@@ -39,7 +39,7 @@ public class DBContext {
                 System.out.println("NULL");
             }
         } catch (SQLException ex) {
-            System.out.println("Khong ket noi duoc roi em oi...........");
+            System.out.println("Khong ket noi duoc");
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
         }
