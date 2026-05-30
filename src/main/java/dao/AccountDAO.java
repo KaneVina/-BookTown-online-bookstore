@@ -50,7 +50,7 @@ public class AccountDAO {
             e.printStackTrace();
         }
 
-        // Kiểm tra bảng Account (admin, staff)
+        // Kiểm tra bảng Account 
         String sqlAccount = "SELECT accountID, fullname, email, phone, role, status "
                 + "FROM Account WHERE email = ? AND password = ? AND status = 'active'";
         try (Connection conn = db.getConnection();

@@ -2,14 +2,15 @@ package utils;
 
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
+import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 public class EmailUtil {
 
-    private static final String FROM_EMAIL   = "khangnpce181578@fpt.edu.vn";
+    private static final String FROM_EMAIL = "khangnpce181578@fpt.edu.vn";
     private static final String APP_PASSWORD = "cdln botz auro shjm";
 
-    public static void sendOtp(String toEmail, String otp) throws MessagingException {
+    public static void sendOtp(String toEmail, String otp) throws MessagingException, UnsupportedEncodingException {
         Properties props = new Properties();
         props.put("mail.smtp.host", "smtp.gmail.com");
         props.put("mail.smtp.port", "587");
@@ -24,44 +25,50 @@ public class EmailUtil {
         });
 
         Message message = new MimeMessage(session);
-        message.setFrom(new InternetAddress(FROM_EMAIL));
+        message.setFrom(new InternetAddress(FROM_EMAIL, "BookTown Support", "UTF-8"));
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
-        message.setSubject("BookTown - Mã xác thực OTP");
+        message.setSubject("BookTown - Mã xác thực đăng ký tài khoản");
         message.setContent(buildEmailHtml(otp), "text/html; charset=UTF-8");
 
         Transport.send(message);
     }
 
     private static String buildEmailHtml(String otp) {
-        return "<div style='font-family:Inter,Arial,sans-serif;max-width:520px;margin:auto;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,77,153,0.10);border:1px solid #e3eaf5;'>"
-                + "<div style='background:linear-gradient(135deg,#004d99 0%,#1565c0 100%);padding:36px 32px 28px;text-align:center;'>"
-                + "<div style='font-size:36px;margin-bottom:8px;'>📚</div>"
-                + "<div style='color:#ffffff;font-size:26px;font-weight:800;letter-spacing:1px;'>BookTown</div>"
-                + "<div style='color:#a9c7ff;font-size:13px;margin-top:4px;'>Hệ thống xác thực tài khoản</div>"
-                + "</div>"
-                + "<div style='padding:36px 32px;'>"
-                + "<h2 style='color:#071e27;font-size:20px;font-weight:700;margin:0 0 8px;'>Xác thực Email của bạn</h2>"
-                + "<p style='color:#424752;font-size:14px;margin:0 0 28px;line-height:1.6;'>Chúng tôi nhận được yêu cầu đăng ký tài khoản BookTown. Vui lòng dùng mã OTP bên dưới để hoàn tất xác thực.</p>"
-                + "<div style='background:linear-gradient(135deg,#f3faff 0%,#e6f6ff 100%);border:2px dashed #004d99;border-radius:16px;padding:28px 16px;text-align:center;margin-bottom:28px;'>"
-                + "<div style='color:#727783;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;'>Mã xác thực OTP</div>"
-                + "<div style='font-size:44px;font-weight:900;letter-spacing:14px;color:#004d99;font-family:monospace;'>" + otp + "</div>"
-                + "<div style='color:#727783;font-size:12px;margin-top:12px;'>⏱ Có hiệu lực trong <strong style='color:#D32F2F;'>5 phút</strong></div>"
-                + "</div>"
-                + "<div style='background:#fff8e1;border-left:4px solid #FFA000;border-radius:8px;padding:14px 16px;margin-bottom:24px;'>"
-                + "<p style='color:#5d4037;font-size:13px;margin:0;line-height:1.6;'>⚠️ <strong>Lưu ý bảo mật:</strong> Không chia sẻ mã này với bất kỳ ai, kể cả nhân viên BookTown. Chúng tôi sẽ không bao giờ yêu cầu mã OTP của bạn.</p>"
-                + "</div>"
-                + "<p style='color:#727783;font-size:12px;line-height:1.6;margin:0;'>Nếu bạn không thực hiện yêu cầu này, hãy bỏ qua email này. Tài khoản của bạn vẫn an toàn.</p>"
-                + "</div>"
-                + "<div style='background:#f3faff;padding:20px 32px;text-align:center;border-top:1px solid #e3eaf5;'>"
-                + "<p style='color:#727783;font-size:12px;margin:0;'>© 2026 BookTown · Tất cả quyền được bảo lưu</p>"
-                + "<p style='margin:6px 0 0;'>"
-                + "<a href='#' style='color:#004d99;font-size:12px;text-decoration:none;margin:0 8px;'>Điều khoản</a>"
-                + "<span style='color:#c2c6d4;'>|</span>"
-                + "<a href='#' style='color:#004d99;font-size:12px;text-decoration:none;margin:0 8px;'>Bảo mật</a>"
-                + "<span style='color:#c2c6d4;'>|</span>"
-                + "<a href='#' style='color:#004d99;font-size:12px;text-decoration:none;margin:0 8px;'>Liên hệ</a>"
-                + "</p>"
-                + "</div>"
+        return "<div style=\"font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 30px 0;\">"
+                + "  <div style=\"max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e0e0e0;\">"
+                // Phần Header
+                + "    <div style=\"background-color: #134aa4; padding: 20px; text-align: center;\">"
+                + "      <img src=\"https://res.cloudinary.com/dylkbydhg/image/upload/v1780127819/logoBT_1_fyixrl.png\" alt=\"BookTown Logo\" style=\"max-width: 180px; height: auto; display: block; margin: 0 auto;\" />"
+                + "    </div>"
+                // Phần Nội dung chính
+                + "    <div style=\"padding: 30px 40px;\">"
+                + "      <h2 style=\"color: #333333; font-size: 20px; margin-top: 0;\">Xác thực địa chỉ email</h2>"
+                + "      <p style=\"color: #555555; font-size: 15px; line-height: 1.6;\">"
+                + "        Xin chào người dùng,<br><br>"
+                + "        Cảm ơn đã sử dụng dịch vụ của BookTown. Bạn vừa yêu cầu đăng ký tài khoản tại hệ thống của chúng tôi. Để hoàn tất quá trình, vui lòng sử dụng mã xác thực (OTP) dưới đây:"
+                + "      </p>"
+                // Mã OTP
+                + "      <div style=\"text-align: center; margin: 35px 0;\">"
+                + "        <span style=\"display: inline-block; font-size: 34px; font-weight: bold; color: #134aa4; background-color: #f0f5fa; padding: 15px 40px; border-radius: 6px; letter-spacing: 6px; border: 1px dashed #134aa4;\">"
+                + otp
+                + "        </span>"
+                + "      </div>"
+                + "      <p style=\"color: #555555; font-size: 15px; line-height: 1.6;\">"
+                + "        <strong>Lưu ý:</strong> Mã xác thực này có hiệu lực trong vòng 5 phút. Tuyệt đối không chia sẻ mã này với bất kỳ ai để bảo vệ tài khoản của bạn."
+                + "      </p>"
+                + "      <div style=\"border-top: 1px solid #eeeeee; margin-top: 30px; padding-top: 20px;\">"
+                + "        <p style=\"color: #888888; font-size: 13px; line-height: 1.5; margin: 0;\">"
+                + "          Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email. Hệ thống sẽ tự động hủy yêu cầu và tài khoản của bạn vẫn an toàn."
+                + "        </p>"
+                + "      </div>"
+                + "    </div>"
+                // Phần Footer
+                + "    <div style=\"background-color: #f9f9f9; padding: 20px; text-align: center; border-top: 1px solid #eeeeee;\">"
+                + "      <p style=\"color: #999999; font-size: 13px; margin: 0;\">"
+                + "        &copy; 2026 BookTown. Tất cả quyền được bảo lưu."
+                + "      </p>"
+                + "    </div>"
+                + "  </div>"
                 + "</div>";
     }
 }
