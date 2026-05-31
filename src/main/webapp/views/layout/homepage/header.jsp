@@ -69,9 +69,31 @@
                     </div>
                     <c:choose>
                         <c:when test="${not empty sessionScope.account}">
-                            <div class="flex flex-col justify-center text-left">
+                            <%-- Đã đăng nhập: hiện tên + dropdown --%>
+                            <div class="relative flex flex-col justify-center text-left group">
                                 <span class="text-sm opacity-80">Xin chào,</span>
-                                <span class="text-xl font-bold leading-tight">${sessionScope.account.fullname}</span>
+                                <span class="text-xl font-bold leading-tight cursor-pointer">
+                                    ${sessionScope.account.fullname}
+                                    <i data-lucide="chevron-down" class="inline w-4 h-4"></i>
+                                </span>
+                                <%-- Dropdown menu --%>
+                                <div class="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg 
+                                     opacity-0 invisible group-hover:opacity-100 group-hover:visible 
+                                     transition-all z-50 text-on-surface text-sm">
+                                    <a href="${pageContext.request.contextPath}/profile"
+                                       class="flex items-center gap-2 px-4 py-3 hover:bg-blue-50 rounded-t-lg">
+                                        <i data-lucide="user" class="w-4 h-4 text-primary"></i> Tài khoản của tôi
+                                    </a>
+                                    <a href="${pageContext.request.contextPath}/order"
+                                       class="flex items-center gap-2 px-4 py-3 hover:bg-blue-50">
+                                        <i data-lucide="package" class="w-4 h-4 text-primary"></i> Đơn hàng
+                                    </a>
+                                    <hr class="border-gray-100">
+                                    <a href="${pageContext.request.contextPath}/logout"
+                                       class="flex items-center gap-2 px-4 py-3 hover:bg-red-50 text-red-500 rounded-b-lg">
+                                        <i data-lucide="log-out" class="w-4 h-4"></i> Đăng xuất
+                                    </a>
+                                </div>
                             </div>
                         </c:when>
                         <c:otherwise>
