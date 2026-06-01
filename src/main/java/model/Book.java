@@ -1,10 +1,15 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package model;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 public class Book {
+
     private int bookID;
     private String title;
     private String description;
@@ -16,7 +21,7 @@ public class Book {
     private BigDecimal weight;
     private String status;
 
-    // FK fields (loaded via JOIN)
+    // FK info
     private int genreID;
     private String genreName;
     private int contentID;
@@ -26,99 +31,206 @@ public class Book {
     private int originID;
     private String originName;
 
-    // Author (many-to-many via BookAuthor)
-    private List<String> authors;
-
-    // Timestamps
-    private Date createdAt;
-    private Date updatedAt;
-
-    // Featured flag (không có trong DB, dùng để đánh dấu khi query)
-    private boolean featured;
-
-    // Average rating (computed)
+    // Computed
     private double avgRating;
     private int reviewCount;
+    private boolean featured;
 
-    public Book() {}
+    private List<String> authors;
 
-    // ── Getters & Setters ──────────────────────────────────────
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
 
-    public int getBookID() { return bookID; }
-    public void setBookID(int bookID) { this.bookID = bookID; }
+    // ── Getters & Setters ──────────────────────────────────────────────
+    public int getBookID() {
+        return bookID;
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public void setBookID(int v) {
+        this.bookID = v;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getTitle() {
+        return title;
+    }
 
-    public BigDecimal getPrice() { return price; }
-    public void setPrice(BigDecimal price) { this.price = price; }
+    public void setTitle(String v) {
+        this.title = v;
+    }
 
-    public int getStockQuantity() { return stockQuantity; }
-    public void setStockQuantity(int stockQuantity) { this.stockQuantity = stockQuantity; }
+    public String getDescription() {
+        return description;
+    }
 
-    public String getThumbnail() { return thumbnail; }
-    public void setThumbnail(String thumbnail) { this.thumbnail = thumbnail; }
+    public void setDescription(String v) {
+        this.description = v;
+    }
 
-    public int getTotalPages() { return totalPages; }
-    public void setTotalPages(int totalPages) { this.totalPages = totalPages; }
+    public BigDecimal getPrice() {
+        return price;
+    }
 
-    public String getDimensions() { return dimensions; }
-    public void setDimensions(String dimensions) { this.dimensions = dimensions; }
+    public void setPrice(BigDecimal v) {
+        this.price = v;
+    }
 
-    public BigDecimal getWeight() { return weight; }
-    public void setWeight(BigDecimal weight) { this.weight = weight; }
+    public int getStockQuantity() {
+        return stockQuantity;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setStockQuantity(int v) {
+        this.stockQuantity = v;
+    }
 
-    public int getGenreID() { return genreID; }
-    public void setGenreID(int genreID) { this.genreID = genreID; }
+    public String getThumbnail() {
+        return thumbnail;
+    }
 
-    public String getGenreName() { return genreName; }
-    public void setGenreName(String genreName) { this.genreName = genreName; }
+    public void setThumbnail(String v) {
+        this.thumbnail = v;
+    }
 
-    public int getContentID() { return contentID; }
-    public void setContentID(int contentID) { this.contentID = contentID; }
+    public int getTotalPages() {
+        return totalPages;
+    }
 
-    public String getContentName() { return contentName; }
-    public void setContentName(String contentName) { this.contentName = contentName; }
+    public void setTotalPages(int v) {
+        this.totalPages = v;
+    }
 
-    public int getSeriesID() { return seriesID; }
-    public void setSeriesID(int seriesID) { this.seriesID = seriesID; }
+    public String getDimensions() {
+        return dimensions;
+    }
 
-    public String getSeriesName() { return seriesName; }
-    public void setSeriesName(String seriesName) { this.seriesName = seriesName; }
+    public void setDimensions(String v) {
+        this.dimensions = v;
+    }
 
-    public int getOriginID() { return originID; }
-    public void setOriginID(int originID) { this.originID = originID; }
+    public BigDecimal getWeight() {
+        return weight;
+    }
 
-    public String getOriginName() { return originName; }
-    public void setOriginName(String originName) { this.originName = originName; }
+    public void setWeight(BigDecimal v) {
+        this.weight = v;
+    }
 
-    public List<String> getAuthors() { return authors; }
-    public void setAuthors(List<String> authors) { this.authors = authors; }
+    public String getStatus() {
+        return status;
+    }
 
-    public Date getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+    public void setStatus(String v) {
+        this.status = v;
+    }
 
-    public Date getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(Date updatedAt) { this.updatedAt = updatedAt; }
+    public int getGenreID() {
+        return genreID;
+    }
 
-    public boolean isFeatured() { return featured; }
-    public void setFeatured(boolean featured) { this.featured = featured; }
+    public void setGenreID(int v) {
+        this.genreID = v;
+    }
 
-    public double getAvgRating() { return avgRating; }
-    public void setAvgRating(double avgRating) { this.avgRating = avgRating; }
+    public String getGenreName() {
+        return genreName;
+    }
 
-    public int getReviewCount() { return reviewCount; }
-    public void setReviewCount(int reviewCount) { this.reviewCount = reviewCount; }
+    public void setGenreName(String v) {
+        this.genreName = v;
+    }
 
-    /** Trả về danh sách tác giả dạng chuỗi, ví dụ: "Nguyên Phong, Paulo Coelho" */
-    public String getAuthorsDisplay() {
-        if (authors == null || authors.isEmpty()) return "Đang cập nhật";
-        return String.join(", ", authors);
+    public int getContentID() {
+        return contentID;
+    }
+
+    public void setContentID(int v) {
+        this.contentID = v;
+    }
+
+    public String getContentName() {
+        return contentName;
+    }
+
+    public void setContentName(String v) {
+        this.contentName = v;
+    }
+
+    public int getSeriesID() {
+        return seriesID;
+    }
+
+    public void setSeriesID(int v) {
+        this.seriesID = v;
+    }
+
+    public String getSeriesName() {
+        return seriesName;
+    }
+
+    public void setSeriesName(String v) {
+        this.seriesName = v;
+    }
+
+    public int getOriginID() {
+        return originID;
+    }
+
+    public void setOriginID(int v) {
+        this.originID = v;
+    }
+
+    public String getOriginName() {
+        return originName;
+    }
+
+    public void setOriginName(String v) {
+        this.originName = v;
+    }
+
+    public double getAvgRating() {
+        return avgRating;
+    }
+
+    public void setAvgRating(double v) {
+        this.avgRating = v;
+    }
+
+    public int getReviewCount() {
+        return reviewCount;
+    }
+
+    public void setReviewCount(int v) {
+        this.reviewCount = v;
+    }
+
+    public boolean isFeatured() {
+        return featured;
+    }
+
+    public void setFeatured(boolean v) {
+        this.featured = v;
+    }
+
+    public List<String> getAuthors() {
+        return authors;
+    }
+
+    public void setAuthors(List<String> v) {
+        this.authors = v;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp v) {
+        this.createdAt = v;
+    }
+
+    public Timestamp getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Timestamp v) {
+        this.updatedAt = v;
     }
 }

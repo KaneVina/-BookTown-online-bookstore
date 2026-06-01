@@ -1,59 +1,87 @@
 package controller;
 
+import dao.BookDAO;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Book;
-import service.BookService;
-
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet({"/products", "/featured"})
+/**
+ * ProductController
+ */
 public class ProductController extends HttpServlet {
 
-    private final BookService bookService = new BookService();
+    private static final int DEFAULT_PAGE_SIZE = 10;
+
+    private final BookDAO bookDAO = new BookDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        String path = req.getServletPath();
+        String idParam     = req.getParameter("id");
+        String actionParam = req.getParameter("action");
 
-        switch (path) {
-            case "/products" -> handleProducts(req, resp);
-            case "/featured" -> handleFeatured(req, resp);
-            default          -> resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-        }
-    }
-
-    // ── /products ────────────────────────────────────────────────────────
-
-    private void handleProducts(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-
-        String idParam = req.getParameter("id");
-
+        String action;
         if (idParam != null) {
-            handleProductDetail(req, resp, idParam);   // 2.2 – chi tiết
+            action = "detail";
+        } else if (actionParam != null) {
+            action = actionParam.trim().toLowerCase();
         } else {
-            handleProductList(req, resp);               // 2.1 – danh sách
+            action = "list";
+        }
+
+        switch (action) {
+            case "list":
+                showList(req, resp);
+                break;
+            case "detail":
+                showDetail(req, resp, idParam);
+                break;
+            case "featured":
+                showFeatured(req, resp);
+                break;
+            default:
+                show404(req, resp, "Hành động không tồn tại: " + action);
         }
     }
 
-    /** 2.1 – Danh sách sách, phân trang + sort. URL: /products?page=1&size=10&sort=newest */
-    private void handleProductList(HttpServletRequest req, HttpServletResponse resp)
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        String action = req.getParameter("action");
+        if (action == null) action = "";
+        switch (action) {
+            // case "addToCart": handleAddToCart(req, resp); break;
+            default:
+                resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+        }
+    }
+
+    // Danh sách sách, phân trang + sort
+    private void showList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        int    page     = parseIntParam(req.getParameter("page"), 1);
-        int    pageSize = parseIntParam(req.getParameter("size"), 10);
+        int    page     = parsePage(req.getParameter("page"));
+        int    pageSize = parsePageSize(req.getParameter("size"));
         String sort     = req.getParameter("sort");
+        String order    = buildOrderClause(sort);
 
-        List<Book> books      = bookService.getBooks(page, pageSize, sort);
-        int        totalPages = bookService.getTotalPages(pageSize);
-        int        totalBooks = bookService.getTotalBooks();
+        int offset     = (page - 1) * pageSize;
+        int totalBooks = bookDAO.countBooks();
+        int totalPages = (int) Math.ceil((double) totalBooks / pageSize);
+
+        // Clamp page nếu vượt tổng trang
+        if (totalPages > 0 && page > totalPages) {
+            resp.sendRedirect(req.getContextPath() + "/products?page=" + totalPages
+                    + "&size=" + pageSize + (sort != null ? "&sort=" + sort : ""));
+            return;
+        }
+
+        List<Book> books = bookDAO.getBooks(offset, pageSize, order);
 
         req.setAttribute("books",      books);
         req.setAttribute("page",       page);
@@ -62,26 +90,26 @@ public class ProductController extends HttpServlet {
         req.setAttribute("totalBooks", totalBooks);
         req.setAttribute("sort",       sort);
 
-        req.getRequestDispatcher("/views/book/index.jsp").forward(req, resp);
+        req.getRequestDispatcher("/views/book/book-index.jsp").forward(req, resp);
     }
 
-    /** 2.2 – Chi tiết sách. URL: /products?id=1 */
-    private void handleProductDetail(HttpServletRequest req, HttpServletResponse resp, String idParam)
+    // Chi tiết 1 cuốn sách
+    private void showDetail(HttpServletRequest req, HttpServletResponse resp, String idParam)
             throws ServletException, IOException {
 
-        int bookID = parseIntParam(idParam, 0);
+        int bookID = parseID(idParam);
         if (bookID <= 0) {
-            resp.sendRedirect(req.getContextPath() + "/products");
+            show404(req, resp, "ID sách không hợp lệ: " + idParam);
             return;
         }
 
-        Book book = bookService.getBookDetail(bookID);
+        Book book = bookDAO.getBookByID(bookID);
         if (book == null) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy sách.");
+            show404(req, resp, "Không tìm thấy sách với ID = " + bookID);
             return;
         }
 
-        List<Book> relatedBooks = bookService.getRelatedBooks(bookID, book.getGenreID());
+        List<Book> relatedBooks = bookDAO.getRelatedBooks(bookID, book.getGenreID(), 4);
 
         req.setAttribute("book",         book);
         req.setAttribute("relatedBooks", relatedBooks);
@@ -89,23 +117,61 @@ public class ProductController extends HttpServlet {
         req.getRequestDispatcher("/views/book/product-detail.jsp").forward(req, resp);
     }
 
-    /** 2.3 – Sách nổi bật. URL: /featured */
-    private void handleFeatured(HttpServletRequest req, HttpServletResponse resp)
+    // Sách nổi bật
+    private void showFeatured(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        List<Book> featuredBooks = bookService.getFeaturedBooks();
+        List<Book> featuredBooks = bookDAO.getFeaturedBooks(5);
+        int        totalBooks    = bookDAO.countBooks();
+
         req.setAttribute("featuredBooks", featuredBooks);
-        req.getRequestDispatcher("/views/book/index.jsp").forward(req, resp);
+        req.setAttribute("books",         featuredBooks);
+        req.setAttribute("page",          1);
+        req.setAttribute("pageSize",      featuredBooks.size());
+        req.setAttribute("totalPages",    1);
+        req.setAttribute("totalBooks",    totalBooks);
+        req.setAttribute("sort",          "popular");
+
+        req.getRequestDispatcher("/views/book/book-index.jsp").forward(req, resp);
     }
 
-    // ── Utility ──────────────────────────────────────────────────────────
+    // 404 handler
+    private void show404(HttpServletRequest req, HttpServletResponse resp, String message)
+            throws ServletException, IOException {
+        resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        req.setAttribute("errorMessage", message);
+        req.setAttribute("backUrl", req.getContextPath() + "/products");
+        req.getRequestDispatcher("/views/book/404.jsp").forward(req, resp);
+    }
 
-    private int parseIntParam(String param, int defaultVal) {
-        if (param == null || param.isBlank()) return defaultVal;
-        try {
-            return Integer.parseInt(param.trim());
-        } catch (NumberFormatException e) {
-            return defaultVal;
+
+    private int parsePage(String param) {
+        if (param == null || param.trim().isEmpty()) return 1;
+        try { int p = Integer.parseInt(param.trim()); return p < 1 ? 1 : p; }
+        catch (Exception e) { return 1; }
+    }
+
+    private int parsePageSize(String param) {
+        if (param == null || param.trim().isEmpty()) return DEFAULT_PAGE_SIZE;
+        try { int s = Integer.parseInt(param.trim()); return s < 1 ? DEFAULT_PAGE_SIZE : s; }
+        catch (Exception e) { return DEFAULT_PAGE_SIZE; }
+    }
+
+    private int parseID(String param) {
+        if (param == null || param.trim().isEmpty()) return -1;
+        try { return Integer.parseInt(param.trim()); }
+        catch (Exception e) { return -1; }
+    }
+
+    private String buildOrderClause(String sortBy) {
+        if (sortBy == null || sortBy.trim().isEmpty()) return " ORDER BY b.bookID DESC ";
+        switch (sortBy.trim()) {
+            case "name":       return " ORDER BY b.title ASC ";
+            case "price_asc":  return " ORDER BY b.price ASC ";
+            case "price_desc": return " ORDER BY b.price DESC ";
+            case "newest":     return " ORDER BY b.created_at DESC ";
+            case "popular":    return " ORDER BY review_count DESC ";
+            default:           return " ORDER BY b.bookID DESC ";
         }
     }
 }

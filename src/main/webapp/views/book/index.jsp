@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <%@ include file="/views/layout/homepage/header.jsp" %>
 
@@ -72,188 +72,129 @@
 
 <main class="max-w-[1400px] mx-auto px-8 py-7">
 
-    <!-- ══════════════════════════════════════════════════ -->
-    <!-- 2.3 – SÁCH BÁN CHẠY (dynamic từ featuredBooks)   -->
-    <!-- ══════════════════════════════════════════════════ -->
+    <!-- FEATURED BOOKS -->
     <section class="mb-12">
         <div class="flex justify-between items-center mb-5">
             <h2 class="section-title-border text-xl font-bold text-primary pl-3">🔥 Sách Bán Chạy</h2>
-            <a href="${pageContext.request.contextPath}/products"
-               class="text-[13px] text-primary font-medium border border-primary px-3.5 py-1.5 rounded-full cursor-pointer hover:bg-primary hover:text-white transition-colors uppercase tracking-tight">
-                Xem tất cả
-            </a>
-        </div>
-
-        <!-- Filter tabs (tĩnh, dùng cho Iter sau khi có filter by category) -->
-        <div class="flex flex-wrap gap-2.5 mb-6">
-            <a href="${pageContext.request.contextPath}/products"
-               class="bg-primary text-white border border-primary px-4 py-1.5 rounded-full text-[13px] font-medium cursor-pointer shadow-sm">📚 Tất cả</a>
-            <a href="${pageContext.request.contextPath}/products?sort=name"
-               class="bg-white text-on-surface border border-gray-300 px-4 py-1.5 rounded-full text-[13px] font-medium cursor-pointer hover:bg-primary hover:text-white hover:border-primary transition-all">✍️ Văn học</a>
-            <a href="${pageContext.request.contextPath}/products?sort=price_asc"
-               class="bg-white text-on-surface border border-gray-300 px-4 py-1.5 rounded-full text-[13px] font-medium cursor-pointer hover:bg-primary hover:text-white hover:border-primary transition-all">💼 Kinh tế</a>
             <a href="${pageContext.request.contextPath}/products?sort=popular"
-               class="bg-white text-on-surface border border-gray-300 px-4 py-1.5 rounded-full text-[13px] font-medium cursor-pointer hover:bg-primary hover:text-white hover:border-primary transition-all">🧠 Kỹ năng</a>
-            <a href="${pageContext.request.contextPath}/products"
-               class="bg-white text-on-surface border border-gray-300 px-4 py-1.5 rounded-full text-[13px] font-medium cursor-pointer hover:bg-primary hover:text-white hover:border-primary transition-all">🧒 Thiếu nhi</a>
-            <a href="${pageContext.request.contextPath}/products"
-               class="bg-white text-on-surface border border-gray-300 px-4 py-1.5 rounded-full text-[13px] font-medium cursor-pointer hover:bg-primary hover:text-white hover:border-primary transition-all">🔬 Khoa học</a>
-            <a href="${pageContext.request.contextPath}/products"
-               class="bg-white text-on-surface border border-gray-300 px-4 py-1.5 rounded-full text-[13px] font-medium cursor-pointer hover:bg-primary hover:text-white hover:border-primary transition-all">🌏 Lịch sử</a>
+               class="text-[13px] text-primary font-medium border border-primary px-3.5 py-1.5 rounded-full hover:bg-primary hover:text-white transition-colors uppercase tracking-tight">Xem tất cả</a>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <c:choose>
-                <%-- Dynamic: có dữ liệu từ DB --%>
-                <c:when test="${not empty featuredBooks}">
-                    <c:forEach var="book" items="${featuredBooks}">
-                        <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
-                            <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
-                                <c:choose>
-                                    <c:when test="${not empty book.thumbnail}">
-                                        <img alt="${book.title}" class="w-full h-full object-cover" src="${book.thumbnail}">
-                                    </c:when>
-                                    <c:otherwise>
-                                        <i data-lucide="book" class="w-16 h-16 text-gray-300"></i>
-                                    </c:otherwise>
-                                </c:choose>
-                                <div class="absolute top-2.5 left-2.5 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">🔥 Hot</div>
-                            </div>
-                            <div class="p-3 flex flex-col flex-1">
-                                <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 min-h-[36px]">
-                                    <a class="text-primary hover:underline"
-                                       href="${pageContext.request.contextPath}/products?id=${book.bookID}">
-                                        ${book.title}
-                                        <c:if test="${not empty book.authors}"> – ${book.authorsDisplay}</c:if>
-                                    </a>
-                                </div>
-                                <div class="text-[#FDD835] text-[12px] mb-1.5 flex items-center gap-1">
-                                    <c:forEach begin="1" end="5" var="i">
-                                        <c:choose>
-                                            <c:when test="${i <= book.avgRating}">★</c:when>
-                                            <c:otherwise>☆</c:otherwise>
-                                        </c:choose>
-                                    </c:forEach>
-                                    <span class="text-gray-400 text-[11px]">(${book.reviewCount})</span>
-                                </div>
-                                <div class="text-primary text-[17px] font-bold mb-2.5">
-                                    <fmt:formatNumber value="${book.price}" type="number" maxFractionDigits="0"/>đ
-                                </div>
-                                <a href="${pageContext.request.contextPath}/products?id=${book.bookID}"
-                                   class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
-                                    <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
-                                </a>
-                            </div>
-                        </div>
-                    </c:forEach>
-                </c:when>
+            <c:forEach var="book" items="${featuredBooks}">
+            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
+                <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
+                    <c:choose>
+                        <c:when test="${not empty book.thumbnail}">
+                            <img alt="${book.title}" class="w-full h-full object-cover" src="${book.thumbnail}">
+                        </c:when>
+                        <c:otherwise>
+                            <i data-lucide="book-open" class="w-16 h-16 text-gray-300"></i>
+                        </c:otherwise>
+                    </c:choose>
+                    <div class="absolute top-2.5 left-2.5 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">🔥 Hot</div>
+                </div>
+                <div class="p-3 flex flex-col flex-1">
+                    <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 min-h-[36px]">
+                        <a class="text-primary hover:underline"
+                           href="${pageContext.request.contextPath}/products?id=${book.bookID}">
+                            ${book.title}<c:if test="${not empty book.authors}"> – <c:forEach var="a" items="${book.authors}" varStatus="s">${a}<c:if test="${!s.last}">, </c:if></c:forEach></c:if>
+                        </a>
+                    </div>
+                    <div class="text-[#FDD835] text-[12px] mb-1.5 flex items-center gap-1">
+                        <c:forEach begin="1" end="5" var="i">
+                            <c:choose>
+                                <c:when test="${i <= book.avgRating}">★</c:when>
+                                <c:otherwise><span class="text-gray-300">★</span></c:otherwise>
+                            </c:choose>
+                        </c:forEach>
+                        <span class="text-gray-400 text-[11px]">(${book.reviewCount})</span>
+                    </div>
+                    <div class="text-primary text-[17px] font-bold mb-2.5">
+                        <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true" />đ
+                    </div>
+                    <a href="${pageContext.request.contextPath}/products?id=${book.bookID}"
+                       class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
+                        <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
+                    </a>
+                </div>
+            </div>
+            </c:forEach>
 
-                <%-- Fallback: DB chưa có data, hiện placeholder --%>
-                <c:otherwise>
-                    <c:forEach begin="1" end="5">
-                        <div class="prod-card-hover bg-white rounded-lg overflow-hidden flex flex-col opacity-50">
-                            <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
-                                <i data-lucide="book" class="w-16 h-16 text-gray-300"></i>
-                            </div>
-                            <div class="p-3 flex flex-col flex-1">
-                                <div class="h-4 bg-gray-200 rounded mb-2"></div>
-                                <div class="h-3 bg-gray-100 rounded mb-4 w-2/3"></div>
-                                <div class="mt-auto w-full bg-gray-200 rounded-md py-2.5"></div>
-                            </div>
-                        </div>
-                    </c:forEach>
-                </c:otherwise>
-            </c:choose>
+            <c:if test="${empty featuredBooks}">
+            <div class="col-span-5 py-12 text-center text-gray-400 text-[14px]">Chưa có sách nào.</div>
+            </c:if>
         </div>
     </section>
 
     <!-- PROMO BANNERS -->
     <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
         <a href="${pageContext.request.contextPath}/products"
-           class="rounded-lg h-[120px] flex flex-col items-center justify-center font-bold text-lg text-white p-4 text-center cursor-pointer hover:scale-[1.02] transition-transform bg-gradient-to-br from-primary to-primary-dark">
+           class="rounded-lg h-[120px] flex flex-col items-center justify-center font-bold text-lg text-white p-4 text-center hover:scale-[1.02] transition-transform bg-gradient-to-br from-primary to-primary-dark">
             📚 Sách Kỹ Năng<br><span class="text-[13px] opacity-80 font-normal">Giảm đến 40%</span>
         </a>
         <a href="${pageContext.request.contextPath}/products"
-           class="rounded-lg h-[120px] flex flex-col items-center justify-center font-bold text-lg text-white p-4 text-center cursor-pointer hover:scale-[1.02] transition-transform bg-gradient-to-br from-[#E53935] to-[#B71C1C]">
+           class="rounded-lg h-[120px] flex flex-col items-center justify-center font-bold text-lg text-white p-4 text-center hover:scale-[1.02] transition-transform bg-gradient-to-br from-[#E53935] to-[#B71C1C]">
             🎁 Quà Tặng Ý Nghĩa<br><span class="text-[13px] opacity-80 font-normal">Gói quà miễn phí</span>
         </a>
         <a href="${pageContext.request.contextPath}/products?sort=newest"
-           class="rounded-lg h-[120px] flex flex-col items-center justify-center font-bold text-lg text-white p-4 text-center cursor-pointer hover:scale-[1.02] transition-transform bg-gradient-to-br from-[#F57F17] to-[#E65100]">
+           class="rounded-lg h-[120px] flex flex-col items-center justify-center font-bold text-lg text-white p-4 text-center hover:scale-[1.02] transition-transform bg-gradient-to-br from-[#F57F17] to-[#E65100]">
             🚀 Sách Mới Nhất<br><span class="text-[13px] opacity-80 font-normal">Cập nhật mỗi tuần</span>
         </a>
     </section>
 
-    <!-- ══════════════════════════════════════════════════ -->
-    <!-- 2.1 – SÁCH MỚI VỀ (dynamic, sort=newest)         -->
-    <!-- ══════════════════════════════════════════════════ -->
+    <!-- NEW ARRIVALS -->
     <section class="mb-12">
         <div class="flex justify-between items-center mb-5">
             <h2 class="section-title-border text-xl font-bold text-primary pl-3">🆕 Sách Mới Về</h2>
             <a href="${pageContext.request.contextPath}/products?sort=newest"
-               class="text-[13px] text-primary font-medium border border-primary px-3.5 py-1.5 rounded-full cursor-pointer hover:bg-primary hover:text-white transition-colors uppercase tracking-tight">
-                Xem tất cả
-            </a>
+               class="text-[13px] text-primary font-medium border border-primary px-3.5 py-1.5 rounded-full hover:bg-primary hover:text-white transition-colors uppercase tracking-tight">Xem tất cả</a>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <c:choose>
-                <c:when test="${not empty newBooks}">
-                    <c:forEach var="book" items="${newBooks}">
-                        <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
-                            <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
-                                <c:choose>
-                                    <c:when test="${not empty book.thumbnail}">
-                                        <img alt="${book.title}" class="w-full h-full object-cover" src="${book.thumbnail}">
-                                    </c:when>
-                                    <c:otherwise>
-                                        <i data-lucide="book" class="w-16 h-16 text-gray-300"></i>
-                                    </c:otherwise>
-                                </c:choose>
-                                <div class="absolute top-2.5 left-2.5 bg-[#E53935] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">👍 New</div>
-                            </div>
-                            <div class="p-3 flex flex-col flex-1">
-                                <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 min-h-[36px]">
-                                    <a class="text-primary hover:underline"
-                                       href="${pageContext.request.contextPath}/products?id=${book.bookID}">
-                                        ${book.title}
-                                        <c:if test="${not empty book.authors}"> – ${book.authorsDisplay}</c:if>
-                                    </a>
-                                </div>
-                                <div class="text-[#FDD835] text-[12px] mb-1.5 flex items-center gap-1">
-                                    <c:forEach begin="1" end="5" var="i">
-                                        <c:choose>
-                                            <c:when test="${i <= book.avgRating}">★</c:when>
-                                            <c:otherwise>☆</c:otherwise>
-                                        </c:choose>
-                                    </c:forEach>
-                                    <span class="text-gray-400 text-[11px]">(${book.reviewCount})</span>
-                                </div>
-                                <div class="text-primary text-[17px] font-bold mb-2.5">
-                                    <fmt:formatNumber value="${book.price}" type="number" maxFractionDigits="0"/>đ
-                                </div>
-                                <a href="${pageContext.request.contextPath}/products?id=${book.bookID}"
-                                   class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
-                                    <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
-                                </a>
-                            </div>
-                        </div>
-                    </c:forEach>
-                </c:when>
-                <c:otherwise>
-                    <c:forEach begin="1" end="5">
-                        <div class="prod-card-hover bg-white rounded-lg overflow-hidden flex flex-col opacity-50">
-                            <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
-                                <i data-lucide="notebook" class="w-16 h-16 text-gray-300"></i>
-                            </div>
-                            <div class="p-3 flex flex-col flex-1">
-                                <div class="h-4 bg-gray-200 rounded mb-2"></div>
-                                <div class="h-3 bg-gray-100 rounded mb-4 w-2/3"></div>
-                                <div class="mt-auto w-full bg-gray-200 rounded-md py-2.5"></div>
-                            </div>
-                        </div>
-                    </c:forEach>
-                </c:otherwise>
-            </c:choose>
+            <c:forEach var="book" items="${newBooks}">
+            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
+                <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
+                    <c:choose>
+                        <c:when test="${not empty book.thumbnail}">
+                            <img alt="${book.title}" class="w-full h-full object-cover" src="${book.thumbnail}">
+                        </c:when>
+                        <c:otherwise>
+                            <i data-lucide="book-open" class="w-16 h-16 text-gray-300"></i>
+                        </c:otherwise>
+                    </c:choose>
+                    <div class="absolute top-2.5 left-2.5 bg-[#E53935] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">👍 New</div>
+                </div>
+                <div class="p-3 flex flex-col flex-1">
+                    <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 min-h-[36px]">
+                        <a class="text-primary hover:underline"
+                           href="${pageContext.request.contextPath}/products?id=${book.bookID}">
+                            ${book.title}<c:if test="${not empty book.authors}"> – <c:forEach var="a" items="${book.authors}" varStatus="s">${a}<c:if test="${!s.last}">, </c:if></c:forEach></c:if>
+                        </a>
+                    </div>
+                    <div class="text-[#FDD835] text-[12px] mb-1.5 flex items-center gap-1">
+                        <c:forEach begin="1" end="5" var="i">
+                            <c:choose>
+                                <c:when test="${i <= book.avgRating}">★</c:when>
+                                <c:otherwise><span class="text-gray-300">★</span></c:otherwise>
+                            </c:choose>
+                        </c:forEach>
+                        <span class="text-gray-400 text-[11px]">(${book.reviewCount})</span>
+                    </div>
+                    <div class="text-primary text-[17px] font-bold mb-2.5">
+                        <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true" />đ
+                    </div>
+                    <a href="${pageContext.request.contextPath}/products?id=${book.bookID}"
+                       class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
+                        <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
+                    </a>
+                </div>
+            </div>
+            </c:forEach>
+
+            <c:if test="${empty newBooks}">
+            <div class="col-span-5 py-12 text-center text-gray-400 text-[14px]">Chưa có sách nào.</div>
+            </c:if>
         </div>
     </section>
 
