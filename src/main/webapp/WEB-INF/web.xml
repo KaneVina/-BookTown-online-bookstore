@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
     <servlet>
-        <servlet-name>LoginController</servlet-name>
-        <servlet-class>controller.LoginController</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>HomeController</servlet-name>
         <servlet-class>controller.HomeController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>LoginController</servlet-name>
+        <servlet-class>controller.LoginController</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>RegisterController</servlet-name>
@@ -16,17 +16,74 @@
         <servlet-name>OtpController</servlet-name>
         <servlet-class>controller.OtpController</servlet-class>
     </servlet>
-    <servlet-mapping>
-        <servlet-name>LoginController</servlet-name>
-        <url-pattern>/login</url-pattern>
-    </servlet-mapping>
+    <servlet>
+        <servlet-name>CartController</servlet-name>
+        <servlet-class>controller.CartController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CheckoutController</servlet-name>
+        <servlet-class>controller.CheckoutController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ProfileController</servlet-name>
+        <servlet-class>controller.ProfileController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>OrderHistory</servlet-name>
+        <servlet-class>controller.OrderHistory</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>OrderHistoryController</servlet-name>
+        <servlet-class>controller.OrderHistoryController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>OrderHistoryDetail</servlet-name>
+        <servlet-class>controller.OrderHistoryDetailControllder</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>OrderHistoryDetailControllder</servlet-name>
+        <servlet-class>controller.OrderHistoryDetailControllder</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>OrderHistoryDetailController</servlet-name>
+        <servlet-class>controller.OrderHistoryDetailController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AddToCartController</servlet-name>
+        <servlet-class>controller.AddToCartController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CustomerOrderDetail</servlet-name>
+        <servlet-class>controller.CustomerOrderDetail</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CustomerOderDetailController</servlet-name>
+        <servlet-class>controller.CustomerOderDetailController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CustomerOrderDetailController</servlet-name>
+        <servlet-class>controller.CustomerOrderDetailController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CustomerOrderController</servlet-name>
+        <servlet-class>controller.CustomerOrderController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ProductController</servlet-name>
+        <servlet-class>controller.ProductController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>LogoutController</servlet-name>
+        <servlet-class>controller.LogoutController</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>HomeController</servlet-name>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
-    <welcome-file-list>
-        <welcome-file>home</welcome-file>
-    </welcome-file-list>
+    <servlet-mapping>
+        <servlet-name>LoginController</servlet-name>
+        <url-pattern>/login</url-pattern>
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>RegisterController</servlet-name>
         <url-pattern>/register</url-pattern>
@@ -35,9 +92,46 @@
         <servlet-name>OtpController</servlet-name>
         <url-pattern>/otp</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CartController</servlet-name>
+        <url-pattern>/cart</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CheckoutController</servlet-name>
+        <url-pattern>/checkout</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ProfileController</servlet-name>
+        <url-pattern>/profile</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>OrderHistoryController</servlet-name>
+        <url-pattern>/profile/order-history</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>OrderHistoryDetailController</servlet-name>
+        <url-pattern>/profile/order-history-detail</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CustomerOrderDetailController</servlet-name>
+        <url-pattern>/dashboard/customer-order-detail</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CustomerOrderController</servlet-name>
+        <url-pattern>/dashboard/customer-order</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ProductController</servlet-name>
+        <url-pattern>/products</url-pattern>
+    </servlet-mapping>
+    <welcome-file-list>
+        <welcome-file>home</welcome-file>
+    </welcome-file-list>
+    <servlet-mapping>
+        <servlet-name>LogoutController</servlet-name>
+        <url-pattern>/logout</url-pattern>
+    </servlet-mapping>
     <session-config>
-        <session-timeout>
-            30
-        </session-timeout>
+        <session-timeout>30</session-timeout>
     </session-config>
 </web-app>

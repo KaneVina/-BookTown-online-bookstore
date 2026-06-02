@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html class="light" lang="vi"><head>
         <meta charset="utf-8">
@@ -155,16 +155,7 @@
                     <span class="font-label-md text-label-md">Khách hàng</span>
                 </a>
             </nav>
-            <div class="px-4 mb-6">
-                <button class="w-full bg-primary text-on-primary py-3 rounded-lg font-label-md text-label-md shadow-sm hover:opacity-90 transition-opacity">
-                    + Thêm sách mới
-                </button>
-            </div>
             <div class="border-t border-outline-variant pt-4 pb-2">
-                <a class="flex items-center px-4 py-3 mx-2 text-on-surface-variant hover:bg-surface-container rounded-lg" href="#">
-                    <span class="material-symbols-outlined mr-3">settings</span>
-                    <span class="font-label-md text-label-md">Cài đặt</span>
-                </a>
                 <a class="flex items-center px-4 py-3 mx-2 text-error hover:bg-surface-container rounded-lg" href="#">
                     <span class="material-symbols-outlined mr-3">logout</span>
                     <span class="font-label-md text-label-md">Đăng xuất</span>
@@ -185,13 +176,6 @@
                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
                         <input class="pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-full w-64 font-body-sm text-body-sm focus:ring-2 focus:ring-primary focus:bg-surface" placeholder="Tìm kiếm đơn hàng..." type="text">
                     </div>
-                    <button class="p-2 hover:bg-surface-container-low rounded-full transition-colors relative">
-                        <span class="material-symbols-outlined text-on-surface-variant">notifications</span>
-                        <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
-                    </button>
-                    <button class="p-2 hover:bg-surface-container-low rounded-full transition-colors">
-                        <span class="material-symbols-outlined text-on-surface-variant">help_outline</span>
-                    </button>
                     <img alt="Staff avatar" class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="A professional headshot of a friendly library staff member with short dark hair and a warm smile, wearing a professional navy blue shirt. The background is a brightly lit, modern office environment with blurred bookshelves, maintaining a clean corporate aesthetic with soft, natural daylight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKQmIL_6asflCh2-C9g5AyP7qbfJOWdexOwKA11t_MyHcwxXpUmXJdwAOaAD6IX2ZyyRu4ioJmfdSS0a-hYqzlRR4w-jUr1it8mtTncDyCXU8Mlk2wwkpEMUqRelCEIWNR_DkZ0oUqXW7-4RI3mbH3xrWs9K3COLRxIdEABPPC2IsRUCyFIw7DR5e_rqGJEygOZ0FaFdMAsRHA9hx0DpJ9CrqQMInj5sJyrjf2pldp4sGCoFdDG9iErF6KfFrZ3ik1I4fcYmy8dlwC">
                 </div>
             </header>
@@ -201,7 +185,7 @@
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <nav class="flex text-on-surface-variant font-label-sm text-label-sm gap-2 mb-1">
-                            <a class="hover:text-primary" href="${pageContext.request.contextPath}/customer-order" >Đơn hàng</a>
+                            <a class="hover:text-primary" href="${pageContext.request.contextPath}/dashboard/customer-order" >Đơn hàng</a>
                             <span>/</span>
                             <span class="text-on-surface">Chi tiết đơn hàng</span>
                         </nav>

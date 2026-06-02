@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ include file="/views/layout/homepage/header.jsp" %>
 <!DOCTYPE html>
 <html lang="vi" class="light">
@@ -100,7 +100,7 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
                     <nav class="flex items-center gap-2 mb-2">
-                        <a class="text-xs font-medium text-on-surface-variant hover:text-primary transition-colors" href="${pageContext.request.contextPath}/order-history">Đơn hàng của tôi</a>
+                        <a class="text-xs font-medium text-on-surface-variant hover:text-primary transition-colors" href="${pageContext.request.contextPath}/profile/order-history">Đơn hàng của tôi</a>
                         <span class="material-symbols-outlined text-xs text-outline">chevron_right</span>
                         <span class="text-xs text-primary font-bold">Chi tiết đơn hàng</span>
                     </nav>

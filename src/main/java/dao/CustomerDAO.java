@@ -75,4 +75,20 @@ public class CustomerDAO {
         }
         return false;
     }
+
+    public boolean updateCustomer(int id, String fullname, String phone) {
+        String sql = "UPDATE Customer "
+                + "SET fullname = ?, phone = ? "
+                + "WHERE customerID = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, fullname);
+            ps.setString(2, phone);
+            ps.setInt(3, id);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("ERROR: " + e.getMessage()); // thêm dòng này
+        }
+        return false;
+    }
 }
