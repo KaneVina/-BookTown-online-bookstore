@@ -37,8 +37,7 @@ public class CartController extends HttpServlet {
         BigDecimal shippingFee = cartItems.isEmpty() ? BigDecimal.ZERO : new BigDecimal("30000");
         BigDecimal total = subtotal.add(shippingFee);
 
-        // Cập nhật badge giỏ hàng trên header
-        session.setAttribute("cartCount", cartItems.size());
+        session.setAttribute("cartCount", cartDAO.countCartItems(account.getId()));
 
         req.setAttribute("cartItems", cartItems);
         req.setAttribute("subtotal", subtotal);
@@ -54,7 +53,6 @@ public class CartController extends HttpServlet {
 
         HttpSession session = req.getSession(false);
 
-        // Chưa đăng nhập → redirect login, giữ lại URL để quay lại sau
         if (session == null || session.getAttribute("account") == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
@@ -86,7 +84,6 @@ public class CartController extends HttpServlet {
         }
     }
 
-    // ── Thêm sản phẩm vào giỏ ────────────────────────────────────────────
     private void handleAdd(HttpServletRequest req, HttpServletResponse resp, Account account)
             throws IOException {
 
@@ -107,20 +104,13 @@ public class CartController extends HttpServlet {
         CartDAO cartDAO = new CartDAO();
         boolean success = cartDAO.addToCart(account.getId(), bookID, quantity);
 
-        // Cập nhật badge cartCount trong session
         if (success) {
             int newCount = cartDAO.countCartItems(account.getId());
             req.getSession().setAttribute("cartCount", newCount);
         }
 
-        // Redirect về trang sản phẩm vừa xem, kèm thông báo
-        String referer = req.getHeader("Referer");
-        if (referer != null && !referer.isEmpty()) {
-            resp.sendRedirect(referer + (referer.contains("?") ? "&" : "?")
-                    + "addResult=" + (success ? "success" : "error"));
-        } else {
-            resp.sendRedirect(req.getContextPath() + "/cart");
-        }
+        resp.sendRedirect(req.getContextPath() + "/products?id=" + bookID
+                + "&addResult=" + (success ? "success" : "error"));
     }
 
     private int parseIntParam(String param, int defaultVal) {
@@ -148,13 +138,11 @@ public class CartController extends HttpServlet {
         CartDAO cartDAO = new CartDAO();
 
         if (newQty < 1) {
-            // Giảm xuống 0 → xóa luôn
             cartDAO.removeItem(cartItemID, account.getId());
         } else {
             cartDAO.updateQuantity(cartItemID, newQty);
         }
 
-        // Cập nhật badge
         int newCount = cartDAO.countCartItems(account.getId());
         req.getSession().setAttribute("cartCount", newCount);
 

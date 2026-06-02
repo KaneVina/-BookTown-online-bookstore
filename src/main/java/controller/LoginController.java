@@ -1,6 +1,7 @@
 package controller;
 
 import dao.AccountDAO;
+import dao.CartDAO;
 import model.Account;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -41,6 +42,9 @@ public class LoginController extends HttpServlet {
             if (acc.getRole().equals("admin") || acc.getRole().equals("staff")) {
                 response.sendRedirect(request.getContextPath() + "/admin/dashboard");
             } else {
+                // Set cartCount ngay khi đăng nhập để badge hiển thị đúng liền
+                CartDAO cartDAO = new CartDAO();
+                session.setAttribute("cartCount", cartDAO.countCartItems(acc.getId()));
                 response.sendRedirect(request.getContextPath() + "/home");
             }
         } else {

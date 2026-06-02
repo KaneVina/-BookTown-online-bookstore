@@ -55,11 +55,6 @@
                             src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
                             class="w-24 h-24 rounded-full border-4 border-blue-200 shadow"
                             alt="Avatar">
-                        <div class="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-1">
-                            <span class="material-symbols-outlined text-sm">
-                                edit
-                            </span>
-                        </div>
                     </div>
                     <h2 class="mt-4 text-xl font-bold text-center">
                         ${sessionScope.account.fullname}

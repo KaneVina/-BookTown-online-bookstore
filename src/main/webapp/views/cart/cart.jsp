@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ include file="/views/layout/homepage/header.jsp" %>
 <body class="text-on-background">
@@ -59,9 +60,7 @@
                                     </p>
                                 </div>
 
-                                <%-- Số lượng + tạm tính + xóa --%>
                                 <div class="flex flex-col items-center md:items-end gap-4">
-                                    <%-- Nút tăng/giảm số lượng (placeholder, sẽ xử lý ở tính năng update/delete) --%>
                                     <div class="flex items-center border border-[#c2c6d4] rounded-lg overflow-hidden bg-[#e6f6ff]">
                                         <button class="px-3 py-1 hover:bg-[#cfe6f2] transition-colors font-bold"
                                                 onclick="updateQty(${item.cartItemID}, ${item.quantity - 1})">−</button>
@@ -70,9 +69,8 @@
                                                 onclick="updateQty(${item.cartItemID}, ${item.quantity + 1})">+</button>
                                     </div>
 
-                                    <%-- Tạm tính dòng --%>
                                     <div class="text-right">
-                                        <p class="text-xs text-[#424752]">Tạm tính</p>
+                                        <p class="text-xs text-[#424752]">Tạm tính </p>
                                         <p class="text-xl font-bold text-[#004d99]">
                                             <fmt:formatNumber value="${item.subtotal}" type="number" groupingUsed="true"/> đ
                                         </p>
@@ -101,7 +99,7 @@
 
                     <div class="space-y-4">
                         <div class="flex justify-between items-center text-base">
-                            <span class="text-[#424752]">Tạm tính</span>
+                            <span class="text-[#424752]">Tạm tính (${sessionScope.cartCount} sản phẩm)</span>
                             <span class="font-semibold">
                                 <fmt:formatNumber value="${subtotal}" type="number" groupingUsed="true"/> đ
                             </span>
