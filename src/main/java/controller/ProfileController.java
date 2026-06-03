@@ -12,7 +12,10 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.time.LocalDate;
+import java.time.Period;
 import model.Account;
+import model.Customer;
 
 /**
  *
@@ -20,45 +23,13 @@ import model.Account;
  */
 public class ProfileController extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet ProfileController</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet ProfileController at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
+
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
 
         HttpSession session = request.getSession(false);
 
@@ -66,6 +37,39 @@ public class ProfileController extends HttpServlet {
             response.sendRedirect("login");
             return;
         }
+
+        String idParam = request.getParameter("id");
+
+        if (idParam == null) {
+            response.sendRedirect(request.getContextPath() + "/");
+            return;
+        }
+
+        int id = Integer.parseInt(idParam);
+
+        // user đang đăng nhập
+        Account loginUser = (Account) session.getAttribute("account");
+
+        // nếu id trên URL khác id của user đăng nhập
+        if (id != loginUser.getId()) {
+
+            request.getRequestDispatcher("/views/error/404.jsp")
+                    .forward(request, response);
+
+            return;
+        }
+
+        CustomerDAO dao = new CustomerDAO();
+
+        Customer customer = dao.getCustomerById(id);
+
+        System.out.println("Customer = " + customer);
+
+        if (customer != null) {
+            System.out.println("Name = " + customer.getFullname());
+        }
+
+        request.setAttribute("customer", customer);
 
         request.getRequestDispatcher("/views/profile/profile.jsp")
                 .forward(request, response);
@@ -75,6 +79,9 @@ public class ProfileController extends HttpServlet {
     protected void doPost(HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
+
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
 
         HttpSession session = request.getSession(false);
 
@@ -87,36 +94,130 @@ public class ProfileController extends HttpServlet {
 
         String fullname = request.getParameter("fullname");
         String phone = request.getParameter("phone");
+        String gender = request.getParameter("gender");
+        String dob = request.getParameter("dob");
 
+        // VALIDATE
+        fullname = fullname.trim();
+        phone = phone.trim();
+
+        if (fullname.isEmpty()) {
+            session.setAttribute("error",
+                    "Họ tên không được để trống");
+
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/profile?id="
+                    + acc.getId());
+
+            return;
+        }
+
+        if (!fullname.matches("^[\\p{L}\\s]{2,50}$")) {
+            session.setAttribute("error",
+                    "Họ tên chỉ được chứa chữ cái và khoảng trắng");
+
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/profile?id="
+                    + acc.getId());
+
+            return;
+        }
+
+        if (!phone.matches("^0\\d{9}$")) {
+            session.setAttribute("error",
+                    "Số điện thoại phải gồm 10 số và bắt đầu bằng 0");
+
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/profile?id="
+                    + acc.getId());
+
+            return;
+        }
+
+        if (dob == null || dob.trim().isEmpty()) {
+            session.setAttribute("error",
+                    "Vui lòng chọn ngày sinh");
+
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/profile?id="
+                    + acc.getId());
+            return;
+        }
+
+        try {
+            LocalDate birthDate = LocalDate.parse(dob);
+            LocalDate today = LocalDate.now();
+
+            // Không cho chọn ngày tương lai
+            if (birthDate.isAfter(today)) {
+                session.setAttribute("error",
+                        "Ngày sinh không hợp lệ");
+
+                response.sendRedirect(
+                        request.getContextPath()
+                        + "/profile?id="
+                        + acc.getId());
+                return;
+            }
+
+            int age = Period.between(birthDate, today).getYears();
+
+            // Giới hạn tuổi tối thiểu
+            if (age < 18 || age > 120) {
+                session.setAttribute("error",
+                        "Bạn phải từ 18 tuổi đến dưới 120 tuổi");
+
+                response.sendRedirect(
+                        request.getContextPath()
+                        + "/profile?id="
+                        + acc.getId());
+                return;
+            }
+
+        } catch (Exception e) {
+            session.setAttribute("error",
+                    "Định dạng ngày sinh không hợp lệ");
+
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/profile?id="
+                    + acc.getId());
+            return;
+        }
+
+        // VALIDATE OK MỚI UPDATE
         CustomerDAO dao = new CustomerDAO();
 
         boolean success = dao.updateCustomer(
                 acc.getId(),
                 fullname,
-                phone
+                phone,
+                gender,
+                dob
         );
 
         if (success) {
-
-            Account updatedAccount = new Account(
-                    acc.getId(),
-                    fullname,
-                    acc.getEmail(),
-                    phone,
-                    acc.getRole(),
-                    acc.getStatus()
+            session.removeAttribute("error");
+            session.setAttribute(
+                    "message",
+                    "Cập nhật thông tin thành công!"
             );
-
-            session.setAttribute("account", updatedAccount);
-
-            request.setAttribute("message",
-                    "Cập nhật thông tin thành công!");
         } else {
-            request.setAttribute("error",
-                    "Cập nhật thất bại!");
+            session.removeAttribute("message");
+            session.setAttribute(
+                    "error",
+                    "Cập nhật thất bại!"
+            );
         }
 
-        request.getRequestDispatcher("/views/profile/profile.jsp")
-                .forward(request, response);
+        response.sendRedirect(
+                request.getContextPath()
+                + "/profile?id="
+                + acc.getId()
+        );
     }
 }

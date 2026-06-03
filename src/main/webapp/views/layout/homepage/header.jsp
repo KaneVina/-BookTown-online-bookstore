@@ -80,7 +80,7 @@
                                 <div class="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg 
                                      opacity-0 invisible group-hover:opacity-100 group-hover:visible 
                                      transition-all z-50 text-on-surface text-sm">
-                                    <a href="${pageContext.request.contextPath}/profile"
+                                    <a href="${pageContext.request.contextPath}/profile?id=${sessionScope.account.id}"
                                        class="flex items-center gap-2 px-4 py-3 hover:bg-blue-50 rounded-t-lg">
                                         <i data-lucide="user" class="w-4 h-4 text-primary"></i> Tài khoản của tôi
                                     </a>
@@ -90,8 +90,9 @@
                                     </a>
                                     <hr class="border-gray-100">
                                     <a href="${pageContext.request.contextPath}/logout"
-                                       class="flex items-center gap-2 px-4 py-3 hover:bg-red-50 text-red-500 rounded-b-lg">
-                                        <i data-lucide="log-out" class="w-4 h-4"></i> Đăng xuất
+                                       class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200 text-sm font-medium group">
+                                        <i data-lucide="log-out" class="w-[18px] h-[18px] text-gray-400 group-hover:text-red-600 transition-colors"></i>
+                                        Đăng xuất
                                     </a>
                                 </div>
                             </div>

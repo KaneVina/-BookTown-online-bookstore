@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <%@ include file="/views/layout/homepage/header.jsp" %>
 
@@ -17,12 +18,14 @@
             Hơn 50.000 đầu sách chính hãng – Văn học, kinh tế, kỹ năng, thiếu nhi. Giao hàng nhanh toàn quốc.
         </p>
         <div class="flex gap-3">
-            <button class="bg-secondary text-primary font-bold text-sm px-6 py-2.5 rounded-full hover:scale-105 transition-transform flex items-center gap-2">
+            <a href="${pageContext.request.contextPath}/products"
+               class="bg-secondary text-primary font-bold text-sm px-6 py-2.5 rounded-full hover:scale-105 transition-transform flex items-center gap-2">
                 <i data-lucide="shopping-cart" class="icon-md"></i> Mua ngay
-            </button>
-            <button class="bg-transparent text-white font-medium text-sm px-6 py-2.5 border-2 border-white/50 rounded-full hover:border-white transition-all flex items-center gap-2">
+            </a>
+            <a href="${pageContext.request.contextPath}/products"
+               class="bg-transparent text-white font-medium text-sm px-6 py-2.5 border-2 border-white/50 rounded-full hover:border-white transition-all flex items-center gap-2">
                 Xem danh mục <i data-lucide="arrow-right" class="icon-md"></i>
-            </button>
+            </a>
         </div>
     </div>
 
@@ -69,263 +72,129 @@
 
 <main class="max-w-[1400px] mx-auto px-8 py-7">
 
-    <!-- BESTSELLERS -->
+    <!-- FEATURED BOOKS -->
     <section class="mb-12">
         <div class="flex justify-between items-center mb-5">
             <h2 class="section-title-border text-xl font-bold text-primary pl-3">🔥 Sách Bán Chạy</h2>
-            <span class="text-[13px] text-primary font-medium border border-primary px-3.5 py-1.5 rounded-full cursor-pointer hover:bg-primary hover:text-white transition-colors uppercase tracking-tight">Xem tất cả</span>
-        </div>
-
-        <div class="flex flex-wrap gap-2.5 mb-6">
-            <div class="bg-primary text-white border border-primary px-4 py-1.5 rounded-full text-[13px] font-medium cursor-pointer shadow-sm">📚 Tất cả</div>
-            <div class="bg-white text-on-surface border border-gray-300 px-4 py-1.5 rounded-full text-[13px] font-medium cursor-pointer hover:bg-primary hover:text-white hover:border-primary transition-all">✍️ Văn học</div>
-            <div class="bg-white text-on-surface border border-gray-300 px-4 py-1.5 rounded-full text-[13px] font-medium cursor-pointer hover:bg-primary hover:text-white hover:border-primary transition-all">💼 Kinh tế</div>
-            <div class="bg-white text-on-surface border border-gray-300 px-4 py-1.5 rounded-full text-[13px] font-medium cursor-pointer hover:bg-primary hover:text-white hover:border-primary transition-all">🧠 Kỹ năng</div>
-            <div class="bg-white text-on-surface border border-gray-300 px-4 py-1.5 rounded-full text-[13px] font-medium cursor-pointer hover:bg-primary hover:text-white hover:border-primary transition-all">🧒 Thiếu nhi</div>
-            <div class="bg-white text-on-surface border border-gray-300 px-4 py-1.5 rounded-full text-[13px] font-medium cursor-pointer hover:bg-primary hover:text-white hover:border-primary transition-all">🔬 Khoa học</div>
-            <div class="bg-white text-on-surface border border-gray-300 px-4 py-1.5 rounded-full text-[13px] font-medium cursor-pointer hover:bg-primary hover:text-white hover:border-primary transition-all">🌏 Lịch sử</div>
+            <a href="${pageContext.request.contextPath}/products?sort=popular"
+               class="text-[13px] text-primary font-medium border border-primary px-3.5 py-1.5 rounded-full hover:bg-primary hover:text-white transition-colors uppercase tracking-tight">Xem tất cả</a>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-
-            <!-- Card 1 -->
+            <c:forEach var="book" items="${featuredBooks}">
             <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
                 <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
-                    <img alt="Book cover" class="w-full h-full object-cover"
-                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuDL5DNrhpxC3JYzAsW2vU0LqbHPMKfXPDTo3fZabcjsD-rEiAPPWHd58yhwx4U1kao71thxMgXkTTOH4WSJVhpYYhFIl_wewZWt7FNJSFcbib4hyW50DQecRHOV-1DoMMPtvtU2ztEJ_bJJhWcqqRnIMuYlBwqgIwZhT6mdG7aZ6tPXEfDROSLA97_xBrDEa-W20d1F8G8QaH9TKNsqWQ7BrUl9UrZDHRNqB-qRg1OwDTJQ7zEoUKdWLQI-1quNYmUOgn9zdaUt_ouA">
+                    <c:choose>
+                        <c:when test="${not empty book.thumbnail}">
+                            <img alt="${book.title}" class="w-full h-full object-cover" src="${book.thumbnail}">
+                        </c:when>
+                        <c:otherwise>
+                            <i data-lucide="book-open" class="w-16 h-16 text-gray-300"></i>
+                        </c:otherwise>
+                    </c:choose>
                     <div class="absolute top-2.5 left-2.5 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">🔥 Hot</div>
                 </div>
                 <div class="p-3 flex flex-col flex-1">
                     <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 min-h-[36px]">
-                        <a class="text-primary hover:underline" href="${pageContext.request.contextPath}/products?id=1">Lược Sử Loài Người - Yuval Noah Harari</a>
+                        <a class="text-primary hover:underline"
+                           href="${pageContext.request.contextPath}/products?id=${book.bookID}">
+                            ${book.title}<c:if test="${not empty book.authors}"> – <c:forEach var="a" items="${book.authors}" varStatus="s">${a}<c:if test="${!s.last}">, </c:if></c:forEach></c:if>
+                        </a>
                     </div>
                     <div class="text-[#FDD835] text-[12px] mb-1.5 flex items-center gap-1">
-                        ★★★★★ <span class="text-gray-400 text-[11px]">(1.240)</span>
+                        <c:forEach begin="1" end="5" var="i">
+                            <c:choose>
+                                <c:when test="${i <= book.avgRating}">★</c:when>
+                                <c:otherwise><span class="text-gray-300">★</span></c:otherwise>
+                            </c:choose>
+                        </c:forEach>
+                        <span class="text-gray-400 text-[11px]">(${book.reviewCount})</span>
                     </div>
                     <div class="text-primary text-[17px] font-bold mb-2.5">
-                        156.000đ <span class="text-gray-400 text-xs font-normal line-through ml-1.5">195.000đ</span>
+                        <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true" />đ
                     </div>
-                    <button class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
+                    <a href="${pageContext.request.contextPath}/products?id=${book.bookID}"
+                       class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
                         <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
-                    </button>
+                    </a>
                 </div>
             </div>
+            </c:forEach>
 
-            <!-- Card 2 -->
-            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
-                <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
-                    <img alt="Book cover" class="w-full h-full object-cover"
-                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1ZQXa2zKsAKBIygOkn7Re38a9RzeX3GWtOkjniy_b625r6eFLLHCCHqwRKf_uxN7km3eTGjrEG6Vrb0tv1mSMdHJlsrVfl8xEW6O_8r7SjSVVaBUgZzOeh04Lrlwom5VcezUGcqE8pdoNuseDxHvL_JMqPAO9CZjIML2AUl8mm62ImYnhTSI8Ztf1p-UndinbhWT_Ik9xPq5QUYr3PGfV3-vVKdx-VwayBNcZb_BJFx0XLwY2QtKHqrefpARqzplvsa3xn_U29OvN">
-                    <div class="absolute top-2.5 left-2.5 bg-[#E53935] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">👍 New</div>
-                </div>
-                <div class="p-3 flex flex-col flex-1">
-                    <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 min-h-[36px]">
-                        <a class="text-primary hover:underline" href="${pageContext.request.contextPath}/products?id=2">Nhà Giả Kim - Paulo Coelho</a>
-                    </div>
-                    <div class="text-[#FDD835] text-[12px] mb-1.5 flex items-center gap-1">
-                        ★★★★★ <span class="text-gray-400 text-[11px]">(980)</span>
-                    </div>
-                    <div class="text-primary text-[17px] font-bold mb-2.5">89.000đ</div>
-                    <button class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
-                        <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
-                    </button>
-                </div>
-            </div>
-
-            <!-- Card 3 -->
-            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
-                <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
-                    <img alt="Book cover" class="w-full h-full object-cover"
-                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCQKV1PyUpBNd4gQFmCxXpHplPY2JjHD_OfFMuzmgTMRM1jWI9VC8GjToIujpOtPw8_NXMyY6XPmZrGTsSGJ-na0YCUY2hKGCygjGZkOiqJ_jccfzi5t0f91JHMFH0idrn6G92wSfGkikWHmEvhYjzczmQg-t2gN9bJ2bYCGuVQqKrwQFUnhi5BFCzaL9nRt4XFqkGNFVJV6d4raD1w0fWc_lKS2qKzE9ZaZ6sbgofCFkuSJ00PBJw1KVoX28on8P5BGoFLAotiiVx">
-                    <div class="absolute top-2.5 left-2.5 bg-[#FB8C00] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">🏷️ -20%</div>
-                </div>
-                <div class="p-3 flex flex-col flex-1">
-                    <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 min-h-[36px]">
-                        <a class="text-primary hover:underline" href="${pageContext.request.contextPath}/products?id=3">Kinh Tế Học Hài Hước - Steven D. Levitt</a>
-                    </div>
-                    <div class="text-[#FDD835] text-[12px] mb-1.5 flex items-center gap-1">
-                        ★★★★★ <span class="text-gray-400 text-[11px]">(2.100)</span>
-                    </div>
-                    <div class="text-primary text-[17px] font-bold mb-2.5">225.000đ</div>
-                    <button class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
-                        <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
-                    </button>
-                </div>
-            </div>
-
-            <!-- Card 4 -->
-            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
-                <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
-                    <img alt="Book cover" class="w-full h-full object-cover"
-                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2B7XLtdS0wy7BAE332DkzQUbRUjCucjPE7TUDXTblI-0H9EYtkFVhDetEo41CpskjUGCM0wjW1joZwk6ob3qdina-PJglBbLAyi_AwUpv_g8DPLkt5TSAM-4Ml6b_hBJRVuX7S3ORg60TB69xXxqm7imepXAAmliixlQJdvQndz7N3cJRFB0cdLomr42PqV2er0FhnSNg1q4g94PTFO00fC0zxPAmBV92WYRiyAHF4M3tigIo4-zfcIEiRH6sNAavENUGTVkE88B_">
-                    <div class="absolute top-2.5 left-2.5 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">🔥 Hot</div>
-                </div>
-                <div class="p-3 flex flex-col flex-1">
-                    <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 min-h-[36px]">
-                        <a class="text-primary hover:underline" href="${pageContext.request.contextPath}/products?id=4">Muôn Kiếp Nhân Sinh - Nguyên Phong</a>
-                    </div>
-                    <div class="text-[#FDD835] text-[12px] mb-1.5 flex items-center gap-1">
-                        ★★★★★ <span class="text-gray-400 text-[11px]">(875)</span>
-                    </div>
-                    <div class="text-primary text-[17px] font-bold mb-2.5">188.000đ</div>
-                    <button class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
-                        <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
-                    </button>
-                </div>
-            </div>
-
-            <!-- Card 5 -->
-            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
-                <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
-                    <img alt="Book cover" class="w-full h-full object-cover"
-                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwLsWcjspRrX6xou1YHJNPsQZax8Ow9uMwo7cE7lQUeiCjtxIt7dR-E6mXUrhy7L5hAfWsskuKKuKWR3ajaGzJI6DY6zw1tDIiIXwF1Z6cRvjnJOTJqigQCkOJ3kHOd8NZt3fJ-_wDOX6FEohrmlQeKpce0KKB3g3zJg_sCX9Acqa3gM9IgfQRCm7jSFOkD0wMsSWdpZuqn5Ly5Wbrw_qAtZD_RaPSVDGyRRU4awDqlGgbPLsLGiCUkp-9uXQbG9eq4WN6TAgEyyac">
-                    <div class="absolute top-2.5 left-2.5 bg-[#FB8C00] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">🏷️ -15%</div>
-                </div>
-                <div class="p-3 flex flex-col flex-1">
-                    <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 min-h-[36px]">
-                        <a class="text-primary hover:underline" href="${pageContext.request.contextPath}/products?id=5">One Piece - Tập 101 - Eiichiro Oda</a>
-                    </div>
-                    <div class="text-[#FDD835] text-[12px] mb-1.5 flex items-center gap-1">
-                        ★★★★★ <span class="text-gray-400 text-[11px]">(1.560)</span>
-                    </div>
-                    <div class="text-primary text-[17px] font-bold mb-2.5">
-                        21.000đ <span class="text-gray-400 text-xs font-normal line-through ml-1.5">25.000đ</span>
-                    </div>
-                    <button class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
-                        <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
-                    </button>
-                </div>
-            </div>
-
+            <c:if test="${empty featuredBooks}">
+            <div class="col-span-5 py-12 text-center text-gray-400 text-[14px]">Chưa có sách nào.</div>
+            </c:if>
         </div>
     </section>
 
     <!-- PROMO BANNERS -->
     <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-        <div class="rounded-lg h-[120px] flex flex-col items-center justify-center font-bold text-lg text-white p-4 text-center cursor-pointer hover:scale-[1.02] transition-transform bg-gradient-to-br from-primary to-primary-dark">
+        <a href="${pageContext.request.contextPath}/products"
+           class="rounded-lg h-[120px] flex flex-col items-center justify-center font-bold text-lg text-white p-4 text-center hover:scale-[1.02] transition-transform bg-gradient-to-br from-primary to-primary-dark">
             📚 Sách Kỹ Năng<br><span class="text-[13px] opacity-80 font-normal">Giảm đến 40%</span>
-        </div>
-        <div class="rounded-lg h-[120px] flex flex-col items-center justify-center font-bold text-lg text-white p-4 text-center cursor-pointer hover:scale-[1.02] transition-transform bg-gradient-to-br from-[#E53935] to-[#B71C1C]">
+        </a>
+        <a href="${pageContext.request.contextPath}/products"
+           class="rounded-lg h-[120px] flex flex-col items-center justify-center font-bold text-lg text-white p-4 text-center hover:scale-[1.02] transition-transform bg-gradient-to-br from-[#E53935] to-[#B71C1C]">
             🎁 Quà Tặng Ý Nghĩa<br><span class="text-[13px] opacity-80 font-normal">Gói quà miễn phí</span>
-        </div>
-        <div class="rounded-lg h-[120px] flex flex-col items-center justify-center font-bold text-lg text-white p-4 text-center cursor-pointer hover:scale-[1.02] transition-transform bg-gradient-to-br from-[#F57F17] to-[#E65100]">
+        </a>
+        <a href="${pageContext.request.contextPath}/products?sort=newest"
+           class="rounded-lg h-[120px] flex flex-col items-center justify-center font-bold text-lg text-white p-4 text-center hover:scale-[1.02] transition-transform bg-gradient-to-br from-[#F57F17] to-[#E65100]">
             🚀 Sách Mới Nhất<br><span class="text-[13px] opacity-80 font-normal">Cập nhật mỗi tuần</span>
-        </div>
+        </a>
     </section>
 
     <!-- NEW ARRIVALS -->
     <section class="mb-12">
         <div class="flex justify-between items-center mb-5">
             <h2 class="section-title-border text-xl font-bold text-primary pl-3">🆕 Sách Mới Về</h2>
-            <span class="text-[13px] text-primary font-medium border border-primary px-3.5 py-1.5 rounded-full cursor-pointer hover:bg-primary hover:text-white transition-colors uppercase tracking-tight">Xem tất cả</span>
+            <a href="${pageContext.request.contextPath}/products?sort=newest"
+               class="text-[13px] text-primary font-medium border border-primary px-3.5 py-1.5 rounded-full hover:bg-primary hover:text-white transition-colors uppercase tracking-tight">Xem tất cả</a>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-
-            <!-- Arrival 1 -->
+            <c:forEach var="book" items="${newBooks}">
             <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
                 <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
-                    <img alt="Book cover" class="w-full h-full object-cover"
-                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYZn0G898rGsRNjqKMDfcw2DeIUbBzWKEfBC17FtB9kLNhkHqBn6SxObR1s-D01LiltlZlXo_lLdZ081Evb0G1RnCa0rmXHkBfGBmm_MBhiRZzHFcKBv1b1xAcoBcGyPje2eDaaKUE6FmZZLNL0JR_6eHdVcui4k0QQQxXMg31q4CcubkL4dnr5CpCG3lrPpzjNoWa4V0mt42PhymHEqLox60kxz9Ubnnr6O_ivf1I_GFTDhihusQEHqGrf-EfJuWOw9esdjhdMqCI">
+                    <c:choose>
+                        <c:when test="${not empty book.thumbnail}">
+                            <img alt="${book.title}" class="w-full h-full object-cover" src="${book.thumbnail}">
+                        </c:when>
+                        <c:otherwise>
+                            <i data-lucide="book-open" class="w-16 h-16 text-gray-300"></i>
+                        </c:otherwise>
+                    </c:choose>
                     <div class="absolute top-2.5 left-2.5 bg-[#E53935] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">👍 New</div>
                 </div>
                 <div class="p-3 flex flex-col flex-1">
                     <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 min-h-[36px]">
-                        <a class="text-primary hover:underline" href="${pageContext.request.contextPath}/products?id=6">Tâm Lý Học Về Tiền - Morgan Housel</a>
+                        <a class="text-primary hover:underline"
+                           href="${pageContext.request.contextPath}/products?id=${book.bookID}">
+                            ${book.title}<c:if test="${not empty book.authors}"> – <c:forEach var="a" items="${book.authors}" varStatus="s">${a}<c:if test="${!s.last}">, </c:if></c:forEach></c:if>
+                        </a>
                     </div>
                     <div class="text-[#FDD835] text-[12px] mb-1.5 flex items-center gap-1">
-                        ★★★★★ <span class="text-gray-400 text-[11px]">(0)</span>
+                        <c:forEach begin="1" end="5" var="i">
+                            <c:choose>
+                                <c:when test="${i <= book.avgRating}">★</c:when>
+                                <c:otherwise><span class="text-gray-300">★</span></c:otherwise>
+                            </c:choose>
+                        </c:forEach>
+                        <span class="text-gray-400 text-[11px]">(${book.reviewCount})</span>
                     </div>
-                    <div class="text-primary text-[17px] font-bold mb-2.5">145.000đ</div>
-                    <button class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
+                    <div class="text-primary text-[17px] font-bold mb-2.5">
+                        <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true" />đ
+                    </div>
+                    <a href="${pageContext.request.contextPath}/products?id=${book.bookID}"
+                       class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
                         <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
-                    </button>
+                    </a>
                 </div>
             </div>
+            </c:forEach>
 
-            <!-- Arrival 2 -->
-            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
-                <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
-                    <img alt="Book cover" class="w-full h-full object-cover"
-                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLpeq1y2nUHWByaMqR26eH_13lnomIO3s0dboXH0TyxELa-FcZkCX9iWcWpInVR4ZY-zLKr1n_o8WOhxPHVTv-UZMp053czMx0t6dDkDXXs46Jpd0S7YpDQghqN7DXtIHPIFocxFbWcheIw0Rmw4VsobV41bCy_ts3A5Z4l7B-HqAVaXAfWLABA6zmAjRCfACWXSNApQocvcsQjxvfY-wH4hRSSeP_kWWaG-F0YJA3ztw6Iajg514_y4KLD-Hzu6TB2w4ekxkkf9ZV">
-                    <div class="absolute top-2.5 left-2.5 bg-[#E53935] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">👍 New</div>
-                </div>
-                <div class="p-3 flex flex-col flex-1">
-                    <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 min-h-[36px]">
-                        <a class="text-primary hover:underline" href="${pageContext.request.contextPath}/products?id=7">Phía Sau Nghi Can X - Higashino Keigo</a>
-                    </div>
-                    <div class="text-[#FDD835] text-[12px] mb-1.5 flex items-center gap-1">
-                        ★★★★★ <span class="text-gray-400 text-[11px]">(12)</span>
-                    </div>
-                    <div class="text-primary text-[17px] font-bold mb-2.5">112.000đ</div>
-                    <button class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
-                        <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
-                    </button>
-                </div>
-            </div>
-
-            <!-- Arrival 3 -->
-            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
-                <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
-                    <img alt="Book cover" class="w-full h-full object-cover"
-                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq8GZju_7_XRWTEIgtQItR-uKfARYvGRemwW5KN9bJ9acvJbY_vVSL7rN8kWfJzytI-t0698Cvz7U3iBax1985HnikptWOed9wjG1JVPLWtwaQOtnSa3GjZfRZldv8EmWFb9m2JWFeINbpwY6MculeuviR6eIHxXcwDUUu2V9fAxu9lIu9Ywb63v-v_FXFnOh4Sh23MnFwwoGEi72nAB9eoj1U2xl5cKQfeneO2UKC_fe0G7VBfTkF8Y1YLHZv22FdZ4F1HxhXL7m6">
-                    <div class="absolute top-2.5 left-2.5 bg-[#E53935] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">👍 New</div>
-                </div>
-                <div class="p-3 flex flex-col flex-1">
-                    <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 min-h-[36px]">
-                        <a class="text-primary hover:underline" href="${pageContext.request.contextPath}/products?id=8">Hành Trình Về Phương Đông - Baird T. Spalding</a>
-                    </div>
-                    <div class="text-[#FDD835] text-[12px] mb-1.5 flex items-center gap-1">
-                        ★★★★★ <span class="text-gray-400 text-[11px]">(8)</span>
-                    </div>
-                    <div class="text-primary text-[17px] font-bold mb-2.5">95.000đ</div>
-                    <button class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
-                        <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
-                    </button>
-                </div>
-            </div>
-
-            <!-- Arrival 4 -->
-            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
-                <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
-                    <img alt="Book cover" class="w-full h-full object-cover"
-                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuAG9j4kQQX3LwAqtjK2ecdJoOseBednAJ8JYFJrrDlaSomp3q5vNexOdPpQdhDiatHWHxpBejRVT5kfasO1oenX_CEcg1dx39FzZg0uHKTnuhcOgyWTeZpmVLxUzE95U7QeXmvteoLViggPE7wBbB4M3XopQGJ1PZagoyUf8nQUDewDwuxP7KDNhZpU3x68IOHrprjmCsiU5RndnD4UNirRw2xowDAQ8Dd5r6MbmhUdPENpPdG0_F-uHL3TP0fufXPqrtC-HT3ofbwK">
-                    <div class="absolute top-2.5 left-2.5 bg-[#E53935] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">👍 New</div>
-                </div>
-                <div class="p-3 flex flex-col flex-1">
-                    <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 min-h-[36px]">
-                        <a class="text-primary hover:underline" href="${pageContext.request.contextPath}/products?id=9">Vũ Trụ - Carl Sagan</a>
-                    </div>
-                    <div class="text-[#FDD835] text-[12px] mb-1.5 flex items-center gap-1">
-                        ★★★★★ <span class="text-gray-400 text-[11px]">(5)</span>
-                    </div>
-                    <div class="text-primary text-[17px] font-bold mb-2.5">245.000đ</div>
-                    <button class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
-                        <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
-                    </button>
-                </div>
-            </div>
-
-            <!-- Arrival 5 -->
-            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
-                <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
-                    <i data-lucide="notebook" class="w-16 h-16 text-gray-300"></i>
-                    <div class="absolute top-2.5 left-2.5 bg-[#E53935] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">👍 New</div>
-                </div>
-                <div class="p-3 flex flex-col flex-1">
-                    <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 min-h-[36px]">
-                        <a class="text-primary hover:underline" href="${pageContext.request.contextPath}/products?id=10">Đắc Nhân Tâm – Bìa Cứng Đặc Biệt</a>
-                    </div>
-                    <div class="text-[#FDD835] text-[12px] mb-1.5 flex items-center gap-1">
-                        ★★★★★ <span class="text-gray-400 text-[11px]">(3)</span>
-                    </div>
-                    <div class="text-primary text-[17px] font-bold mb-2.5">58.000đ</div>
-                    <button class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
-                        <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
-                    </button>
-                </div>
-            </div>
-
+            <c:if test="${empty newBooks}">
+            <div class="col-span-5 py-12 text-center text-gray-400 text-[14px]">Chưa có sách nào.</div>
+            </c:if>
         </div>
     </section>
 

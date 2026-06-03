@@ -55,18 +55,13 @@
                             src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
                             class="w-24 h-24 rounded-full border-4 border-blue-200 shadow"
                             alt="Avatar">
-                        <div class="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-1">
-                            <span class="material-symbols-outlined text-sm">
-                                edit
-                            </span>
-                        </div>
                     </div>
                     <h2 class="mt-4 text-xl font-bold text-center">
-                        ${sessionScope.account.fullname}
+                        ${customer.fullname}
                     </h2>
 
                     <div class="mt-2 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-sm">
-                        ${sessionScope.account.role}
+                        ${customer.role}
                     </div>
 
                 </div>
@@ -99,15 +94,18 @@
 
         <!-- CONTENT -->
         <div class="lg:col-span-3 space-y-6">
-            <c:if test="${not empty message}">
+            <c:if test="${not empty sessionScope.message}">
                 <div class="bg-green-100 text-green-700 p-4 rounded-xl">
-                    ${message}
+                    ${sessionScope.message}
                 </div>
+                <c:remove var="message" scope="session"/>
             </c:if>
-            <c:if test="${not empty error}">
+
+            <c:if test="${not empty sessionScope.error}">
                 <div class="bg-red-100 text-red-700 p-4 rounded-xl">
-                    ${error}
+                    ${sessionScope.error}
                 </div>
+                <c:remove var="error" scope="session"/>
             </c:if>
             <!-- PROFILE -->
             <div id="profile" class="profile-card p-8">
@@ -130,7 +128,7 @@
                             <input
                                 type="text"
                                 name="fullname"
-                                value="${sessionScope.account.fullname}"
+                                value="${customer.fullname}"
                                 required
                                 class="input-style">
                         </div>
@@ -140,7 +138,7 @@
                             </label>
                             <input
                                 type="email"
-                                value="${sessionScope.account.email}"
+                                value="${customer.email}"
                                 disabled
                                 class="input-style bg-gray-100">
                         </div>
@@ -151,19 +149,8 @@
                             <input
                                 type="text"
                                 name="phone"
-                                value="${sessionScope.account.phone}"
+                                value="${customer.phone}"
                                 class="input-style">
-                        </div>
-                        <div>
-                            <label class="block mb-2 font-medium">
-                                Vai trò
-                            </label>
-
-                            <input
-                                type="text"
-                                value="${sessionScope.account.role}"
-                                disabled
-                                class="input-style bg-gray-100">
                         </div>
                         <div>
                             <label class="block mb-2 font-medium">
@@ -171,9 +158,43 @@
                             </label>
                             <input
                                 type="text"
-                                value="${sessionScope.account.status}"
+                                value="${customer.status}"
                                 disabled
                                 class="input-style bg-gray-100">
+                        </div>
+                        <div>
+                            <label class="block mb-2 font-medium">
+                                Giới tính
+                            </label>
+
+                            <select name="gender" class="input-style">
+                                <option value="Male"
+                                        ${customer.gender == 'Male' ? 'selected' : ''}>
+                                    Nam
+                                </option>
+
+                                <option value="Female"
+                                        ${customer.gender == 'Female' ? 'selected' : ''}>
+                                    Nữ
+                                </option>
+
+                                <option value="Other"
+                                        ${customer.gender == 'Other' ? 'selected' : ''}>
+                                    Khác
+                                </option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block mb-2 font-medium">
+                                Ngày sinh
+                            </label>
+
+                            <input
+                                type="date"
+                                name="dob"
+                                value="${customer.dob}"
+                                max="<%= java.time.LocalDate.now()%>"
+                                class="input-style">
                         </div>
                     </div>
                     <div class="mt-8">
