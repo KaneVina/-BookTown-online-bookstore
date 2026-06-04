@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%@ taglib prefix="fn"  uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ include file="/views/layout/homepage/header.jsp" %>
 <body class="text-on-background">
@@ -99,7 +99,7 @@
 
                     <div class="space-y-4">
                         <div class="flex justify-between items-center text-base">
-                            <span class="text-[#424752]">Tạm tính (${sessionScope.cartCount} sản phẩm)</span>
+                            <span class="text-[#424752]">Tạm tính (${fn:length(cartItems)} sản phẩm)</span>
                             <span class="font-semibold">
                                 <fmt:formatNumber value="${subtotal}" type="number" groupingUsed="true"/> đ
                             </span>
