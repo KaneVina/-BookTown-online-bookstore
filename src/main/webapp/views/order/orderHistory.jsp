@@ -4,7 +4,9 @@
 <%@ include file="/views/layout/homepage/header.jsp" %>
 
 <style>
-    body { background: #f3faff; }
+    body {
+        background: #f3faff;
+    }
     .profile-card {
         background: #fff;
         border-radius: 16px;
@@ -19,7 +21,9 @@
         border-radius: 12px;
         transition: .2s;
     }
-    .menu-item:hover { background: #eff6ff; }
+    .menu-item:hover {
+        background: #eff6ff;
+    }
     .menu-active {
         background: #dbeafe;
         color: #2563eb;
@@ -40,9 +44,6 @@
                         <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
                              class="w-24 h-24 rounded-full border-4 border-blue-200 shadow"
                              alt="Avatar">
-                        <div class="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-1">
-                            <span class="material-symbols-outlined text-sm">edit</span>
-                        </div>
                     </div>
                     <h2 class="mt-4 text-xl font-bold text-center">${sessionScope.account.fullname}</h2>
                     <div class="mt-2 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-sm">
@@ -53,21 +54,24 @@
                 <hr class="my-6">
 
                 <nav class="space-y-2">
-                    <a href="${pageContext.request.contextPath}/profile"
+                    <a href="${pageContext.request.contextPath}/profile?id=${sessionScope.account.id}"
                        class="menu-item">
                         <span class="material-symbols-outlined">person</span>
                         Thông tin cá nhân
-                    </a>
-                    <a href="${pageContext.request.contextPath}/profile#password"
-                       class="menu-item">
-                        <span class="material-symbols-outlined">lock</span>
-                        Đổi mật khẩu
                     </a>
                     <a href="${pageContext.request.contextPath}/profile/order-history"
                        class="menu-item menu-active">
                         <span class="material-symbols-outlined">receipt_long</span>
                         Lịch sử đơn hàng
                     </a>
+                    <a href="${pageContext.request.contextPath}/change-password"
+                       class="menu-item">
+                        <span class="material-symbols-outlined">
+                            lock
+                        </span>
+                        Đổi mật khẩu
+                    </a>
+
                     <a href="${pageContext.request.contextPath}/logout"
                        class="menu-item text-red-600">
                         <span class="material-symbols-outlined">logout</span>
@@ -85,7 +89,7 @@
                     <h1 class="text-2xl font-bold text-[#17479D]">Lịch sử đơn hàng của tôi</h1>
                     <div class="relative w-full md:w-72">
                         <input class="pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-full text-sm w-full
-                                      focus:ring-2 focus:ring-[#17479D] focus:border-[#17479D] outline-none transition-all"
+                               focus:ring-2 focus:ring-[#17479D] focus:border-[#17479D] outline-none transition-all"
                                placeholder="Tìm kiếm đơn hàng..." type="text"/>
                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
                     </div>

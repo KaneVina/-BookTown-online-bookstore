@@ -156,4 +156,60 @@ public class CustomerDAO {
 
         return null;
     }
+
+    public boolean changePassword(
+            int customerId,
+            String currentPassword,
+            String newPassword) {
+
+        String checkSql
+                = "SELECT password "
+                + "FROM Customer "
+                + "WHERE customerID = ?";
+
+        String updateSql
+                = "UPDATE Customer "
+                + "SET password = ? "
+                + "WHERE customerID = ?";
+
+        try (Connection conn = new DBContext().getConnection()) {
+
+            PreparedStatement ps
+                    = conn.prepareStatement(checkSql);
+
+            ps.setInt(1, customerId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                String oldPassword
+                        = rs.getString("password");
+
+                if (!oldPassword.equals(
+                        hashMD5(currentPassword))) {
+
+                    return false;
+                }
+
+                PreparedStatement update
+                        = conn.prepareStatement(updateSql);
+
+                update.setString(
+                        1,
+                        hashMD5(newPassword));
+
+                update.setInt(
+                        2,
+                        customerId);
+
+                return update.executeUpdate() > 0;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 }

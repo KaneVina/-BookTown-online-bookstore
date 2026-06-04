@@ -67,14 +67,19 @@
                 </div>
                 <hr class="my-6">
                 <nav class="space-y-2">
-                    <a href="#profile"
+                    <a href="${pageContext.request.contextPath}/profile?id=${sessionScope.account.id}"
                        class="menu-item menu-active">
-                        <span class="material-symbols-outlined">
-                            person
-                        </span>
+                        <span class="material-symbols-outlined">person</span>
                         Thông tin cá nhân
                     </a>
-                    <a href="#password"
+                    <a href="${pageContext.request.contextPath}/profile/order-history"
+                       class="menu-item">
+                        <span class="material-symbols-outlined">
+                            lock
+                        </span>
+                        Lịch sử đơn hàng
+                    </a>
+                    <a href="${pageContext.request.contextPath}/change-password"
                        class="menu-item">
                         <span class="material-symbols-outlined">
                             lock
@@ -202,58 +207,6 @@
                             type="submit"
                             class="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-xl shadow">
                             Lưu thay đổi
-                        </button>
-                    </div>
-                </form>
-            </div>
-            <!-- PASSWORD -->
-            <div id="password" class="profile-card p-8">
-                <div class="mb-8">
-                    <h1 class="text-3xl font-bold">
-                        Đổi mật khẩu
-                    </h1>
-                    <p class="text-gray-500 mt-2">
-                        Để bảo mật tài khoản, vui lòng không chia sẻ mật khẩu
-                    </p>
-                </div>
-                <form action="${pageContext.request.contextPath}/change-password"
-                      method="post">
-                    <div class="space-y-5">
-                        <div>
-                            <label class="block mb-2 font-medium">
-                                Mật khẩu hiện tại
-                            </label>
-                            <input
-                                type="password"
-                                name="currentPassword"
-                                required
-                                class="input-style">
-                        </div>
-                        <div>
-                            <label class="block mb-2 font-medium">
-                                Mật khẩu mới
-                            </label>
-                            <input
-                                type="password"
-                                name="newPassword"
-                                required
-                                class="input-style">
-                        </div>
-                        <div>
-                            <label class="block mb-2 font-medium">
-                                Xác nhận mật khẩu mới
-                            </label>
-
-                            <input
-                                type="password"
-                                name="confirmPassword"
-                                required
-                                class="input-style">
-                        </div>
-                        <button
-                            type="submit"
-                            class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl shadow">
-                            Cập nhật mật khẩu
                         </button>
                     </div>
                 </form>
