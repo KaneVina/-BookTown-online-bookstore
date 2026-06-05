@@ -1,0 +1,179 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ include file="/views/layout/homepage/header.jsp" %>
+<body class="bg-background-alt text-on-background font-body-md min-h-screen">
+    <main class="max-w-[1280px] mx-auto px-4 md:px-16 py-12 min-h-[716px] text-[#071e27]">
+        <h1 class="text-[20px] font-bold mb-stack-md text-primary pl-3 border-l-4 border-secondary">THANH TOÁN AN TOÀN
+        </h1>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+            <!-- Left Column: Checkout Details -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- Review Order -->
+                <section class="bg-surface rounded-xl style-card border border-outline-variant overflow-hidden">
+                    <div class="p-6 border-b border-surface-container flex items-center justify-between">
+                        <h2 class="text-[16px] font-bold text-primary flex items-center gap-2"> <i data-lucide="handbag"></i>  
+                            Kiểm tra đơn hàng</h2>
+                    </div>
+                    <div class="divide-y divide-surface-container">
+                        <!-- Item 1 -->
+                        <div class="p-6 flex flex-col sm:flex-row gap-6 hover:bg-surface-variant/20 transition-colors">
+                            <div class="w-24 h-36 bg-surface-container-low flex-shrink-0 rounded-lg overflow-hidden border border-outline-variant">
+                                <img class="w-full h-full object-cover"
+                                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8b4wCh07Utdo5kjn1IPuLTYKtAoWzAIdrQxYg5fjEEYPtD4V72qC7-yTv88ZzXmZ3IgEf2KG_CqNBZEB05gkTd4-LXE-wtP21TZvjBEzwxMW91heLkZj_6ZuT9NI0pjWjDOcGsuQxId6CEISypsel-qFxtCvoTi82jfTMMgczeluZkXCHTE5FbjcXyqDSvjrnCCan4vN8LZPq-4bxgPkVvlWPw_fPl9NeHGMXUCFjibPsRfNnUZrEggZMCLZ7sqWeOZ4DtmiLdH3-">
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="text-[15px] font-bold text-on-surface mb-1">Bệnh nhân lặng lẽ</h3>
+                                        <p class="text-[13px] text-on-surface-variant">Alex Michaelides • Fiction</p>
+                                    </div>
+                                    <span class="text-[17px] font-bold text-primary">100.000 đ</span>
+                                </div>
+                                <div class="mt-4 flex items-center justify-between">
+                                    <span class="text-[13px] text-on-surface-variant" >Số Lượng: 1</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Item 2 -->
+                        <div class="p-6 flex flex-col sm:flex-row gap-6 hover:bg-surface-variant/20 transition-colors">
+                            <div class="w-24 h-36 bg-surface-container-low flex-shrink-0 rounded-lg overflow-hidden border border-outline-variant">
+                                <img class="w-full h-full object-cover"
+                                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7F7DgE1AwGvbm_x-qxZGQE7bq3jtwgfTmtDaFJ4Liqv7h_1neoXuCf1KNNMdW-O1j92-mC9Hhxzwh23nFXizb_xJpiPY7K25OJFXWvgEcVm7LlkCRV-4OgSVcby7LaWevTx1npEpvl4y8RL03dhsL9FixSNo8Qzi9MRqcqDd4BMLvHnuXuIDuaQ8Baop_cp14htdWNwJGt-Yper6GxacWln-QOtPlAzfL2Z5cSy1f4s8FyDHDnPuYgyzRdomYnlM5GCqyyxPuEX3H">
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="text-[15px] font-bold text-on-surface mb-1">Truyện kỳ bí cổ điển</h3>
+                                        <p class="text-[13px] text-on-surface-variant">Various Authors • Classics</p>
+                                    </div>
+                                    <span class="text-[17px] font-bold text-primary">100.000 đ</span>
+                                </div>
+                                <div class="mt-4 flex items-center justify-between">
+                                    <span class="text-[13px] text-on-surface-variant" >Số Lượng: 1</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Shipping Address -->
+                <section class="bg-surface rounded-xl style-card border border-outline-variant p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-[16px] font-bold text-primary flex items-center gap-2"><i data-lucide="truck"></i> Địa chỉ giao hàng</h2>
+                        <button class="text-primary text-[13px] font-bold border border-primary px-3 py-1 rounded-full hover:bg-primary hover:text-white transition-all">+ Thêm mới</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Address Card 1 (Active) -->
+                        <label class="relative flex flex-col p-4 border-2 border-primary bg-primary/5 rounded-[10px] cursor-pointer transition-all">
+                            <input checked="" class="absolute top-4 right-4 text-primary focus:ring-primary h-5 w-5" name="shipping_address" type="radio">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i data-lucide="house"></i><span class="text-[13px] font-bold">Nhà riêng</span>
+                            </div>
+                            <p class="text-[15px] font-bold mb-1">Nguyễn Văn Tèo</p>
+                            <p class="text-[13px] text-on-surface-variant leading-relaxed">
+                                600 Nguyễn Văn Cừ Nối Dài, An Bình, Cần Thơ<br>
+                                (+84)123456789
+                            </p>
+                        </label>
+                        <!-- Address Card 2 -->
+                        <label class="relative flex flex-col p-4 border-2 border-outline-variant hover:border-primary/50 rounded-[10px] cursor-pointer transition-all">
+                            <input class="absolute top-4 right-4 text-primary focus:ring-primary h-5 w-5" name="shipping_address" type="radio">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i data-lucide="briefcase-business"></i><span class="text-[13px] font-bold text-on-surface-variant">Văn phòng</span>
+                            </div>
+                            <p class="text-[15px] font-bold mb-1">Nguyễn Văn Tí</p>
+                            <p class="text-[13px] text-on-surface-variant leading-relaxed">
+                                27 Nguyễn Văn Linh , Tân An, Cần Thơ<br>
+                                (+84)123456789
+                            </p>
+                        </label>
+                    </div>
+                </section>
+                <!-- Payment Method -->
+                <section class="bg-surface rounded-xl style-card border border-outline-variant p-6">
+                    <h2 class="text-[16px] font-bold text-primary flex items-center gap-2 mb-6"><i data-lucide="wallet-cards"></i>Phương thức thanh toán</h2>
+                    <div class="space-y-3">
+                        <label class="flex items-center justify-between p-4 border-2 border-primary bg-primary/5 rounded-[10px] cursor-pointer transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full bg-white border border-primary/20 flex items-center justify-center text-primary">
+                                    <i data-lucide="credit-card"></i>  
+                                </div>
+                                <div>
+                                    <p class="text-[14px] font-bold">VNPAY</p>
+                                    <p class="text-[12px] text-on-surface-variant">Thanh toán điện tử nhanh</p>
+                                </div>
+                            </div>
+                            <input checked="" class="text-primary focus:ring-primary h-5 w-5" name="payment_method" type="radio">
+                        </label>
+                        <label class="flex items-center justify-between p-4 border border-outline-variant rounded-[10px] cursor-pointer hover:bg-surface-variant/20 transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant">
+                                    <i data-lucide="banknote"></i>  
+                                </div>
+                                <div>
+                                    <p class="text-[14px] font-bold text-on-surface-variant">Cash on Delivery (COD)</p>
+                                    <p class="text-[12px] text-on-surface-variant">Thanh toán khi nhận hàng</p>
+                                </div>
+                            </div>
+                            <input class="text-primary focus:ring-primary h-5 w-5" name="payment_method" type="radio">
+                        </label>
+                    </div>
+                </section>
+            </div>
+            <!-- Right Column: Order Summary -->
+            <aside class="lg:col-span-4 sticky top-6">
+                <div class="bg-surface rounded-xl style-card border border-outline-variant p-6">
+                    <h2 class="text-[16px] font-black text-primary uppercase border-l-4 border-secondary pl-3 mb-6">Tóm tắt đơn hàng</h2>
+                    <div class="space-y-4 mb-6">
+                        <div class="flex justify-between text-[14px]">
+                            <span class="text-on-surface-variant">Tạm tính (3 sản phẩm)</span>
+                            <span class="text-on-surface font-bold">100.000 đ</span>
+                        </div>
+                        <div class="flex justify-between text-[14px]">
+                            <span class="text-on-surface-variant">Phí vận chuyển</span>
+                            <span class="text-on-surface font-bold">100.000 đ</span>
+                        </div>
+                        <div class="flex justify-between text-[14px]">
+                            <span class="text-on-surface-variant">Thuế</span>
+                            <span class="text-on-surface font-bold">100.000 đ</span>
+                        </div>
+                        <div class="pt-4 border-t border-surface-container flex justify-between items-end">
+                            <span class="text-[15px] font-bold text-primary">Tổng cộng</span>
+                            <span class="text-[22px] font-black text-primary">100.000 đ</span>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex rounded-[4px] overflow-hidden border border-outline-variant">
+                            <input class="flex-1 bg-surface-container-low border-none px-4 py-2 text-[14px] focus:ring-0" placeholder="Mã giảm giá" type="text">
+                            <button class="bg-secondary text-primary px-4 font-bold text-[13px] hover:opacity-90">Áp dụng</button>
+                        </div>
+                        <button class="w-full bg-secondary text-primary py-3.5 rounded-full font-black text-[15px] shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-wide">
+                            ĐẶT HÀNG NGAY 
+                            <span><i data-lucide="move-right"></i> </span>
+                        </button>
+                        <p class="text-center text-[12px] text-on-surface-variant leading-relaxed">
+                            Bằng việc nhấn nhấn vào nút "Đặt hàng ngay", bạn đã đồng ý với <a class="text-primary underline font-medium" href="#">Điều khoản dịch vụ</a> của BookTown.
+                        </p>
+                    </div>
+                    <div class="mt-8 pt-6 border-t border-surface-container grid grid-cols-3 gap-4">
+                        <div class="flex flex-col items-center gap-1.5 text-center">
+                            <span class="text-[20px]"><i data-lucide="shield-check"></i></span>
+                            <span class="text-[10px] font-black text-primary uppercase">BẢO MẬT</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1.5 text-center">
+                            <span class="text-[20px]"><i data-lucide="truck"></i></span>
+                            <span class="text-[10px] font-black text-primary uppercase">THEO DÕI</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1.5 text-center">
+                            <span class="text-[20px]"><i data-lucide="refresh-cw"></i></span>
+                            <span class="text-[10px] font-black text-primary uppercase">ĐỔI TRẢ 30 NGÀY</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+    <script>
+
+    </script>
+</body>
+<%@ include file="/views/layout/homepage/footer.jsp" %>
