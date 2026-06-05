@@ -74,9 +74,8 @@
                     </a>
                     <a href="${pageContext.request.contextPath}/profile/order-history"
                        class="menu-item">
-                        <span class="material-symbols-outlined">
-                            lock
-                        </span>
+                        <span class="material-symbols-outlined">receipt_long</span>
+
                         Lịch sử đơn hàng
                     </a>
                     <a href="${pageContext.request.contextPath}/change-password"
@@ -97,7 +96,7 @@
             </div>
         </div>
 
-        <!-- CONTENT -->
+        <!--form nhập thông tin và lưu thay đổi-->
         <div class="lg:col-span-3 space-y-6">
             <c:if test="${not empty sessionScope.message}">
                 <div class="bg-green-100 text-green-700 p-4 rounded-xl">

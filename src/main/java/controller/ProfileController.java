@@ -97,7 +97,6 @@ public class ProfileController extends HttpServlet {
         String gender = request.getParameter("gender");
         String dob = request.getParameter("dob");
 
-        // VALIDATE
         fullname = fullname.trim();
         phone = phone.trim();
 
@@ -189,7 +188,6 @@ public class ProfileController extends HttpServlet {
             return;
         }
 
-        // VALIDATE OK MỚI UPDATE
         CustomerDAO dao = new CustomerDAO();
 
         boolean success = dao.updateCustomer(

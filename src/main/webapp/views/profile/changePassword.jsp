@@ -47,7 +47,7 @@
 <div class="max-w-7xl mx-auto py-10 px-4">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-        <!-- SIDEBAR -->
+        <!--Thanh sidebar của trang profile-->
         <div class="lg:col-span-1">
             <div class="profile-card p-6">
 
@@ -98,7 +98,7 @@
             </div>
         </div>
 
-        <!-- CONTENT -->
+        <!--form điền mật khẩu và lưu-->
         <div class="lg:col-span-3">
 
             <div class="profile-card p-8">

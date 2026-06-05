@@ -109,9 +109,53 @@
                 <a href="${pageContext.request.contextPath}/cart" class="relative flex flex-col items-center text-white text-xs cursor-pointer gap-0.5">
                     <i data-lucide="shopping-cart" class="icon-lg"></i>
                     <span>Giỏ hàng</span>
-                    <span class="absolute -top-1.5 -right-2 bg-secondary text-primary text-[10px] font-bold rounded-full w-[18px] h-[18px] flex items-center justify-center">0</span>
+                    <span class="absolute -top-1.5 -right-2 bg-secondary text-primary text-[10px] font-bold rounded-full w-[18px] h-[18px] flex items-center justify-center">
+                        ${empty sessionScope.cartCount ? 0 : sessionScope.cartCount}
+                    </span>
                 </a>
             </div>
         </header>
+        <script>
+            (function () {
+                const wrapper = document.getElementById('user-menu-wrapper');
+                const dropdown = document.getElementById('user-dropdown');
+                const chevron = document.getElementById('chevron-icon');
+                if (!wrapper || !dropdown)
+                    return;
+
+                let open = false;
+
+                function showMenu() {
+                    open = true;
+                    dropdown.classList.remove('opacity-0', 'invisible', 'translate-y-[-8px]');
+                    dropdown.classList.add('opacity-100', 'visible', 'translate-y-0');
+                    if (chevron)
+                        chevron.classList.add('rotate-180');
+                }
+
+                function hideMenu() {
+                    open = false;
+                    dropdown.classList.add('opacity-0', 'invisible', 'translate-y-[-8px]');
+                    dropdown.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                    if (chevron)
+                        chevron.classList.remove('rotate-180');
+                }
+
+                wrapper.addEventListener('click', function (e) {
+                    open ? hideMenu() : showMenu();
+                    e.stopPropagation();
+                });
+
+                document.addEventListener('click', function () {
+                    if (open)
+                        hideMenu();
+                });
+
+                dropdown.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                });
+            })();
+        </script>
+
 
         <%@ include file="navbar.jsp" %>

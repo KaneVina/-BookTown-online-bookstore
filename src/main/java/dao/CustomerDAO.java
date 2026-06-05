@@ -7,6 +7,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.security.MessageDigest;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 import model.Customer;
 
 public class CustomerDAO {
@@ -211,5 +213,51 @@ public class CustomerDAO {
         }
 
         return false;
+    }
+
+    // admin và staff quản lý tài khoản người dùng 
+    public List<Customer> getAllCustomers() {
+
+        List<Customer> list = new ArrayList<>();
+
+        String sql
+                = "SELECT * FROM Customer";
+
+        try (
+                Connection conn
+                = new DBContext().getConnection(); PreparedStatement ps
+                = conn.prepareStatement(sql); ResultSet rs
+                = ps.executeQuery()) {
+
+            while (rs.next()) {
+
+                Customer c = new Customer();
+
+                c.setCustomerID(
+                        rs.getInt("customerID"));
+
+                c.setFullname(
+                        rs.getString("fullname"));
+
+                c.setEmail(
+                        rs.getString("email"));
+
+                c.setPhone(
+                        rs.getString("phone"));
+
+                c.setRole(
+                        rs.getString("role"));
+
+                c.setStatus(
+                        rs.getString("status"));
+
+                list.add(c);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
     }
 }

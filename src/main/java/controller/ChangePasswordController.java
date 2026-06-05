@@ -103,7 +103,7 @@ public class ChangePasswordController extends HttpServlet {
         }
 
         // kiểm tra độ mạnh của mật khẩu
-        if (!newPassword.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{6,50}$")) {
+        if (!newPassword.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,15}$")) {
             session.setAttribute("error", "Mật khẩu phải chứa chữ hoa, chữ thường và số");
             response.sendRedirect(request.getContextPath() + "/change-password");
 
