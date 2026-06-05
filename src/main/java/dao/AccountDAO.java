@@ -1,30 +1,24 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package dao;
 
 import utils.DBContext;
+import utils.HashMD5;
 import model.Account;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.security.MessageDigest;
 
+/**
+ *
+ * @author PHUC KHANG
+ */
 public class AccountDAO {
 
-    private String hashMD5(String input) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] bytes = md.digest(input.getBytes("UTF-8"));
-            StringBuilder sb = new StringBuilder();
-            for (byte b : bytes) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (Exception e) {
-            return input;
-        }
-    }
-
     public Account checkLogin(String email, String password) {
-        String hashedPassword = hashMD5(password);
+        String hashedPassword = HashMD5.hash(password);
         DBContext db = new DBContext();
 
         // Kiểm tra bảng Customer
@@ -50,7 +44,7 @@ public class AccountDAO {
             e.printStackTrace();
         }
 
-        // Kiểm tra bảng Account 
+        // Kiểm tra bảng Account
         String sqlAccount = "SELECT accountID, fullname, email, phone, role, status "
                 + "FROM Account WHERE email = ? AND password = ? AND status = 'active'";
         try (Connection conn = db.getConnection();
@@ -76,4 +70,3 @@ public class AccountDAO {
         return null;
     }
 }
-
