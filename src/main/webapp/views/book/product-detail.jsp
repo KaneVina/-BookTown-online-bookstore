@@ -1,296 +1,439 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
 <%@ include file="/views/layout/homepage/header.jsp" %>
 
-<main class="max-w-[1280px] mx-auto px-8 py-6" style="background: linear-gradient(0deg, #F4F4F4, #F4F4F4), #FFFFFF; min-height: 100vh;">
+<style>
+    .section-title-left {
+        border-left: 4px solid #FDD835;
+        padding-left: 12px;
+    }
+    .prod-thumb-active  {
+        border: 2px solid #1565C0;
+    }
+    .prod-thumb-idle    {
+        border: 1px solid #E0E0E0;
+    }
+    .prod-card-hover    {
+        border: 1px solid #E0E0E0;
+        box-shadow: 0 1px 2px rgba(0,0,0,.05);
+        transition: box-shadow .2s, transform .2s;
+    }
+    .prod-card-hover:hover {
+        box-shadow: 0 6px 20px rgba(0,0,0,.1);
+        transform: translateY(-2px);
+    }
+    .review-card        {
+        border: 1px solid #E0E0E0;
+        border-radius: 12px;
+        background:#fff;
+    }
+    .slider-track       {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+    }
+    .slider-track::-webkit-scrollbar {
+        display: none;
+    }
+    .slider-item        {
+        flex: 0 0 calc(25% - 12px);
+        scroll-snap-align: start;
+    }
+    @media (max-width: 1024px) {
+        .slider-item {
+            flex: 0 0 calc(33% - 12px);
+        }
+    }
+    @media (max-width: 768px)  {
+        .slider-item {
+            flex: 0 0 calc(50% - 8px);
+        }
+    }
+</style>
 
-    <!-- BREADCRUMB -->
-    <nav class="text-sm text-gray-500 mb-6 flex items-center gap-1.5">
-        <a href="${pageContext.request.contextPath}/" class="hover:text-primary transition-colors">Trang chủ</a>
-        <span class="text-gray-300">/</span>
-        <a href="${pageContext.request.contextPath}/products?category=van-hoc" class="hover:text-primary transition-colors">Thư viện</a>
-        <span class="text-gray-300">/</span>
-        <span class="text-primary font-medium">Sách Văn học</span>
-    </nav>
 
-    <!-- PRODUCT DETAIL SECTION -->
-    <section class="bg-white rounded-xl shadow-sm p-8 mb-8">
-        <div class="flex flex-col lg:flex-row gap-10">
-
-            <!-- LEFT: Image Gallery -->
-            <div class="flex flex-col gap-4 lg:w-[340px] flex-shrink-0">
-                <!-- Main Image -->
-                <div class="relative rounded-xl overflow-hidden bg-[#f5f5f0] aspect-[3/4] flex items-center justify-center">
-                    <img
-                        id="mainImage"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYZn0G898rGsRNjqKMDfcw2DeIUbBzWKEfBC17FtB9kLNhkHqBn6SxObR1s-D01LiltlZlXo_lLdZ081Evb0G1RnCa0rmXHkBfGBmm_MBhiRZzHFcKBv1b1xAcoBcGyPje2eDaaKUE6FmZZLNL0JR_6eHdVcui4k0QQQxXMg31q4CcubkL4dnr5CpCG3lrPpzjNoWa4V0mt42PhymHEqLox60kxz9Ubnnr6O_ivf1I_GFTDhihusQEHqGrf-EfJuWOw9esdjhdMqCI"
-                        alt="The Whispering Library - Bìa sách"
-                        class="w-full h-full object-cover transition-opacity duration-300"
-                    >
-                    <!-- Badge -->
-                    <div class="absolute top-3 left-3 bg-[#E53935] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">
-                        Tiết kiệm 17%
+<main class="max-w-[1400px] mx-auto px-8 py-8 flex flex-col gap-8">
+    <section class="flex flex-col lg:flex-row gap-10">
+        <div class="flex-shrink-0 w-full lg:w-[499px] flex flex-col gap-4">
+            <div class="bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden aspect-[3/4] flex items-center justify-center relative">
+                <c:choose>
+                    <c:when test="${not empty book.thumbnail}">
+                        <img id="mainImage" src="${book.thumbnail}" alt="${book.title}"
+                             class="w-full h-full object-cover">
+                    </c:when>
+                    <c:otherwise>
+                        <i data-lucide="book-open" class="w-24 h-24 text-gray-300"></i>
+                    </c:otherwise>
+                </c:choose>
+                <c:if test="${book.featured}">
+                    <div class="absolute top-3 left-3 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">🔥 Nổi bật</div>
+                </c:if>
+                <c:if test="${book.stockQuantity == 0}">
+                    <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <span class="bg-white text-red-600 font-bold text-sm px-4 py-2 rounded-full">Hết hàng</span>
                     </div>
+                </c:if>
+            </div>
+            <c:if test="${not empty book.thumbnail}">
+                <div class="grid grid-cols-4 gap-3">
+                    <button onclick="switchImg(this, '${book.thumbnail}')"
+                            class="prod-thumb-active rounded-lg overflow-hidden aspect-square bg-gray-50">
+                        <img src="${book.thumbnail}" class="w-full h-full object-cover" alt="">
+                    </button>
+                    <button class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50 flex items-center justify-center">
+                        <i data-lucide="image" class="w-6 h-6 text-gray-300"></i>
+                    </button>
+                    <button class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50 flex items-center justify-center">
+                        <i data-lucide="image" class="w-6 h-6 text-gray-300"></i>
+                    </button>
+                    <button class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50 flex items-center justify-center">
+                        <i data-lucide="image" class="w-6 h-6 text-gray-300"></i>
+                    </button>
                 </div>
-
-                <!-- Thumbnails -->
-                <div class="flex gap-2.5">
-                    <div class="thumbnail-item w-[72px] h-[72px] rounded-lg overflow-hidden border-2 border-primary cursor-pointer flex-shrink-0">
-                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYZn0G898rGsRNjqKMDfcw2DeIUbBzWKEfBC17FtB9kLNhkHqBn6SxObR1s-D01LiltlZlXo_lLdZ081Evb0G1RnCa0rmXHkBfGBmm_MBhiRZzHFcKBv1b1xAcoBcGyPje2eDaaKUE6FmZZLNL0JR_6eHdVcui4k0QQQxXMg31q4CcubkL4dnr5CpCG3lrPpzjNoWa4V0mt42PhymHEqLox60kxz9Ubnnr6O_ivf1I_GFTDhihusQEHqGrf-EfJuWOw9esdjhdMqCI" alt="Ảnh 1" class="w-full h-full object-cover">
-                    </div>
-                    <div class="thumbnail-item w-[72px] h-[72px] rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer flex-shrink-0 hover:border-primary transition-colors">
-                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLpeq1y2nUHWByaMqR26eH_13lnomIO3s0dboXH0TyxELa-FcZkCX9iWcWpInVR4ZY-zLKr1n_o8WOhxPHVTv-UZMp053czMx0t6dDkDXXs46Jpd0S7YpDQghqN7DXtIHPIFocxFbWcheIw0Rmw4VsobV41bCy_ts3A5Z4l7B-HqAVaXAfWLABA6zmAjRCfACWXSNApQocvcsQjxvfY-wH4hRSSeP_kWWaG-F0YJA3ztw6Iajg514_y4KLD-Hzu6TB2w4ekxkkf9ZV" alt="Ảnh 2" class="w-full h-full object-cover">
-                    </div>
-                    <div class="thumbnail-item w-[72px] h-[72px] rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer flex-shrink-0 hover:border-primary transition-colors">
-                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq8GZju_7_XRWTEIgtQItR-uKfARYvGRemwW5KN9bJ9acvJbY_vVSL7rN8kWfJzytI-t0698Cvz7U3iBax1985HnikptWOed9wjG1JVPLWtwaQOtnSa3GjZfRZldv8EmWFb9m2JWFeINbpwY6MculeuviR6eIHxXcwDUUu2V9fAxu9lIu9Ywb63v-v_FXFnOh4Sh23MnFwwoGEi72nAB9eoj1U2xl5cKQfeneO2UKC_fe0G7VBfTkF8Y1YLHZv22FdZ4F1HxhXL7m6" alt="Ảnh 3" class="w-full h-full object-cover">
-                    </div>
-                    <div class="thumbnail-item w-[72px] h-[72px] rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer flex-shrink-0 hover:border-primary transition-colors bg-[#f5f0e8] flex items-center justify-center">
-                        <i data-lucide="book-open" class="w-8 h-8 text-gray-400"></i>
-                    </div>
+            </c:if>
+        </div>
+        <div class="flex-1 min-w-0 flex flex-col gap-6">
+            <div class="flex flex-wrap gap-2">
+                <c:if test="${not empty book.genreName}">
+                    <span class="bg-primary/10 text-primary text-[12px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">${book.genreName}</span>
+                </c:if>
+                <c:if test="${book.featured}">
+                    <span class="bg-secondary/20 text-primary text-[12px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">🔥 Bán chạy</span>
+                </c:if>
+                <c:if test="${not empty book.originName}">
+                    <span class="bg-gray-100 text-gray-600 text-[12px] font-medium px-3 py-1 rounded-full">🌏 ${book.originName}</span>
+                </c:if>
+            </div>
+            <h1 class="text-[30px] font-black text-[#222222] leading-tight">${book.title}</h1>
+            <c:if test="${not empty book.authors}">
+                <p class="text-[18px] italic text-gray-500">
+                    Tác giả:
+                    <c:forEach var="author" items="${book.authors}" varStatus="s">
+                        <span class="text-primary font-semibold not-italic hover:underline cursor-pointer">${author}</span><c:if test="${!s.last}">, </c:if>
+                    </c:forEach>
+                </p>
+            </c:if>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-0.5 text-[#FDD835] text-[14px]">
+                    <c:set var="rating" value="${book.avgRating}" />
+                    <c:forEach begin="1" end="5" var="i">
+                        <c:choose>
+                            <c:when test="${i <= rating}">★</c:when>
+                            <c:otherwise><span class="text-gray-300">★</span></c:otherwise>
+                        </c:choose>
+                    </c:forEach>
                 </div>
+                <span class="text-[14px] font-medium text-gray-500">
+                    <fmt:formatNumber value="${book.avgRating}" maxFractionDigits="1" /> (${book.reviewCount} đánh giá)
+                </span>
             </div>
 
-            <!-- RIGHT: Product Info -->
-            <div class="flex-1 flex flex-col gap-5">
+            <div class="bg-white border border-gray-200 shadow-sm rounded-xl px-6 pt-10 pb-6 flex flex-col gap-6">
+                <div class="flex items-end gap-3">
+                    <span class="text-[30px] font-bold text-primary leading-none">
+                        <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true" />đ
+                    </span>
+                </div>
+                <div class="flex items-center gap-2 text-[14px] font-medium">
+                    <c:choose>
+                        <c:when test="${book.stockQuantity > 0}">
+                            <div class="w-5 h-5 bg-green-700 rounded-full flex items-center justify-center">
+                                <i data-lucide="check" class="w-3 h-3 text-white"></i>
+                            </div>
+                            <span class="text-[#222222]">Còn hàng (${book.stockQuantity} cuốn)</span>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                                <i data-lucide="x" class="w-3 h-3 text-white"></i>
+                            </div>
+                            <span class="text-red-500">Hết hàng</span>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+                <form id="add-to-cart-form" method="post" action="${pageContext.request.contextPath}/cart">
+                    <input type="hidden" name="action"   value="add"/>
+                    <input type="hidden" name="bookID"   value="${book.bookID}"/>
+                    <input type="hidden" name="quantity" id="form-qty" value="1"/>
+                    <div class="flex items-center gap-4 flex-wrap">
+                        <div class="flex items-center border-2 border-gray-200 rounded-full overflow-hidden">
+                            <button type="button" id="qty-minus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">−</button>
+                            <input id="qty-input" type="number" value="1" min="1" max="${book.stockQuantity}"
+                                   class="w-12 text-center text-[15px] font-bold border-none outline-none py-2 bg-transparent" readonly>
+                            <button type="button" id="qty-plus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">+</button>
+                        </div>
+                        <c:choose>
+                            <c:when test="${book.stockQuantity > 0}">
+                                <button type="submit" class="flex-1 bg-secondary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-opacity min-w-[160px]">
+                                    <i data-lucide="shopping-cart" class="w-5 h-5"></i> Thêm vào giỏ
+                                </button>
+                                <button type="button" class="flex-1 border-2 border-primary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all min-w-[160px]">
+                                    <i data-lucide="heart" class="w-5 h-5"></i> Thêm vào yêu thích
+                                </button>
+                            </c:when>
+                            <c:otherwise>
+                                <button type="button" disabled class="flex-1 bg-gray-200 text-gray-400 font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 cursor-not-allowed min-w-[160px]">
+                                    <i data-lucide="x-circle" class="w-5 h-5"></i> Hết hàng
+                                </button>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                </form>
+            </div>
+            <div class="border-y border-gray-200 grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-200 py-6">
+                <div class="flex flex-col gap-1 px-4 first:pl-0">
+                    <span class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Nhà xuất bản</span>
+                    <span class="text-[16px] font-medium text-[#222222]">—</span>
+                </div>
+                <div class="flex flex-col gap-1 px-4">
+                    <span class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Số trang</span>
+                    <span class="text-[16px] font-medium text-[#222222]">
+                        <c:choose>
+                            <c:when test="${book.totalPages > 0}">${book.totalPages} trang</c:when>
+                            <c:otherwise>—</c:otherwise>
+                        </c:choose>
+                    </span>
+                </div>
+                <div class="flex flex-col gap-1 px-4">
+                    <span class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Hình thức</span>
+                    <span class="text-[16px] font-medium text-[#222222]">
+                        <c:choose>
+                            <c:when test="${not empty book.contentName}">${book.contentName}</c:when>
+                            <c:otherwise>—</c:otherwise>
+                        </c:choose>
+                    </span>
+                </div>
+                <div class="flex flex-col gap-1 px-4">
+                    <span class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Mã SKU</span>
+                    <span class="text-[16px] font-medium text-[#222222]">BT-${book.bookID}</span>
+                </div>
+            </div>
+            <c:if test="${not empty book.description}">
+                <div class="flex flex-col gap-3">
+                    <h2 class="section-title-left text-[20px] font-bold text-primary">Mô tả</h2>
+                    <p class="text-[16px] text-gray-500 leading-relaxed line-clamp-5">${book.description}</p>
+                </div>
+            </c:if>
+        </div>
+    </section>
+    <section class="pt-2">
 
-                <!-- Category badges -->
+        <div class="flex items-center justify-between mb-5">
+            <h2 class="section-title-left text-[20px] font-bold text-primary">
+                Đánh giá
+            </h2>
+        </div>
+        <c:choose>
+            <c:when test="${not empty reviews}">
+                <c:forEach items="${reviews}" var="review">
+                    <div class="review-card p-4 mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold">
+                                Customer #${review.customerID}
+                            </span>
+                            <small class="text-gray-500">
+                                ${review.createdAt}
+                            </small>
+                        </div>
+                        <div class="text-yellow-500 mb-2">
+                            <c:forEach begin="1" end="5" var="i">
+                                <c:choose>
+                                    <c:when test="${i <= review.rating}">
+                                        ★
+                                    </c:when>
+                                    <c:otherwise>
+                                        ☆
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:forEach>
+                        </div>
+                        <p class="text-gray-700">
+                            ${review.comment}
+                        </p>
+                    </div>
+                </c:forEach>
+            </c:when>
+            <c:otherwise>
+                <div class="bg-gray-50 border rounded-lg p-4">
+                    Chưa có đánh giá nào.
+                </div>
+            </c:otherwise>
+        </c:choose>
+
+        <div class="mt-8 bg-white border rounded-xl p-6">
+            <h3 class="text-lg font-bold mb-4">
+                Viết đánh giá
+            </h3>
+            <form action="${pageContext.request.contextPath}/review"
+                  method="post">
+
+                <input type="hidden"
+                       name="bookID"
+                       value="${book.bookID}">
+                <input type="hidden"
+                       name="customerID"
+                       value="1">
+                <input type="hidden"
+                       name="orderDetailID"
+                       value="1">
+
+                <div class="mb-4">
+
+                    <label class="font-medium">
+                        Đánh giá
+                    </label>
+
+                    <select name="rating"
+                            class="w-full border rounded p-2 mt-1">
+
+                        <option value="5">★★★★★</option>
+                        <option value="4">★★★★☆</option>
+                        <option value="3">★★★☆☆</option>
+                        <option value="2">★★☆☆☆</option>
+                        <option value="1">★☆☆☆☆</option>
+
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="font-medium">
+                        Nhận xét
+                    </label>
+                    <textarea
+                        name="comment"
+                        rows="4"
+                        required
+                        class="w-full border rounded p-3 mt-1"
+                        placeholder="Nhập đánh giá của bạn..."></textarea>
+                </div>
+                <button
+                    type="submit"
+                    class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700">
+                    Gửi đánh giá
+                </button>
+            </form>
+        </div>
+    </section>
+    <c:if test="${not empty relatedBooks}">
+        <section class="pt-2">
+            <div class="flex items-center justify-between mb-5">
+                <h2 class="section-title-left text-[20px] font-bold text-primary">📚 Bạn cũng có thể thích</h2>
                 <div class="flex gap-2">
-                    <span class="bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Văn Học</span>
-                    <span class="bg-secondary/20 text-yellow-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Bán Chạy</span>
-                </div>
-
-                <!-- Title & Author -->
-                <div>
-                    <h1 class="text-3xl font-black text-primary leading-tight mb-1">The Whispering Library</h1>
-                    <p class="text-gray-500 text-[15px]">Tác giả: <span class="text-on-surface font-semibold hover:text-primary cursor-pointer transition-colors">Eleanor Vance</span></p>
-                </div>
-
-                <!-- Rating -->
-                <div class="flex items-center gap-2.5">
-                    <div class="text-[#FDD835] text-base flex items-center gap-0.5">★★★★★</div>
-                    <span class="text-sm font-semibold text-gray-700">4.8</span>
-                    <span class="text-sm text-gray-400">(1.240 đánh giá)</span>
-                </div>
-
-                <!-- Price -->
-                <div class="flex items-center gap-3">
-                    <span class="text-[32px] font-black text-primary leading-none">166.000 đ</span>
-                    <span class="text-lg text-gray-400 line-through font-normal">200.000 đ</span>
-                    <span class="bg-[#E53935] text-white text-xs font-bold px-2.5 py-1 rounded-full">Tiết kiệm 17%</span>
-                </div>
-
-                <!-- Stock -->
-                <div class="flex items-center gap-2 text-[13px]">
-                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                    <span class="text-gray-600">Còn hàng <span class="font-semibold text-green-600">(131 cuốn / 12 xuất)</span></span>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex gap-3 flex-wrap">
-                    <button class="flex-1 min-w-[180px] bg-secondary text-primary font-bold text-[15px] px-6 py-3.5 rounded-full hover:scale-[1.02] transition-transform flex items-center justify-center gap-2 shadow-md">
-                        <i data-lucide="shopping-cart" class="icon-md"></i> Thêm vào giỏ hàng
+                    <button id="sliderPrev"
+                            class="w-[34px] h-[34px] border border-gray-200 rounded-full flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
                     </button>
-                    <button class="flex-1 min-w-[180px] bg-white text-primary font-bold text-[15px] px-6 py-3.5 rounded-full border-2 border-primary hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2">
-                        <i data-lucide="heart" class="icon-md"></i> Thêm vào yêu thích
+                    <button id="sliderNext"
+                            class="w-[34px] h-[34px] border border-gray-200 rounded-full flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
                     </button>
                 </div>
-
-                <!-- Meta Info -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-gray-100">
-                    <div class="flex flex-col gap-0.5">
-                        <span class="text-[11px] text-gray-400 uppercase tracking-wider font-medium">Nhà xuất bản</span>
-                        <span class="text-[13px] font-semibold text-on-surface">Grand Central</span>
-                    </div>
-                    <div class="flex flex-col gap-0.5">
-                        <span class="text-[11px] text-gray-400 uppercase tracking-wider font-medium">Số trang</span>
-                        <span class="text-[13px] font-semibold text-on-surface">412 trang</span>
-                    </div>
-                    <div class="flex flex-col gap-0.5">
-                        <span class="text-[11px] text-gray-400 uppercase tracking-wider font-medium">Hình thức</span>
-                        <span class="text-[13px] font-semibold text-on-surface">Bìa cứng</span>
-                    </div>
-                    <div class="flex flex-col gap-0.5">
-                        <span class="text-[11px] text-gray-400 uppercase tracking-wider font-medium">Mã sách</span>
-                        <span class="text-[13px] font-semibold text-on-surface">BT-99221</span>
-                    </div>
-                </div>
-
-                <!-- Description -->
-                <div class="pt-4 border-t border-gray-100">
-                    <h3 class="text-[15px] font-bold text-primary mb-3">Mô tả</h3>
-                    <p class="text-[14px] text-gray-600 leading-relaxed">
-                        "Thư Viện Thì Thầm" là câu chuyện phép thuật bí ẩn về một nữ lưu trữ viên tìm thấy khu vực ẩn giấu trong thư viện cổ nhất thế giới. 
-                        Những cuốn sách ở đây không chỉ kể chuyện mà còn đang thực sự sống. Khi ranh giới giữa hiện thực và hư cấu dần lu mờ, cô phải quyết
-                        định liệu bí mật của quá khứ có đáng để đánh đổi bằng tương lai. Một tuyệt tác kể chuyện hiện đại hòa quyện giữa chất văn nên thơ và 
-                        cốt truyện kịch tính.
-                    </p>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- REVIEWS SECTION -->
-    <section class="bg-white rounded-xl shadow-sm p-8 mb-8">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="section-title-border text-xl font-bold text-primary pl-3">Đánh giá</h2>
-            <a href="#" class="text-[13px] text-primary font-medium border border-primary px-3.5 py-1.5 rounded-full hover:bg-primary hover:text-white transition-colors uppercase tracking-tight">Viết nhận xét ✏️</a>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-            <!-- Review 1 -->
-            <div class="bg-[#F9F9F9] rounded-xl p-5 flex flex-col gap-3">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[14px] font-bold text-on-surface">Marcus Thorne</p>
-                        <p class="text-[11px] text-gray-400">93 đánh giá trước</p>
-                    </div>
-                    <div class="text-[#FDD835] text-sm">★★★★★</div>
-                </div>
-                <div>
-                    <p class="text-[13px] font-semibold text-primary mb-1">Không thể rời mắt!</p>
-                    <p class="text-[13px] text-gray-600 leading-relaxed">
-                        Không thể bỏ đọc từ những dòng đầu tiên, truyện gì mà đỉnh quá vậy. Ai là fan của thể loại Fantasy nên thử nha.
-                    </p>
-                </div>
             </div>
 
-            <!-- Review 2 -->
-            <div class="bg-[#F9F9F9] rounded-xl p-5 flex flex-col gap-3">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[14px] font-bold text-on-surface">Sarah J.</p>
-                        <p class="text-[11px] text-gray-400">44 đánh giá trước</p>
+            <div id="relatedSlider" class="slider-track">
+                <c:forEach var="rb" items="${relatedBooks}">
+                    <div class="slider-item prod-card-hover bg-white rounded-xl overflow-hidden flex flex-col">
+                        <a href="${pageContext.request.contextPath}/products?id=${rb.bookID}"
+                           class="relative block bg-[#f0f4ff] aspect-[3/4] overflow-hidden">
+                            <c:choose>
+                                <c:when test="${not empty rb.thumbnail}">
+                                    <img src="${rb.thumbnail}" alt="${rb.title}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="w-full h-full flex items-center justify-center">
+                                        <i data-lucide="book-open" class="w-12 h-12 text-gray-300"></i>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                            <c:if test="${rb.featured}">
+                                <span class="absolute top-2.5 left-2.5 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">🔥 Hot</span>
+                            </c:if>
+                        </a>
+                        <div class="p-3 flex flex-col flex-1 gap-1.5">
+                            <a href="${pageContext.request.contextPath}/products?id=${rb.bookID}"
+                               class="text-[13px] font-bold text-[#222222] line-clamp-2 hover:text-primary transition-colors min-h-[36px]">
+                                ${rb.title}
+                            </a>
+                            <c:if test="${not empty rb.authors}">
+                                <p class="text-[12px] text-gray-400 line-clamp-1">
+                                    <c:forEach var="a" items="${rb.authors}" varStatus="s">
+                                        ${a}<c:if test="${!s.last}">, </c:if>
+                                    </c:forEach>
+                                </p>
+                            </c:if>
+                            <div class="flex items-center gap-1 text-[12px] text-[#FDD835]">
+                                <c:forEach begin="1" end="5" var="i">
+                                    <c:choose>
+                                        <c:when test="${i <= rb.avgRating}">★</c:when>
+                                        <c:otherwise><span class="text-gray-300">★</span></c:otherwise>
+                                    </c:choose>
+                                </c:forEach>
+                                <span class="text-gray-400 text-[11px]">(${rb.reviewCount})</span>
+                            </div>
+                            <p class="text-primary text-[17px] font-bold">
+                                <fmt:formatNumber value="${rb.price}" type="number" groupingUsed="true" />đ
+                            </p>
+                            <a href="${pageContext.request.contextPath}/products?id=${rb.bookID}"
+                               class="mt-auto w-full bg-primary text-white rounded-lg py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors">
+                                <i data-lucide="eye" class="w-4 h-4"></i> XEM NHANH
+                            </a>
+                        </div>
                     </div>
-                    <div class="text-[#FDD835] text-sm">★★★★★</div>
-                </div>
-                <div>
-                    <p class="text-[13px] font-semibold text-primary mb-1">Rất thú vị và xúc động</p>
-                    <p class="text-[13px] text-gray-600 leading-relaxed">
-                        Rất cảm động, tuy về giữa nhịp truyện có chậm đi nhưng phần kết đã làm rất tốt, rất trọn vẹn.
-                    </p>
-                </div>
+                </c:forEach>
             </div>
-
-            <!-- Review 3 -->
-            <div class="bg-[#F9F9F9] rounded-xl p-5 flex flex-col gap-3">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[14px] font-bold text-on-surface">David Wilson</p>
-                        <p class="text-[11px] text-gray-400">201 đánh giá trước</p>
-                    </div>
-                    <div class="text-[#FDD835] text-sm">★★★★★</div>
-                </div>
-                <div>
-                    <p class="text-[13px] font-semibold text-primary mb-1">Ấn bản rất đẹp</p>
-                    <p class="text-[13px] text-gray-600 leading-relaxed">
-                        Chất lượng oke quá nè. Sách cầm nặng đã tay ghê, bìa làm cũng đẹp luôn 10 điểm.
-                    </p>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- RELATED PRODUCTS -->
-    <section class="mb-8">
-        <div class="flex justify-between items-center mb-5">
-            <h2 class="section-title-border text-xl font-bold text-primary pl-3">Bạn cũng có thể thích</h2>
-            <div class="flex gap-2">
-                <button id="relatedPrev" class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-primary hover:text-primary transition-colors cursor-pointer">
-                    <i data-lucide="chevron-left" class="icon-sm"></i>
-                </button>
-                <button id="relatedNext" class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-primary hover:text-primary transition-colors cursor-pointer">
-                    <i data-lucide="chevron-right" class="icon-sm"></i>
-                </button>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-
-            <!-- Related Card 1 -->
-            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
-                <div class="relative aspect-[3/4] bg-[#0d1117] flex items-center justify-center overflow-hidden">
-                    <img alt="The Silent Echo" class="w-full h-full object-cover"
-                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2B7XLtdS0wy7BAE332DkzQUbRUjCucjPE7TUDXTblI-0H9EYtkFVhDetEo41CpskjUGCM0wjW1joZwk6ob3qdina-PJglBbLAyi_AwUpv_g8DPLkt5TSAM-4Ml6b_hBJRVuX7S3ORg60TB69xXxqm7imepXAAmliixlQJdvQndz7N3cJRFB0cdLomr42PqV2er0FhnSNg1q4g94PTFO00fC0zxPAmBV92WYRiyAHF4M3tigIo4-zfcIEiRH6sNAavENUGTVkE88B_">
-                </div>
-                <div class="p-3 flex flex-col flex-1">
-                    <div class="text-[13px] font-medium text-on-surface mb-1 line-clamp-2 min-h-[36px]">
-                        <a class="text-primary hover:underline" href="${pageContext.request.contextPath}/products?id=11">The Silent Echo</a>
-                    </div>
-                    <p class="text-[12px] text-gray-400 mb-2">Julian Reed</p>
-                    <div class="text-primary text-[16px] font-bold mt-auto">134.000 đ</div>
-                </div>
-            </div>
-
-            <!-- Related Card 2 -->
-            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
-                <div class="relative aspect-[3/4] bg-gradient-to-br from-[#1a1a2e] to-[#16213e] flex items-center justify-center overflow-hidden">
-                    <img alt="Paper Shadows" class="w-full h-full object-cover"
-                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwLsWcjspRrX6xou1YHJNPsQZax8Ow9uMwo7cE7lQUeiCjtxIt7dR-E6mXUrhy7L5hAfWsskuKKuKWR3ajaGzJI6DY6zw1tDIiIXwF1Z6cRvjnJOTJqigQCkOJ3kHOd8NZt3fJ-_wDOX6FEohrmlQeKpce0KKB3g3zJg_sCX9Acqa3gM9IgfQRCm7jSFOkD0wMsSWdpZuqn5Ly5Wbrw_qAtZD_RaPSVDGyRRU4awDqlGgbPLsLGiCUkp-9uXQbG9eq4WN6TAgEyyac">
-                </div>
-                <div class="p-3 flex flex-col flex-1">
-                    <div class="text-[13px] font-medium text-on-surface mb-1 line-clamp-2 min-h-[36px]">
-                        <a class="text-primary hover:underline" href="${pageContext.request.contextPath}/products?id=12">Paper Shadows</a>
-                    </div>
-                    <p class="text-[12px] text-gray-400 mb-2">Clara Montiel</p>
-                    <div class="text-primary text-[16px] font-bold mt-auto">200.000 đ</div>
-                </div>
-            </div>
-
-            <!-- Related Card 3 -->
-            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
-                <div class="relative aspect-[3/4] bg-[#f0ebe3] flex items-center justify-center overflow-hidden">
-                    <img alt="Midnight Garden" class="w-full h-full object-cover"
-                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuAG9j4kQQX3LwAqtjK2ecdJoOseBednAJ8JYFJrrDlaSomp3q5vNexOdPpQdhDiatHWHxpBejRVT5kfasO1oenX_CEcg1dx39FzZg0uHKTnuhcOgyWTeZpmVLxUzE95U7QeXmvteoLViggPE7wBbB4M3XopQGJ1PZagoyUf8nQUDewDwuxP7KDNhZpU3x68IOHrprjmCsiU5RndnD4UNirRw2xowDAQ8Dd5r6MbmhUdPENpPdG0_F-uHL3TP0fufXPqrtC-HT3ofbwK">
-                </div>
-                <div class="p-3 flex flex-col flex-1">
-                    <div class="text-[13px] font-medium text-on-surface mb-1 line-clamp-2 min-h-[36px]">
-                        <a class="text-primary hover:underline" href="${pageContext.request.contextPath}/products?id=13">Midnight Garden</a>
-                    </div>
-                    <p class="text-[12px] text-gray-400 mb-2">Thomas Vane</p>
-                    <div class="text-primary text-[16px] font-bold mt-auto">250.000 đ</div>
-                </div>
-            </div>
-
-            <!-- Related Card 4 -->
-            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
-                <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center overflow-hidden">
-                    <img alt="Atomic Habits" class="w-full h-full object-cover"
-                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCQKV1PyUpBNd4gQFmCxXpHplPY2JjHD_OfFMuzmgTMRM1jWI9VC8GjToIujpOtPw8_NXMyY6XPmZrGTsSGJ-na0YCUY2hKGCygjGZkOiqJ_jccfzi5t0f91JHMFH0idrn6G92wSfGkikWHmEvhYjzczmQg-t2gN9bJ2bYCGuVQqKrwQFUnhi5BFCzaL9nRt4XFqkGNFVJV6d4raD1w0fWc_lKS2qKzE9ZaZ6sbgofCFkuSJ00PBJw1KVoX28on8P5BGoFLAotiiVx">
-                </div>
-                <div class="p-3 flex flex-col flex-1">
-                    <div class="text-[13px] font-medium text-on-surface mb-1 line-clamp-2 min-h-[36px]">
-                        <a class="text-primary hover:underline" href="${pageContext.request.contextPath}/products?id=14">Kinh Tế Học Hài Hước</a>
-                    </div>
-                    <p class="text-[12px] text-gray-400 mb-2">Steven D. Levitt</p>
-                    <div class="text-primary text-[16px] font-bold mt-auto">225.000 đ</div>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
+        </section>
+    </c:if>
 </main>
 
 <script>
-    // Thumbnail switcher
-    document.querySelectorAll('.thumbnail-item').forEach(function(thumb) {
-        thumb.addEventListener('click', function() {
-            var img = this.querySelector('img');
-            if (img) {
-                document.getElementById('mainImage').src = img.src;
-            }
-            document.querySelectorAll('.thumbnail-item').forEach(function(t) {
-                t.classList.remove('border-primary');
-                t.classList.add('border-gray-200');
+    (function () {
+        var input = document.getElementById('qty-input');
+        var formQty = document.getElementById('form-qty');
+
+        if (input) {
+            var max = parseInt(input.getAttribute('max')) || 1;
+
+            document.getElementById('qty-minus').addEventListener('click', function () {
+                var v = parseInt(input.value) || 1;
+                if (v > 1) {
+                    input.value = v - 1;
+                    formQty.value = v - 1;
+                }
             });
-            this.classList.remove('border-gray-200');
-            this.classList.add('border-primary');
-        });
-    });
+            document.getElementById('qty-plus').addEventListener('click', function () {
+                var v = parseInt(input.value) || 1;
+                if (v < max) {
+                    input.value = v + 1;
+                    formQty.value = v + 1;
+                }
+            });
+        }
+
+        window.switchImg = function (btn, src) {
+            var main = document.getElementById('mainImage');
+            if (main)
+                main.src = src;
+            document.querySelectorAll('[onclick^="switchImg"]').forEach(function (b) {
+                b.className = b.className.replace('prod-thumb-active', 'prod-thumb-idle');
+            });
+            btn.className = btn.className.replace('prod-thumb-idle', 'prod-thumb-active');
+        };
+
+        var slider = document.getElementById('relatedSlider');
+        var prev = document.getElementById('sliderPrev');
+        var next = document.getElementById('sliderNext');
+        if (slider && prev && next) {
+            var scrollAmt = 280;
+            prev.addEventListener('click', function () {
+                slider.scrollBy({left: -scrollAmt, behavior: 'smooth'});
+            });
+            next.addEventListener('click', function () {
+                slider.scrollBy({left: scrollAmt, behavior: 'smooth'});
+            });
+        }
+    })();
 </script>
 
 <%@ include file="/views/layout/homepage/footer.jsp" %>

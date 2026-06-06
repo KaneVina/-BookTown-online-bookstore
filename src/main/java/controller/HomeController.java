@@ -2,16 +2,14 @@ package controller;
 
 import dao.BookDAO;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import model.Book;
 import java.io.IOException;
 import java.util.List;
+import model.Book;
 
-/**
- * HomeController – trang chủ.
- */
 public class HomeController extends HttpServlet {
 
     private final BookDAO bookDAO = new BookDAO();
