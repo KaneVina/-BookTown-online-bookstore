@@ -55,7 +55,7 @@ public class AccountDetailController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        req.getRequestDispatcher("/views/admin/account-detail.jsp").forward(req, resp);
+        req.getRequestDispatcher("/views/admin/account/account-detail.jsp").forward(req, resp);
     }
 
     /**

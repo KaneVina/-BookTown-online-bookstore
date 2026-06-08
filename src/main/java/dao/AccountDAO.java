@@ -60,7 +60,7 @@ public class AccountDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return new Account(
-                            rs.getInt("customerID"),
+                            rs.getInt("accountID"),
                             rs.getString("fullname"),
                             rs.getString("email"),
                             rs.getString("phone"),

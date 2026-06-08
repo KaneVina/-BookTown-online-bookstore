@@ -98,7 +98,7 @@ public class AccountManagementController extends HttpServlet {
         }
 
         request.getRequestDispatcher(
-                "/views/admin/account-management.jsp")
+                "/views/admin/account/account-management.jsp")
                 .forward(request,response);
     }
 
