@@ -1,85 +1,101 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
+import dao.AccountDAO;
+import dao.CustomerDAO;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import model.Account;
+import model.Customer;
 
-/**
- *
- * @author Trương Trân
- */
 public class AccountDetailController extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet AccountDetailController</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet AccountDetailController at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        req.getRequestDispatcher("/views/admin/account/account-detail.jsp").forward(req, resp);
+
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        Account loginUser = (Account) session.getAttribute("account");
+        if (loginUser == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        // Lấy role và id từ query param
+        // VD: /dashboard/account-detail?role=customer&id=5
+        //     /dashboard/account-detail?role=staff&id=3
+        String role = request.getParameter("role");
+        String idParam = request.getParameter("id");
+
+        if (idParam == null || role == null) {
+            response.sendRedirect(request.getContextPath() + "/dashboard/account-management");
+            return;
+        }
+
+        try {
+            int id = Integer.parseInt(idParam);
+
+            if ("customer".equals(role)) {
+                CustomerDAO customerDAO = new CustomerDAO();
+                Customer customer = customerDAO.getCustomerById(id);
+
+                if (customer == null) {
+                    response.sendRedirect(request.getContextPath() + "/dashboard/account-management");
+                    return;
+                }
+
+                request.setAttribute("targetCustomer", customer);
+                request.setAttribute("targetRole", "customer");
+
+            } else if ("staff".equals(role) || "admin".equals(role)) {
+                // Chỉ admin mới được xem chi tiết staff
+                if (!"admin".equals(loginUser.getRole())) {
+                    response.sendRedirect(request.getContextPath() + "/dashboard/account-management");
+                    return;
+                }
+
+                AccountDAO accountDAO = new AccountDAO();
+                // Tìm staff trong danh sách (dùng getAllStaffs vì chưa có getStaffById)
+                Account staff = accountDAO.getAllStaffs()
+                        .stream()
+                        .filter(a -> a.getId() == id)
+                        .findFirst()
+                        .orElse(null);
+
+                if (staff == null) {
+                    response.sendRedirect(request.getContextPath() + "/dashboard/account-management");
+                    return;
+                }
+
+                request.setAttribute("targetStaff", staff);
+                request.setAttribute("targetRole", role);
+            }
+
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/dashboard/account-management");
+            return;
+        }
+
+        request.getRequestDispatcher("/views/admin/account/account-detail.jsp").forward(request, response);
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        // Xử lý cập nhật thông tin nếu cần sau này
+        doGet(request, response);
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+        return "Account Detail Controller";
+    }
 }
