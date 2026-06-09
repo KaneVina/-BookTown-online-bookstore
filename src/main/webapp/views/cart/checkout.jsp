@@ -11,17 +11,15 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
 
-            <%-- ── Cột trái ── --%>
             <div class="lg:col-span-8 space-y-6">
 
-                <%-- Danh sách sản phẩm --%>
                 <section class="bg-surface rounded-xl style-card border border-outline-variant overflow-hidden">
                     <div class="p-6 border-b border-surface-container flex items-center justify-between">
                         <h2 class="text-[16px] font-bold text-primary flex items-center gap-2">
                             <i data-lucide="shopping-bag"></i>
                             Kiểm tra đơn hàng
                             <span class="text-[13px] font-normal text-on-surface-variant">
-                                (${fn:length(cartItems)} sản phẩm)
+                                (${totalQuantity} sản phẩm)
                             </span>
                         </h2>
                         <a href="${pageContext.request.contextPath}/cart"
@@ -34,7 +32,6 @@
                         <c:forEach var="item" items="${cartItems}">
                             <div class="p-6 flex flex-col sm:flex-row gap-6 hover:bg-surface-variant/20 transition-colors">
 
-                                <%-- Ảnh bìa --%>
                                 <div class="w-24 h-36 bg-surface-container-low flex-shrink-0 rounded-lg overflow-hidden border border-outline-variant">
                                     <c:choose>
                                         <c:when test="${not empty item.thumbnail}">
@@ -50,7 +47,6 @@
                                     </c:choose>
                                 </div>
 
-                                <%-- Thông tin --%>
                                 <div class="flex-grow">
                                     <div class="flex justify-between items-start">
                                         <div>
@@ -82,7 +78,6 @@
                     </div>
                 </section>
 
-                <%-- Địa chỉ giao hàng --%>
                 <section class="bg-surface rounded-xl style-card border border-outline-variant p-6">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-[16px] font-bold text-primary flex items-center gap-2">
@@ -120,7 +115,6 @@
                     </div>
                 </section>
 
-                <%-- Phương thức thanh toán --%>
                 <section class="bg-surface rounded-xl style-card border border-outline-variant p-6">
                     <h2 class="text-[16px] font-bold text-primary flex items-center gap-2 mb-6">
                         <i data-lucide="wallet-cards"></i> Phương thức thanh toán
@@ -155,7 +149,6 @@
 
             </div>
 
-            <%-- ── Cột phải: Tóm tắt ── --%>
             <aside class="lg:col-span-4 sticky top-6">
                 <div class="bg-surface rounded-xl style-card border border-outline-variant p-6">
                     <h2 class="text-[16px] font-black text-primary uppercase border-l-4 border-secondary pl-3 mb-6">
@@ -165,16 +158,10 @@
                     <div class="space-y-3 mb-6">
                         <div class="flex justify-between text-[14px]">
                             <span class="text-on-surface-variant">
-                                Tạm tính (${fn:length(cartItems)} sản phẩm)
+                                Tạm tính (${totalQuantity} sản phẩm)
                             </span>
                             <span class="font-bold">
                                 <fmt:formatNumber value="${subtotal}" type="number" groupingUsed="true"/> đ
-                            </span>
-                        </div>
-                        <div class="flex justify-between text-[14px]">
-                            <span class="text-on-surface-variant">Phí vận chuyển</span>
-                            <span class="font-bold">
-                                <fmt:formatNumber value="${shippingFee}" type="number" groupingUsed="true"/> đ
                             </span>
                         </div>
                         <div class="flex justify-between text-[14px] text-green-600">
@@ -189,7 +176,6 @@
                         </div>
                     </div>
 
-                    <%-- Ô nhập voucher --%>
                     <div class="mb-6">
                         <div class="flex rounded-[4px] overflow-hidden border border-outline-variant">
                             <input id="voucherInput"
@@ -236,7 +222,6 @@
     </main>
 
     <script>
-        /* ── Highlight card địa chỉ khi chọn ── */
         document.querySelectorAll('#addressGroup input[type="radio"]').forEach(function (radio) {
             radio.addEventListener('change', function () {
                 document.querySelectorAll('.address-card').forEach(function (card) {
@@ -249,7 +234,6 @@
             });
         });
 
-        /* ── Highlight card thanh toán khi chọn ── */
         document.querySelectorAll('#paymentGroup input[type="radio"]').forEach(function (radio) {
             radio.addEventListener('change', function () {
                 document.querySelectorAll('.payment-card').forEach(function (card) {

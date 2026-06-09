@@ -1,7 +1,8 @@
 package controller;
 
-import dao.AccountDAO;
 import dao.CartDAO;
+import model.CartItem;
+import dao.AccountDAO;
 import model.Account;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -34,6 +35,16 @@ public class LoginController extends HttpServlet {
             session.setAttribute("account", acc);
             session.setMaxInactiveInterval(30 * 60);
 
+            if ("customer".equals(acc.getRole())) {
+                CartDAO cartDAO = new CartDAO();
+                java.util.List<CartItem> items = cartDAO.getCartItems(acc.getId());
+                int totalQty = 0;
+                for (CartItem item : items) {
+                    totalQty += item.getQuantity();
+                }
+                session.setAttribute("cartCount", totalQty);
+            }
+
             Cookie emailCookie = new Cookie("savedEmail", email);
             emailCookie.setMaxAge(24 * 60 * 60);
             emailCookie.setHttpOnly(true);
@@ -42,9 +53,6 @@ public class LoginController extends HttpServlet {
             if (acc.getRole().equals("admin") || acc.getRole().equals("staff")) {
                 response.sendRedirect(request.getContextPath() + "/admin/dashboard");
             } else {
-                // Set cartCount ngay khi đăng nhập để badge hiển thị đúng liền
-                CartDAO cartDAO = new CartDAO();
-                session.setAttribute("cartCount", cartDAO.countCartItems(acc.getId()));
                 response.sendRedirect(request.getContextPath() + "/home");
             }
         } else {

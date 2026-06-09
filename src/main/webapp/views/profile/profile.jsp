@@ -57,36 +57,33 @@
                             alt="Avatar">
                     </div>
                     <h2 class="mt-4 text-xl font-bold text-center">
-                        ${sessionScope.account.fullname}
+                        ${customer.fullname}
                     </h2>
 
                     <div class="mt-2 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-sm">
-                        ${sessionScope.account.role}
+                        ${customer.role}
                     </div>
 
                 </div>
                 <hr class="my-6">
                 <nav class="space-y-2">
-                    <a href="#profile"
+                    <a href="${pageContext.request.contextPath}/profile?id=${sessionScope.account.id}"
                        class="menu-item menu-active">
-                        <span class="material-symbols-outlined">
-                            person
-                        </span>
+                        <span class="material-symbols-outlined">person</span>
                         Thông tin cá nhân
                     </a>
-                    <a href="#password"
+                    <a href="${pageContext.request.contextPath}/profile/order-history"
+                       class="menu-item">
+                        <span class="material-symbols-outlined">receipt_long</span>
+
+                        Lịch sử đơn hàng
+                    </a>
+                    <a href="${pageContext.request.contextPath}/change-password"
                        class="menu-item">
                         <span class="material-symbols-outlined">
                             lock
                         </span>
                         Đổi mật khẩu
-                    </a>
-                    <a href="${pageContext.request.contextPath}/profile/order-history"
-                       class="menu-item">
-                        <span class="material-symbols-outlined">
-                            lock
-                        </span>
-                        Lịch sử đơn hàng
                     </a>
                     <a href="${pageContext.request.contextPath}/logout"
                        class="menu-item text-red-600">
@@ -99,17 +96,20 @@
             </div>
         </div>
 
-        <!-- CONTENT -->
+        <!--form nhập thông tin và lưu thay đổi-->
         <div class="lg:col-span-3 space-y-6">
-            <c:if test="${not empty message}">
+            <c:if test="${not empty sessionScope.message}">
                 <div class="bg-green-100 text-green-700 p-4 rounded-xl">
-                    ${message}
+                    ${sessionScope.message}
                 </div>
+                <c:remove var="message" scope="session"/>
             </c:if>
-            <c:if test="${not empty error}">
+
+            <c:if test="${not empty sessionScope.error}">
                 <div class="bg-red-100 text-red-700 p-4 rounded-xl">
-                    ${error}
+                    ${sessionScope.error}
                 </div>
+                <c:remove var="error" scope="session"/>
             </c:if>
             <!-- PROFILE -->
             <div id="profile" class="profile-card p-8">
@@ -132,7 +132,7 @@
                             <input
                                 type="text"
                                 name="fullname"
-                                value="${sessionScope.account.fullname}"
+                                value="${customer.fullname}"
                                 required
                                 class="input-style">
                         </div>
@@ -142,7 +142,7 @@
                             </label>
                             <input
                                 type="email"
-                                value="${sessionScope.account.email}"
+                                value="${customer.email}"
                                 disabled
                                 class="input-style bg-gray-100">
                         </div>
@@ -153,19 +153,8 @@
                             <input
                                 type="text"
                                 name="phone"
-                                value="${sessionScope.account.phone}"
+                                value="${customer.phone}"
                                 class="input-style">
-                        </div>
-                        <div>
-                            <label class="block mb-2 font-medium">
-                                Vai trò
-                            </label>
-
-                            <input
-                                type="text"
-                                value="${sessionScope.account.role}"
-                                disabled
-                                class="input-style bg-gray-100">
                         </div>
                         <div>
                             <label class="block mb-2 font-medium">
@@ -173,9 +162,43 @@
                             </label>
                             <input
                                 type="text"
-                                value="${sessionScope.account.status}"
+                                value="${customer.status}"
                                 disabled
                                 class="input-style bg-gray-100">
+                        </div>
+                        <div>
+                            <label class="block mb-2 font-medium">
+                                Giới tính
+                            </label>
+
+                            <select name="gender" class="input-style">
+                                <option value="Male"
+                                        ${customer.gender == 'Male' ? 'selected' : ''}>
+                                    Nam
+                                </option>
+
+                                <option value="Female"
+                                        ${customer.gender == 'Female' ? 'selected' : ''}>
+                                    Nữ
+                                </option>
+
+                                <option value="Other"
+                                        ${customer.gender == 'Other' ? 'selected' : ''}>
+                                    Khác
+                                </option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block mb-2 font-medium">
+                                Ngày sinh
+                            </label>
+
+                            <input
+                                type="date"
+                                name="dob"
+                                value="${customer.dob}"
+                                max="<%= java.time.LocalDate.now()%>"
+                                class="input-style">
                         </div>
                     </div>
                     <div class="mt-8">
@@ -183,58 +206,6 @@
                             type="submit"
                             class="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-xl shadow">
                             Lưu thay đổi
-                        </button>
-                    </div>
-                </form>
-            </div>
-            <!-- PASSWORD -->
-            <div id="password" class="profile-card p-8">
-                <div class="mb-8">
-                    <h1 class="text-3xl font-bold">
-                        Đổi mật khẩu
-                    </h1>
-                    <p class="text-gray-500 mt-2">
-                        Để bảo mật tài khoản, vui lòng không chia sẻ mật khẩu
-                    </p>
-                </div>
-                <form action="${pageContext.request.contextPath}/change-password"
-                      method="post">
-                    <div class="space-y-5">
-                        <div>
-                            <label class="block mb-2 font-medium">
-                                Mật khẩu hiện tại
-                            </label>
-                            <input
-                                type="password"
-                                name="currentPassword"
-                                required
-                                class="input-style">
-                        </div>
-                        <div>
-                            <label class="block mb-2 font-medium">
-                                Mật khẩu mới
-                            </label>
-                            <input
-                                type="password"
-                                name="newPassword"
-                                required
-                                class="input-style">
-                        </div>
-                        <div>
-                            <label class="block mb-2 font-medium">
-                                Xác nhận mật khẩu mới
-                            </label>
-
-                            <input
-                                type="password"
-                                name="confirmPassword"
-                                required
-                                class="input-style">
-                        </div>
-                        <button
-                            type="submit"
-                            class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl shadow">
-                            Cập nhật mật khẩu
                         </button>
                     </div>
                 </form>

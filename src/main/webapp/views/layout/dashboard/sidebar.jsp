@@ -11,6 +11,9 @@
         color: #424752;
         transition: all 0.2s;
     }
+    .text-error {
+        color: #d32f2f;
+    }
 
     .sidebar-link:hover {
         background: #dbf1fe;
@@ -41,45 +44,38 @@
     <nav class="flex-1 space-y-1 mt-4">
 
         <a href="${pageContext.request.contextPath}/admin/dashboard"
-           class="sidebar-link <%= currentPage.contains("dashboard") ? "active" : "" %>">
+           class="sidebar-link <%= currentPage.contains("dashboard") ? "active" : ""%>">
             <span class="material-symbols-outlined mr-3">dashboard</span>
             Bảng điều khiển
         </a>
 
-        <a href="${pageContext.request.contextPath}/customer-order"
-           class="sidebar-link <%= currentPage.contains("customer-order") ? "active" : "" %>">
+        <a href="${pageContext.request.contextPath}/dashboard/customer-order"
+           class="sidebar-link <%= currentPage.contains("customer-order") ? "active" : ""%>">
             <span class="material-symbols-outlined mr-3">shopping_cart</span>
             Đơn hàng
         </a>
 
         <a href="${pageContext.request.contextPath}/admin/products"
-           class="sidebar-link <%= currentPage.contains("products") ? "active" : "" %>">
+           class="sidebar-link <%= currentPage.contains("products") ? "active" : ""%>">
             <span class="material-symbols-outlined mr-3">inventory_2</span>
             Kho hàng
         </a>
 
-        <a href="${pageContext.request.contextPath}/admin/customers"
-           class="sidebar-link <%= currentPage.contains("customers") ? "active" : "" %>">
+        <a href="${pageContext.request.contextPath}/dashboard/account-management"
+           class="sidebar-link <%= currentPage.contains("account-management") ? "active" : ""%>">
             <span class="material-symbols-outlined mr-3">group</span>
-            Khách hàng
+            Tài khoản
+        </a>
+
+        <a href="${pageContext.request.contextPath}/dashboard/review-management"
+           class="sidebar-link <%= currentPage.contains("review-management") ? "active" : ""%>">
+            <span class="material-symbols-outlined mr-3">rate_review</span>
+            đánh giá 
         </a>
 
     </nav>
 
-    <div class="px-4 mb-6">
-        <button class="w-full bg-primary text-white py-3 rounded-lg shadow-sm hover:opacity-90">
-            + Thêm sách mới
-        </button>
-    </div>
-
     <div class="border-t border-outline-variant pt-4 pb-2">
-
-        <a href="${pageContext.request.contextPath}/settings"
-           class="sidebar-link">
-            <span class="material-symbols-outlined mr-3">settings</span>
-            Cài đặt
-        </a>
-
         <a href="${pageContext.request.contextPath}/logout"
            class="sidebar-link text-error">
             <span class="material-symbols-outlined mr-3">logout</span>

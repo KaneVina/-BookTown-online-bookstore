@@ -19,7 +19,6 @@ public class CheckoutController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        // 1. Kiểm tra đăng nhập
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("account") == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
@@ -32,26 +31,24 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-        // 2. Lấy cart items từ DB (tái sử dụng CartDAO có sẵn)
         CartDAO cartDAO = new CartDAO();
-        List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
+        List<CartItem> cartItemList = cartDAO.getCartItems(account.getId());
 
-        // 3. Nếu giỏ trống thì quay về giỏ hàng
-        if (cartItems.isEmpty()) {
+        if (cartItemList.isEmpty()) {
             resp.sendRedirect(req.getContextPath() + "/cart");
             return;
         }
 
-        // 4. Tính tiền (giống CartController)
-        BigDecimal subtotal   = cartDAO.calcSubtotal(cartItems);
-        BigDecimal shippingFee = new BigDecimal("30000");
-        BigDecimal total      = subtotal.add(shippingFee);
+        BigDecimal subtotal = cartDAO.calcSubtotal(cartItemList);
 
-        // 5. Truyền sang JSP
-        req.setAttribute("cartItems",   cartItems);
-        req.setAttribute("subtotal",    subtotal);
-        req.setAttribute("shippingFee", shippingFee);
-        req.setAttribute("total",       total);
+        int totalQuantity = 0;
+        for (CartItem item : cartItemList) {
+            totalQuantity += item.getQuantity();
+        }
+
+        req.setAttribute("cartItems", cartItemList);
+        req.setAttribute("total", subtotal);
+        req.setAttribute("totalQuantity", totalQuantity);
 
         req.getRequestDispatcher("/views/cart/checkout.jsp").forward(req, resp);
     }

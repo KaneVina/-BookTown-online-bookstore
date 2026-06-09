@@ -10,6 +10,7 @@ import model.Account;
 import model.CartItem;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -32,17 +33,16 @@ public class CartController extends HttpServlet {
         }
 
         CartDAO cartDAO = new CartDAO();
-        List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
-        BigDecimal subtotal = cartDAO.calcSubtotal(cartItems);
-        BigDecimal shippingFee = cartItems.isEmpty() ? BigDecimal.ZERO : new BigDecimal("30000");
-        BigDecimal total = subtotal.add(shippingFee);
+        List<CartItem> cartItemList = cartDAO.getCartItems(account.getId());
+        BigDecimal subtotal = cartDAO.calcSubtotal(cartItemList);
+        int totalQuantity = calcTotalQuantity(cartItemList);
 
-        session.setAttribute("cartCount", cartDAO.countCartItems(account.getId()));
+        session.setAttribute("cartCount", totalQuantity);
 
-        req.setAttribute("cartItems", cartItems);
+        req.setAttribute("cartItems", cartItemList);
         req.setAttribute("subtotal", subtotal);
-        req.setAttribute("shippingFee", shippingFee);
-        req.setAttribute("total", total);
+        req.setAttribute("total", subtotal);
+        req.setAttribute("totalQuantity", totalQuantity);
 
         req.getRequestDispatcher("/views/cart/cart.jsp").forward(req, resp);
     }
@@ -52,7 +52,6 @@ public class CartController extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = req.getSession(false);
-
         if (session == null || session.getAttribute("account") == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
@@ -80,7 +79,7 @@ public class CartController extends HttpServlet {
                 handleRemove(req, resp, account);
                 break;
             default:
-                resp.sendRedirect(req.getContextPath() + "/cart");
+                sendJson(resp, "{\"ok\":false,\"message\":\"Action không hợp lệ\"}");
         }
     }
 
@@ -105,12 +104,87 @@ public class CartController extends HttpServlet {
         boolean success = cartDAO.addToCart(account.getId(), bookID, quantity);
 
         if (success) {
-            int newCount = cartDAO.countCartItems(account.getId());
-            req.getSession().setAttribute("cartCount", newCount);
+            List<CartItem> cartItemList = cartDAO.getCartItems(account.getId());
+            req.getSession().setAttribute("cartCount", calcTotalQuantity(cartItemList));
         }
 
         resp.sendRedirect(req.getContextPath() + "/products?id=" + bookID
                 + "&addResult=" + (success ? "success" : "error"));
+    }
+
+    private void handleUpdate(HttpServletRequest req, HttpServletResponse resp, Account account)
+            throws IOException {
+
+        int cartItemID = parseIntParam(req.getParameter("cartItemID"), 0);
+        int newQty = parseIntParam(req.getParameter("quantity"), 1);
+
+        if (cartItemID <= 0) {
+            sendJson(resp, "{\"ok\":false,\"message\":\"Item không hợp lệ\"}");
+            return;
+        }
+
+        CartDAO cartDAO = new CartDAO();
+
+        if (newQty < 1) {
+            cartDAO.removeItem(cartItemID, account.getId());
+        } else {
+            cartDAO.updateQuantity(cartItemID, newQty);
+        }
+
+        List<CartItem> cartItemList = cartDAO.getCartItems(account.getId());
+        BigDecimal subtotal = cartDAO.calcSubtotal(cartItemList);
+        int newCount = calcTotalQuantity(cartItemList);
+
+        req.getSession().setAttribute("cartCount", newCount);
+
+        BigDecimal itemSubtotal = BigDecimal.ZERO;
+        for (CartItem item : cartItemList) {
+            if (item.getCartItemID() == cartItemID) {
+                itemSubtotal = item.getSubtotal();
+                break;
+            }
+        }
+
+        sendJson(resp, "{\"ok\":true"
+                + ",\"cartCount\":" + newCount
+                + ",\"itemSubtotal\":" + itemSubtotal.longValue()
+                + ",\"subtotal\":" + subtotal.longValue()
+                + ",\"total\":" + subtotal.longValue()
+                + "}");
+    }
+
+    private void handleRemove(HttpServletRequest req, HttpServletResponse resp, Account account)
+            throws IOException {
+
+        int cartItemID = parseIntParam(req.getParameter("cartItemID"), 0);
+
+        if (cartItemID <= 0) {
+            sendJson(resp, "{\"ok\":false,\"message\":\"Item không hợp lệ\"}");
+            return;
+        }
+
+        CartDAO cartDAO = new CartDAO();
+        cartDAO.removeItem(cartItemID, account.getId());
+
+        List<CartItem> cartItemList = cartDAO.getCartItems(account.getId());
+        BigDecimal subtotal = cartDAO.calcSubtotal(cartItemList);
+        int newCount = calcTotalQuantity(cartItemList);
+
+        req.getSession().setAttribute("cartCount", newCount);
+
+        sendJson(resp, "{\"ok\":true"
+                + ",\"cartCount\":" + newCount
+                + ",\"subtotal\":" + subtotal.longValue()
+                + ",\"total\":" + subtotal.longValue()
+                + "}");
+    }
+
+    private int calcTotalQuantity(List<CartItem> items) {
+        int total = 0;
+        for (CartItem item : items) {
+            total += item.getQuantity();
+        }
+        return total;
     }
 
     private int parseIntParam(String param, int defaultVal) {
@@ -124,44 +198,10 @@ public class CartController extends HttpServlet {
         }
     }
 
-    private void handleUpdate(HttpServletRequest req, HttpServletResponse resp, Account account)
-            throws IOException {
-
-        int cartItemID = parseIntParam(req.getParameter("cartItemID"), 0);
-        int newQty = parseIntParam(req.getParameter("quantity"), 1);
-
-        if (cartItemID <= 0) {
-            resp.sendRedirect(req.getContextPath() + "/cart");
-            return;
-        }
-
-        CartDAO cartDAO = new CartDAO();
-
-        if (newQty < 1) {
-            cartDAO.removeItem(cartItemID, account.getId());
-        } else {
-            cartDAO.updateQuantity(cartItemID, newQty);
-        }
-
-        int newCount = cartDAO.countCartItems(account.getId());
-        req.getSession().setAttribute("cartCount", newCount);
-
-        resp.sendRedirect(req.getContextPath() + "/cart");
-    }
-
-    private void handleRemove(HttpServletRequest req, HttpServletResponse resp, Account account)
-            throws IOException {
-
-        int cartItemID = parseIntParam(req.getParameter("cartItemID"), 0);
-
-        if (cartItemID > 0) {
-            CartDAO cartDAO = new CartDAO();
-            cartDAO.removeItem(cartItemID, account.getId());
-
-            int newCount = cartDAO.countCartItems(account.getId());
-            req.getSession().setAttribute("cartCount", newCount);
-        }
-
-        resp.sendRedirect(req.getContextPath() + "/cart");
+    private void sendJson(HttpServletResponse resp, String json) throws IOException {
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+        PrintWriter out = resp.getWriter();
+        out.print(json);
     }
 }

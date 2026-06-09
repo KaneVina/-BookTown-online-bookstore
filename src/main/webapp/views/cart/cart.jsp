@@ -10,12 +10,10 @@
 
         <div class="grid grid-cols-12 gap-6">
 
-            <%-- ── Cột trái: danh sách sản phẩm ── --%>
-            <div class="col-span-12 lg:col-span-8 space-y-6">
+            <div class="col-span-12 lg:col-span-8 space-y-6" id="cart-list">
 
                 <c:choose>
                     <c:when test="${empty cartItems}">
-                        <%-- Giỏ trống --%>
                         <div class="flex flex-col items-center justify-center py-20 space-y-6">
                             <span class="material-symbols-outlined text-[64px] text-[#c2c6d4]"><i data-lucide="shopping-cart"></i>  </span>
                             <p class="text-2xl text-[#424752]">Giỏ hàng của bạn đang trống</p>
@@ -27,13 +25,12 @@
                     </c:when>
 
                     <c:otherwise>
-                        <%-- Render từng item --%>
                         <c:forEach var="item" items="${cartItems}">
                             <div class="bg-white rounded-xl p-6 flex flex-col md:flex-row items-center gap-6
                                  transition-transform duration-200 ease-out hover:-translate-y-0.5"
+                                 id="cart-item-${item.cartItemID}"
                                  style="box-shadow: 0 4px 20px rgba(21,101,192,0.08);">
 
-                                <%-- Ảnh bìa --%>
                                 <div class="w-24 h-36 flex-shrink-0 overflow-hidden rounded-lg bg-[#e6f6ff]">
                                     <c:choose>
                                         <c:when test="${not empty item.thumbnail}">
@@ -49,7 +46,6 @@
                                     </c:choose>
                                 </div>
 
-                                <%-- Thông tin sách --%>
                                 <div class="flex-grow space-y-1">
                                     <a href="${pageContext.request.contextPath}/product-detail?id=${item.bookID}">
                                         <h3 class="text-xl font-bold text-[#004d99] hover:underline">${item.title}</h3>
@@ -64,19 +60,20 @@
                                     <div class="flex items-center border border-[#c2c6d4] rounded-lg overflow-hidden bg-[#e6f6ff]">
                                         <button class="px-3 py-1 hover:bg-[#cfe6f2] transition-colors font-bold"
                                                 onclick="updateQty(${item.cartItemID}, ${item.quantity - 1})">−</button>
-                                        <span class="px-4 py-1 text-base border-x border-[#c2c6d4]">${item.quantity}</span>
+                                        <span class="px-4 py-1 text-base border-x border-[#c2c6d4]"
+                                              id="qty-${item.cartItemID}">${item.quantity}</span>
                                         <button class="px-3 py-1 hover:bg-[#cfe6f2] transition-colors font-bold"
                                                 onclick="updateQty(${item.cartItemID}, ${item.quantity + 1})">+</button>
                                     </div>
 
                                     <div class="text-right">
                                         <p class="text-xs text-[#424752]">Tạm tính </p>
-                                        <p class="text-xl font-bold text-[#004d99]">
+                                        <p class="text-xl font-bold text-[#004d99]"
+                                           id="subtotal-item-${item.cartItemID}">
                                             <fmt:formatNumber value="${item.subtotal}" type="number" groupingUsed="true"/> đ
                                         </p>
                                     </div>
 
-                                    <%-- Nút xóa --%>
                                     <button class="text-[#D32F2F] hover:bg-[#ffdad6]/20 p-2 rounded-full transition-all duration-200"
                                             onclick="removeItem(${item.cartItemID})"
                                             title="Xóa khỏi giỏ hàng">
@@ -90,7 +87,6 @@
 
             </div>
 
-            <%-- ── Cột phải: tóm tắt đơn hàng ── --%>
             <div class="col-span-12 lg:col-span-4">
                 <div class="bg-white rounded-xl p-8 sticky top-24 space-y-6"
                      style="box-shadow: 0 4px 20px rgba(21,101,192,0.08);">
@@ -99,15 +95,11 @@
 
                     <div class="space-y-4">
                         <div class="flex justify-between items-center text-base">
-                            <span class="text-[#424752]">Tạm tính (${fn:length(cartItems)} sản phẩm)</span>
-                            <span class="font-semibold">
-                                <fmt:formatNumber value="${subtotal}" type="number" groupingUsed="true"/> đ
+                            <span class="text-[#424752]">Tạm tính
+                                (<span id="item-count">${totalQuantity}</span> sản phẩm)
                             </span>
-                        </div>
-                        <div class="flex justify-between items-center text-base">
-                            <span class="text-[#424752]">Phí vận chuyển</span>
-                            <span class="font-semibold">
-                                <fmt:formatNumber value="${shippingFee}" type="number" groupingUsed="true"/> đ
+                            <span class="font-semibold" id="summary-subtotal">
+                                <fmt:formatNumber value="${subtotal}" type="number" groupingUsed="true"/> đ
                             </span>
                         </div>
                         <div class="flex justify-between items-center text-base text-[#2E7D32]">
@@ -116,7 +108,6 @@
                         </div>
                     </div>
 
-                    <%-- Ô nhập voucher --%>
                     <div class="space-y-3">
                         <label class="block text-sm text-[#424752]">Mã giảm giá</label>
                         <div class="flex gap-2">
@@ -130,28 +121,28 @@
                         </div>
                     </div>
 
-                    <%-- Tổng cộng --%>
                     <div class="border-t border-[#c2c6d4] pt-6">
                         <div class="flex justify-between items-end mb-8">
                             <span class="text-xl font-bold text-[#071e27]">Tổng cộng</span>
                             <div class="text-right">
-                                <p class="text-[#004d99] font-extrabold text-3xl">
+                                <p class="text-[#004d99] font-extrabold text-3xl" id="summary-total">
                                     <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/> đ
                                 </p>
-                                <p class="text-xs text-[#424752]">(Đã bao gồm VAT)</p>
                             </div>
                         </div>
 
-                        <c:if test="${not empty cartItems}">
-                            <a href="${pageContext.request.contextPath}/checkout">
-                                <button class="w-full bg-[#fdd835] hover:bg-[#e8c41d] text-[#705e00] py-4 rounded-xl
-                                        font-bold text-xl shadow-md hover:shadow-lg transition-all duration-200
-                                        flex items-center justify-center gap-3 active:scale-95">
-                                    Thanh toán ngay
-                                    <span class="material-symbols-outlined"><i data-lucide="move-right"></i></span>
-                                </button>
-                            </a>
-                        </c:if>
+                        <div id="checkout-btn-wrap">
+                            <c:if test="${not empty cartItems}">
+                                <a href="${pageContext.request.contextPath}/checkout">
+                                    <button class="w-full bg-[#fdd835] hover:bg-[#e8c41d] text-[#705e00] py-4 rounded-xl
+                                            font-bold text-xl shadow-md hover:shadow-lg transition-all duration-200
+                                            flex items-center justify-center gap-3 active:scale-95">
+                                        Thanh toán ngay
+                                        <span class="material-symbols-outlined"><i data-lucide="move-right"></i></span>
+                                    </button>
+                                </a>
+                            </c:if>
+                        </div>
                     </div>
 
                     <div class="pt-4 flex items-center gap-2 justify-center text-[#424752] text-xs opacity-60">
@@ -165,37 +156,101 @@
     </main>
 
     <script>
+        var CART_URL = '${pageContext.request.contextPath}/cart';
+
+        function formatPrice(amount) {
+            return Number(amount).toLocaleString('vi-VN');
+        }
+
         function updateQty(cartItemID, newQty) {
             if (newQty < 1) {
                 removeItem(cartItemID);
                 return;
             }
-            submitCartForm('update', cartItemID, newQty);
+
+            fetch(CART_URL, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'action=update&cartItemID=' + cartItemID + '&quantity=' + newQty
+            })
+                    .then(function (res) {
+                        return res.json();
+                    })
+                    .then(function (data) {
+                        if (!data.ok) {
+                            alert(data.message || 'Có lỗi xảy ra');
+                            return;
+                        }
+
+                        document.getElementById('qty-' + cartItemID).textContent = newQty;
+                        document.getElementById('subtotal-item-' + cartItemID).textContent
+                                = formatPrice(data.itemSubtotal) + ' đ';
+
+                        var card = document.getElementById('cart-item-' + cartItemID);
+                        var buttonList = card.querySelectorAll('button');
+                        buttonList[0].setAttribute('onclick', 'updateQty(' + cartItemID + ',' + (newQty - 1) + ')');
+                        buttonList[1].setAttribute('onclick', 'updateQty(' + cartItemID + ',' + (newQty + 1) + ')');
+
+                        updateSummary(data);
+                    })
+                    .catch(function (err) {
+                        console.error(err);
+                        alert('Không kết nối được server');
+                    });
         }
 
         function removeItem(cartItemID) {
             if (!confirm('Bạn có chắc muốn xóa sản phẩm này?'))
                 return;
-            submitCartForm('remove', cartItemID, null);
+
+            fetch(CART_URL, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'action=remove&cartItemID=' + cartItemID
+            })
+                    .then(function (res) {
+                        return res.json();
+                    })
+                    .then(function (data) {
+                        if (!data.ok) {
+                            alert(data.message || 'Có lỗi xảy ra');
+                            return;
+                        }
+                        removeRow(cartItemID, data);
+                    })
+                    .catch(function (err) {
+                        console.error(err);
+                        alert('Không kết nối được server');
+                    });
         }
 
-        function submitCartForm(action, cartItemID, quantity) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '${pageContext.request.contextPath}/cart';
-            const addHidden = (name, val) => {
-                const inp = document.createElement('input');
-                inp.type = 'hidden';
-                inp.name = name;
-                inp.value = val;
-                form.appendChild(inp);
-            };
-            addHidden('action', action);
-            addHidden('cartItemID', cartItemID);
-            if (quantity !== null)
-                addHidden('quantity', quantity);
-            document.body.appendChild(form);
-            form.submit();
+        function removeRow(cartItemID, data) {
+            var itemRow = document.getElementById('cart-item-' + cartItemID);
+            if (itemRow)
+                itemRow.remove();
+
+            var remainingCount = document.querySelectorAll('[id^="cart-item-"]').length;
+            if (remainingCount === 0) {
+                document.getElementById('cart-list').innerHTML =
+                        '<div class="flex flex-col items-center justify-center py-20 space-y-6">' +
+                        '<p class="text-2xl text-[#424752]">Giỏ hàng của bạn đang trống</p>' +
+                        '<a href="${pageContext.request.contextPath}/" ' +
+                        'class="bg-[#1565c0] text-white px-8 py-3 rounded-xl font-semibold">Tiếp tục mua sắm</a>' +
+                        '</div>';
+                document.getElementById('checkout-btn-wrap').innerHTML = '';
+            }
+
+            updateSummary(data);
+        }
+
+        function updateSummary(data) {
+            document.getElementById('summary-subtotal').textContent = formatPrice(data.subtotal) + ' đ';
+            document.getElementById('summary-total').textContent = formatPrice(data.total) + ' đ';
+            document.getElementById('item-count').textContent = data.cartCount;
+
+            var badge = document.getElementById('cart-count');
+            if (badge)
+                badge.textContent = data.cartCount;
         }
     </script>
 </body>
