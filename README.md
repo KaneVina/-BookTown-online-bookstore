@@ -51,122 +51,163 @@
 ## ✨ Features
 
 <details>
-<summary><b>🔐 Authentication</b></summary>
+<summary><b>🔐 1. Authentication</b></summary>
 
-| Function | Complexity |
-|----------|------------|
-| Login | Medium |
-| Register | Simple |
-| Logout | Simple |
-| Forgot Password (OTP) | High |
-| Login with Google | High |
-
-</details>
-
-<details>
-<summary><b>👤 Profile Management</b></summary>
-
-| Function | Complexity |
-|----------|------------|
-| View Profile | Simple |
-| Update Personal Info | Simple |
-| Change Password | Simple |
+| UC | Function | Complexity |
+|----|----------|------------|
+| 1.1 | Register | Simple |
+| 1.2 | Login | Medium |
+| 1.3 | Forgot Password | High |
+| 1.4 | Verify OTP | High |
+| 1.5 | Logout | Simple |
+| 1.6 | Login with Google | High |
 
 </details>
 
 <details>
-<summary><b>📚 Book Browsing</b></summary>
+<summary><b>📚 2. Product Management</b></summary>
 
-| Function | Complexity | Notes |
-|----------|------------|-------|
-| View Book List | Simple | With pagination |
-| View Book Detail | Simple | |
-| Search Book | Medium | By title, author, publisher, letter |
-| Filter Book | Medium | |
-| Sort Book | Simple | |
-
-</details>
-
-<details>
-<summary><b>🛒 Cart & Wishlist</b></summary>
-
-| Function | Complexity |
-|----------|------------|
-| Add to Cart | Simple |
-| Update Cart Quantity | Simple |
-| Remove from Cart | Simple |
-| View / Add / Remove Wishlist | Simple |
+| UC | Function | Complexity |
+|----|----------|------------|
+| 2.1 | View Product | Simple |
+| 2.2 | View Product Detail | Simple |
+| 2.3 | View Featured Product | Simple |
+| 2.4 | Filter Product by Category | Medium |
+| 2.5 | Create Product | Medium |
+| 2.6 | Update Product | Medium |
+| 2.7 | Delete Product | Simple |
 
 </details>
 
 <details>
-<summary><b>📦 Order Management</b></summary>
+<summary><b>👤 3. Profile Management</b></summary>
 
-| Function | Complexity | Notes |
-|----------|------------|-------|
-| Create Order | Medium | |
-| View Order Detail | Simple | |
-| View Order History | Simple | |
-| Cancel Order | Medium | |
-| Update Order | Medium | Soft delete |
-| Search Order | Simple | |
+| UC | Function | Complexity |
+|----|----------|------------|
+| 3.1 | View Profile | Simple |
+| 3.2 | Update Profile | Simple |
+| 3.3 | Change Password | Simple |
 
 </details>
 
 <details>
-<summary><b>⭐ Review System</b></summary>
+<summary><b>🛒 4. Cart Management</b></summary>
 
-| Function | Complexity | Notes |
-|----------|------------|-------|
-| Comment Book (CRUD) | Medium | Only after purchase · 1 comment/book · Anti-spam filter |
-
-</details>
-
-<details>
-<summary><b>💳 Payment</b></summary>
-
-| Function | Complexity | Notes |
-|----------|------------|-------|
-| COD (Cash on Delivery) | Low | Available now |
-| Online Payment (MoMo / VNPAY) | High | Planned |
+| UC | Function | Complexity |
+|----|----------|------------|
+| 4.1 | View Product in Cart | Simple |
+| 4.2 | Add Product to Cart | Simple |
+| 4.3 | Remove Product from Cart | Simple |
+| 4.4 | Proceed to Checkout | Medium |
+| 4.5 | Process Payment | High |
+| 4.6 | Update Product in Cart | Simple |
 
 </details>
 
 <details>
-<summary><b>🏪 Admin Panel</b></summary>
+<summary><b>📦 5. Order Management</b></summary>
 
-| Function | Complexity |
-|----------|------------|
-| Manage Books (CRUD) | Medium |
-| Manage Categories | Simple |
-| Manage Authors | Simple |
-| Manage Publishers | Simple |
-| CRUD Stock / Inventory | Medium |
-| Create / Update / Delete Products | Simple |
-| View Featured Products | Simple |
-
-</details>
-
-<details>
-<summary><b>📊 Dashboard & Analytics</b></summary>
-
-| Function | Complexity |
-|----------|------------|
-| Revenue Statistics | Medium |
-| Total Orders Overview | Simple |
-| Total Users Overview | Simple |
+| UC | Function | Complexity |
+|----|----------|------------|
+| 5.1 | View Order History | Simple |
+| 5.2 | View Customer Order Detail | Simple |
+| 5.3 | Cancel Order | Medium |
+| 5.4 | View Customer Order | Simple |
+| 5.5 | Update Status Customer Order | Medium |
+| 5.6 | View Order History Detail | Simple |
 
 </details>
 
 <details>
-<summary><b>📍 Address Management</b></summary>
+<summary><b>👥 6. Account Management</b></summary>
 
-| Function | Complexity |
-|----------|------------|
-| Create Delivery Address | Simple |
-| View Address Detail | Simple |
-| Update Address | Simple |
-| Address List | Medium |
+| UC | Function | Complexity |
+|----|----------|------------|
+| 6.1 | View Account | Simple |
+| 6.2 | View Account Detail | Simple |
+| 6.3 | Search Account by Name | Simple |
+| 6.4 | Filter Account by Role | Simple |
+| 6.5 | Filter Account by Status | Simple |
+| 6.6 | Create Staff Account | Medium |
+| 6.7 | Update Account | Simple |
+
+</details>
+
+<details>
+<summary><b>🏷️ 7. Category Management</b></summary>
+
+| UC | Function | Complexity |
+|----|----------|------------|
+| 7.1 | Create Category | Simple |
+| 7.2 | Update Category | Simple |
+| 7.3 | Delete Category | Simple |
+| 7.4 | View Category | Simple |
+| 7.5 | View Category Detail | Simple |
+| 7.6 | Filter Category | Simple |
+
+</details>
+
+<details>
+<summary><b>📍 8. Address Management</b></summary>
+
+| UC | Function | Complexity |
+|----|----------|------------|
+| 8.1 | Create Address | Simple |
+| 8.2 | View Address List | Simple |
+| 8.3 | Update Address | Simple |
+| 8.4 | Delete Address | Simple |
+| 8.5 | Set Default Address | Simple |
+
+</details>
+
+<details>
+<summary><b>❤️ 9. Wishlist Management</b></summary>
+
+| UC | Function | Complexity |
+|----|----------|------------|
+| 9.1 | View Wishlist | Simple |
+| 9.2 | Add Product to Wishlist | Simple |
+| 9.3 | Remove Product from Wishlist | Simple |
+| 9.4 | Move Wishlist Item to Cart | Simple |
+
+</details>
+
+<details>
+<summary><b>🎟️ 10. Voucher Management</b></summary>
+
+| UC | Function | Complexity |
+|----|----------|------------|
+| 10.1 | View Voucher List | Simple |
+| 10.2 | View Voucher Detail | Simple |
+| 10.3 | Create Voucher | Medium |
+| 10.4 | Update Voucher | Medium |
+| 10.5 | Delete Voucher | Simple |
+| 10.6 | Filter Voucher by Status | Simple |
+| 10.7 | Apply Voucher Code | High |
+
+</details>
+
+<details>
+<summary><b>⭐ 11. Review Management</b></summary>
+
+| UC | Function | Complexity |
+|----|----------|------------|
+| 11.1 | View Review | Simple |
+| 11.2 | Create Review | Medium |
+| 11.3 | Update Review | Medium |
+| 11.4 | Moderate Review | Medium |
+| 11.5 | Reply to Review | Medium |
+
+</details>
+
+<details>
+<summary><b>📊 12. Dashboard</b></summary>
+
+| UC | Function | Complexity |
+|----|----------|------------|
+| 12.1 | View Dashboard | Medium |
+| 12.2 | Filter Dashboard by Date | Medium |
+| 12.3 | Filter Dashboard by Category | Medium |
 
 </details>
 
@@ -178,16 +219,21 @@
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![JSP](https://img.shields.io/badge/JSP-007396?style=for-the-badge&logo=java&logoColor=white)
 
 ### Backend
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
-![Java](https://img.shields.io/badge/Java-007396?style=for-the-badge&logo=java&logoColor=white)
+![Java](https://img.shields.io/badge/Java%2024-007396?style=for-the-badge&logo=java&logoColor=white)
+![Jakarta EE](https://img.shields.io/badge/Jakarta%20EE-F58219?style=for-the-badge&logo=jakartaee&logoColor=white)
+![MVC](https://img.shields.io/badge/Pattern-MVC2-green?style=for-the-badge)
 
 ### Database
 ![SQL Server](https://img.shields.io/badge/SQL%20Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+
+### Environment
+![NetBeans](https://img.shields.io/badge/NetBeans%2025-1B6AC6?style=for-the-badge&logo=apachenetbeanside&logoColor=white)
+![Tomcat](https://img.shields.io/badge/Tomcat%2010.1.4-F8DC75?style=for-the-badge&logo=apachetomcat&logoColor=black)
+![JDK](https://img.shields.io/badge/JDK%2024-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 
 ### DevOps & Tools
 ![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
@@ -205,11 +251,13 @@
 ## 🗺️ System Scope
 
 ### ✅ In-Scope
-- Book management (categories, authors, publishers, languages)
+- Book management (categories, authors, publishers)
 - Shopping cart & order placement
-- COD payment (Online payment planned)
+- COD payment (Online payment planned: MoMo / VNPAY)
 - Order & inventory management
 - Revenue analytics dashboard
+- Voucher & wishlist system
+- Review & rating system
 
 ### 🚫 Out-of-Scope *(Phase 1)*
 - International shipping
@@ -240,6 +288,15 @@ Customer → Self-orders on website (24/7)
 
 ## 🚀 Getting Started
 
+### Prerequisites
+| Tool | Version | Note |
+|------|---------|------|
+| NetBeans | 25 | IDE |
+| JDK | 24 | Bắt buộc |
+| Tomcat | 10.1.4 | Runtime |
+| SQL Server | Latest | Database |
+
+### Setup
 ```bash
 # Clone the repository
 git clone https://github.com/KaneVina/-BookTown-online-bookstore.git
@@ -247,11 +304,10 @@ git clone https://github.com/KaneVina/-BookTown-online-bookstore.git
 # Navigate to project
 cd BookTown-online-bookstore
 
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
+# Open with NetBeans 25
+# Configure Tomcat 10.1.4 in Services
+# Run SQL script in /database folder
+# Build and Run project
 ```
 
 ---
@@ -260,32 +316,37 @@ npm run dev
 
 ```
 BookTown/
-├── 📁 frontend/          # React + Vite UI
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   └── assets/
-├── 📁 backend/           # Node.js / Java API
-│   ├── controllers/
-│   ├── routes/
-│   ├── models/
-│   └── middlewares/
-├── 📁 database/          # SQL schema & seeds
-└── README.md
+├── 📁 src/main/java/
+│   ├── controller/        # Servlets (LoginController, RegisterController, ...)
+│   ├── dao/               # Database Access Objects
+│   ├── model/             # Entity classes (Account, Book, ...)
+│   ├── filter/            # Auth Filter
+│   └── utils/             # DBContext, EmailUtil, HashMD5
+├── 📁 src/main/webapp/
+│   ├── views/
+│   │   ├── auth/          # login.jsp, register.jsp, otp.jsp
+│   │   ├── book/          # index.jsp, detail.jsp
+│   │   └── layout/        # header.jsp, footer.jsp
+│   └── WEB-INF/
+│       └── web.xml
+└── 📁 database/           # SQL schema & seeds
 ```
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Team
 
 <div align="center">
 
-| | |
-|--|--|
-| **Name** | Nguyen Phuc Khang (Kane Nguyen) |
-| **Role** | Frontend Developer & Business Analyst |
-| **University** | FPT University |
-| **Phone** | 0849.324.423 |
+**Supervisor:** Le Thi Thu Lan &nbsp;|&nbsp; **Class:** SE1912
+
+| # | Name | Student ID | Role |
+|---|------|------------|------|
+| 1 | Trương Ngọc Trân | CE180829 | Leader |
+| 2 | Nguyễn Phúc Khang | CE181578 | Member |
+| 3 | Dương Nguyễn Kim Chi | CE191215 | Member |
+| 4 | Trần Lâm Tuấn Khôi | CE190993 | Member |
+| 5 | Ngô Lê Tiến Đạt | CE170010 | Member |
 
 [![Email](https://img.shields.io/badge/Personal%20Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:nutwtskane@gmail.com)
 [![Email](https://img.shields.io/badge/School%20Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:khangnpce181578@fpt.edu.vn)

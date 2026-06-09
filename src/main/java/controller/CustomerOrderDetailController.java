@@ -11,6 +11,6 @@ public class CustomerOrderDetailController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        req.getRequestDispatcher("/views/order/customer-order-detail.jsp").forward(req, resp);
+        req.getRequestDispatcher("/views/staff/customer-order-detail.jsp").forward(req, resp);
     }
 }

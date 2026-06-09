@@ -5,6 +5,16 @@ import jakarta.mail.internet.*;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+
+/**
+ *
+ * @author PHUC KHANG
+ */
+
 public class EmailUtil {
 
     private static final String FROM_EMAIL = "khangnpce181578@fpt.edu.vn";
@@ -36,11 +46,11 @@ public class EmailUtil {
     private static String buildEmailHtml(String otp) {
         return "<div style=\"font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 30px 0;\">"
                 + "  <div style=\"max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e0e0e0;\">"
-                // Phần Header
+                // Header
                 + "    <div style=\"background-color: #134aa4; padding: 20px; text-align: center;\">"
                 + "      <img src=\"https://res.cloudinary.com/dylkbydhg/image/upload/v1780127819/logoBT_1_fyixrl.png\" alt=\"BookTown Logo\" style=\"max-width: 180px; height: auto; display: block; margin: 0 auto;\" />"
                 + "    </div>"
-                // Phần Nội dung chính
+                // Nội dung
                 + "    <div style=\"padding: 30px 40px;\">"
                 + "      <h2 style=\"color: #333333; font-size: 20px; margin-top: 0;\">Xác thực địa chỉ email</h2>"
                 + "      <p style=\"color: #555555; font-size: 15px; line-height: 1.6;\">"
@@ -62,7 +72,7 @@ public class EmailUtil {
                 + "        </p>"
                 + "      </div>"
                 + "    </div>"
-                // Phần Footer
+                // Footer
                 + "    <div style=\"background-color: #f9f9f9; padding: 20px; text-align: center; border-top: 1px solid #eeeeee;\">"
                 + "      <p style=\"color: #999999; font-size: 13px; margin: 0;\">"
                 + "        &copy; 2026 BookTown. Tất cả quyền được bảo lưu."

@@ -80,6 +80,10 @@
         <servlet-name>ReviewManagementController</servlet-name>
         <servlet-class>controller.ReviewManagementController</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>VoucherController</servlet-name>
+        <servlet-class>controller.VoucherController</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginController</servlet-name>
         <url-pattern>/login</url-pattern>
@@ -162,6 +166,10 @@
     <servlet-mapping>
         <servlet-name>ReviewManagementController</servlet-name>
         <url-pattern>/dashboard/review-management</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>VoucherController</servlet-name>
+        <url-pattern>/dashboard/voucher-management</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout> 30 </session-timeout>

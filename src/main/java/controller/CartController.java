@@ -103,13 +103,13 @@ public class CartController extends HttpServlet {
         CartDAO cartDAO = new CartDAO();
         boolean success = cartDAO.addToCart(account.getId(), bookID, quantity);
 
+        int newCount = 0;
         if (success) {
             List<CartItem> cartItemList = cartDAO.getCartItems(account.getId());
-            req.getSession().setAttribute("cartCount", calcTotalQuantity(cartItemList));
+            newCount = calcTotalQuantity(cartItemList);
+            req.getSession().setAttribute("cartCount", newCount);
         }
-
-        resp.sendRedirect(req.getContextPath() + "/products?id=" + bookID
-                + "&addResult=" + (success ? "success" : "error"));
+        sendJson(resp, "{\"ok\":" + success + ",\"cartCount\":" + newCount + "}");
     }
 
     private void handleUpdate(HttpServletRequest req, HttpServletResponse resp, Account account)

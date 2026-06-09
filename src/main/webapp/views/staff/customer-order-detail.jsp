@@ -261,7 +261,6 @@
                         </div>
                     </div>
                     <div class="space-y-gutter">
-                        <!-- Customer Information -->
                         <div class="bg-surface p-6 rounded-xl shadow-[0_4px_20px_rgba(21,101,192,0.08)]">
                             <div class="flex items-center justify-between mb-6">
                                 <h4 class="font-headline-sm text-headline-sm text-on-surface">Khách hàng</h4>
@@ -332,5 +331,7 @@
                 </div>
             </div>
         </main>
+        <script>
+        </script>
     </body>
 </html>

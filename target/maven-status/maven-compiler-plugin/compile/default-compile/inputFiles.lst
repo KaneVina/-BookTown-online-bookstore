@@ -1,10 +1,13 @@
 D:\SWP\BookTown\src\main\java\dao\CustomerDAO.java
 D:\SWP\BookTown\src\main\java\dao\CartDAO.java
 D:\SWP\BookTown\src\main\java\model\Customer.java
+D:\SWP\BookTown\src\main\java\utils\HashMD5.java
 D:\SWP\BookTown\src\main\java\dao\BookDAO.java
 D:\SWP\BookTown\src\main\java\controller\OrderHistoryController.java
 D:\SWP\BookTown\src\main\java\model\Account.java
+D:\SWP\BookTown\src\main\java\model\Voucher.java
 D:\SWP\BookTown\src\main\java\controller\ChangePasswordController.java
+D:\SWP\BookTown\src\main\java\filter\AuthFilter.java
 D:\SWP\BookTown\src\main\java\controller\CreateStaffController.java
 D:\SWP\BookTown\src\main\java\controller\UpdateAccountController.java
 D:\SWP\BookTown\src\main\java\controller\CustomerOrderController.java
@@ -18,6 +21,7 @@ D:\SWP\BookTown\src\main\java\utils\EmailUtil.java
 D:\SWP\BookTown\src\main\java\controller\RegisterController.java
 D:\SWP\BookTown\src\main\java\controller\AccountDetailController.java
 D:\SWP\BookTown\src\main\java\model\CartItem.java
+D:\SWP\BookTown\src\main\java\controller\VoucherController.java
 D:\SWP\BookTown\src\main\java\dao\ReviewDAO.java
 D:\SWP\BookTown\src\main\java\controller\AccountManagementController.java
 D:\SWP\BookTown\src\main\java\controller\ReviewManagementController.java
@@ -26,6 +30,7 @@ D:\SWP\BookTown\src\main\java\model\Book.java
 D:\SWP\BookTown\src\main\java\controller\OtpController.java
 D:\SWP\BookTown\src\main\java\controller\HomeController.java
 D:\SWP\BookTown\src\main\java\utils\DBContext.java
+D:\SWP\BookTown\src\main\java\dao\VoucherDAO.java
 D:\SWP\BookTown\src\main\java\controller\CustomerOrderDetailController.java
 D:\SWP\BookTown\src\main\java\controller\ProductController.java
 D:\SWP\BookTown\src\main\java\controller\LogoutController.java

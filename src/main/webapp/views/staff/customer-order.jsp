@@ -1,7 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
-<html lang="vi"><head>
+<html lang="vi">
+    <head>
         <meta charset="utf-8">
         <meta content="width=device-width, initial-scale=1.0" name="viewport">
         <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -349,4 +350,5 @@
         <script>
 
         </script>
-    </body></html>
+    </body>
+</html>

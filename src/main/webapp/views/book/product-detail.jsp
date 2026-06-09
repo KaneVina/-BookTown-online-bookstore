@@ -154,30 +154,35 @@
                         </c:otherwise>
                     </c:choose>
                 </div>
-                <div class="flex items-center gap-4 flex-wrap">
-                    <div class="flex items-center border-2 border-gray-200 rounded-full overflow-hidden">
-                        <button type="button" id="qty-minus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">−</button>
-                        <input id="qty-input" type="number" value="1" min="1" max="${book.stockQuantity}"
-                               class="w-12 text-center text-[15px] font-bold border-none outline-none py-2 bg-transparent" readonly>
-                        <button type="button" id="qty-plus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">+</button>
+                <form id="add-to-cart-form" method="post" action="${pageContext.request.contextPath}/cart">
+                    <input type="hidden" name="action"   value="add"/>
+                    <input type="hidden" name="bookID"   value="${book.bookID}"/>
+                    <input type="hidden" name="quantity" id="form-qty" value="1"/>
+                    <div class="flex items-center gap-4 flex-wrap">
+                        <div class="flex items-center border-2 border-gray-200 rounded-full overflow-hidden">
+                            <button type="button" id="qty-minus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">−</button>
+                            <input id="qty-input" type="number" value="1" min="1" max="${book.stockQuantity}"
+                                   class="w-12 text-center text-[15px] font-bold border-none outline-none py-2 bg-transparent" readonly>
+                            <button type="button" id="qty-plus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">+</button>
+                        </div>
+                        <c:choose>
+                            <c:when test="${book.stockQuantity > 0}">
+                                <!--                                add to cart-->
+                                <button type="button" id="btn-add-to-cart" class="flex-1 bg-secondary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-opacity min-w-[160px]">
+                                    <i data-lucide="shopping-cart" class="w-5 h-5"></i> Thêm vào giỏ
+                                </button>
+                                <button type="button" class="flex-1 border-2 border-primary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all min-w-[160px]">
+                                    <i data-lucide="heart" class="w-5 h-5"></i> Thêm vào yêu thích
+                                </button>
+                            </c:when>
+                            <c:otherwise>
+                                <button type="button" disabled class="flex-1 bg-gray-200 text-gray-400 font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 cursor-not-allowed min-w-[160px]">
+                                    <i data-lucide="x-circle" class="w-5 h-5"></i> Hết hàng
+                                </button>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
-                    <c:choose>
-                        <c:when test="${book.stockQuantity > 0}">
-                            <button type="button" id="btn-add-cart"
-                                    class="flex-1 bg-secondary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-opacity min-w-[160px]">
-                                <i data-lucide="shopping-cart" class="w-5 h-5"></i> Thêm vào giỏ
-                            </button>
-                            <button type="button" class="flex-1 border-2 border-primary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all min-w-[160px]">
-                                <i data-lucide="heart" class="w-5 h-5"></i> Thêm vào yêu thích
-                            </button>
-                        </c:when>
-                        <c:otherwise>
-                            <button type="button" disabled class="flex-1 bg-gray-200 text-gray-400 font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 cursor-not-allowed min-w-[160px]">
-                                <i data-lucide="x-circle" class="w-5 h-5"></i> Hết hàng
-                            </button>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
+                </form>
             </div>
             <div class="border-y border-gray-200 grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-200 py-6">
                 <div class="flex flex-col gap-1 px-4 first:pl-0">
@@ -384,65 +389,91 @@
 </main>
 
 <script>
-    var CART_URL = '${pageContext.request.contextPath}/cart';
-    var BOOK_ID  = ${book.bookID};
+    (function () {
+        var input = document.getElementById('qty-input');
+        var formQty = document.getElementById('form-qty');
 
-    var qtyInput = document.getElementById('qty-input');
+        if (input) {
+            var max = parseInt(input.getAttribute('max')) || 1;
 
-    // Nút tăng/giảm số lượng
-    document.getElementById('qty-minus').addEventListener('click', function() {
-        var v = parseInt(qtyInput.value) || 1;
-        if (v > 1) qtyInput.value = v - 1;
-    });
-    document.getElementById('qty-plus').addEventListener('click', function() {
-        var v = parseInt(qtyInput.value) || 1;
-        var max = parseInt(qtyInput.getAttribute('max')) || 999;
-        if (v < max) qtyInput.value = v + 1;
-    });
-
-    // Nút thêm vào giỏ (AJAX)
-    var btnAdd = document.getElementById('btn-add-cart');
-    if (btnAdd) {
-        btnAdd.addEventListener('click', function() {
-            var qty = parseInt(qtyInput.value) || 1;
-
-            fetch(CART_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'action=add&bookID=' + BOOK_ID + '&quantity=' + qty,
-                redirect: 'manual'
-            })
-            .then(function(res) {
-                if (res.type === 'opaqueredirect' || res.ok) {
-                    // Cập nhật badge giỏ hàng trên header
-                    var badge = document.getElementById('cart-count');
-                    if (badge) {
-                        badge.textContent = parseInt(badge.textContent || '0') + qty;
-                    }
+            document.getElementById('qty-minus').addEventListener('click', function () {
+                var v = parseInt(input.value) || 1;
+                if (v > 1) {
+                    input.value = v - 1;
+                    formQty.value = v - 1;
                 }
-            })
-            .catch(function() {});
-        });
-    }
+            });
+            document.getElementById('qty-plus').addEventListener('click', function () {
+                var v = parseInt(input.value) || 1;
+                if (v < max) {
+                    input.value = v + 1;
+                    formQty.value = v + 1;
+                }
+            });
+        }
 
-    // Chuyển ảnh thumbnail
-    window.switchImg = function(btn, src) {
-        var main = document.getElementById('mainImage');
-        if (main) main.src = src;
-        document.querySelectorAll('[onclick^="switchImg"]').forEach(function(b) {
-            b.className = b.className.replace('prod-thumb-active', 'prod-thumb-idle');
-        });
-        btn.className = btn.className.replace('prod-thumb-idle', 'prod-thumb-active');
-    };
+        window.switchImg = function (btn, src) {
+            var main = document.getElementById('mainImage');
+            if (main)
+                main.src = src;
+            document.querySelectorAll('[onclick^="switchImg"]').forEach(function (b) {
+                b.className = b.className.replace('prod-thumb-active', 'prod-thumb-idle');
+            });
+            btn.className = btn.className.replace('prod-thumb-idle', 'prod-thumb-active');
+        };
+//add-to-cart
+        var btnAddToCart = document.getElementById('btn-add-to-cart');
+        if (btnAddToCart) {
+            btnAddToCart.addEventListener('click', function () {
+                var cartForm = document.getElementById('add-to-cart-form');
+                var params = new URLSearchParams();
+                params.append('action', cartForm.elements['action'].value);
+                params.append('bookID', cartForm.elements['bookID'].value);
+                params.append('quantity', cartForm.elements['quantity'].value);
+                fetch(cartForm.getAttribute('action'), {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: params.toString()
+                })
+                        .then(function (res) {
+                            if (res.redirected) {
+                                window.location.href = res.url;
+                                return null;
+                            }
+                            return res.json();
+                        })
+                        .then(function (data) {
+                            if (data === null)
+                                return;
+                            if (data.ok) {
+                                var badge = document.getElementById('cart-count');
+                                if (badge)
+                                    badge.textContent = data.cartCount;
+                                alert('Bạn đã thêm vào giỏ hàng thành công!');
+                            } else {
+                                alert(data.message || 'Có lỗi xảy ra');
+                            }
+                        })
+                        .catch(function (err) {
+                            console.error(err);
+                            alert('Không kết nối được server');
+                        });
+            });
+        }
 
-    // Slider sản phẩm liên quan
-    var slider = document.getElementById('relatedSlider');
-    var prev   = document.getElementById('sliderPrev');
-    var next   = document.getElementById('sliderNext');
-    if (slider && prev && next) {
-        prev.addEventListener('click', function() { slider.scrollBy({ left: -280, behavior: 'smooth' }); });
-        next.addEventListener('click', function() { slider.scrollBy({ left:  280, behavior: 'smooth' }); });
-    }
+        var slider = document.getElementById('relatedSlider');
+        var prev = document.getElementById('sliderPrev');
+        var next = document.getElementById('sliderNext');
+        if (slider && prev && next) {
+            var scrollAmt = 280;
+            prev.addEventListener('click', function () {
+                slider.scrollBy({left: -scrollAmt, behavior: 'smooth'});
+            });
+            next.addEventListener('click', function () {
+                slider.scrollBy({left: scrollAmt, behavior: 'smooth'});
+            });
+        }
+    })();
 </script>
 
 <%@ include file="/views/layout/homepage/footer.jsp" %>

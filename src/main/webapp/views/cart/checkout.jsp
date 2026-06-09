@@ -18,9 +18,6 @@
                         <h2 class="text-[16px] font-bold text-primary flex items-center gap-2">
                             <i data-lucide="shopping-bag"></i>
                             Kiểm tra đơn hàng
-                            <span class="text-[13px] font-normal text-on-surface-variant">
-                                (${totalQuantity} sản phẩm)
-                            </span>
                         </h2>
                         <a href="${pageContext.request.contextPath}/cart"
                            class="text-[13px] text-primary hover:underline font-medium">
@@ -90,10 +87,6 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="addressGroup">
                         <label class="address-card relative flex flex-col p-4 border-2 border-primary bg-primary/5 rounded-[10px] cursor-pointer transition-all">
                             <input checked="checked" class="absolute top-4 right-4 text-primary focus:ring-primary h-5 w-5" name="shipping_address" type="radio" value="1"/>
-                            <div class="flex items-center gap-2 mb-2">
-                                <i data-lucide="house"></i>
-                                <span class="text-[13px] font-bold">Nhà riêng</span>
-                            </div>
                             <p class="text-[15px] font-bold mb-1">Nguyễn Văn Tèo</p>
                             <p class="text-[13px] text-on-surface-variant leading-relaxed">
                                 600 Nguyễn Văn Cừ Nối Dài, An Bình, Cần Thơ<br/>
@@ -102,10 +95,6 @@
                         </label>
                         <label class="address-card relative flex flex-col p-4 border-2 border-outline-variant hover:border-primary/50 rounded-[10px] cursor-pointer transition-all">
                             <input class="absolute top-4 right-4 text-primary focus:ring-primary h-5 w-5" name="shipping_address" type="radio" value="2"/>
-                            <div class="flex items-center gap-2 mb-2">
-                                <i data-lucide="briefcase-business"></i>
-                                <span class="text-[13px] font-bold text-on-surface-variant">Văn phòng</span>
-                            </div>
                             <p class="text-[15px] font-bold mb-1">Nguyễn Văn Tí</p>
                             <p class="text-[13px] text-on-surface-variant leading-relaxed">
                                 27 Nguyễn Văn Linh, Tân An, Cần Thơ<br/>
@@ -161,7 +150,7 @@
                                 Tạm tính (${totalQuantity} sản phẩm)
                             </span>
                             <span class="font-bold">
-                                <fmt:formatNumber value="${subtotal}" type="number" groupingUsed="true"/> đ
+                                <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/> đ
                             </span>
                         </div>
                         <div class="flex justify-between text-[14px] text-green-600">

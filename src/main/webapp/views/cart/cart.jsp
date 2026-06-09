@@ -47,7 +47,7 @@
                                 </div>
 
                                 <div class="flex-grow space-y-1">
-                                    <a href="${pageContext.request.contextPath}/product-detail?id=${item.bookID}">
+                                 <a href="${pageContext.request.contextPath}/products?id=${item.bookID}">
                                         <h3 class="text-xl font-bold text-[#004d99] hover:underline">${item.title}</h3>
                                     </a>
                                     <p class="text-sm text-[#424752]">Tác giả: ${item.authorsDisplay}</p>
