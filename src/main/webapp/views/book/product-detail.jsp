@@ -281,21 +281,24 @@
                        value="1">
 
                 <div class="mb-4">
-
-                    <label class="font-medium">
+                    <label class="font-medium block mb-2">
                         Đánh giá
                     </label>
 
-                    <select name="rating"
-                            class="w-full border rounded p-2 mt-1">
+                    <input type="hidden" name="rating" id="ratingValue" value="5">
 
-                        <option value="5">★★★★★</option>
-                        <option value="4">★★★★☆</option>
-                        <option value="3">★★★☆☆</option>
-                        <option value="2">★★☆☆☆</option>
-                        <option value="1">★☆☆☆☆</option>
+                    <div id="ratingStars" class="flex items-center gap-1 text-4xl cursor-pointer">
+                        <span class="star" data-value="1">☆</span>
+                        <span class="star" data-value="2">☆</span>
+                        <span class="star" data-value="3">☆</span>
+                        <span class="star" data-value="4">☆</span>
+                        <span class="star" data-value="5">☆</span>
+                    </div>
 
-                    </select>
+                    <div class="mt-2 text-sm text-gray-500">
+                        Đánh giá:
+                        <span id="ratingText">5</span>/5
+                    </div>
                 </div>
                 <div class="mb-4">
                     <label class="font-medium">
@@ -388,52 +391,47 @@
 </main>
 
 <script>
-    (function () {
-        var input = document.getElementById('qty-input');
-        var formQty = document.getElementById('form-qty');
+const stars = document.querySelectorAll('.star');
+const ratingInput = document.getElementById('ratingValue');
+const ratingText = document.getElementById('ratingText');
 
-        if (input) {
-            var max = parseInt(input.getAttribute('max')) || 1;
+let currentRating = 5;
 
-            document.getElementById('qty-minus').addEventListener('click', function () {
-                var v = parseInt(input.value) || 1;
-                if (v > 1) {
-                    input.value = v - 1;
-                    formQty.value = v - 1;
-                }
-            });
-            document.getElementById('qty-plus').addEventListener('click', function () {
-                var v = parseInt(input.value) || 1;
-                if (v < max) {
-                    input.value = v + 1;
-                    formQty.value = v + 1;
-                }
-            });
+function updateStars(rating) {
+    stars.forEach(star => {
+        if (star.dataset.value <= rating) {
+            star.textContent = '★';
+            star.classList.add('text-yellow-400');
+        } else {
+            star.textContent = '☆';
+            star.classList.remove('text-yellow-400');
         }
+    });
+}
 
-        window.switchImg = function (btn, src) {
-            var main = document.getElementById('mainImage');
-            if (main)
-                main.src = src;
-            document.querySelectorAll('[onclick^="switchImg"]').forEach(function (b) {
-                b.className = b.className.replace('prod-thumb-active', 'prod-thumb-idle');
-            });
-            btn.className = btn.className.replace('prod-thumb-idle', 'prod-thumb-active');
-        };
+updateStars(currentRating);
 
-        var slider = document.getElementById('relatedSlider');
-        var prev = document.getElementById('sliderPrev');
-        var next = document.getElementById('sliderNext');
-        if (slider && prev && next) {
-            var scrollAmt = 280;
-            prev.addEventListener('click', function () {
-                slider.scrollBy({left: -scrollAmt, behavior: 'smooth'});
-            });
-            next.addEventListener('click', function () {
-                slider.scrollBy({left: scrollAmt, behavior: 'smooth'});
-            });
-        }
-    })();
+stars.forEach(star => {
+
+    star.addEventListener('mouseover', () => {
+        updateStars(star.dataset.value);
+    });
+
+    star.addEventListener('click', () => {
+        currentRating = star.dataset.value;
+
+        ratingInput.value = currentRating;
+        ratingText.textContent = currentRating;
+
+        updateStars(currentRating);
+    });
+
+});
+
+document.getElementById('ratingStars')
+    .addEventListener('mouseleave', () => {
+        updateStars(currentRating);
+    });
 </script>
 
 <%@ include file="/views/layout/homepage/footer.jsp" %>
