@@ -40,27 +40,38 @@ public class ProfileController extends HttpServlet {
 
         String idParam = request.getParameter("id");
 
-        if (idParam == null) {
-            response.sendRedirect(request.getContextPath() + "/");
+        if (idParam == null) { response.sendRedirect(request.getContextPath() + "/");
             return;
         }
 
-        int id = Integer.parseInt(idParam);
+        // Trim để loại bỏ khoảng trắng (%20)
+        idParam = idParam.trim();
 
-        // user đang đăng nhập
-        Account loginUser = (Account) session.getAttribute("account");
-
-        // nếu id trên URL khác id của user đăng nhập
-        if (id != loginUser.getId()) {
-
+        // Kiểm tra chỉ cho phép số nguyên dương
+        if (!idParam.matches("^[1-9]\\d*$")) {
             request.getRequestDispatcher("/views/error/404.jsp")
                     .forward(request, response);
+            return;
+        }
 
+        int id;
+        try {
+            id = Integer.parseInt(idParam);
+        } catch (NumberFormatException e) {
+            request.getRequestDispatcher("/views/error/404.jsp")
+                    .forward(request, response);
+            return;
+        }
+
+        Account loginUser = (Account) session.getAttribute("account");
+
+        if (id != loginUser.getId()) {
+            request.getRequestDispatcher("/views/error/404.jsp")
+                    .forward(request, response);
             return;
         }
 
         CustomerDAO dao = new CustomerDAO();
-
         Customer customer = dao.getCustomerById(id);
 
         System.out.println("Customer = " + customer);
@@ -70,9 +81,7 @@ public class ProfileController extends HttpServlet {
         }
 
         request.setAttribute("customer", customer);
-
-        request.getRequestDispatcher("/views/profile/profile.jsp")
-                .forward(request, response);
+        request.getRequestDispatcher("/views/profile/profile.jsp") .forward(request, response);
     }
 
     @Override
@@ -212,10 +221,7 @@ public class ProfileController extends HttpServlet {
             );
         }
 
-        response.sendRedirect(
-                request.getContextPath()
-                + "/profile?id="
-                + acc.getId()
+        response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId()
         );
     }
 }

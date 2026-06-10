@@ -306,7 +306,7 @@
                                                 </c:choose>
                                             </td>
                                             <td class="px-6 py-4 text-right">
-                                                <a href="${pageContext.request.contextPath}/dashboard/update-account?id=${s.id}" class="text-primary">
+                                                <a href="${pageContext.request.contextPath}/dashboard/account-detail" class="text-primary">
                                                     <span class="material-symbols-outlined">edit</span>
                                                 </a>
 

@@ -189,19 +189,28 @@ public class CustomerDAO {
     
     // cập nhật trạng thái của người dùng
     public boolean toggleCustomerStatus(int customerID, String status) {
+
     String sql = "UPDATE Customer SET status = ? WHERE customerID = ?";
 
     try (Connection conn = new DBContext().getConnection();
          PreparedStatement ps = conn.prepareStatement(sql)) {
+
         ps.setString(1, status);
         ps.setInt(2, customerID);
-        return ps.executeUpdate() > 0;
+
+        int rows = ps.executeUpdate();
+
+        System.out.println("customerID = " + customerID);
+        System.out.println("status = " + status);
+        System.out.println("rows = " + rows);
+
+        return rows > 0;
 
     } catch (Exception e) {
         e.printStackTrace();
     }
-        return false;
-    }
+    return false;
+}
 
     // thêm phân trang 
     public int countCustomers() {
