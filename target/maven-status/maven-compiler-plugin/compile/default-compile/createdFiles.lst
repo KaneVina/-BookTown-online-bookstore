@@ -1,7 +1,6 @@
 controller\AccountManagementController.class
 model\CartItem.class
 controller\HomeController.class
-controller\OrderHistoryDetailController.class
 utils\EmailUtil.class
 dao\CustomerDAO.class
 dao\CartDAO.class
@@ -29,7 +28,6 @@ dao\BookDAO.class
 controller\OrderHistoryController.class
 controller\ProductController.class
 controller\ReviewController.class
-controller\CustomerOrderDetailController.class
 utils\EmailUtil$1.class
 model\Book.class
 controller\OtpController.class

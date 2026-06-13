@@ -8,6 +8,7 @@
         <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
         <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/images/logo/logoBT_3.png">
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
         <script id="tailwind-config">
             tailwind.config = {
                 darkMode: "class",

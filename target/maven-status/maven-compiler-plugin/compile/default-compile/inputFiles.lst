@@ -25,13 +25,11 @@ D:\SWP\BookTown\src\main\java\controller\VoucherController.java
 D:\SWP\BookTown\src\main\java\dao\ReviewDAO.java
 D:\SWP\BookTown\src\main\java\controller\AccountManagementController.java
 D:\SWP\BookTown\src\main\java\controller\ReviewManagementController.java
-D:\SWP\BookTown\src\main\java\controller\OrderHistoryDetailController.java
 D:\SWP\BookTown\src\main\java\model\Book.java
 D:\SWP\BookTown\src\main\java\controller\OtpController.java
 D:\SWP\BookTown\src\main\java\controller\HomeController.java
 D:\SWP\BookTown\src\main\java\utils\DBContext.java
 D:\SWP\BookTown\src\main\java\dao\VoucherDAO.java
-D:\SWP\BookTown\src\main\java\controller\CustomerOrderDetailController.java
 D:\SWP\BookTown\src\main\java\controller\ProductController.java
 D:\SWP\BookTown\src\main\java\controller\LogoutController.java
 D:\SWP\BookTown\src\main\java\controller\ProfileController.java
