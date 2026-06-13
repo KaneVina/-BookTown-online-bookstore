@@ -164,25 +164,10 @@
                             </span>
                         </div>
                     </div>
-
-                    <div class="mb-6">
-                        <div class="flex rounded-[4px] overflow-hidden border border-outline-variant">
-                            <input id="voucherInput"
-                                   class="flex-1 bg-surface-container-low border-none px-4 py-2 text-[14px] focus:ring-0"
-                                   placeholder="Mã giảm giá" type="text"/>
-                            <button onclick="applyVoucher()"
-                                    class="bg-secondary text-primary px-4 font-bold text-[13px] hover:opacity-90">
-                                Áp dụng
-                            </button>
-                        </div>
-                        <p id="voucherMsg" class="mt-1 text-[12px] hidden"></p>
-                    </div>
-
                     <button class="w-full bg-secondary text-primary py-3.5 rounded-full font-black text-[15px]
                             shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all
                             flex items-center justify-center gap-2 uppercase tracking-wide">
                         ĐẶT HÀNG NGAY
-                        <i data-lucide="move-right"></i>
                     </button>
 
                     <p class="text-center text-[12px] text-on-surface-variant leading-relaxed mt-3">

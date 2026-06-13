@@ -103,7 +103,6 @@
 
                 <div class="space-y-4">
 
-                    <%-- Đang giao --%>
                     <div class="profile-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div class="flex items-center gap-5">
                             <div class="w-16 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0 border border-gray-200">
@@ -120,8 +119,13 @@
                                 <span class="material-symbols-outlined text-[16px]">local_shipping</span>
                                 Đang giao
                             </span>
+
+                            <button class="px-5 py-2 border border-red-500 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
+                                Hủy đơn hàng
+                            </button>
+
                             <a href="${pageContext.request.contextPath}/profile/order-history-detail">
-                                <button class="px-5 py-1.5 border border-[#17479D] text-[#17479D] rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
+                                <button class="px-5 py-2 border border-[#17479D] text-[#17479D] rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
                                     Chi tiết
                                 </button>
                             </a>
@@ -140,12 +144,17 @@
                             </div>
                         </div>
                         <div class="flex items-center justify-between sm:justify-end gap-4">
-                            <span class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-[16px]">check_circle</span>
-                                Đã hoàn thành
+                            <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px]">local_shipping</span>
+                                Đang giao
                             </span>
+
+                            <button class="px-5 py-2 border border-red-500 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
+                                Hủy đơn hàng
+                            </button>
+
                             <a href="${pageContext.request.contextPath}/profile/order-history-detail">
-                                <button class="px-5 py-1.5 border border-[#17479D] text-[#17479D] rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
+                                <button class="px-5 py-2 border border-[#17479D] text-[#17479D] rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
                                     Chi tiết
                                 </button>
                             </a>
@@ -164,12 +173,17 @@
                             </div>
                         </div>
                         <div class="flex items-center justify-between sm:justify-end gap-4">
-                            <span class="px-3 py-1 bg-red-50 text-red-500 rounded-full text-xs font-medium flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-[16px]">cancel</span>
-                                Đã hủy
+                            <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px]">local_shipping</span>
+                                Đang giao
                             </span>
+
+                            <button class="px-5 py-2 border border-red-500 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
+                                Hủy đơn hàng
+                            </button>
+
                             <a href="${pageContext.request.contextPath}/profile/order-history-detail">
-                                <button class="px-5 py-1.5 border border-[#17479D] text-[#17479D] rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
+                                <button class="px-5 py-2 border border-[#17479D] text-[#17479D] rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
                                     Chi tiết
                                 </button>
                             </a>
@@ -188,12 +202,17 @@
                             </div>
                         </div>
                         <div class="flex items-center justify-between sm:justify-end gap-4">
-                            <span class="px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-xs font-medium flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-[16px]">pending</span>
-                                Chờ xử lý
+                            <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px]">local_shipping</span>
+                                Đang giao
                             </span>
+
+                            <button class="px-5 py-2 border border-red-500 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
+                                Hủy đơn hàng
+                            </button>
+
                             <a href="${pageContext.request.contextPath}/profile/order-history-detail">
-                                <button class="px-5 py-1.5 border border-[#17479D] text-[#17479D] rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
+                                <button class="px-5 py-2 border border-[#17479D] text-[#17479D] rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
                                     Chi tiết
                                 </button>
                             </a>

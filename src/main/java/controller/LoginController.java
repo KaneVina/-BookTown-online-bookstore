@@ -1,8 +1,7 @@
 package controller;
 
-import dao.CartDAO;
-import model.CartItem;
 import dao.AccountDAO;
+import dao.CartDAO;
 import model.Account;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,6 +11,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.List;
+import model.CartItem;
 
 public class LoginController extends HttpServlet {
 
@@ -34,15 +35,15 @@ public class LoginController extends HttpServlet {
             HttpSession session = request.getSession();
             session.setAttribute("account", acc);
             session.setMaxInactiveInterval(30 * 60);
-
             if ("customer".equals(acc.getRole())) {
                 CartDAO cartDAO = new CartDAO();
-                java.util.List<CartItem> items = cartDAO.getCartItems(acc.getId());
-                int totalQty = 0;
+                List<CartItem> items = cartDAO.getCartItems(acc.getId());
+
+                int total = 0;
                 for (CartItem item : items) {
-                    totalQty += item.getQuantity();
+                    total += item.getQuantity();
                 }
-                session.setAttribute("cartCount", totalQty);
+                session.setAttribute("cartCount", total);
             }
 
             Cookie emailCookie = new Cookie("savedEmail", email);

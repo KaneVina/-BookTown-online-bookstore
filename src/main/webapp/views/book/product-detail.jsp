@@ -167,7 +167,6 @@
                         </div>
                         <c:choose>
                             <c:when test="${book.stockQuantity > 0}">
-                                <!--                                add to cart-->
                                 <button type="button" id="btn-add-to-cart" class="flex-1 bg-secondary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-opacity min-w-[160px]">
                                     <i data-lucide="shopping-cart" class="w-5 h-5"></i> Thêm vào giỏ
                                 </button>
@@ -421,45 +420,43 @@
             });
             btn.className = btn.className.replace('prod-thumb-idle', 'prod-thumb-active');
         };
-//add-to-cart
-        var btnAddToCart = document.getElementById('btn-add-to-cart');
-        if (btnAddToCart) {
-            btnAddToCart.addEventListener('click', function () {
-                var cartForm = document.getElementById('add-to-cart-form');
+        // ── Thêm vào giỏ hàng (AJAX) ───────────────────────────────────
+        var btnAdd = document.getElementById('btn-add-to-cart');
+        if (btnAdd) {
+            btnAdd.addEventListener('click', function () {
+                var bookID = document.querySelector('#add-to-cart-form input[name="bookID"]').value;
+                var quantity = document.getElementById('form-qty').value;
+
                 var params = new URLSearchParams();
-                params.append('action', cartForm.elements['action'].value);
-                params.append('bookID', cartForm.elements['bookID'].value);
-                params.append('quantity', cartForm.elements['quantity'].value);
-                fetch(cartForm.getAttribute('action'), {
+                params.append('action', 'add');
+                params.append('bookID', bookID);
+                params.append('quantity', quantity);
+
+                fetch('${pageContext.request.contextPath}/cart', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                     body: params.toString()
                 })
                         .then(function (res) {
-                            if (res.redirected) {
-                                window.location.href = res.url;
-                                return null;
-                            }
                             return res.json();
                         })
                         .then(function (data) {
-                            if (data === null)
-                                return;
                             if (data.ok) {
                                 var badge = document.getElementById('cart-count');
-                                if (badge)
+                                if (badge) {
                                     badge.textContent = data.cartCount;
-                                alert('Bạn đã thêm vào giỏ hàng thành công!');
+                                }
+                                showToast('Thêm vào giỏ hàng thành công!');
                             } else {
-                                alert(data.message || 'Có lỗi xảy ra');
+                                showToast(data.message || 'Thêm vào giỏ hàng thất bại!', true);
                             }
                         })
-                        .catch(function (err) {
-                            console.error(err);
-                            alert('Không kết nối được server');
+                        .catch(function () {
+                            showToast('Lỗi kết nối, vui lòng thử lại!', true);
                         });
             });
         }
+        // ───────────────────────────────────────────────────────────────
 
         var slider = document.getElementById('relatedSlider');
         var prev = document.getElementById('sliderPrev');
@@ -476,4 +473,5 @@
     })();
 </script>
 
+<%@ include file="/views/layout/common/toast.jsp" %>
 <%@ include file="/views/layout/homepage/footer.jsp" %>

@@ -218,7 +218,7 @@
                                     </td>
                                     <td class="px-gutter py-4 text-right">
                                         <div class="flex items-center justify-end gap-2">
-                                            <button class="p-2 bg-surface border border-outline-variant/30 text-primary rounded-lg hover:bg-surface-container-high transition-all active:scale-90" title="Xem chi tiết">
+                                            <button class="p-2 bg-surface border border-outline-variant/30 text-primary rounded-lg hover:bg-surface-container-high transition-all active:scale-90" title="Chỉnh sửa">
                                                 <span class="material-symbols-outlined text-[18px]">edit</span>
                                             </button>
                                             <button class="p-2 bg-surface border border-outline-variant/30 text-primary rounded-lg hover:bg-surface-container-high transition-all active:scale-90" title="Xem chi tiết">

@@ -13,6 +13,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ *
+ * @author Kim Chi
+ */
 public class CheckoutController extends HttpServlet {
 
     @Override
