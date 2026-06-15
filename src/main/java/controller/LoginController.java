@@ -52,7 +52,7 @@ public class LoginController extends HttpServlet {
             response.addCookie(emailCookie);
 
             if (acc.getRole().equals("admin") || acc.getRole().equals("staff")) {
-                response.sendRedirect(request.getContextPath() + "/dashboard");
+                response.sendRedirect(request.getContextPath() + "/dashboard/account-management");
             } else {
                 response.sendRedirect(request.getContextPath() + "/home");
             }

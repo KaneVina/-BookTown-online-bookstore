@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import dao.AccountDAO;
@@ -15,115 +11,97 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Account;
 
-/**
- *
- * @author Trương Trân
- */
 public class AccountManagementController extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet AccountManagementController</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet AccountManagementController at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
-    protected void doGet(HttpServletRequest request,
-            HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-
-        if(session == null){
-            response.sendRedirect(
-                request.getContextPath()+"/login");
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        Account loginUser =
-                (Account) session.getAttribute("account");
+        Account loginUser = (Account) session.getAttribute("account");
+        if (loginUser == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
         CustomerDAO customerDAO = new CustomerDAO();
         AccountDAO accountDAO = new AccountDAO();
 
-        // staff chỉ xem customer
-        if(loginUser.getRole().equals("staff")){
+        int pageSize = 5;
+        int currentPage = 1;
 
-            request.setAttribute(
-                    "customers",
-                    customerDAO.getAllCustomers());
-
+        try {
+            String p = request.getParameter("page");
+            if (p != null) {
+                currentPage = Math.max(1, Integer.parseInt(p));
+            }
+        } catch (Exception e) {
         }
 
-        // admin xem customer + staff
-        else if(loginUser.getRole().equals("admin")){
+        int offset = (currentPage - 1) * pageSize;
 
-            request.setAttribute(
-                    "customers",
-                    customerDAO.getAllCustomers());
+        if (loginUser.getRole().equals("staff")) {
+            int totalRecords = customerDAO.countCustomers();
+            int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
 
-            request.setAttribute(
-                    "staffs",
-                    accountDAO.getAllStaffs());
+            request.setAttribute("customers", customerDAO.getCustomersPaging(offset, pageSize));
+            request.setAttribute("currentPage", currentPage);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("baseUrl", request.getContextPath() + "/dashboard/account-management?");
 
+        } else if (loginUser.getRole().equals("admin")) {
+            int totalRecords = customerDAO.countCustomers() + accountDAO.countStaffs();
+            int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
+
+            request.setAttribute("customers", customerDAO.getCustomersPaging(offset, pageSize));
+            request.setAttribute("staffs", accountDAO.getStaffsPaging(offset, pageSize));
+            request.setAttribute("currentPage", currentPage);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("baseUrl", request.getContextPath() + "/dashboard/account-management?");
         }
 
-        request.getRequestDispatcher(
-                "/views/admin/account/account-management.jsp")
-                .forward(request,response);
+        request.getRequestDispatcher("/views/admin/account/account-management.jsp").forward(request, response);
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+
+        String action = request.getParameter("action");
+        CustomerDAO customerDAO = new CustomerDAO();
+        AccountDAO accountDAO = new AccountDAO();
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        try (PrintWriter out = response.getWriter()) {
+            if ("toggleCustomer".equals(action)) {
+                int customerID = Integer.parseInt(request.getParameter("id"));
+                String status = request.getParameter("status");
+                customerDAO.toggleCustomerStatus(customerID, status);
+
+            } else if ("toggleStaff".equals(action)) {
+                int accountID = Integer.parseInt(request.getParameter("id"));
+                String status = request.getParameter("status");
+                accountDAO.toggleStaffStatus(accountID, status);
+            }
+
+            out.write("{\"success\":true}");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(500);
+            response.getWriter().write("{\"success\":false}");
+        }
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+        return "Account Management Controller";
+    }
 }
