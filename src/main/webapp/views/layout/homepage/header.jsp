@@ -8,6 +8,7 @@
         <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
         <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/images/logo/logoBT_3.png">
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
         <script id="tailwind-config">
             tailwind.config = {
                 darkMode: "class",
@@ -84,7 +85,7 @@
                                        class="flex items-center gap-2 px-4 py-3 hover:bg-blue-50 rounded-t-lg">
                                         <i data-lucide="user" class="w-4 h-4 text-primary"></i> Tài khoản của tôi
                                     </a>
-                                    <a href="${pageContext.request.contextPath}/order"
+                                    <a href="${pageContext.request.contextPath}/profile/order-history"
                                        class="flex items-center gap-2 px-4 py-3 hover:bg-blue-50">
                                         <i data-lucide="package" class="w-4 h-4 text-primary"></i> Đơn hàng
                                     </a>
@@ -109,8 +110,12 @@
                 <a href="${pageContext.request.contextPath}/cart" class="relative flex flex-col items-center text-white text-xs cursor-pointer gap-0.5">
                     <i data-lucide="shopping-cart" class="icon-lg"></i>
                     <span>Giỏ hàng</span>
-                    <span class="absolute -top-1.5 -right-2 bg-secondary text-primary text-[10px] font-bold rounded-full w-[18px] h-[18px] flex items-center justify-center">
-                        ${empty sessionScope.cartCount ? 0 : sessionScope.cartCount}
+                    <span id="cart-count"
+                          class="absolute -top-1.5 -right-2 bg-secondary text-primary text-[10px] font-bold rounded-full w-[18px] h-[18px] flex items-center justify-center">
+                        <c:choose>
+                            <c:when test="${sessionScope.cartCount > 0}">${sessionScope.cartCount}</c:when>
+                            <c:otherwise>0</c:otherwise>
+                        </c:choose>
                     </span>
                 </a>
             </div>

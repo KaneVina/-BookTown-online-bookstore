@@ -149,7 +149,7 @@ public class ProductController extends HttpServlet {
         resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
         req.setAttribute("errorMessage", message);
         req.setAttribute("backUrl", req.getContextPath() + "/products");
-        req.getRequestDispatcher("/views/book/404.jsp").forward(req, resp);
+        req.getRequestDispatcher("/views/error/404.jsp").forward(req, resp);
     }
 
     private int parsePage(String param) {

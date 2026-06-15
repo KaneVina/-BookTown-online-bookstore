@@ -32,15 +32,18 @@
         transition: all 0.2s ease;
         gap: 10px;
     }
+
     .sidebar-link:hover {
         background: #dbf1fe;
         color: #004d99;
     }
+
     .sidebar-link.active {
         background: #cfe6f2;
         color: #004d99;
         font-weight: 700;
     }
+
     .sidebar-link.active .material-symbols-outlined {
         font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
@@ -59,20 +62,23 @@
         z-index: 100;
         overflow: hidden;
     }
+
     .user-popup.open {
         display: block;
         animation: popupIn 0.15s ease;
     }
+
     @keyframes popupIn {
         from {
             opacity: 0;
             transform: translateY(8px);
         }
-        to   {
+        to {
             opacity: 1;
             transform: translateY(0);
         }
     }
+
     .user-popup a {
         display: flex;
         align-items: center;
@@ -83,14 +89,17 @@
         text-decoration: none;
         transition: background 0.15s;
     }
+
     .user-popup a:hover {
         background: #e6f6ff;
         color: #004d99;
     }
+
     .user-popup a.danger:hover {
         background: #ffdad6;
         color: #D32F2F;
     }
+
     .user-popup .divider {
         height: 1px;
         background: #c2c6d4;
@@ -107,6 +116,7 @@
         cursor: pointer;
         transition: background 0.2s;
     }
+
     .user-trigger:hover {
         background: #dbf1fe;
     }
@@ -122,7 +132,7 @@
     </div>
 
     <nav class="flex-1 py-4 space-y-0.5 overflow-y-auto">
-        <!--bảng điều khiển-->
+
         <a href="${pageContext.request.contextPath}/dashboard"
            class="sidebar-link <%= currentPage.contains("dashboard") ? "active" : ""%>">
             <span class="material-symbols-outlined">dashboard</span>
@@ -168,12 +178,15 @@
                 <span class="material-symbols-outlined" style="font-size:18px;">manage_accounts</span>
                 Quản lý tài khoản
             </a>
+
             <div class="divider"></div>
+
             <a href="${pageContext.request.contextPath}/logout" class="danger">
                 <span class="material-symbols-outlined" style="font-size:18px; color:#D32F2F;">logout</span>
                 Đăng xuất
             </a>
         </div>
+
         <div class="user-trigger" id="userTrigger" onclick="toggleUserPopup()">
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-semibold truncate" style="color: #071e27;">
@@ -183,7 +196,10 @@
                     <%= sidebarRole%>
                 </p>
             </div>
-            <span class="material-symbols-outlined text-sm" style="color: #727783; font-size: 18px;" id="userChevron">
+
+            <span class="material-symbols-outlined text-sm"
+                  style="color: #727783; font-size: 18px;"
+                  id="userChevron">
                 expand_less
             </span>
         </div>
@@ -195,14 +211,18 @@
     function toggleUserPopup() {
         const popup = document.getElementById('userPopup');
         const chevron = document.getElementById('userChevron');
+
         popup.classList.toggle('open');
-        chevron.textContent = popup.classList.contains('open') ? 'expand_less' : 'expand_more';
+        chevron.textContent =
+                popup.classList.contains('open')
+                ? 'expand_less'
+                : 'expand_more';
     }
 
-    // Đóng popup khi click ra ngoài
     document.addEventListener('click', function (e) {
         const trigger = document.getElementById('userTrigger');
         const popup = document.getElementById('userPopup');
+
         if (!trigger.contains(e.target) && !popup.contains(e.target)) {
             popup.classList.remove('open');
             document.getElementById('userChevron').textContent = 'expand_more';

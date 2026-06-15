@@ -167,9 +167,20 @@
                         </div>
                         <c:choose>
                             <c:when test="${book.stockQuantity > 0}">
-                                <button type="submit" class="flex-1 bg-secondary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-opacity min-w-[160px]">
-                                    <i data-lucide="shopping-cart" class="w-5 h-5"></i> Thêm vào giỏ
-                                </button>
+                                <c:choose>
+                                    <c:when test="${not empty sessionScope.account and sessionScope.account.role == 'customer'}">
+                                        <button type="button" id="btn-add-to-cart"
+                                                class="flex-1 bg-secondary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-opacity min-w-[160px]">
+                                            <i data-lucide="shopping-cart" class="w-5 h-5"></i> Thêm vào giỏ
+                                        </button>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a href="${pageContext.request.contextPath}/login"
+                                           class="flex-1 bg-secondary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-opacity min-w-[160px]">
+                                            <i data-lucide="shopping-cart" class="w-5 h-5"></i> Thêm vào giỏ
+                                        </a>
+                                    </c:otherwise>
+                                </c:choose>
                                 <button type="button" class="flex-1 border-2 border-primary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all min-w-[160px]">
                                     <i data-lucide="heart" class="w-5 h-5"></i> Thêm vào yêu thích
                                 </button>
@@ -409,7 +420,50 @@ function updateStars(rating) {
     });
 }
 
-updateStars(currentRating);
+        window.switchImg = function (btn, src) {
+            var main = document.getElementById('mainImage');
+            if (main)
+                main.src = src;
+            document.querySelectorAll('[onclick^="switchImg"]').forEach(function (b) {
+                b.className = b.className.replace('prod-thumb-active', 'prod-thumb-idle');
+            });
+            btn.className = btn.className.replace('prod-thumb-idle', 'prod-thumb-active');
+        };
+        var btnAdd = document.getElementById('btn-add-to-cart');
+        if (btnAdd) {
+            btnAdd.addEventListener('click', function () {
+                var bookID = document.querySelector('#add-to-cart-form input[name="bookID"]').value;
+                var quantity = document.getElementById('form-qty').value;
+
+                var params = new URLSearchParams();
+                params.append('action', 'add');
+                params.append('bookID', bookID);
+                params.append('quantity', quantity);
+
+                fetch('${pageContext.request.contextPath}/cart', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: params.toString()
+                })
+                        .then(function (res) {
+                            return res.json();
+                        })
+                        .then(function (data) {
+                            if (data.ok) {
+                                var badge = document.getElementById('cart-count');
+                                if (badge) {
+                                    badge.textContent = data.cartCount;
+                                }
+                                showToast('Thêm vào giỏ hàng thành công!');
+                            } else {
+                                showToast(data.message || 'Thêm vào giỏ hàng thất bại!', true);
+                            }
+                        })
+                        .catch(function () {
+                            showToast('Lỗi kết nối, vui lòng thử lại!', true);
+                        });
+            });
+        }
 
 stars.forEach(star => {
 
@@ -434,4 +488,5 @@ document.getElementById('ratingStars')
     });
 </script>
 
+<%@ include file="/views/layout/common/toast.jsp" %>
 <%@ include file="/views/layout/homepage/footer.jsp" %>
