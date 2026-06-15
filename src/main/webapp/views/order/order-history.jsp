@@ -1,7 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <%@ include file="/views/layout/homepage/header.jsp" %>
+<%@ include file="/views/layout/common/toast.jsp" %>
 
 <style>
     body {
@@ -85,12 +87,6 @@
 
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <h1 class="text-2xl font-bold text-[#17479D]">Lịch sử đơn hàng của tôi</h1>
-                    <div class="relative w-full md:w-72">
-                        <input class="pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-full text-sm w-full
-                               focus:ring-2 focus:ring-[#17479D] focus:border-[#17479D] outline-none transition-all"
-                               placeholder="Tìm kiếm đơn hàng..." type="text"/>
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                    </div>
                 </div>
 
                 <div class="flex overflow-x-auto border-b border-gray-200 gap-8 no-scrollbar px-2">
@@ -103,135 +99,72 @@
 
                 <div class="space-y-4">
 
-                    <div class="profile-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div class="flex items-center gap-5">
-                            <div class="w-16 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0 border border-gray-200">
-                                <img class="w-full h-full object-cover" alt="Book" src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=150"/>
+                    <c:choose>
+                        <c:when test="${empty orders}">
+                            <div class="profile-card p-10 text-center text-gray-500">
+                                Bạn chưa có đơn hàng nào.
                             </div>
-                            <div class="space-y-1">
-                                <p class="text-sm font-semibold text-[#17479D]">#BT-88902</p>
-                                <p class="text-xs text-gray-500">Ngày đặt: 24/10/2023</p>
-                                <p class="text-base font-bold text-gray-900">450.000đ</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between sm:justify-end gap-4">
-                            <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-[16px]">local_shipping</span>
-                                Đang giao
-                            </span>
+                        </c:when>
+                        <c:otherwise>
+                            <c:forEach var="order" items="${orders}">
+                                <div class="profile-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div class="flex items-center gap-5">
+                                        <div class="w-16 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0 border border-gray-200 flex items-center justify-center">
+                                            <span class="material-symbols-outlined text-gray-400 text-3xl">receipt_long</span>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <p class="text-sm font-semibold text-[#17479D]">#BT-${order.orderID}</p>
+                                            <p class="text-xs text-gray-500">
+                                                Ngày đặt:
+                                                <fmt:formatDate value="${order.createdAt}" pattern="dd/MM/yyyy"/>
+                                            </p>
+                                            <p class="text-base font-bold text-gray-900">
+                                                <fmt:formatNumber value="${order.totalPrice}" type="number" groupingUsed="true"/>đ
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between sm:justify-end gap-4">
+                                        <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium flex items-center gap-1.5">
+                                            <span class="material-symbols-outlined text-[16px]">local_shipping</span>
+                                            <c:choose>
+                                                <c:when test="${order.status == 'pending'}">Chờ xác nhận</c:when>
+                                                <c:when test="${order.status == 'confirmed'}">Đã xác nhận</c:when>
+                                                <c:when test="${order.status == 'shipping'}">Đang giao</c:when>
+                                                <c:when test="${order.status == 'completed'}">Hoàn thành</c:when>
+                                                <c:when test="${order.status == 'cancelled'}">Đã hủy</c:when>
+                                                <c:otherwise>${order.status}</c:otherwise>
+                                            </c:choose>
+                                        </span>
 
-                            <button class="px-5 py-2 border border-red-500 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
-                                Hủy đơn hàng
-                            </button>
+                                        <c:if test="${order.status == 'pending'}">
+                                            <form method="POST"
+                                                  action="${pageContext.request.contextPath}/profile/order-history"
+                                                  onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng #BT-${order.orderID}?');">
+                                                <input type="hidden" name="action" value="cancel"/>
+                                                <input type="hidden" name="orderID" value="${order.orderID}"/>
+                                                <button type="submit"
+                                                        class="px-5 py-2 border border-red-500 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
+                                                    Hủy đơn
+                                                </button>
+                                            </form>
+                                        </c:if>
 
-                            <a href="${pageContext.request.contextPath}/profile/order-history-detail">
-                                <button class="px-5 py-2 border border-[#17479D] text-[#17479D] rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
-                                    Chi tiết
-                                </button>
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="profile-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div class="flex items-center gap-5">
-                            <div class="w-16 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0 border border-gray-200">
-                                <img class="w-full h-full object-cover" alt="Book" src="https://images.unsplash.com/photo-1532012197267-da84d127e765?w=150"/>
-                            </div>
-                            <div class="space-y-1">
-                                <p class="text-sm font-semibold text-[#17479D]">#BT-88741</p>
-                                <p class="text-xs text-gray-500">Ngày đặt: 18/10/2023</p>
-                                <p class="text-base font-bold text-gray-900">1.280.000đ</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between sm:justify-end gap-4">
-                            <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-[16px]">local_shipping</span>
-                                Đang giao
-                            </span>
-
-                            <button class="px-5 py-2 border border-red-500 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
-                                Hủy đơn hàng
-                            </button>
-
-                            <a href="${pageContext.request.contextPath}/profile/order-history-detail">
-                                <button class="px-5 py-2 border border-[#17479D] text-[#17479D] rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
-                                    Chi tiết
-                                </button>
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="profile-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div class="flex items-center gap-5">
-                            <div class="w-16 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0 border border-gray-200">
-                                <img class="w-full h-full object-cover" alt="Book" src="https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=150"/>
-                            </div>
-                            <div class="space-y-1">
-                                <p class="text-sm font-semibold text-[#17479D]">#BT-88622</p>
-                                <p class="text-xs text-gray-500">Ngày đặt: 10/10/2023</p>
-                                <p class="text-base font-bold text-gray-900">325.000đ</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between sm:justify-end gap-4">
-                            <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-[16px]">local_shipping</span>
-                                Đang giao
-                            </span>
-
-                            <button class="px-5 py-2 border border-red-500 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
-                                Hủy đơn hàng
-                            </button>
-
-                            <a href="${pageContext.request.contextPath}/profile/order-history-detail">
-                                <button class="px-5 py-2 border border-[#17479D] text-[#17479D] rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
-                                    Chi tiết
-                                </button>
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="profile-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div class="flex items-center gap-5">
-                            <div class="w-16 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0 border border-gray-200">
-                                <img class="w-full h-full object-cover" alt="Book" src="https://images.unsplash.com/photo-1512820790803-83ca734da794?w=150"/>
-                            </div>
-                            <div class="space-y-1">
-                                <p class="text-sm font-semibold text-[#17479D]">#BT-88590</p>
-                                <p class="text-xs text-gray-500">Ngày đặt: 05/10/2023</p>
-                                <p class="text-base font-bold text-gray-900">210.000đ</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between sm:justify-end gap-4">
-                            <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-[16px]">local_shipping</span>
-                                Đang giao
-                            </span>
-
-                            <button class="px-5 py-2 border border-red-500 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
-                                Hủy đơn hàng
-                            </button>
-
-                            <a href="${pageContext.request.contextPath}/profile/order-history-detail">
-                                <button class="px-5 py-2 border border-[#17479D] text-[#17479D] rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
-                                    Chi tiết
-                                </button>
-                            </a>
-                        </div>
-                    </div>
+                                        <a href="${pageContext.request.contextPath}/profile/order-history?action=detail&orderID=${order.orderID}">
+                                            <button class="px-5 py-2 border border-[#17479D] text-[#17479D] rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
+                                                Chi tiết
+                                            </button>
+                                        </a>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </c:otherwise>
+                    </c:choose>
 
                 </div>
 
-                <div class="flex justify-center items-center gap-1.5 pt-4">
-                    <button class="w-9 h-9 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors">
-                        <span class="material-symbols-outlined text-[20px]">chevron_left</span>
-                    </button>
-                    <button class="w-9 h-9 rounded-lg bg-[#17479D] text-white font-semibold text-sm">1</button>
-                    <button class="w-9 h-9 rounded-lg border border-gray-300 flex items-center justify-center text-sm text-gray-600 hover:bg-gray-50 transition-colors">2</button>
-                    <button class="w-9 h-9 rounded-lg border border-gray-300 flex items-center justify-center text-sm text-gray-600 hover:bg-gray-50 transition-colors">3</button>
-                    <button class="w-9 h-9 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors">
-                        <span class="material-symbols-outlined text-[20px]">chevron_right</span>
-                    </button>
-                </div>
+                <c:if test="${not empty orders}">
+                    <%@ include file="/views/layout/common/pagination.jsp" %>
+                </c:if>
 
             </section>
         </div>

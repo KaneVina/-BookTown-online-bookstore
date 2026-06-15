@@ -92,6 +92,7 @@
             </c:choose>
         </div>
 
+        <c:if test="${not empty cartItems}">
         <div class="col-span-12 lg:col-span-4">
             <div class="bg-white rounded-xl p-8 sticky top-24 space-y-6"
                  style="box-shadow: 0 4px 20px rgba(21,101,192,0.08);">
@@ -154,6 +155,7 @@
 
             </div>
         </div>
+        </c:if>
 
     </div>
 </main>
@@ -233,11 +235,14 @@
             if (remaining === 0) {
                 document.getElementById('cart-list').innerHTML =
                     '<div class="flex flex-col items-center justify-center py-20 space-y-6">' +
+                    '<i data-lucide="shopping-cart" class="w-16 h-16 text-[#c2c6d4]"></i>' +
                     '<p class="text-2xl text-[#424752]">Giỏ hàng của bạn đang trống</p>' +
                     '<a href="${pageContext.request.contextPath}/home" ' +
                     'class="bg-[#1565c0] text-white px-8 py-3 rounded-xl font-semibold">Tiếp tục mua sắm</a>' +
                     '</div>';
-                document.getElementById('checkout-btn-wrap').innerHTML = '';
+                var summaryCol = document.querySelector('.lg\\:col-span-4');
+                if (summaryCol) summaryCol.style.display = 'none';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
             }
 
             updateSummary(data);

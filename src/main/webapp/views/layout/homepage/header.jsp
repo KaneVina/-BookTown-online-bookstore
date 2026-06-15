@@ -85,7 +85,7 @@
                                        class="flex items-center gap-2 px-4 py-3 hover:bg-blue-50 rounded-t-lg">
                                         <i data-lucide="user" class="w-4 h-4 text-primary"></i> Tài khoản của tôi
                                     </a>
-                                    <a href="${pageContext.request.contextPath}/order"
+                                    <a href="${pageContext.request.contextPath}/profile/order-history"
                                        class="flex items-center gap-2 px-4 py-3 hover:bg-blue-50">
                                         <i data-lucide="package" class="w-4 h-4 text-primary"></i> Đơn hàng
                                     </a>
