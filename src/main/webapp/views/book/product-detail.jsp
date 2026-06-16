@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <%@ include file="/views/layout/homepage/header.jsp" %>
 
@@ -57,8 +57,14 @@
 
 
 <main class="max-w-[1400px] mx-auto px-8 py-8 flex flex-col gap-8">
+
+    <!-- ══ PRODUCT HERO ══════════════════════════════════════════════════ -->
     <section class="flex flex-col lg:flex-row gap-10">
+
+        <!-- LEFT: Image Gallery -->
         <div class="flex-shrink-0 w-full lg:w-[499px] flex flex-col gap-4">
+
+            <!-- Main image -->
             <div class="bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden aspect-[3/4] flex items-center justify-center relative">
                 <c:choose>
                     <c:when test="${not empty book.thumbnail}">
@@ -78,6 +84,8 @@
                     </div>
                 </c:if>
             </div>
+
+            <!-- Thumbnails row (4 thumbs like Figma) -->
             <c:if test="${not empty book.thumbnail}">
                 <div class="grid grid-cols-4 gap-3">
                     <button onclick="switchImg(this, '${book.thumbnail}')"
@@ -96,7 +104,11 @@
                 </div>
             </c:if>
         </div>
+
+        <!-- RIGHT: Product Info -->
         <div class="flex-1 min-w-0 flex flex-col gap-6">
+
+            <!-- Tags: genre + badges -->
             <div class="flex flex-wrap gap-2">
                 <c:if test="${not empty book.genreName}">
                     <span class="bg-primary/10 text-primary text-[12px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">${book.genreName}</span>
@@ -108,7 +120,11 @@
                     <span class="bg-gray-100 text-gray-600 text-[12px] font-medium px-3 py-1 rounded-full">🌏 ${book.originName}</span>
                 </c:if>
             </div>
+
+            <!-- Title -->
             <h1 class="text-[30px] font-black text-[#222222] leading-tight">${book.title}</h1>
+
+            <!-- Author -->
             <c:if test="${not empty book.authors}">
                 <p class="text-[18px] italic text-gray-500">
                     Tác giả:
@@ -117,6 +133,8 @@
                     </c:forEach>
                 </p>
             </c:if>
+
+            <!-- Rating row -->
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-0.5 text-[#FDD835] text-[14px]">
                     <c:set var="rating" value="${book.avgRating}" />
@@ -132,12 +150,17 @@
                 </span>
             </div>
 
+            <!-- Price card -->
             <div class="bg-white border border-gray-200 shadow-sm rounded-xl px-6 pt-10 pb-6 flex flex-col gap-6">
+
+                <!-- Price row -->
                 <div class="flex items-end gap-3">
                     <span class="text-[30px] font-bold text-primary leading-none">
                         <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true" />đ
                     </span>
                 </div>
+
+                <!-- Stock status -->
                 <div class="flex items-center gap-2 text-[14px] font-medium">
                     <c:choose>
                         <c:when test="${book.stockQuantity > 0}">
@@ -154,19 +177,26 @@
                         </c:otherwise>
                     </c:choose>
                 </div>
-                <form id="add-to-cart-form" method="post" action="${pageContext.request.contextPath}/cart">
-                    <input type="hidden" name="action"   value="add"/>
-                    <input type="hidden" name="bookID"   value="${book.bookID}"/>
-                    <input type="hidden" name="quantity" id="form-qty" value="1"/>
-                    <div class="flex items-center gap-4 flex-wrap">
-                        <div class="flex items-center border-2 border-gray-200 rounded-full overflow-hidden">
-                            <button type="button" id="qty-minus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">−</button>
-                            <input id="qty-input" type="number" value="1" min="1" max="${book.stockQuantity}"
-                                   class="w-12 text-center text-[15px] font-bold border-none outline-none py-2 bg-transparent" readonly>
-                            <button type="button" id="qty-plus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">+</button>
-                        </div>
+
+                <!-- Qty + CTA buttons (Figma: yellow pill + outlined pill) -->
+                <div class="flex items-center gap-4 flex-wrap">
+                    <form action="${pageContext.request.contextPath}/cart" method="POST" class="flex items-center gap-4 flex-wrap flex-1">
+                        <input type="hidden" name="action" value="add" />
+                        <input type="hidden" name="bookID" value="${book.bookID}" />
+                        <input type="hidden" name="redirect" value="${pageContext.request.contextPath}/products?id=${book.bookID}" />
+
+                        <c:if test="${book.stockQuantity > 0}">
+                            <div class="flex items-center border-2 border-gray-200 rounded-full overflow-hidden">
+                                <button type="button" id="qty-minus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">−</button>
+                                <input id="qty-input" name="quantity" type="number" value="1" min="1" max="${book.stockQuantity}"
+                                       class="w-12 text-center text-[15px] font-bold border-none outline-none py-2 bg-transparent" readonly>
+                                <button type="button" id="qty-plus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">+</button>
+                            </div>
+                        </c:if>
+
                         <c:choose>
                             <c:when test="${book.stockQuantity > 0}">
+<<<<<<< HEAD
                                 <c:choose>
                                     <c:when test="${not empty sessionScope.account and sessionScope.account.role == 'customer'}">
                                         <button type="button" id="btn-add-to-cart"
@@ -183,6 +213,10 @@
                                 </c:choose>
                                 <button type="button" class="flex-1 border-2 border-primary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all min-w-[160px]">
                                     <i data-lucide="heart" class="w-5 h-5"></i> Thêm vào yêu thích
+=======
+                                <button type="submit" class="flex-1 bg-secondary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-opacity min-w-[160px]">
+                                    <i data-lucide="shopping-cart" class="w-5 h-5"></i> Thêm vào giỏ
+>>>>>>> 2e3ec42 (feat: update wish features)
                                 </button>
                             </c:when>
                             <c:otherwise>
@@ -191,9 +225,34 @@
                                 </button>
                             </c:otherwise>
                         </c:choose>
-                    </div>
-                </form>
+                    </form>
+
+                    <c:choose>
+                        <c:when test="${isInWishlist}">
+                            <form action="${pageContext.request.contextPath}/wishlist" method="POST" class="flex-1 min-w-[160px]">
+                                <input type="hidden" name="action" value="remove" />
+                                <input type="hidden" name="bookID" value="${book.bookID}" />
+                                <input type="hidden" name="redirect" value="${pageContext.request.contextPath}/products?id=${book.bookID}" />
+                                <button type="submit" class="w-full bg-red-50 border-2 border-red-500 text-red-500 font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-red-500 hover:text-white transition-all">
+                                    <i data-lucide="heart" class="w-5 h-5 fill-current"></i> Đã thích
+                                </button>
+                            </form>
+                        </c:when>
+                        <c:otherwise>
+                            <form action="${pageContext.request.contextPath}/wishlist" method="POST" class="flex-1 min-w-[160px]">
+                                <input type="hidden" name="action" value="add" />
+                                <input type="hidden" name="bookID" value="${book.bookID}" />
+                                <input type="hidden" name="redirect" value="${pageContext.request.contextPath}/products?id=${book.bookID}" />
+                                <button type="submit" class="w-full border-2 border-primary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all">
+                                    <i data-lucide="heart" class="w-5 h-5"></i> Yêu thích
+                                </button>
+                            </form>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
             </div>
+
+            <!-- Specs grid (Figma: 4 columns — NXB / Số trang / Hình thức / Mã SKU) -->
             <div class="border-y border-gray-200 grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-200 py-6">
                 <div class="flex flex-col gap-1 px-4 first:pl-0">
                     <span class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Nhà xuất bản</span>
@@ -222,57 +281,51 @@
                     <span class="text-[16px] font-medium text-[#222222]">BT-${book.bookID}</span>
                 </div>
             </div>
+
+            <!-- Description (inline, below specs — as in Figma right panel) -->
             <c:if test="${not empty book.description}">
                 <div class="flex flex-col gap-3">
                     <h2 class="section-title-left text-[20px] font-bold text-primary">Mô tả</h2>
                     <p class="text-[16px] text-gray-500 leading-relaxed line-clamp-5">${book.description}</p>
                 </div>
             </c:if>
+
         </div>
     </section>
-    <section class="pt-2">
 
+    <!-- ══ REVIEWS ════════════════════════════════════════════════════════ -->
+    <section class="pt-2">
         <div class="flex items-center justify-between mb-5">
-            <h2 class="section-title-left text-[20px] font-bold text-primary">
-                Đánh giá
-            </h2>
+            <h2 class="section-title-left text-[20px] font-bold text-primary">Đánh giá</h2>
+            <a href="#" class="flex items-center gap-1 text-[16px] font-bold text-primary hover:underline">
+                Viết nhận xét <i data-lucide="chevron-right" class="w-3 h-3"></i>
+            </a>
         </div>
+
         <c:choose>
-            <c:when test="${not empty reviews}">
-                <c:forEach items="${reviews}" var="review">
-                    <div class="review-card p-4 mb-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold">
-                                Customer #${review.customerID}
-                            </span>
-                            <small class="text-gray-500">
-                                ${review.createdAt}
-                            </small>
+            <c:when test="${book.reviewCount > 0}">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <%-- Placeholder review cards — replace with actual review list from controller --%>
+                    <div class="review-card p-6 flex flex-col gap-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-bold text-[16px] text-[#222222]">Độc giả</p>
+                                <p class="text-[11px] font-medium text-green-700 uppercase tracking-wide">Đã mua hàng</p>
+                            </div>
+                            <div class="flex text-[#FDD835] text-[13px]">★★★★★</div>
                         </div>
-                        <div class="text-yellow-500 mb-2">
-                            <c:forEach begin="1" end="5" var="i">
-                                <c:choose>
-                                    <c:when test="${i <= review.rating}">
-                                        ★
-                                    </c:when>
-                                    <c:otherwise>
-                                        ☆
-                                    </c:otherwise>
-                                </c:choose>
-                            </c:forEach>
-                        </div>
-                        <p class="text-gray-700">
-                            ${review.comment}
-                        </p>
+                        <h3 class="font-bold text-[16px] text-[#222222] pt-2">Rất hay!</h3>
+                        <p class="text-[14px] text-gray-500 leading-relaxed">Cuốn sách rất hay và bổ ích. Giao hàng nhanh, sách đẹp như mô tả.</p>
                     </div>
-                </c:forEach>
+                </div>
             </c:when>
             <c:otherwise>
-                <div class="bg-gray-50 border rounded-lg p-4">
-                    Chưa có đánh giá nào.
+                <div class="bg-white border border-gray-100 rounded-xl p-10 text-center text-gray-400 text-[14px]">
+                    Chưa có đánh giá nào. Hãy là người đầu tiên nhận xét!
                 </div>
             </c:otherwise>
         </c:choose>
+<<<<<<< HEAD
 
         <div class="mt-8 bg-white border rounded-xl p-6">
             <h3 class="text-lg font-bold mb-4">
@@ -329,7 +382,11 @@
                 </button>
             </form>
         </div>
+=======
+>>>>>>> 2e3ec42 (feat: update wish features)
     </section>
+
+    <!-- ══ RELATED BOOKS ══════════════════════════════════════════════════ -->
     <c:if test="${not empty relatedBooks}">
         <section class="pt-2">
             <div class="flex items-center justify-between mb-5">
@@ -349,6 +406,7 @@
             <div id="relatedSlider" class="slider-track">
                 <c:forEach var="rb" items="${relatedBooks}">
                     <div class="slider-item prod-card-hover bg-white rounded-xl overflow-hidden flex flex-col">
+                        <!-- Book cover -->
                         <a href="${pageContext.request.contextPath}/products?id=${rb.bookID}"
                            class="relative block bg-[#f0f4ff] aspect-[3/4] overflow-hidden">
                             <c:choose>
@@ -365,6 +423,8 @@
                                 <span class="absolute top-2.5 left-2.5 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">🔥 Hot</span>
                             </c:if>
                         </a>
+
+                        <!-- Info -->
                         <div class="p-3 flex flex-col flex-1 gap-1.5">
                             <a href="${pageContext.request.contextPath}/products?id=${rb.bookID}"
                                class="text-[13px] font-bold text-[#222222] line-clamp-2 hover:text-primary transition-colors min-h-[36px]">
@@ -399,9 +459,11 @@
             </div>
         </section>
     </c:if>
+
 </main>
 
 <script>
+
 const stars = document.querySelectorAll('.star');
 const ratingInput = document.getElementById('ratingValue');
 const ratingText = document.getElementById('ratingText');
@@ -416,10 +478,28 @@ function updateStars(rating) {
         } else {
             star.textContent = '☆';
             star.classList.remove('text-yellow-400');
+
+    (function () {
+        // Qty +/-
+        var input = document.getElementById('qty-input');
+        if (input) {
+            var max = parseInt(input.getAttribute('max')) || 1;
+            document.getElementById('qty-minus').addEventListener('click', function () {
+                var v = parseInt(input.value) || 1;
+                if (v > 1)
+                    input.value = v - 1;
+            });
+            document.getElementById('qty-plus').addEventListener('click', function () {
+                var v = parseInt(input.value) || 1;
+                if (v < max)
+                    input.value = v + 1;
+            });
+
         }
     });
 }
 
+        // Thumbnail switcher
         window.switchImg = function (btn, src) {
             var main = document.getElementById('mainImage');
             if (main)
@@ -434,6 +514,7 @@ function updateStars(rating) {
             btnAdd.addEventListener('click', function () {
                 var bookID = document.querySelector('#add-to-cart-form input[name="bookID"]').value;
                 var quantity = document.getElementById('form-qty').value;
+
 
                 var params = new URLSearchParams();
                 params.append('action', 'add');
@@ -462,6 +543,19 @@ function updateStars(rating) {
                         .catch(function () {
                             showToast('Lỗi kết nối, vui lòng thử lại!', true);
                         });
+
+        // Related slider
+        var slider = document.getElementById('relatedSlider');
+        var prev = document.getElementById('sliderPrev');
+        var next = document.getElementById('sliderNext');
+        if (slider && prev && next) {
+            var scrollAmt = 280;
+            prev.addEventListener('click', function () {
+                slider.scrollBy({left: -scrollAmt, behavior: 'smooth'});
+            });
+            next.addEventListener('click', function () {
+                slider.scrollBy({left: scrollAmt, behavior: 'smooth'});
+
             });
         }
 

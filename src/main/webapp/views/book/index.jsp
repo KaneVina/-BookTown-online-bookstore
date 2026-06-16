@@ -82,41 +82,50 @@
 
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <c:forEach var="book" items="${featuredBooks}">
-            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
-                <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
+            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col h-full">
+                <!-- Vùng Ảnh -->
+                <div class="relative w-full h-0 pb-[135%] bg-[#f0f4ff] overflow-hidden">
                     <c:choose>
                         <c:when test="${not empty book.thumbnail}">
-                            <img alt="${book.title}" class="w-full h-full object-cover" src="${book.thumbnail}">
+                            <img alt="${book.title}" class="absolute inset-0 w-full h-full object-cover object-center" src="${book.thumbnail}">
                         </c:when>
                         <c:otherwise>
-                            <i data-lucide="book-open" class="w-16 h-16 text-gray-300"></i>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i data-lucide="book-open" class="w-16 h-16 text-gray-300"></i>
+                            </div>
                         </c:otherwise>
                     </c:choose>
-                    <div class="absolute top-2.5 left-2.5 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">🔥 Hot</div>
+                    <div class="absolute top-2.5 left-2.5 z-10 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">🔥 Hot</div>
                 </div>
-                <div class="p-3 flex flex-col flex-1">
-                    <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 min-h-[36px]">
-                        <a class="text-primary hover:underline"
-                           href="${pageContext.request.contextPath}/products?id=${book.bookID}">
-                            ${book.title}<c:if test="${not empty book.authors}"> – <c:forEach var="a" items="${book.authors}" varStatus="s">${a}<c:if test="${!s.last}">, </c:if></c:forEach></c:if>
+                
+                <!-- Vùng Thông Tin -->
+                <div class="p-3 flex flex-col flex-1 justify-between min-h-[160px]">
+                    <div>
+                        <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 h-[38px] overflow-hidden">
+                            <a class="text-primary hover:underline"
+                               href="${pageContext.request.contextPath}/products?id=${book.bookID}">
+                                ${book.title}<c:if test="${not empty book.authors}"> – <c:forEach var="a" items="${book.authors}" varStatus="s">${a}<c:if test="${!s.last}">, </c:if></c:forEach></c:if>
+                            </a>
+                        </div>
+                        <div class="text-[#FDD835] text-[12px] mb-2 flex items-center gap-1">
+                            <c:forEach begin="1" end="5" var="i">
+                                <c:choose>
+                                    <c:when test="${i <= book.avgRating}">★</c:when>
+                                    <c:otherwise><span class="text-gray-300">★</span></c:otherwise>
+                                </c:choose>
+                            </c:forEach>
+                            <span class="text-gray-400 text-[11px]">(${book.reviewCount})</span>
+                        </div>
+                    </div>
+                    <div class="mt-auto">
+                        <div class="text-primary text-[17px] font-bold mb-2.5">
+                            <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true" />đ
+                        </div>
+                        <a href="${pageContext.request.contextPath}/products?id=${book.bookID}"
+                           class="w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
+                            <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
                         </a>
                     </div>
-                    <div class="text-[#FDD835] text-[12px] mb-1.5 flex items-center gap-1">
-                        <c:forEach begin="1" end="5" var="i">
-                            <c:choose>
-                                <c:when test="${i <= book.avgRating}">★</c:when>
-                                <c:otherwise><span class="text-gray-300">★</span></c:otherwise>
-                            </c:choose>
-                        </c:forEach>
-                        <span class="text-gray-400 text-[11px]">(${book.reviewCount})</span>
-                    </div>
-                    <div class="text-primary text-[17px] font-bold mb-2.5">
-                        <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true" />đ
-                    </div>
-                    <a href="${pageContext.request.contextPath}/products?id=${book.bookID}"
-                       class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
-                        <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
-                    </a>
                 </div>
             </div>
             </c:forEach>
@@ -153,41 +162,50 @@
 
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <c:forEach var="book" items="${newBooks}">
-            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
-                <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
+            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col h-full">
+                <!-- Vùng Ảnh -->
+                <div class="relative w-full h-0 pb-[135%] bg-[#f0f4ff] overflow-hidden">
                     <c:choose>
                         <c:when test="${not empty book.thumbnail}">
-                            <img alt="${book.title}" class="w-full h-full object-cover" src="${book.thumbnail}">
+                            <img alt="${book.title}" class="absolute inset-0 w-full h-full object-cover object-center" src="${book.thumbnail}">
                         </c:when>
                         <c:otherwise>
-                            <i data-lucide="book-open" class="w-16 h-16 text-gray-300"></i>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i data-lucide="book-open" class="w-16 h-16 text-gray-300"></i>
+                            </div>
                         </c:otherwise>
                     </c:choose>
-                    <div class="absolute top-2.5 left-2.5 bg-[#E53935] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">👍 New</div>
+                    <div class="absolute top-2.5 left-2.5 z-10 bg-[#E53935] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">👍 New</div>
                 </div>
-                <div class="p-3 flex flex-col flex-1">
-                    <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 min-h-[36px]">
-                        <a class="text-primary hover:underline"
-                           href="${pageContext.request.contextPath}/products?id=${book.bookID}">
-                            ${book.title}<c:if test="${not empty book.authors}"> – <c:forEach var="a" items="${book.authors}" varStatus="s">${a}<c:if test="${!s.last}">, </c:if></c:forEach></c:if>
+                
+                <!-- Vùng Thông Tin -->
+                <div class="p-3 flex flex-col flex-1 justify-between min-h-[160px]">
+                    <div>
+                        <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 h-[38px] overflow-hidden">
+                            <a class="text-primary hover:underline"
+                               href="${pageContext.request.contextPath}/products?id=${book.bookID}">
+                                ${book.title}<c:if test="${not empty book.authors}"> – <c:forEach var="a" items="${book.authors}" varStatus="s">${a}<c:if test="${!s.last}">, </c:if></c:forEach></c:if>
+                            </a>
+                        </div>
+                        <div class="text-[#FDD835] text-[12px] mb-2 flex items-center gap-1">
+                            <c:forEach begin="1" end="5" var="i">
+                                <c:choose>
+                                    <c:when test="${i <= book.avgRating}">★</c:when>
+                                    <c:otherwise><span class="text-gray-300">★</span></c:otherwise>
+                                </c:choose>
+                            </c:forEach>
+                            <span class="text-gray-400 text-[11px]">(${book.reviewCount})</span>
+                        </div>
+                    </div>
+                    <div class="mt-auto">
+                        <div class="text-primary text-[17px] font-bold mb-2.5">
+                            <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true" />đ
+                        </div>
+                        <a href="${pageContext.request.contextPath}/products?id=${book.bookID}"
+                           class="w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
+                            <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
                         </a>
                     </div>
-                    <div class="text-[#FDD835] text-[12px] mb-1.5 flex items-center gap-1">
-                        <c:forEach begin="1" end="5" var="i">
-                            <c:choose>
-                                <c:when test="${i <= book.avgRating}">★</c:when>
-                                <c:otherwise><span class="text-gray-300">★</span></c:otherwise>
-                            </c:choose>
-                        </c:forEach>
-                        <span class="text-gray-400 text-[11px]">(${book.reviewCount})</span>
-                    </div>
-                    <div class="text-primary text-[17px] font-bold mb-2.5">
-                        <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true" />đ
-                    </div>
-                    <a href="${pageContext.request.contextPath}/products?id=${book.bookID}"
-                       class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
-                        <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
-                    </a>
                 </div>
             </div>
             </c:forEach>
