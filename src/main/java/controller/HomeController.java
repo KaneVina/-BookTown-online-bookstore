@@ -2,14 +2,16 @@ package controller;
 
 import dao.BookDAO;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import model.Book;
 import java.io.IOException;
 import java.util.List;
-import model.Book;
 
+/**
+ * HomeController – trang chủ.
+ */
 public class HomeController extends HttpServlet {
 
     private final BookDAO bookDAO = new BookDAO();
@@ -18,8 +20,8 @@ public class HomeController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        // Sách nổi bật (top 5 theo review + rating)
-        List<Book> featuredBooks = bookDAO.getFeaturedBooks(5);
+        // Sách bán chạy nhất (top 5 nhiều order nhất)
+        List<Book> featuredBooks = bookDAO.getTopSellingBooks(5);
         req.setAttribute("featuredBooks", featuredBooks);
 
         // Sách mới nhất (top 5, sort newest)

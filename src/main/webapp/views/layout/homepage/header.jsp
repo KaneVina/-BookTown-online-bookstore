@@ -64,6 +64,7 @@
                     <span class="text-[11px] opacity-80 uppercase">Hỗ trợ khách hàng</span>
                 </div>
 
+                <!-- User Menu -->
                 <div class="flex items-center gap-3 text-white cursor-pointer">
                     <div class="flex items-center justify-center w-11 h-11 bg-white rounded-full text-blue-600">
                         <i data-lucide="user" class="w-6 h-6"></i>
@@ -78,8 +79,8 @@
                                     <i data-lucide="chevron-down" class="inline w-4 h-4"></i>
                                 </span>
                                 <%-- Dropdown menu --%>
-                                <div class="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg 
-                                     opacity-0 invisible group-hover:opacity-100 group-hover:visible 
+                                <div class="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg
+                                     opacity-0 invisible group-hover:opacity-100 group-hover:visible
                                      transition-all z-50 text-on-surface text-sm">
                                     <a href="${pageContext.request.contextPath}/profile?id=${sessionScope.account.id}"
                                        class="flex items-center gap-2 px-4 py-3 hover:bg-blue-50 rounded-t-lg">
@@ -88,6 +89,10 @@
                                     <a href="${pageContext.request.contextPath}/profile/order-history"
                                        class="flex items-center gap-2 px-4 py-3 hover:bg-blue-50">
                                         <i data-lucide="package" class="w-4 h-4 text-primary"></i> Đơn hàng
+                                    </a>
+                                    <a href="${pageContext.request.contextPath}/wishlist"
+                                       class="flex items-center gap-2 px-4 py-3 hover:bg-blue-50">
+                                        <i data-lucide="heart" class="w-4 h-4 text-primary"></i> Yêu thích
                                     </a>
                                     <hr class="border-gray-100">
                                     <a href="${pageContext.request.contextPath}/logout"
@@ -107,7 +112,18 @@
                     </c:choose>
                 </div>
 
-                <a href="${pageContext.request.contextPath}/cart" class="relative flex flex-col items-center text-white text-xs cursor-pointer gap-0.5">
+                <!-- Wishlist (chỉ hiện khi đã đăng nhập) -->
+                <c:if test="${not empty sessionScope.account}">
+                    <a href="${pageContext.request.contextPath}/wishlist"
+                       class="relative flex flex-col items-center text-white text-xs cursor-pointer gap-0.5">
+                        <i data-lucide="heart" class="icon-lg"></i>
+                        <span>Yêu thích</span>
+                    </a>
+                </c:if>
+
+                <!-- Cart -->
+                <a href="${pageContext.request.contextPath}/cart"
+                   class="relative flex flex-col items-center text-white text-xs cursor-pointer gap-0.5">
                     <i data-lucide="shopping-cart" class="icon-lg"></i>
                     <span>Giỏ hàng</span>
                     <span id="cart-count"
@@ -117,50 +133,9 @@
                             <c:otherwise>0</c:otherwise>
                         </c:choose>
                     </span>
+                    </span>
                 </a>
             </div>
         </header>
-        <script>
-            (function () {
-                const wrapper = document.getElementById('user-menu-wrapper');
-                const dropdown = document.getElementById('user-dropdown');
-                const chevron = document.getElementById('chevron-icon');
-                if (!wrapper || !dropdown)
-                    return;
-
-                let open = false;
-
-                function showMenu() {
-                    open = true;
-                    dropdown.classList.remove('opacity-0', 'invisible', 'translate-y-[-8px]');
-                    dropdown.classList.add('opacity-100', 'visible', 'translate-y-0');
-                    if (chevron)
-                        chevron.classList.add('rotate-180');
-                }
-
-                function hideMenu() {
-                    open = false;
-                    dropdown.classList.add('opacity-0', 'invisible', 'translate-y-[-8px]');
-                    dropdown.classList.remove('opacity-100', 'visible', 'translate-y-0');
-                    if (chevron)
-                        chevron.classList.remove('rotate-180');
-                }
-
-                wrapper.addEventListener('click', function (e) {
-                    open ? hideMenu() : showMenu();
-                    e.stopPropagation();
-                });
-
-                document.addEventListener('click', function () {
-                    if (open)
-                        hideMenu();
-                });
-
-                dropdown.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                });
-            })();
-        </script>
-
 
         <%@ include file="navbar.jsp" %>
