@@ -2,6 +2,8 @@ D:\SWP\BookTown\src\main\java\dao\CustomerDAO.java
 D:\SWP\BookTown\src\main\java\dao\CartDAO.java
 D:\SWP\BookTown\src\main\java\model\Customer.java
 D:\SWP\BookTown\src\main\java\utils\HashMD5.java
+D:\SWP\BookTown\src\main\java\model\Genre.java
+D:\SWP\BookTown\src\main\java\dao\WishListDAO.java
 D:\SWP\BookTown\src\main\java\dao\BookDAO.java
 D:\SWP\BookTown\src\main\java\controller\OrderHistoryController.java
 D:\SWP\BookTown\src\main\java\model\Account.java
@@ -27,6 +29,7 @@ D:\SWP\BookTown\src\main\java\controller\VoucherController.java
 D:\SWP\BookTown\src\main\java\dao\ReviewDAO.java
 D:\SWP\BookTown\src\main\java\controller\AccountManagementController.java
 D:\SWP\BookTown\src\main\java\controller\ReviewManagementController.java
+D:\SWP\BookTown\src\main\java\controller\WishListController.java
 D:\SWP\BookTown\src\main\java\model\Book.java
 D:\SWP\BookTown\src\main\java\controller\OtpController.java
 D:\SWP\BookTown\src\main\java\controller\HomeController.java
@@ -35,5 +38,6 @@ D:\SWP\BookTown\src\main\java\dao\VoucherDAO.java
 D:\SWP\BookTown\src\main\java\controller\ProductController.java
 D:\SWP\BookTown\src\main\java\controller\LogoutController.java
 D:\SWP\BookTown\src\main\java\controller\ProfileController.java
+D:\SWP\BookTown\src\main\java\model\Author.java
 D:\SWP\BookTown\src\main\java\model\OrderDetail.java
 D:\SWP\BookTown\src\main\java\model\Order.java

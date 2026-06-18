@@ -81,6 +81,11 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
+        if ("vnpay".equals(paymentMethod)) {
+            request.getRequestDispatcher("/vnpay-payment").forward(request, response);
+            return;
+        }
+ 
         if (!"cod".equals(paymentMethod)) {
             request.getSession().setAttribute("errorMessage", "Phương thức thanh toán chưa được hỗ trợ!");
             response.sendRedirect(request.getContextPath() + "/checkout");

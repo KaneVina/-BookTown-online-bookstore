@@ -142,14 +142,14 @@
                     Đặt hàng thành công!
                 </h1>
                 <p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl mb-stack-lg">
-                    Cảm ơn bạn đã mua sắm tại BookTown. Mã đơn hàng của bạn là <span class="font-bold text-on-surface">#BT-${order.orderID}</span>. Chúng tôi sẽ sớm liên hệ để xác nhận đơn hàng.
+                    Cảm ơn bạn đã mua sắm tại BookTown. Mã đơn hàng của bạn là <span class="font-bold text-on-surface">${order.orderCode}</span>. Chúng tôi sẽ sớm liên hệ để xác nhận đơn hàng.
                 </p>
                 <div class="w-full bg-surface border border-outline-variant rounded-xl p-6 mb-stack-lg shadow-sm text-left">
                     <h3 class="font-headline-sm text-headline-sm text-on-surface mb-4 border-b border-outline-variant pb-2">Tóm tắt đơn hàng</h3>
                     <div class="space-y-3">
                         <div class="flex justify-between items-center">
                             <span class="text-on-surface-variant font-body-md text-body-md">Mã đơn hàng</span>
-                            <span class="text-on-surface font-label-md text-label-md">#BT-${order.orderID}</span>
+                           <span class="text-on-surface font-label-md text-label-md">${order.orderCode}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-on-surface-variant font-body-md text-body-md">Phương thức thanh toán</span>

@@ -107,7 +107,7 @@
                         <span class="text-xs text-primary font-bold">Chi tiết đơn hàng</span>
                     </nav>
                     <div class="flex flex-wrap items-center gap-3">
-                        <h1 class="text-2xl font-bold text-on-surface">Đơn hàng #BT-${order.orderID}</h1>
+                    <h1 class="text-2xl font-bold text-on-surface">Đơn hàng ${order.orderCode}</h1>
                         <span class="px-3 py-1 font-bold text-xs rounded-full flex items-center gap-1
                                       <c:choose>
                                           <c:when test='${order.status == "pending"}'>bg-amber-100 text-amber-700</c:when>
@@ -142,7 +142,7 @@
                     <c:if test="${order.status == 'pending'}">
                         <form method="POST"
                               action="${pageContext.request.contextPath}/profile/order-history"
-                              onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng #BT-${order.orderID}?');">
+                              onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng ${order.orderCode}?');">
                             <input type="hidden" name="action" value="cancel"/>
                             <input type="hidden" name="orderID" value="${order.orderID}"/>
                             <button type="submit"
