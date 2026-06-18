@@ -53,6 +53,43 @@
             flex: 0 0 calc(50% - 8px);
         }
     }
+
+    .review-summary {
+        background: linear-gradient(135deg,#f8fafc,#ffffff);
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+    }
+
+    .review-item {
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        background: white;
+        transition: all .25s ease;
+    }
+
+    .review-item:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+
+    .star-filled {
+        color: #facc15;
+    }
+
+    .star-empty {
+        color: #d1d5db;
+    }
+
+    .review-avatar{
+        width:40px;
+        height:40px;
+        border-radius:50%;
+        background:#4f46e5;
+        color:white;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-weight:bold;
+    }
 </style>
 
 <main class="max-w-[1400px] mx-auto px-8 py-8 flex flex-col gap-8">
@@ -282,72 +319,175 @@
         </div>
     </section>
 
-    <!-- ══ REVIEWS ════════════════════════════════════════════════════════ -->
-    <section class="pt-2">
-        <div class="flex items-center justify-between mb-5">
-            <h2 class="section-title-left text-[20px] font-bold text-primary">Đánh giá</h2>
-        </div>
+    <!--phần review--> 
+    <section class="pt-8">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="section-title-left text-[22px] font-bold text-primary">
+                Đánh giá sản phẩm (${reviews.size()})
+            </h2>
+            <button
+                id="openReviewModal"
+                data-can-review="${canReview}"
+                type="button"
+                class="flex items-center gap-2 bg-primary hover:opacity-90 text-white font-bold px-5 py-2.5 rounded-lg transition">
 
+                <span class="material-symbols-outlined">
+                    edit
+                </span>
+                Viết đánh giá
+            </button>
+        </div>
         <c:choose>
             <c:when test="${not empty reviews}">
-                <c:forEach items="${reviews}" var="review">
-                    <div class="review-card p-4 mb-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold">Customer #${review.customerID}</span>
-                            <small class="text-gray-500">${review.createdAt}</small>
+                <div class="flex flex-col gap-6">
+                    <c:forEach items="${reviews}" var="review">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-outline-variant hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <!--tên người dùng đã mua đánh giá-->
+                                    <div class="flex items-center gap-2">
+                                        <strong>${review.customerName}</strong>
+                                        <span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded font-bold uppercase">
+                                            Đã mua hàng
+                                        </span>
+                                    </div>
+                                    <!--phần sao-->
+                                    <div class="flex gap-1 mt-1 text-yellow-400">
+                                        <c:forEach begin="1" end="5" var="i">
+                                            <c:choose>
+                                                <c:when test="${i <= review.rating}">
+                                                    <span>★</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="text-gray-300">★</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </c:forEach>
+                                    </div>
+                                </div>
+                                <!--ngày và giờ đánh giá-->
+                                <span class="text-xs text-gray-400 italic">
+                                    <fmt:formatDate
+                                        value="${review.createdAt}"
+                                        pattern="dd/MM/yyyy HH:mm"/>
+                                </span>
+                            </div>
+                            <!--nội dung review-->
+                            <p class="text-gray-700 leading-relaxed text-sm">
+
+                                ${review.comment}
+                            </p>
+                            <!--admin trả lời người review-->
+                            <c:if test="${not empty review.adminReply}">
+                                <div class="mt-5 ml-6 p-4 bg-blue-50 rounded-lg border-l-4 border-primary">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="font-bold text-primary">
+                                            Admin BookTown
+                                        </span>
+                                        <span class="text-[10px] bg-primary text-white  px-2 py-1 rounded uppercase">
+                                            Admin
+                                        </span>
+                                    </div>
+                                    <!--nội dung trả lời-->
+                                    <p class="text-gray-700 text-sm leading-relaxed">
+                                        ${review.adminReply}
+
+                                    </p>
+                                    <c:if test="${review.adminReplyDate != null}">
+                                        <div class="text-xs text-gray-400 mt-2">
+                                            <fmt:formatDate
+                                                value="${review.adminReplyDate}"
+                                                pattern="dd/MM/yyyy HH:mm"/>
+                                        </div>
+                                    </c:if>
+                                </div>
+                            </c:if>
                         </div>
-                        <div class="text-yellow-500 mb-2">
-                            <c:forEach begin="1" end="5" var="i">
-                                <c:choose>
-                                    <c:when test="${i <= review.rating}">★</c:when>
-                                    <c:otherwise>☆</c:otherwise>
-                                </c:choose>
-                            </c:forEach>
-                        </div>
-                        <p class="text-gray-700">${review.comment}</p>
-                    </div>
-                </c:forEach>
+                    </c:forEach>
+                </div>
             </c:when>
             <c:otherwise>
-                <div class="bg-white border border-gray-100 rounded-xl p-10 text-center text-gray-400 text-[14px]">
-                    Chưa có đánh giá nào. Hãy là người đầu tiên nhận xét!
+                <div class="bg-white border border-dashed border-gray-300 rounded-xl p-10 text-center">
+                    <div class="text-5xl mb-3">
+                        ⭐
+                    </div>
+                    <div class="font-semibold text-gray-600">
+                        Chưa có đánh giá nào
+                    </div>
+
+                    <div class="text-gray-400 mt-2">
+                        Hãy là người đầu tiên trải nghiệm và đánh giá cuốn sách này
+                    </div>
                 </div>
             </c:otherwise>
         </c:choose>
+        <!--form popup để viết đánh giá và vote sao-->
+            <div id="reviewModal"
+                 class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+                <div class="bg-white w-[600px] rounded-xl p-6 relative">
+                    <button id="closeReviewModal"
+                            class="absolute top-3 right-4 text-2xl">
+                        ×
+                    </button>
+                    <h3 class="text-xl font-bold mb-6">
+                        Viết đánh giá
+                    </h3>
+                    <form id="reviewForm"
+                          action="${pageContext.request.contextPath}/review"
+                          method="post">
 
-        <!-- Write review form -->
-        <div class="mt-8 bg-white border rounded-xl p-6">
-            <h3 class="text-lg font-bold mb-4">Viết đánh giá</h3>
-            <form action="${pageContext.request.contextPath}/review" method="post">
-                <input type="hidden" name="bookID"        value="${book.bookID}">
-                <input type="hidden" name="customerID"    value="1">
-                <input type="hidden" name="orderDetailID" value="1">
+                        <input type="hidden" name="action" value="add">
+                        <input type="hidden" name="bookID" value="${book.bookID}">
+                        <input type="hidden"
+                               id="ratingValue"
+                               name="rating"
+                               value="5">
 
-                <div class="mb-4">
-                    <label class="font-medium block mb-2">Đánh giá</label>
-                    <input type="hidden" name="rating" id="ratingValue" value="5">
-                    <div id="ratingStars" class="flex items-center gap-1 text-4xl cursor-pointer">
-                        <span class="star" data-value="1">☆</span>
-                        <span class="star" data-value="2">☆</span>
-                        <span class="star" data-value="3">☆</span>
-                        <span class="star" data-value="4">☆</span>
-                        <span class="star" data-value="5">☆</span>
-                    </div>
-                    <div class="mt-2 text-sm text-gray-500">
-                        Đánh giá: <span id="ratingText">5</span>/5
-                    </div>
+                        <div class="mb-4">
+                            <label class="font-semibold block mb-2">
+                                Đánh giá của bạn
+                            </label>
+
+                            <div id="ratingStars"
+                                 class="flex gap-2 text-3xl cursor-pointer">
+
+                                <span class="star text-yellow-400"
+                                      data-value="1">★</span>
+
+                                <span class="star text-yellow-400"
+                                      data-value="2">★</span>
+
+                                <span class="star text-yellow-400"
+                                      data-value="3">★</span>
+
+                                <span class="star text-yellow-400"
+                                      data-value="4">★</span>
+
+                                <span class="star text-yellow-400"
+                                      data-value="5">★</span>
+                            </div>
+
+                            <p class="text-sm text-gray-500 mt-2">
+                                Bạn đang chọn:
+                                <span id="ratingText">5</span> sao
+                            </p>
+                        </div>
+
+                        <textarea
+                            name="comment"
+                            rows="5"
+                            required
+                            placeholder="Chia sẻ cảm nhận của bạn..."
+                            class="w-full border rounded-lg p-4">
+                        </textarea>
+
+                        <button type="submit"
+                                class="mt-4 bg-primary text-white px-6 py-3 rounded-lg">
+                            Gửi đánh giá
+                        </button>
+                    </form>
                 </div>
-                <div class="mb-4">
-                    <label class="font-medium">Nhận xét</label>
-                    <textarea name="comment" rows="4" required
-                              class="w-full border rounded p-3 mt-1"
-                              placeholder="Nhập đánh giá của bạn..."></textarea>
-                </div>
-                <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700">
-                    Gửi đánh giá
-                </button>
-            </form>
-        </div>
+            </div>
     </section>
 
     <!-- ══ RELATED BOOKS ══════════════════════════════════════════════════ -->
@@ -418,10 +558,8 @@
             </div>
         </section>
     </c:if>
-
 </main>
 
-<!-- ✅ FIX: Script được viết lại đúng cấu trúc, không bị lồng nhau -->
 <script>
     // ── Qty +/- ──────────────────────────────────────────────────────────
     (function () {
@@ -503,7 +641,7 @@
         });
     }
 
-    // ── Star rating ──────────────────────────────────────────────────────
+    //phần đánh sao và review 
     var stars = document.querySelectorAll('.star');
     var ratingInput = document.getElementById('ratingValue');
     var ratingText = document.getElementById('ratingText');
@@ -535,9 +673,103 @@
         });
     });
 
-    document.getElementById('ratingStars').addEventListener('mouseleave', function () {
-        updateStars(currentRating);
-    });
+    var ratingStars =
+            document.getElementById('ratingStars');
+
+    if (ratingStars) {
+
+        ratingStars.addEventListener(
+                'mouseleave',
+                function () {
+                    updateStars(currentRating);
+                }
+        );
+
+    }
+
+    var reviewModal = document.getElementById('reviewModal');
+    var openReviewBtn = document.getElementById('openReviewModal');
+    var closeReviewBtn = document.getElementById('closeReviewModal');
+
+    if (reviewModal && openReviewBtn) {
+        openReviewBtn.addEventListener('click', function () {
+            const canReview = this.dataset.canReview === 'true';
+            if (!canReview) {
+                showToast(
+                        'Bạn cần mua và nhận sách trước khi đánh giá.',
+                        true
+                        );
+                return;
+            }
+            reviewModal.classList.remove('hidden');
+            reviewModal.classList.add('flex');
+        });
+    }
+
+    if (closeReviewBtn && reviewModal) {
+        closeReviewBtn.addEventListener('click', function () {
+            reviewModal.classList.add('hidden');
+            reviewModal.classList.remove('flex');
+        });
+    }
+
+    // AJAX submit review
+    var reviewForm = document.getElementById('reviewForm');
+
+    if (reviewForm) {
+
+        reviewForm.addEventListener('submit', function (e) {
+
+            e.preventDefault();
+
+            var formData = new URLSearchParams(
+                    new FormData(reviewForm)
+                    );
+
+            fetch(
+                    '${pageContext.request.contextPath}/review',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type':
+                                    'application/x-www-form-urlencoded'
+                        },
+                        body: formData.toString()
+                    }
+            )
+                    .then(function (res) {
+
+                        if (!res.ok) {
+                            throw new Error();
+                        }
+
+                        return res.json();
+                    })
+                    .then(data => {
+
+                        if (data.success) {
+
+                            showToast(data.message);
+
+                            reviewModal.classList.add('hidden');
+                            reviewModal.classList.remove('flex');
+
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1000);
+
+                        } else {
+
+                            showToast(data.message, true);
+                        }
+                    })
+                    .catch(() => {
+                        showToast('Có lỗi xảy ra', true);
+                    });
+
+        });
+
+    }
 </script>
 
 <%@ include file="/views/layout/common/toast.jsp" %>
