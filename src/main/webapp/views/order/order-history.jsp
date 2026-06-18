@@ -113,7 +113,7 @@
                                             <span class="material-symbols-outlined text-gray-400 text-3xl">receipt_long</span>
                                         </div>
                                         <div class="space-y-1">
-                                            <p class="text-sm font-semibold text-[#17479D]">#BT-${order.orderID}</p>
+                                             <p class="text-sm font-semibold text-[#17479D]">${order.orderCode}</p>
                                             <p class="text-xs text-gray-500">
                                                 Ngày đặt:
                                                 <fmt:formatDate value="${order.createdAt}" pattern="dd/MM/yyyy"/>
@@ -139,7 +139,7 @@
                                         <c:if test="${order.status == 'pending'}">
                                             <form method="POST"
                                                   action="${pageContext.request.contextPath}/profile/order-history"
-                                                  onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng #BT-${order.orderID}?');">
+                                                  onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng ${order.orderCode}?');">
                                                 <input type="hidden" name="action" value="cancel"/>
                                                 <input type="hidden" name="orderID" value="${order.orderID}"/>
                                                 <button type="submit"

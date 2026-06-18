@@ -6,6 +6,7 @@ package model;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 
 /**
  *
@@ -53,10 +54,7 @@ public class Order {
     
     public Order() {}
 
-    public Order(int orderID, int customerID, int addressID, Integer processedBy, String status, String paymentMethod, String paymentStatus, BigDecimal totalPrice, Timestamp createdAt) {
-        
-    }
-    
+       
     public int getOrderID() {
         return orderID;
     }
@@ -127,6 +125,15 @@ public class Order {
 
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
+    }
+      public String getOrderCode() {
+        String datePart = "";
+        if (createdAt != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("ddMMyy");
+            datePart = sdf.format(createdAt);
+        }
+        String seqPart = String.format("%06d", orderID);
+        return "BT-" + datePart + seqPart;
     }
 
 }
