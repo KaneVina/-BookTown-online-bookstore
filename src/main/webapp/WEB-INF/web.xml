@@ -77,10 +77,6 @@
         <servlet-class>controller.UpdateAccountController</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>ReviewManagementController</servlet-name>
-        <servlet-class>controller.ReviewManagementController</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>VoucherController</servlet-name>
         <servlet-class>controller.VoucherController</servlet-class>
     </servlet>
@@ -99,6 +95,10 @@
     <servlet>
         <servlet-name>VNPayReturnController</servlet-name>
         <servlet-class>controller.VNPayReturnController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ReviewManagementController</servlet-name>
+        <servlet-class>controller.ReviewManagementController</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>LoginController</servlet-name>
@@ -178,10 +178,6 @@
     <servlet-mapping>
         <servlet-name>UpdateAccountController</servlet-name>
         <url-pattern>/dashboard/update-account</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ReviewManagementController</servlet-name>
-        <url-pattern>/dashboard/review-management</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>VoucherController</servlet-name>
