@@ -1,0 +1,72 @@
+/* ============================================
+   BookTown - Main Stylesheet
+   ============================================ */
+
+body {
+    background-color: #f4f4f4;
+    font-family: 'Roboto', sans-serif;
+    color: #222;
+}
+
+/* ---------- Promo Bar ---------- */
+.promo-bar {
+    background: #FDD835;
+    color: #1565C0;
+}
+
+/* ---------- Hero ---------- */
+.hero-gradient {
+    background: linear-gradient(135deg, #1565C0 0%, #0D47A1 60%, #1976D2 100%);
+}
+
+/* ---------- Section Title ---------- */
+.section-title-border {
+    border-left: 4px solid #FDD835;
+}
+
+/* ---------- Product Card ---------- */
+.prod-card-hover {
+    transition: box-shadow .2s, transform .2s, border-color .2s;
+    border: 1.5px solid transparent;
+}
+.prod-card-hover:hover {
+    box-shadow: 0 8px 28px rgba(21, 101, 192, .15);
+    transform: translateY(-4px);
+    border-color: #1976D2;
+}
+
+/* ---------- Book Spine (Hero Decoration) ---------- */
+.spine {
+    border-radius: 4px 0 0 4px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 10px;
+    cursor: pointer;
+    transition: transform .25s;
+    box-shadow: 4px 4px 12px rgba(0, 0, 0, .3);
+}
+.spine:hover {
+    transform: translateY(-14px);
+}
+.spine-txt {
+    font-size: 9px;
+    color: rgba(255, 255, 255, .75);
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-weight: 500;
+}
+
+/* ---------- Category Nav ---------- */
+.cat-nav-item {
+    border-right: 1px solid rgba(255, 255, 255, .15);
+}
+.cat-nav-item:hover {
+    background: #1565C0;
+}
+
+/* ---------- Icon Sizing Helpers ---------- */
+.icon-sm  { width: 14px; height: 14px; display: inline-block; vertical-align: middle; }
+.icon-md  { width: 18px; height: 18px; display: inline-block; vertical-align: middle; }
+.icon-lg  { width: 22px; height: 22px; display: inline-block; vertical-align: middle; }
+.icon-xl  { width: 28px; height: 28px; display: inline-block; vertical-align: middle; }
