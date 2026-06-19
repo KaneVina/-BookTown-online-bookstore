@@ -92,6 +92,18 @@
         <servlet-name>WishListController</servlet-name>
         <servlet-class>controller.WishListController</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>GenreServletController</servlet-name>
+        <servlet-class>controller.GenreServletController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CategoryManagementController</servlet-name>
+        <servlet-class>controller.CategoryManagementController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AddressManagementController</servlet-name>
+        <servlet-class>controller.AddressManagementController</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginController</servlet-name>
         <url-pattern>/login</url-pattern>
@@ -186,6 +198,14 @@
     <servlet-mapping>
         <servlet-name>WishListController</servlet-name>
         <url-pattern>/wishlist</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CategoryManagementController</servlet-name>
+        <url-pattern>/category</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AddressManagementController</servlet-name>
+        <url-pattern>/address</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout> 30 </session-timeout>

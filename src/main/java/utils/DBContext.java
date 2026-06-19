@@ -14,10 +14,11 @@ public class DBContext {
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             String dbURL = "jdbc:sqlserver://localhost:1433;"
-                    + "databaseName=BookstoreDB;"
-                    + "user=sa;"
-                    + "password=sa;"
-                    + "encrypt=true;trustServerCertificate=true;";
+        + "databaseName=BookTown;"
+        + "user=sa;"
+        + "password=123456;"
+        + "encrypt=true;"
+        + "trustServerCertificate=true;";
             return DriverManager.getConnection(dbURL);
         } catch (Exception e) {
             System.out.println("Khong ket noi duoc: " + e.getMessage());
@@ -25,9 +26,13 @@ public class DBContext {
         }
     }
 
-    public static void main(String[] args) {
-        DBContext db = new DBContext();
-        Connection conn = db.getConnection();
-        System.out.println(conn != null ? "Ket noi thanh cong" : "That bai");
-    }
-}
+public static void main(String[] args) {
+    System.out.println("TEST");
+
+    DBContext db = new DBContext();
+    Connection conn = db.getConnection();
+
+    System.out.println(conn != null
+            ? "Ket noi thanh cong"
+            : "That bai");
+}}
