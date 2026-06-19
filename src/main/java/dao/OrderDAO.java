@@ -101,12 +101,12 @@ public class OrderDAO {
 
     public boolean clearCart(int customerID) {
         String sqlDeleteItems = "DELETE CartItem FROM CartItem "
-                + "JOIN Cart ON Cart.cartID = CartItem.cartID "
-                + "WHERE Cart.customerID = ? AND Cart.status = 'active'";
+        + "JOIN Cart ON Cart.cartID = CartItem.cartID "
+        + "WHERE Cart.customerID = ? AND Cart.status = 'active'";
 
-        String sqlCloseCart = "UPDATE Cart SET status = 'completed' "
-                + "WHERE customerID = ? AND status = 'active'";
-
+      String sqlCloseCart = "UPDATE Cart SET status = 'checked_out' "
+        + "WHERE customerID = ? AND status = 'active'";
+      
         try (Connection conn = new DBContext().getConnection()) {
 
             try (PreparedStatement ps = conn.prepareStatement(sqlDeleteItems)) {
@@ -294,27 +294,28 @@ public class OrderDAO {
         }
         return false;
     }
-    
+
     // Xóa cart dựa vào orderID - dùng cho VNPAY callback
-public boolean clearCartByOrderID(int orderID) {
-    // Bước 1: lấy customerID từ Order
-    String sqlGetCustomer = "SELECT customerID FROM [Order] WHERE orderID = ?";
-    int customerID = -1;
-    try (Connection conn = new DBContext().getConnection();
-         PreparedStatement ps = conn.prepareStatement(sqlGetCustomer)) {
-        ps.setInt(1, orderID);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            customerID = rs.getInt("customerID");
+    public boolean clearCartByOrderID(int orderID) {
+        // Bước 1: lấy customerID từ Order
+        String sqlGetCustomer = "SELECT customerID FROM [Order] WHERE orderID = ?";
+        int customerID = -1;
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sqlGetCustomer)) {
+            ps.setInt(1, orderID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                customerID = rs.getInt("customerID");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-    } catch (Exception e) {
-        e.printStackTrace();
-        return false;
+
+        if (customerID == -1) {
+            return false;
+        }
+
+        // Bước 2: gọi lại clearCart có sẵn
+        return clearCart(customerID);
     }
-
-    if (customerID == -1) return false;
-
-    // Bước 2: gọi lại clearCart có sẵn
-    return clearCart(customerID);
-}
 }
