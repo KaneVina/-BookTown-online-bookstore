@@ -1,7 +1,6 @@
 package controller;
 
 import dao.CartDAO;
-import dao.OrderDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,11 +38,11 @@ public class VNPayController extends HttpServlet {
         }
         Account account = (Account) session.getAttribute("account");
 
-        String fullname      = request.getParameter("fullname");
-        String phone         = request.getParameter("phone");
-        String street        = request.getParameter("street");
-        String district      = request.getParameter("district");
-        String city          = request.getParameter("city");
+        String fullname  = request.getParameter("fullname");
+        String phone     = request.getParameter("phone");
+        String street    = request.getParameter("street");
+        String district  = request.getParameter("district");
+        String city      = request.getParameter("city");
 
         if (isEmpty(fullname) || isEmpty(phone) || isEmpty(street)
                 || isEmpty(district) || isEmpty(city)) {
@@ -60,32 +59,22 @@ public class VNPayController extends HttpServlet {
         }
         BigDecimal total = cartDAO.calcSubtotal(cartItems);
 
-        OrderDAO orderDAO = new OrderDAO();
-        int addressID = orderDAO.createTempAddress(account.getId(),
-                street.trim(), district.trim(), city.trim());
-        if (addressID == -1) {
-            session.setAttribute("errorMessage", "Lỗi khi lưu địa chỉ!");
-            response.sendRedirect(request.getContextPath() + "/checkout");
-            return;
-        }
+        // ✅ KHÔNG tạo đơn hàng ở đây nữa
+        // Lưu thông tin vào session, chỉ tạo đơn khi VNPAY callback thành công
+        String txnRef = VNPayConfig.getRandomNumber(12); // mã tạm gửi sang VNPAY
+        session.setAttribute("vnpay_txnRef",  txnRef);
+        session.setAttribute("vnpay_fullname", fullname.trim());
+        session.setAttribute("vnpay_phone",    phone.trim());
+        session.setAttribute("vnpay_street",   street.trim());
+        session.setAttribute("vnpay_district", district.trim());
+        session.setAttribute("vnpay_city",     city.trim());
+        session.setAttribute("vnpay_total",    total);
 
-        int orderID = orderDAO.createOrder(account.getId(), addressID, "vnpay", total);
-        if (orderID == -1) {
-            session.setAttribute("errorMessage", "Lỗi khi tạo đơn hàng!");
-            response.sendRedirect(request.getContextPath() + "/checkout");
-            return;
-        }
-
-        orderDAO.createOrderDetails(orderID, cartItems);
-
-        session.setAttribute("pendingOrderID", orderID);
-
-        String vnpayUrl = buildVNPayUrl(request, orderID, total);
-
+        String vnpayUrl = buildVNPayUrl(request, txnRef, total);
         response.sendRedirect(vnpayUrl);
     }
 
-    private String buildVNPayUrl(HttpServletRequest request, int orderID, BigDecimal total)
+    private String buildVNPayUrl(HttpServletRequest request, String txnRef, BigDecimal total)
             throws IOException {
 
         long amount = total.longValue() * 100;
@@ -102,8 +91,8 @@ public class VNPayController extends HttpServlet {
         vnp_Params.put("vnp_TmnCode",    VNPayConfig.vnp_TmnCode);
         vnp_Params.put("vnp_Amount",     String.valueOf(amount));
         vnp_Params.put("vnp_CurrCode",   VNPayConfig.vnp_CurrCode);
-        vnp_Params.put("vnp_TxnRef",     String.valueOf(orderID));          
-        vnp_Params.put("vnp_OrderInfo",  "Thanh toan don hang #BT-" + orderID);
+        vnp_Params.put("vnp_TxnRef",     txnRef);                          // ✅ dùng txnRef tạm
+        vnp_Params.put("vnp_OrderInfo",  "Thanh toan don hang:" + txnRef);
         vnp_Params.put("vnp_OrderType",  VNPayConfig.vnp_OrderType);
         vnp_Params.put("vnp_Locale",     VNPayConfig.vnp_Locale);
         vnp_Params.put("vnp_ReturnUrl",  VNPayConfig.vnp_ReturnUrl);
@@ -122,20 +111,26 @@ public class VNPayController extends HttpServlet {
             String fieldName  = itr.next();
             String fieldValue = vnp_Params.get(fieldName);
             if (fieldValue != null && fieldValue.length() > 0) {
-                hashData.append(fieldName).append("=")
-                        .append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
-                query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()))
-                     .append("=")
-                     .append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                hashData.append(fieldName);
+                hashData.append('=');
+                hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
+                query.append('=');
+                query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
                 if (itr.hasNext()) {
-                    query.append("&");
-                    hashData.append("&");
+                    query.append('&');
+                    hashData.append('&');
                 }
             }
         }
 
         String secureHash = VNPayConfig.hmacSHA512(VNPayConfig.vnp_HashSecret, hashData.toString());
         query.append("&vnp_SecureHash=").append(secureHash);
+
+        System.out.println("=== VNPAY PAY ===");
+        System.out.println("txnRef    : " + txnRef);
+        System.out.println("hashData  : " + hashData.toString());
+        System.out.println("secureHash: " + secureHash);
 
         return VNPayConfig.vnp_PayUrl + "?" + query.toString();
     }

@@ -1,7 +1,7 @@
 package utils;
 
 import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -14,15 +14,15 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public class VNPayConfig {
 
-    public static final String vnp_PayUrl    = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static final String vnp_TmnCode   = "T19K6689";   
-    public static final String vnp_HashSecret = "YU33FNTLYQ6U3FIC4T4B6DZ9SRZJ6AMA"; 
-    public static final String vnp_ReturnUrl = "http://localhost:8080/vnpay-return";
-    public static final String vnp_Version   = "2.1.0";
-    public static final String vnp_Command   = "pay";
-    public static final String vnp_CurrCode  = "VND";
-    public static final String vnp_Locale    = "vn";
-    public static final String vnp_OrderType = "other";
+    public static final String vnp_PayUrl     = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+    public static final String vnp_TmnCode    = "T19K6689";
+    public static final String vnp_HashSecret = "YU33FNTLYQ6U3FIC4T4B6DZ9SRZJ6AMA";
+    public static final String vnp_ReturnUrl  = "http://localhost:8080/vnpay-return";
+    public static final String vnp_Version    = "2.1.0";
+    public static final String vnp_Command    = "pay";
+    public static final String vnp_CurrCode   = "VND";
+    public static final String vnp_Locale     = "vn";
+    public static final String vnp_OrderType  = "other";
 
     public static String hmacSHA512(final String key, final String data) {
         try {
@@ -45,21 +45,26 @@ public class VNPayConfig {
         }
     }
 
+    // Copy y chang Config.java gốc của VNPAY - encode giá trị khi build hash
     public static String hashAllFields(Map<String, String> fields) {
         List<String> fieldNames = new ArrayList<>(fields.keySet());
         Collections.sort(fieldNames);
         StringBuilder sb = new StringBuilder();
         Iterator<String> itr = fieldNames.iterator();
         while (itr.hasNext()) {
-            String fieldName = itr.next();
+            String fieldName  = itr.next();
             String fieldValue = fields.get(fieldName);
-            if ((fieldValue != null) && (fieldValue.length() > 0)) {
+            if (fieldValue != null && fieldValue.length() > 0) {
                 sb.append(fieldName);
-                sb.append("=");
-                sb.append(fieldValue);
+                sb.append('=');
+                try {
+                    sb.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                } catch (Exception e) {
+                    sb.append(fieldValue);
+                }
             }
             if (itr.hasNext()) {
-                sb.append("&");
+                sb.append('&');
             }
         }
         return hmacSHA512(vnp_HashSecret, sb.toString());
