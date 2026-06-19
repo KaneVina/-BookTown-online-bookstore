@@ -16,11 +16,7 @@ model\Review.class
 filter\AuthFilter.class
 controller\LoginController.class
 controller\UpdateAccountController.class
-<<<<<<< HEAD
 controller\VNPayReturnController.class
-controller\ReviewManagementController.class
-=======
->>>>>>> 8c65199d18d7381ea59085e5e24ee3659eaee323
 controller\WishListController.class
 model\Voucher.class
 controller\CreateStaffController.class

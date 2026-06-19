@@ -79,10 +79,9 @@ public class CartDAO {
     }
 
     public int getOrCreateCart(int customerID) {
-        String sqlFind = "SELECT Cart.cartID FROM Cart WHERE Cart.customerID = ? AND Cart.status = 'active'";
-
+        // Bước 1: tìm cart active
+        String sqlFind = "SELECT cartID FROM Cart WHERE customerID = ? AND status = 'active'";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sqlFind)) {
-
             ps.setInt(1, customerID);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -92,10 +91,25 @@ public class CartDAO {
             e.printStackTrace();
         }
 
+        // Bước 2: nếu không có active, reactivate cart cũ (tránh vi phạm UNIQUE)
+        String sqlReactivate
+                = "UPDATE Cart SET status = 'active' "
+                + "OUTPUT INSERTED.cartID "
+                + "WHERE customerID = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sqlReactivate)) {
+            ps.setInt(1, customerID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("cartID");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Bước 3: chưa có cart nào → INSERT mới (trường hợp user hoàn toàn mới)
         String sqlInsert = "INSERT INTO Cart (customerID, status) VALUES (?, 'active')";
-
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sqlInsert, PreparedStatement.RETURN_GENERATED_KEYS)) {
-
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sqlInsert,
+                PreparedStatement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, customerID);
             ps.executeUpdate();
             ResultSet rs = ps.getGeneratedKeys();
