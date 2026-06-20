@@ -146,4 +146,38 @@ public class AddressDAO {
             e.printStackTrace();
         }
     }
+    public List<Address> getAddressesByCustomerId(int customerID) {
+    List<Address> list = new ArrayList<>();
+
+    String sql = "SELECT addressID, customerID, street, district, city, country, is_default "
+            + "FROM Address "
+            + "WHERE customerID = ? "
+            + "ORDER BY is_default DESC, addressID DESC";
+
+    try {
+        Connection conn = db.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setInt(1, customerID);
+
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            list.add(new Address(
+                    rs.getInt("addressID"),
+                    rs.getInt("customerID"),
+                    rs.getString("street"),
+                    rs.getString("district"),
+                    rs.getString("city"),
+                    rs.getString("country"),
+                    rs.getBoolean("is_default")
+            ));
+        }
+
+        conn.close();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return list;
+}
 }

@@ -2,6 +2,7 @@ package controller;
 
 import dao.CartDAO;
 import dao.OrderDAO;
+import dao.AddressDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Account;
 import model.CartItem;
+import model.Address;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -25,7 +27,28 @@ public class CheckoutController extends HttpServlet {
         }
 
         Account account = getAccount(request);
+        String action = request.getParameter("action");
+
+        if ("deleteAddress".equals(action)) {
+            String addressIdRaw = request.getParameter("addressID");
+
+            if (addressIdRaw != null && !addressIdRaw.trim().isEmpty()) {
+                try {
+                    int addressID = Integer.parseInt(addressIdRaw);
+                    AddressDAO addressDAO = new AddressDAO();
+                    addressDAO.deleteAddress(addressID);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            response.sendRedirect(request.getContextPath() + "/checkout");
+            return;
+        }
+
         CartDAO cartDAO = new CartDAO();
+        AddressDAO addressDAO = new AddressDAO();
+
         List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
 
         if (cartItems.isEmpty()) {
@@ -40,9 +63,12 @@ public class CheckoutController extends HttpServlet {
             totalQuantity += item.getQuantity();
         }
 
-        request.setAttribute("cartItems",     cartItems);
-        request.setAttribute("total",         total);
+        List<Address> addressList = addressDAO.getAddressesByCustomerId(account.getId());
+
+        request.setAttribute("cartItems", cartItems);
+        request.setAttribute("total", total);
         request.setAttribute("totalQuantity", totalQuantity);
+        request.setAttribute("addressList", addressList);
 
         request.getRequestDispatcher("/views/cart/checkout.jsp").forward(request, response);
     }
@@ -59,23 +85,42 @@ public class CheckoutController extends HttpServlet {
 
         Account account = getAccount(request);
 
-        String fullname      = request.getParameter("fullname");
-        String phone         = request.getParameter("phone");
-        String street        = request.getParameter("street");
-        String district       = request.getParameter("district");
-        String city          = request.getParameter("city");
+        String fullname = request.getParameter("fullname");
+        String phone = request.getParameter("phone");
+        String street = request.getParameter("street");
+        String ward = request.getParameter("ward");
+        String city = request.getParameter("city");
+        String district = request.getParameter("district");
         String paymentMethod = request.getParameter("payment_method");
 
         if (isEmpty(fullname) || isEmpty(phone) || isEmpty(street)
-                || isEmpty(district) || isEmpty(city)) {
+                || isEmpty(ward) || isEmpty(city)) {
 
-            request.getSession().setAttribute("errorMessage", "Vui lòng nhập đầy đủ thông tin giao hàng!");
+            request.getSession().setAttribute(
+                    "errorMessage",
+                    "Bạn chưa có địa chỉ. Vui lòng nhập địa chỉ giao hàng trước khi thanh toán."
+            );
             response.sendRedirect(request.getContextPath() + "/checkout");
             return;
         }
 
-        if (!isValidAddressPart(street) || !isValidAddressPart(district) || !isValidAddressPart(city)) {
+        if (isEmpty(district)) {
+            district = "Không có";
+        }
 
+        if (!isValidFullname(fullname)) {
+            request.getSession().setAttribute("errorMessage", "Họ tên người nhận không hợp lệ!");
+            response.sendRedirect(request.getContextPath() + "/checkout");
+            return;
+        }
+
+        if (!isValidPhone(phone)) {
+            request.getSession().setAttribute("errorMessage", "Số điện thoại không hợp lệ!");
+            response.sendRedirect(request.getContextPath() + "/checkout");
+            return;
+        }
+
+        if (!isValidAddressPart(street) || !isValidAddressPart(ward) || !isValidAddressPart(city)) {
             request.getSession().setAttribute("errorMessage", "Địa chỉ không hợp lệ, vui lòng nhập lại!");
             response.sendRedirect(request.getContextPath() + "/checkout");
             return;
@@ -85,14 +130,14 @@ public class CheckoutController extends HttpServlet {
             request.getRequestDispatcher("/vnpay-payment").forward(request, response);
             return;
         }
- 
+
         if (!"cod".equals(paymentMethod)) {
             request.getSession().setAttribute("errorMessage", "Phương thức thanh toán chưa được hỗ trợ!");
             response.sendRedirect(request.getContextPath() + "/checkout");
             return;
         }
 
-        CartDAO  cartDAO  = new CartDAO();
+        CartDAO cartDAO = new CartDAO();
         OrderDAO orderDAO = new OrderDAO();
 
         List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
@@ -104,8 +149,12 @@ public class CheckoutController extends HttpServlet {
 
         BigDecimal total = cartDAO.calcSubtotal(cartItems);
 
-        int addressID = orderDAO.createTempAddress(account.getId(),
-                street.trim(), district.trim(), city.trim());
+        int addressID = orderDAO.createTempAddress(
+                account.getId(),
+                street.trim(),
+                ward.trim(),
+                city.trim()
+        );
 
         if (addressID == -1) {
             request.getSession().setAttribute("errorMessage", "Lỗi khi lưu địa chỉ, vui lòng thử lại!");
@@ -113,7 +162,6 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-       
         int orderID = orderDAO.createOrder(account.getId(), addressID, paymentMethod, total);
 
         if (orderID == -1) {
@@ -122,17 +170,13 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-      
         orderDAO.createOrderDetails(orderID, cartItems);
-
-      
         orderDAO.clearCart(account.getId());
+
         request.getSession().setAttribute("cartCount", 0);
 
-   
         response.sendRedirect(request.getContextPath() + "/order-confirmation?orderID=" + orderID);
     }
-
 
     private boolean isCustomer(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
@@ -161,11 +205,27 @@ public class CheckoutController extends HttpServlet {
         return value == null || value.trim().isEmpty();
     }
 
+    private boolean isValidFullname(String fullname) {
+        String trimmed = fullname.trim();
+        return trimmed.matches("^[A-Za-zÀ-ỹ\\s]{2,50}$");
+    }
+
+    private boolean isValidPhone(String phone) {
+        String trimmed = phone.trim();
+        return trimmed.matches("^(0|\\+84)(3|5|7|8|9)[0-9]{8}$");
+    }
+
     private boolean isValidAddressPart(String value) {
+        if (value == null) {
+            return false;
+        }
+
         String trimmed = value.trim();
+
         if (trimmed.length() < 3) {
             return false;
         }
+
         return trimmed.matches(".*[a-zA-ZÀ-ỹ].*");
     }
 }

@@ -91,13 +91,13 @@
                         <div>
                             <p class="text-[14px] font-bold">
                                 <span id="selectedDefaultBadge"
-                                      class="text-[11px] bg-primary text-white px-2 py-1 rounded-full mr-2">
+                                      class="hidden text-[11px] bg-primary text-white px-2 py-1 rounded-full mr-2">
                                     Mặc định
                                 </span>
-                                <span id="selectedNamePhone">${sessionScope.account.fullname} - ${sessionScope.account.phone}</span>
+                                <span id="selectedNamePhone">Chưa có địa chỉ</span>
                             </p>
                             <p id="selectedAddressText" class="text-[13px] text-on-surface-variant mt-1">
-                                123 Reading Lane, Phường Ninh Kiều, Thành phố Cần Thơ
+                                Vui lòng thêm địa chỉ giao hàng trước khi thanh toán.
                             </p>
                         </div>
 
@@ -109,59 +109,46 @@
                     <div id="addressDropdown"
                          class="hidden absolute left-0 right-0 mt-2 bg-white border border-outline-variant rounded-xl shadow-lg z-40 overflow-hidden">
 
-                        <div class="address-option p-4 cursor-pointer hover:bg-primary/5 border-b"
-                             data-id="1"
-                             data-deleted="false"
-                             data-fullname="${sessionScope.account.fullname}"
-                             data-phone="${sessionScope.account.phone}"
-                             data-street="123 Reading Lane"
-                             data-ward="Phường Ninh Kiều"
-                             data-city="Thành phố Cần Thơ"
-                             data-default="true">
-                            <div class="flex justify-between gap-3">
-                                <div>
-                                    <p class="text-[14px] font-bold">
-                                        <span class="default-option-badge text-[11px] bg-primary text-white px-2 py-1 rounded-full mr-2">
-                                            Mặc định
-                                        </span>
-                                        ${sessionScope.account.fullname} - ${sessionScope.account.phone}
-                                    </p>
-                                    <p class="text-[13px] text-on-surface-variant mt-1">
-                                        123 Reading Lane, Phường Ninh Kiều, Thành phố Cần Thơ
-                                    </p>
-                                </div>
-                                <button type="button" class="delete-address-btn text-red-600 text-[12px] font-bold hover:underline">
-                                    Xóa
-                                </button>
-                            </div>
-                        </div>
+                        <c:choose>
+                            <c:when test="${not empty addressList}">
+                                <c:forEach var="address" items="${addressList}">
+                                    <div class="address-option p-4 cursor-pointer hover:bg-primary/5 border-b"
+                                         data-id="${address.addressID}"
+                                         data-deleted="false"
+                                         data-fullname="${sessionScope.account.fullname}"
+                                         data-phone="${sessionScope.account.phone}"
+                                         data-street="${address.street}"
+                                         data-ward="${address.district}"
+                                         data-city="${address.city}"
+                                         data-default="${address["default"]}">
+                                        <div class="flex justify-between gap-3">
+                                            <div>
+                                                <p class="text-[14px] font-bold">
+                                                    <span class="default-option-badge ${address["default"] ? '' : 'hidden'} text-[11px] bg-primary text-white px-2 py-1 rounded-full mr-2">
+                                                        Mặc định
+                                                    </span>
+                                                    ${sessionScope.account.fullname} - ${sessionScope.account.phone}
+                                                </p>
+                                                <p class="text-[13px] text-on-surface-variant mt-1">
+                                                    ${address.street}, ${address.district}, ${address.city}
+                                                </p>
+                                            </div>
 
-                        <div class="address-option p-4 cursor-pointer hover:bg-primary/5"
-                             data-id="2"
-                             data-deleted="false"
-                             data-fullname="${sessionScope.account.fullname}"
-                             data-phone="${sessionScope.account.phone}"
-                             data-street="456 Corporate Plaza, Floor 12"
-                             data-ward="Phường Sài Gòn"
-                             data-city="Thành phố Hồ Chí Minh"
-                             data-default="false">
-                            <div class="flex justify-between gap-3">
-                                <div>
-                                    <p class="text-[14px] font-bold">
-                                        <span class="default-option-badge hidden text-[11px] bg-primary text-white px-2 py-1 rounded-full mr-2">
-                                            Mặc định
-                                        </span>
-                                        ${sessionScope.account.fullname} - ${sessionScope.account.phone}
-                                    </p>
-                                    <p class="text-[13px] text-on-surface-variant mt-1">
-                                        456 Corporate Plaza, Floor 12, Phường Sài Gòn, Thành phố Hồ Chí Minh
-                                    </p>
+                                            <button type="button"
+                                                    class="delete-address-btn text-red-600 text-[12px] font-bold hover:underline">
+                                                Xóa
+                                            </button>
+                                        </div>
+                                    </div>
+                                </c:forEach>
+                            </c:when>
+
+                            <c:otherwise>
+                                <div class="p-4 text-red-600 text-[13px] font-bold">
+                                    Bạn chưa có địa chỉ. Vui lòng thêm địa chỉ giao hàng.
                                 </div>
-                                <button type="button" class="delete-address-btn text-red-600 text-[12px] font-bold hover:underline">
-                                    Xóa
-                                </button>
-                            </div>
-                        </div>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
                 </div>
 
@@ -318,13 +305,13 @@
                 </div>
 
                 <form id="checkout-form" action="${pageContext.request.contextPath}/checkout" method="POST">
-                    <input type="hidden" name="fullname" id="checkoutFullname" value="${sessionScope.account.fullname}">
-                    <input type="hidden" name="phone" id="checkoutPhone" value="${sessionScope.account.phone}">
-                    <input type="hidden" name="street" id="checkoutStreet" value="123 Reading Lane">
-                    <input type="hidden" name="ward" id="checkoutWard" value="Phường Ninh Kiều">
-                    <input type="hidden" name="city" id="checkoutCity" value="Thành phố Cần Thơ">
+                    <input type="hidden" name="fullname" id="checkoutFullname" value="">
+                    <input type="hidden" name="phone" id="checkoutPhone" value="">
+                    <input type="hidden" name="street" id="checkoutStreet" value="">
+                    <input type="hidden" name="ward" id="checkoutWard" value="">
+                    <input type="hidden" name="city" id="checkoutCity" value="">
                     <input type="hidden" name="district" id="checkoutDistrict" value="Không có">
-                    <input type="hidden" name="isDefault" id="checkoutIsDefault" value="true">
+                    <input type="hidden" name="isDefault" id="checkoutIsDefault" value="false">
                     <input type="hidden" name="deletedAddressIds" id="deletedAddressIds" value="">
 
                     <button type="submit"
@@ -334,26 +321,6 @@
                         ĐẶT HÀNG NGAY
                     </button>
                 </form>
-
-                <p class="text-center text-[12px] text-on-surface-variant leading-relaxed mt-3">
-                    Bằng việc nhấn vào nút "Đặt hàng ngay", bạn đã đồng ý với
-                    <a class="text-primary underline font-medium" href="#">Điều khoản dịch vụ</a> của BookTown.
-                </p>
-
-                <div class="mt-8 pt-6 border-t border-surface-container grid grid-cols-3 gap-4">
-                    <div class="flex flex-col items-center gap-1.5 text-center">
-                        <i data-lucide="shield-check" class="text-primary"></i>
-                        <span class="text-[10px] font-black text-primary uppercase">BẢO MẬT</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-1.5 text-center">
-                        <i data-lucide="truck" class="text-primary"></i>
-                        <span class="text-[10px] font-black text-primary uppercase">THEO DÕI</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-1.5 text-center">
-                        <i data-lucide="refresh-cw" class="text-primary"></i>
-                        <span class="text-[10px] font-black text-primary uppercase">ĐỔI TRẢ 30 NGÀY</span>
-                    </div>
-                </div>
             </div>
         </aside>
     </div>
@@ -361,7 +328,7 @@
 
 <script>
     var vietnamProvinces = [];
-    var addressIdCounter = 3;
+    var addressIdCounter = 1;
     var deleteTargetOption = null;
     var deletedAddressIds = [];
 
@@ -371,31 +338,21 @@
 
     function validateFullname(fullname) {
         var nameRegex = /^[A-Za-zÀ-ỹ\s]{2,50}$/;
-        if (!fullname) {
-            return 'Vui lòng nhập họ tên người nhận.';
-        }
-        if (!nameRegex.test(fullname)) {
-            return 'Họ tên không hợp lệ. Tên chỉ gồm chữ cái, khoảng trắng và từ 2-50 ký tự.';
-        }
+        if (!fullname) return 'Vui lòng nhập họ tên người nhận.';
+        if (!nameRegex.test(fullname)) return 'Họ tên không hợp lệ.';
         return '';
     }
 
     function validatePhone(phone) {
         var phoneRegex = /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/;
-        if (!phone) {
-            return 'Vui lòng nhập số điện thoại.';
-        }
-        if (!phoneRegex.test(phone)) {
-            return 'Số điện thoại không hợp lệ.';
-        }
+        if (!phone) return 'Vui lòng nhập số điện thoại.';
+        if (!phoneRegex.test(phone)) return 'Số điện thoại không hợp lệ.';
         return '';
     }
 
     function validateStreet(street) {
         var streetRegex = /[A-Za-zÀ-ỹ]/;
-        if (!street) {
-            return 'Vui lòng nhập địa chỉ cụ thể.';
-        }
+        if (!street) return 'Vui lòng nhập địa chỉ cụ thể.';
         if (street.length < 5 || !streetRegex.test(street)) {
             return 'Địa chỉ không hợp lệ. Vui lòng nhập số nhà, tên đường rõ ràng hơn.';
         }
@@ -409,13 +366,8 @@
         error = validatePhone(phone);
         if (error) return error;
 
-        if (!city) {
-            return 'Vui lòng chọn Tỉnh / Thành phố.';
-        }
-
-        if (!ward) {
-            return 'Vui lòng chọn Phường / Xã.';
-        }
+        if (!city) return 'Vui lòng chọn Tỉnh / Thành phố.';
+        if (!ward) return 'Vui lòng chọn Phường / Xã.';
 
         error = validateStreet(street);
         if (error) return error;
@@ -429,19 +381,31 @@
         document.getElementById('checkoutStreet').value = street || '';
         document.getElementById('checkoutWard').value = ward || '';
         document.getElementById('checkoutCity').value = city || '';
-        document.getElementById('checkoutDistrict').value = 'Không có';
+        document.getElementById('checkoutDistrict').value = ward || 'Không có';
         document.getElementById('checkoutIsDefault').value = isDefault ? 'true' : 'false';
 
         document.getElementById('selectedNamePhone').textContent = (fullname || '') + ' - ' + (phone || '');
         document.getElementById('selectedAddressText').textContent =
-                (street || '') + ', ' + (ward || '') + ', ' + (city || '');
+            (street || '') + ', ' + (ward || '') + ', ' + (city || '');
 
         var selectedBadge = document.getElementById('selectedDefaultBadge');
-        if (isDefault) {
-            selectedBadge.classList.remove('hidden');
-        } else {
-            selectedBadge.classList.add('hidden');
-        }
+        if (isDefault) selectedBadge.classList.remove('hidden');
+        else selectedBadge.classList.add('hidden');
+    }
+
+    function resetSelectedAddressBox() {
+        document.getElementById('checkoutFullname').value = '';
+        document.getElementById('checkoutPhone').value = '';
+        document.getElementById('checkoutStreet').value = '';
+        document.getElementById('checkoutWard').value = '';
+        document.getElementById('checkoutCity').value = '';
+        document.getElementById('checkoutDistrict').value = 'Không có';
+        document.getElementById('checkoutIsDefault').value = 'false';
+
+        document.getElementById('selectedDefaultBadge').classList.add('hidden');
+        document.getElementById('selectedNamePhone').textContent = 'Chưa có địa chỉ';
+        document.getElementById('selectedAddressText').textContent =
+            'Vui lòng thêm địa chỉ giao hàng trước khi thanh toán.';
     }
 
     function getVisibleAddressOptions() {
@@ -453,13 +417,12 @@
     function refreshDefaultBadges() {
         document.querySelectorAll('.address-option').forEach(function (option) {
             var badge = option.querySelector('.default-option-badge');
+            if (!badge) return;
 
-            if (badge) {
-                if (option.dataset.default === 'true' && option.dataset.deleted !== 'true') {
-                    badge.classList.remove('hidden');
-                } else {
-                    badge.classList.add('hidden');
-                }
+            if (option.dataset.default === 'true' && option.dataset.deleted !== 'true') {
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
             }
         });
     }
@@ -472,9 +435,7 @@
     }
 
     function selectOption(option) {
-        if (!option || option.dataset.deleted === 'true') {
-            return;
-        }
+        if (!option || option.dataset.deleted === 'true') return;
 
         setCheckoutAddress(
             option.dataset.fullname,
@@ -490,12 +451,6 @@
 
     function softDeleteAddress(option) {
         if (!option) return;
-
-        var visibleOptions = getVisibleAddressOptions();
-        if (visibleOptions.length <= 1) {
-            showInputError('Phải còn ít nhất 1 địa chỉ giao hàng.');
-            return;
-        }
 
         var wasSelected = isSelectedOption(option);
         var wasDefault = option.dataset.default === 'true';
@@ -518,9 +473,8 @@
 
         refreshDefaultBadges();
 
-        if (wasSelected && remainingOptions.length > 0) {
-            selectOption(remainingOptions[0]);
-        }
+        if (wasSelected && remainingOptions.length > 0) selectOption(remainingOptions[0]);
+        if (remainingOptions.length === 0) resetSelectedAddressBox();
 
         showToast('Đã xóa địa chỉ!', false);
     }
@@ -540,9 +494,7 @@
         }
     }
 
-    document.querySelectorAll('.address-option').forEach(function (option) {
-        bindAddressOption(option);
-    });
+    document.querySelectorAll('.address-option').forEach(bindAddressOption);
 
     document.getElementById('btnCancelDeleteAddress').addEventListener('click', function () {
         deleteTargetOption = null;
@@ -557,16 +509,6 @@
 
     document.getElementById('selectedAddressBox').addEventListener('click', function () {
         document.getElementById('addressDropdown').classList.toggle('hidden');
-    });
-
-    document.addEventListener('click', function (e) {
-        var box = document.getElementById('selectedAddressBox');
-        var dropdown = document.getElementById('addressDropdown');
-        var deleteModal = document.getElementById('deleteAddressConfirm');
-
-        if (!box.contains(e.target) && !dropdown.contains(e.target) && deleteModal.classList.contains('hidden')) {
-            dropdown.classList.add('hidden');
-        }
     });
 
     document.getElementById('btnShowAddressForm').addEventListener('click', function () {
@@ -646,6 +588,13 @@
     loadVietnamProvinces();
     refreshDefaultBadges();
 
+    var defaultOption = document.querySelector('.address-option[data-default="true"]');
+    var firstOption = document.querySelector('.address-option[data-deleted="false"]');
+
+    if (defaultOption) selectOption(defaultOption);
+    else if (firstOption) selectOption(firstOption);
+    else resetSelectedAddressBox();
+
     document.getElementById('btnSaveAddress').addEventListener('click', function () {
         var fullname = document.getElementById('newFullname').value.trim();
         var phone = document.getElementById('newPhone').value.trim();
@@ -659,6 +608,8 @@
             showInputError(error);
             return;
         }
+
+        if (getVisibleAddressOptions().length === 0) isDefault = true;
 
         if (isDefault) {
             document.querySelectorAll('.address-option').forEach(function (option) {
@@ -678,18 +629,18 @@
         option.dataset.default = isDefault ? 'true' : 'false';
 
         option.innerHTML =
-                '<div class="flex justify-between gap-3">' +
-                    '<div>' +
-                        '<p class="text-[14px] font-bold">' +
-                            '<span class="default-option-badge ' + (isDefault ? '' : 'hidden') + ' text-[11px] bg-primary text-white px-2 py-1 rounded-full mr-2">Mặc định</span>' +
-                            fullname + ' - ' + phone +
-                        '</p>' +
-                        '<p class="text-[13px] text-on-surface-variant mt-1">' +
-                            street + ', ' + ward + ', ' + city +
-                        '</p>' +
-                    '</div>' +
-                    '<button type="button" class="delete-address-btn text-red-600 text-[12px] font-bold hover:underline">Xóa</button>' +
-                '</div>';
+            '<div class="flex justify-between gap-3">' +
+                '<div>' +
+                    '<p class="text-[14px] font-bold">' +
+                        '<span class="default-option-badge ' + (isDefault ? '' : 'hidden') + ' text-[11px] bg-primary text-white px-2 py-1 rounded-full mr-2">Mặc định</span>' +
+                        fullname + ' - ' + phone +
+                    '</p>' +
+                    '<p class="text-[13px] text-on-surface-variant mt-1">' +
+                        street + ', ' + ward + ', ' + city +
+                    '</p>' +
+                '</div>' +
+                '<button type="button" class="delete-address-btn text-red-600 text-[12px] font-bold hover:underline">Xóa</button>' +
+            '</div>';
 
         document.getElementById('addressDropdown').appendChild(option);
         bindAddressOption(option);
@@ -723,6 +674,12 @@
         var street = document.getElementById('checkoutStreet').value.trim();
         var ward = document.getElementById('checkoutWard').value.trim();
         var city = document.getElementById('checkoutCity').value.trim();
+
+        if (!fullname || !phone || !street || !ward || !city) {
+            e.preventDefault();
+            showInputError('Bạn chưa có địa chỉ. Vui lòng nhập địa chỉ giao hàng trước khi thanh toán.');
+            return false;
+        }
 
         var error = validateAddressInput(fullname, phone, city, ward, street);
         if (error) {

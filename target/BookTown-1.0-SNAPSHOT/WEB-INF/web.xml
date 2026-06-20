@@ -89,6 +89,7 @@
         <servlet-class>controller.WishListController</servlet-class>
     </servlet>
     <servlet>
+
         <servlet-name>VNPayController</servlet-name>
         <servlet-class>controller.VNPayController</servlet-class>
     </servlet>
@@ -99,6 +100,15 @@
     <servlet>
         <servlet-name>ReviewManagementController</servlet-name>
         <servlet-class>controller.ReviewManagementController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CategoryManagementController</servlet-name>
+        <servlet-class>controller.CategoryManagementController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AddressManagementController</servlet-name>
+        <servlet-class>controller.AddressManagementController</servlet-class>
+
     </servlet>
     <servlet-mapping>
         <servlet-name>LoginController</servlet-name>
@@ -198,6 +208,14 @@
     <servlet-mapping>
         <servlet-name>VNPayReturnController</servlet-name>
         <url-pattern>/vnpay-return</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CategoryManagementController</servlet-name>
+        <url-pattern>/category</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AddressManagementController</servlet-name>
+        <url-pattern>/address</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout> 30 </session-timeout>
