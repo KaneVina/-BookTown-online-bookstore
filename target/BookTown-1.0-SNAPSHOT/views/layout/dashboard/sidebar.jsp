@@ -145,7 +145,7 @@
             Đơn hàng
         </a>
 
-        <a href="${pageContext.request.contextPath}/admin/products"
+        <a href="${pageContext.request.contextPath}/dashboard/product-management"
            class="sidebar-link <%= currentPage.contains("products") ? "active" : ""%>">
             <span class="material-symbols-outlined">inventory_2</span>
             Kho hàng

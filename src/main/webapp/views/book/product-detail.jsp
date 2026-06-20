@@ -53,6 +53,67 @@
             flex: 0 0 calc(50% - 8px);
         }
     }
+
+    /* ── Tabs (NEW from code 2) ── */
+    .tab-nav { border-bottom: 1px solid #E0E0E0; display: flex; gap: 0; }
+    .tab-btn {
+        padding: 14px 24px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #666;
+        cursor: pointer;
+        border: none;
+        background: none;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -1px;
+        transition: color .2s, border-color .2s;
+    }
+    .tab-btn:hover { color: #17479D; }
+    .tab-btn.active { color: #17479D; border-bottom-color: #17479D; }
+    .tab-panel { display: none; padding-top: 24px; }
+    .tab-panel.active { display: block; }
+
+    /* ── Review cards (NEW from code 2) ── */
+    .badge-purchased {
+        display: inline-flex; align-items: center; gap: 4px;
+        background: #e8f5e9; color: #2e7d32;
+        font-size: 11px; font-weight: 700;
+        padding: 2px 8px; border-radius: 20px;
+    }
+    .badge-admin {
+        display: inline-block;
+        background: #1565C0; color: #fff;
+        font-size: 10px; font-weight: 700;
+        padding: 1px 7px; border-radius: 4px;
+        margin-left: 6px; vertical-align: middle;
+    }
+    .admin-reply {
+        background: #e3f0fb;
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-top: 14px;
+    }
+
+    /* ── Write review form (NEW from code 2) ── */
+    .btn-write-review {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: #17479D; color: #fff;
+        font-size: 14px; font-weight: 700;
+        padding: 12px 24px; border-radius: 8px;
+        border: none; cursor: pointer;
+        text-transform: uppercase; letter-spacing: .5px;
+        transition: background .2s;
+    }
+    .btn-write-review:hover { background: #0D47A1; }
+    .write-review-form {
+        background: #fff;
+        border: 1px solid #E0E0E0;
+        border-radius: 12px;
+        padding: 28px;
+        margin-top: 24px;
+        display: none;
+    }
+    .write-review-form.open { display: block; }
 </style>
 
 <main class="max-w-[1400px] mx-auto px-8 py-8 flex flex-col gap-8">
@@ -173,7 +234,6 @@
                     </c:choose>
                 </div>
 
-                <!-- ✅ FIX: Form có id="add-to-cart-form" và input qty có id="form-qty" -->
                 <div class="flex items-center gap-4 flex-wrap">
                     <form id="add-to-cart-form" action="${pageContext.request.contextPath}/cart" method="POST" class="flex items-center gap-4 flex-wrap flex-1">
                         <input type="hidden" name="action"   value="add" />
@@ -183,7 +243,6 @@
                         <c:if test="${book.stockQuantity > 0}">
                             <div class="flex items-center border-2 border-gray-200 rounded-full overflow-hidden">
                                 <button type="button" id="qty-minus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">−</button>
-                                <!-- ✅ FIX: thêm id="form-qty" để JS tìm được -->
                                 <input id="form-qty" name="quantity" type="number" value="1" min="1" max="${book.stockQuantity}"
                                        class="w-12 text-center text-[15px] font-bold border-none outline-none py-2 bg-transparent" readonly>
                                 <button type="button" id="qty-plus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">+</button>
@@ -194,7 +253,6 @@
                             <c:when test="${book.stockQuantity > 0}">
                                 <c:choose>
                                     <c:when test="${not empty sessionScope.account and sessionScope.account.role == 'customer'}">
-                                        <!-- ✅ FIX: dùng id="btn-add-to-cart" để JS gắn event được -->
                                         <button type="button" id="btn-add-to-cart"
                                                 class="flex-1 bg-secondary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-opacity min-w-[160px]">
                                             <i data-lucide="shopping-cart" class="w-5 h-5"></i> Thêm vào giỏ
@@ -216,25 +274,25 @@
                         </c:choose>
                     </form>
 
-                    <!-- Wishlist (giữ nguyên từ code 1) -->
+                    <!-- Wishlist (UPDATED: AJAX từ code 2, giữ biến isInWishlist của code 1) -->
                     <c:choose>
                         <c:when test="${isInWishlist}">
-                            <form action="${pageContext.request.contextPath}/wishlist" method="POST" class="flex-1 min-w-[160px]">
+                            <form action="${pageContext.request.contextPath}/wishlist" method="POST" class="flex-1 min-w-[160px]" id="wishlist-detail-form">
                                 <input type="hidden" name="action"  value="remove" />
                                 <input type="hidden" name="bookID"  value="${book.bookID}" />
-                                <input type="hidden" name="redirect" value="${pageContext.request.contextPath}/products?id=${book.bookID}" />
                                 <button type="submit" class="w-full bg-red-50 border-2 border-red-500 text-red-500 font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-red-500 hover:text-white transition-all">
-                                    <i data-lucide="heart" class="w-5 h-5 fill-current"></i> Đã thích
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2" class="w-5 h-5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                    <span class="wishlist-text">Đã thích</span>
                                 </button>
                             </form>
                         </c:when>
                         <c:otherwise>
-                            <form action="${pageContext.request.contextPath}/wishlist" method="POST" class="flex-1 min-w-[160px]">
+                            <form action="${pageContext.request.contextPath}/wishlist" method="POST" class="flex-1 min-w-[160px]" id="wishlist-detail-form">
                                 <input type="hidden" name="action"  value="add" />
                                 <input type="hidden" name="bookID"  value="${book.bookID}" />
-                                <input type="hidden" name="redirect" value="${pageContext.request.contextPath}/products?id=${book.bookID}" />
                                 <button type="submit" class="w-full border-2 border-primary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all">
-                                    <i data-lucide="heart" class="w-5 h-5"></i> Yêu thích
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                    <span class="wishlist-text">Yêu thích</span>
                                 </button>
                             </form>
                         </c:otherwise>
@@ -282,71 +340,161 @@
         </div>
     </section>
 
-    <!-- ══ REVIEWS ════════════════════════════════════════════════════════ -->
+    <!-- ══ REVIEWS (UPDATED: tab layout từ code 2) ════════════════════════════════════════════════════════ -->
     <section class="pt-2">
-        <div class="flex items-center justify-between mb-5">
-            <h2 class="section-title-left text-[20px] font-bold text-primary">Đánh giá</h2>
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-btn" onclick="switchTab('tab-desc', this)">Mô tả</button>
+            <button class="tab-btn" onclick="switchTab('tab-info', this)">Thông tin bổ sung</button>
+            <button class="tab-btn active" onclick="switchTab('tab-reviews', this)">
+                Đánh giá (${book.reviewCount})
+            </button>
         </div>
 
-        <c:choose>
-            <c:when test="${not empty reviews}">
-                <c:forEach items="${reviews}" var="review">
-                    <div class="review-card p-4 mb-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold">Customer #${review.customerID}</span>
-                            <small class="text-gray-500">${review.createdAt}</small>
-                        </div>
-                        <div class="text-yellow-500 mb-2">
-                            <c:forEach begin="1" end="5" var="i">
-                                <c:choose>
-                                    <c:when test="${i <= review.rating}">★</c:when>
-                                    <c:otherwise>☆</c:otherwise>
-                                </c:choose>
-                            </c:forEach>
-                        </div>
-                        <p class="text-gray-700">${review.comment}</p>
-                    </div>
-                </c:forEach>
-            </c:when>
-            <c:otherwise>
-                <div class="bg-white border border-gray-100 rounded-xl p-10 text-center text-gray-400 text-[14px]">
-                    Chưa có đánh giá nào. Hãy là người đầu tiên nhận xét!
-                </div>
-            </c:otherwise>
-        </c:choose>
+        <!-- Tab: Mô tả -->
+        <div id="tab-desc" class="tab-panel">
+            <c:choose>
+                <c:when test="${not empty book.description}">
+                    <p class="text-[16px] text-gray-600 leading-relaxed">${book.description}</p>
+                </c:when>
+                <c:otherwise>
+                    <p class="text-gray-400 italic">Chưa có mô tả.</p>
+                </c:otherwise>
+            </c:choose>
+        </div>
 
-        <!-- Write review form -->
-        <div class="mt-8 bg-white border rounded-xl p-6">
-            <h3 class="text-lg font-bold mb-4">Viết đánh giá</h3>
-            <form action="${pageContext.request.contextPath}/review" method="post">
-                <input type="hidden" name="bookID"        value="${book.bookID}">
-                <input type="hidden" name="customerID"    value="1">
-                <input type="hidden" name="orderDetailID" value="1">
+        <!-- Tab: Thông tin bổ sung -->
+        <div id="tab-info" class="tab-panel">
+            <table class="w-full text-[15px]">
+                <tbody>
+                    <tr class="border-b border-gray-100">
+                        <td class="py-3 font-semibold text-gray-500 w-[200px]">Nhà xuất bản</td>
+                        <td class="py-3 text-gray-800">—</td>
+                    </tr>
+                    <tr class="border-b border-gray-100">
+                        <td class="py-3 font-semibold text-gray-500">Số trang</td>
+                        <td class="py-3 text-gray-800">
+                            <c:choose>
+                                <c:when test="${book.totalPages > 0}">${book.totalPages} trang</c:when>
+                                <c:otherwise>—</c:otherwise>
+                            </c:choose>
+                        </td>
+                    </tr>
+                    <tr class="border-b border-gray-100">
+                        <td class="py-3 font-semibold text-gray-500">Hình thức</td>
+                        <td class="py-3 text-gray-800">
+                            <c:choose>
+                                <c:when test="${not empty book.contentName}">${book.contentName}</c:when>
+                                <c:otherwise>—</c:otherwise>
+                            </c:choose>
+                        </td>
+                    </tr>
+                    <tr class="border-b border-gray-100">
+                        <td class="py-3 font-semibold text-gray-500">Mã SKU</td>
+                        <td class="py-3 text-gray-800">BT-${book.bookID}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-                <div class="mb-4">
-                    <label class="font-medium block mb-2">Đánh giá</label>
-                    <input type="hidden" name="rating" id="ratingValue" value="5">
-                    <div id="ratingStars" class="flex items-center gap-1 text-4xl cursor-pointer">
-                        <span class="star" data-value="1">☆</span>
-                        <span class="star" data-value="2">☆</span>
-                        <span class="star" data-value="3">☆</span>
-                        <span class="star" data-value="4">☆</span>
-                        <span class="star" data-value="5">☆</span>
+        <!-- Tab: Đánh giá -->
+        <div id="tab-reviews" class="tab-panel active">
+            <c:choose>
+                <c:when test="${not empty reviews}">
+                    <c:forEach items="${reviews}" var="review">
+                        <div class="review-card p-5 mb-4">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-[15px]">
+                                        K
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-bold text-[15px] text-gray-800">Khách hàng #${review.customerID}</span>
+                                            <span class="badge-purchased">
+                                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                                ĐÃ MUA HÀNG
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center gap-0.5 text-[#FDD835] text-[14px] mt-1">
+                                            <c:forEach begin="1" end="5" var="i">
+                                                <c:choose>
+                                                    <c:when test="${i <= review.rating}">★</c:when>
+                                                    <c:otherwise><span class="text-gray-300">★</span></c:otherwise>
+                                                </c:choose>
+                                            </c:forEach>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="text-[13px] text-gray-400 whitespace-nowrap">${review.createdAt}</span>
+                            </div>
+                            <p class="text-[15px] text-gray-700 leading-relaxed">${review.comment}</p>
+                            <!-- Admin reply -->
+                            <div class="admin-reply">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="font-bold text-[14px] text-gray-800">Admin BookTown</span>
+                                    <span class="badge-admin">ADMIN</span>
+                                </div>
+                                <p class="text-[14px] text-gray-600 leading-relaxed">
+                                    Cảm ơn bạn đã tin tưởng và ủng hộ BookTown! Rất vui vì bạn hài lòng với chất lượng dịch vụ của shop. Hy vọng sẽ được phục vụ bạn trong những lần tới.
+                                </p>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </c:when>
+                <c:otherwise>
+                    <div class="text-center py-12 text-gray-400">
+                        <i data-lucide="message-square" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+                        <p class="text-[16px] font-medium">Chưa có đánh giá nào.</p>
+                        <p class="text-[14px] mt-1">Hãy là người đầu tiên đánh giá sản phẩm này!</p>
                     </div>
-                    <div class="mt-2 text-sm text-gray-500">
-                        Đánh giá: <span id="ratingText">5</span>/5
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <label class="font-medium">Nhận xét</label>
-                    <textarea name="comment" rows="4" required
-                              class="w-full border rounded p-3 mt-1"
-                              placeholder="Nhập đánh giá của bạn..."></textarea>
-                </div>
-                <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700">
-                    Gửi đánh giá
+                </c:otherwise>
+            </c:choose>
+
+            <!-- Toggle button -->
+            <div class="mt-6">
+                <button class="btn-write-review" onclick="document.getElementById('write-review-form').classList.toggle('open')">
+                    <i data-lucide="pen-line" class="w-4 h-4"></i>
+                    VIẾT ĐÁNH GIÁ CỦA BẠN
                 </button>
-            </form>
+            </div>
+
+            <!-- Write review form (toggle, hidden by default) -->
+            <div id="write-review-form" class="write-review-form">
+                <h3 class="text-[18px] font-bold text-gray-800 mb-6">Viết đánh giá của bạn</h3>
+                <form action="${pageContext.request.contextPath}/review" method="post">
+                    <input type="hidden" name="bookID"        value="${book.bookID}">
+                    <input type="hidden" name="customerID"    value="1">
+                    <input type="hidden" name="orderDetailID" value="1">
+                    <div class="mb-5">
+                        <label class="block font-semibold text-gray-700 mb-2">Đánh giá sao</label>
+                        <input type="hidden" name="rating" id="ratingValue" value="5">
+                        <div id="ratingStars" class="flex items-center gap-2 text-4xl cursor-pointer">
+                            <span class="star" data-value="1">☆</span>
+                            <span class="star" data-value="2">☆</span>
+                            <span class="star" data-value="3">☆</span>
+                            <span class="star" data-value="4">☆</span>
+                            <span class="star" data-value="5">☆</span>
+                        </div>
+                        <div class="mt-1 text-sm text-gray-400">Bạn chọn: <span id="ratingText" class="font-bold text-primary">5</span>/5 sao</div>
+                    </div>
+                    <div class="mb-5">
+                        <label class="block font-semibold text-gray-700 mb-2">Nhận xét của bạn</label>
+                        <textarea name="comment" rows="4" required
+                                  class="w-full border border-gray-200 rounded-xl p-4 text-[15px] focus:outline-none focus:border-primary resize-none"
+                                  placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..."></textarea>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="submit" class="btn-write-review">
+                            <i data-lucide="send" class="w-4 h-4"></i> Gửi đánh giá
+                        </button>
+                        <button type="button" onclick="document.getElementById('write-review-form').classList.remove('open')"
+                                class="px-6 py-3 border border-gray-300 text-gray-600 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                            Hủy
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </section>
 
@@ -368,22 +516,44 @@
             <div id="relatedSlider" class="slider-track">
                 <c:forEach var="rb" items="${relatedBooks}">
                     <div class="slider-item prod-card-hover bg-white rounded-xl overflow-hidden flex flex-col">
-                        <a href="${pageContext.request.contextPath}/products?id=${rb.bookID}"
-                           class="relative block bg-[#f0f4ff] aspect-[3/4] overflow-hidden">
-                            <c:choose>
-                                <c:when test="${not empty rb.thumbnail}">
-                                    <img src="${rb.thumbnail}" alt="${rb.title}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
-                                </c:when>
-                                <c:otherwise>
-                                    <div class="w-full h-full flex items-center justify-center">
-                                        <i data-lucide="book-open" class="w-12 h-12 text-gray-300"></i>
-                                    </div>
-                                </c:otherwise>
-                            </c:choose>
+                        <!-- UPDATED: thêm wishlist overlay heart icon từ code 2 -->
+                        <div class="relative block bg-[#f0f4ff] aspect-[3/4] overflow-hidden">
+                            <a href="${pageContext.request.contextPath}/products?id=${rb.bookID}">
+                                <c:choose>
+                                    <c:when test="${not empty rb.thumbnail}">
+                                        <img src="${rb.thumbnail}" alt="${rb.title}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="w-full h-full flex items-center justify-center">
+                                            <i data-lucide="book-open" class="w-12 h-12 text-gray-300"></i>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
+                            </a>
                             <c:if test="${rb.featured}">
                                 <span class="absolute top-2.5 left-2.5 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">🔥 Hot</span>
                             </c:if>
-                        </a>
+                            <!-- Wishlist heart overlay (NEW from code 2) -->
+                            <c:if test="${empty sessionScope.account or sessionScope.account.role == 'customer'}">
+                                <form method="post" action="${pageContext.request.contextPath}/wishlist" class="wishlist-form absolute top-2.5 right-2.5 z-20">
+                                    <input type="hidden" name="bookID" value="${rb.bookID}">
+                                    <c:choose>
+                                        <c:when test="${not empty wishlistBookIds and wishlistBookIds.contains(rb.bookID)}">
+                                            <input type="hidden" name="action" value="remove">
+                                            <button type="submit" class="wish-btn active" title="Xóa khỏi yêu thích">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                            </button>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <input type="hidden" name="action" value="add">
+                                            <button type="submit" class="wish-btn" title="Thêm vào yêu thích">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                            </button>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </form>
+                            </c:if>
+                        </div>
                         <div class="p-3 flex flex-col flex-1 gap-1.5">
                             <a href="${pageContext.request.contextPath}/products?id=${rb.bookID}"
                                class="text-[13px] font-bold text-[#222222] line-clamp-2 hover:text-primary transition-colors min-h-[36px]">
@@ -421,32 +591,35 @@
 
 </main>
 
-<!-- ✅ FIX: Script được viết lại đúng cấu trúc, không bị lồng nhau -->
 <script>
+    // ── Tab switching (NEW from code 2) ──────────────────────────────────
+    function switchTab(panelId, btn) {
+        document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+        document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+        document.getElementById(panelId).classList.add('active');
+        btn.classList.add('active');
+    }
+
     // ── Qty +/- ──────────────────────────────────────────────────────────
     (function () {
         var input = document.getElementById('form-qty');
-        if (!input)
-            return;
+        if (!input) return;
         var max = parseInt(input.getAttribute('max')) || 1;
 
         document.getElementById('qty-minus').addEventListener('click', function () {
             var v = parseInt(input.value) || 1;
-            if (v > 1)
-                input.value = v - 1;
+            if (v > 1) input.value = v - 1;
         });
         document.getElementById('qty-plus').addEventListener('click', function () {
             var v = parseInt(input.value) || 1;
-            if (v < max)
-                input.value = v + 1;
+            if (v < max) input.value = v + 1;
         });
     })();
 
     // ── Thumbnail switcher ───────────────────────────────────────────────
     window.switchImg = function (btn, src) {
         var main = document.getElementById('mainImage');
-        if (main)
-            main.src = src;
+        if (main) main.src = src;
         document.querySelectorAll('[onclick^="switchImg"]').forEach(function (b) {
             b.className = b.className.replace('prod-thumb-active', 'prod-thumb-idle');
         });
@@ -470,43 +643,36 @@
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                 body: params.toString()
             })
-                    .then(function (res) {
-                        return res.json();
-                    })
-                    .then(function (data) {
-                        if (data.ok) {
-                            var badge = document.getElementById('cart-count');
-                            if (badge)
-                                badge.textContent = data.cartCount;
-                            showToast('Thêm vào giỏ hàng thành công!');
-                        } else {
-                            showToast(data.message || 'Thêm vào giỏ hàng thất bại!', true);
-                        }
-                    })
-                    .catch(function () {
-                        showToast('Lỗi kết nối, vui lòng thử lại!', true);
-                    });
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.ok) {
+                    var badge = document.getElementById('cart-count');
+                    if (badge) badge.textContent = data.cartCount;
+                    showToast('Thêm vào giỏ hàng thành công!');
+                } else {
+                    showToast(data.message || 'Thêm vào giỏ hàng thất bại!', true);
+                }
+            })
+            .catch(function () {
+                showToast('Lỗi kết nối, vui lòng thử lại!', true);
+            });
         });
     }
 
     // ── Related slider ───────────────────────────────────────────────────
     var slider = document.getElementById('relatedSlider');
-    var prev = document.getElementById('sliderPrev');
-    var next = document.getElementById('sliderNext');
+    var prev   = document.getElementById('sliderPrev');
+    var next   = document.getElementById('sliderNext');
     if (slider && prev && next) {
         var scrollAmt = 280;
-        prev.addEventListener('click', function () {
-            slider.scrollBy({left: -scrollAmt, behavior: 'smooth'});
-        });
-        next.addEventListener('click', function () {
-            slider.scrollBy({left: scrollAmt, behavior: 'smooth'});
-        });
+        prev.addEventListener('click', function () { slider.scrollBy({left: -scrollAmt, behavior: 'smooth'}); });
+        next.addEventListener('click', function () { slider.scrollBy({left:  scrollAmt, behavior: 'smooth'}); });
     }
 
     // ── Star rating ──────────────────────────────────────────────────────
-    var stars = document.querySelectorAll('.star');
+    var stars       = document.querySelectorAll('.star');
     var ratingInput = document.getElementById('ratingValue');
-    var ratingText = document.getElementById('ratingText');
+    var ratingText  = document.getElementById('ratingText');
     var currentRating = 5;
 
     function updateStars(rating) {
@@ -521,12 +687,10 @@
         });
     }
 
-    updateStars(currentRating); // hiển thị mặc định 5 sao
+    updateStars(currentRating);
 
     stars.forEach(function (star) {
-        star.addEventListener('mouseover', function () {
-            updateStars(star.dataset.value);
-        });
+        star.addEventListener('mouseover', function () { updateStars(star.dataset.value); });
         star.addEventListener('click', function () {
             currentRating = star.dataset.value;
             ratingInput.value = currentRating;
@@ -537,6 +701,156 @@
 
     document.getElementById('ratingStars').addEventListener('mouseleave', function () {
         updateStars(currentRating);
+    });
+
+    // ── AJAX Wishlist (NEW from code 2) ──────────────────────────────────
+    document.addEventListener("DOMContentLoaded", function() {
+
+        // 1. Wishlist detail form (main product)
+        var detailForm = document.getElementById("wishlist-detail-form");
+        if (detailForm) {
+            detailForm.addEventListener("submit", async function(e) {
+                e.preventDefault();
+
+                var form        = e.currentTarget;
+                var btn         = form.querySelector("button[type='submit']");
+                var svg         = btn.querySelector("svg");
+                var textSpan    = form.querySelector(".wishlist-text");
+                var actionInput = form.querySelector("input[name='action']");
+                var bookID      = form.querySelector("input[name='bookID']").value;
+                var action      = actionInput.value;
+                var formUrl     = form.getAttribute("action");
+
+                var params = new URLSearchParams();
+                params.append("action", action);
+                params.append("bookID", bookID);
+                params.append("ajax", "true");
+
+                try {
+                    var response = await fetch(formUrl, {
+                        method: "POST",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: params.toString()
+                    });
+
+                    if (response.status === 401) {
+                        var data = await response.json();
+                        if (data.redirect) window.location.href = data.redirect;
+                        return;
+                    }
+
+                    if (response.ok) {
+                        var data = await response.json();
+                        if (data.success) {
+                            if (data.action === "added") {
+                                btn.className = "w-full bg-red-50 border-2 border-red-500 text-red-500 font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-red-500 hover:text-white transition-all";
+                                svg.setAttribute("fill", "#ef4444");
+                                svg.setAttribute("stroke", "#ef4444");
+                                textSpan.textContent = "Đã thích";
+                                actionInput.value = "remove";
+                                showToast("Đã thêm vào yêu thích!");
+                            } else {
+                                btn.className = "w-full border-2 border-primary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all";
+                                svg.setAttribute("fill", "none");
+                                svg.setAttribute("stroke", "currentColor");
+                                textSpan.textContent = "Yêu thích";
+                                actionInput.value = "add";
+                                showToast("Đã xóa khỏi yêu thích!");
+                            }
+
+                            var badge = document.querySelector(".wishlist-badge");
+                            if (badge) {
+                                badge.textContent = data.wishlistCount;
+                                if (data.wishlistCount > 0) badge.classList.remove("hidden");
+                                else badge.classList.add("hidden");
+                            }
+                        } else {
+                            showToast("Có lỗi xảy ra, vui lòng thử lại.", true);
+                        }
+                    } else {
+                        showToast("Không thể thực hiện yêu cầu.", true);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast("Lỗi kết nối mạng.", true);
+                }
+            });
+        }
+
+        // 2. Wishlist forms in related slider
+        document.querySelectorAll(".wishlist-form").forEach(function(form) {
+            form.addEventListener("submit", async function(e) {
+                e.preventDefault();
+
+                var f           = e.currentTarget;
+                var btn         = f.querySelector(".wish-btn");
+                var svg         = btn.querySelector("svg");
+                var actionInput = f.querySelector("input[name='action']");
+                var bookID      = f.querySelector("input[name='bookID']").value;
+                var action      = actionInput.value;
+                var formUrl     = f.getAttribute("action");
+
+                var params = new URLSearchParams();
+                params.append("action", action);
+                params.append("bookID", bookID);
+                params.append("ajax", "true");
+
+                try {
+                    var response = await fetch(formUrl, {
+                        method: "POST",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: params.toString()
+                    });
+
+                    if (response.status === 401) {
+                        var data = await response.json();
+                        if (data.redirect) window.location.href = data.redirect;
+                        return;
+                    }
+
+                    if (response.ok) {
+                        var data = await response.json();
+                        if (data.success) {
+                            if (data.action === "added") {
+                                btn.classList.add("active");
+                                svg.setAttribute("fill", "#ef4444");
+                                svg.setAttribute("stroke", "#ef4444");
+                                actionInput.value = "remove";
+                                btn.setAttribute("title", "Xóa khỏi yêu thích");
+                                showToast("Đã thêm vào yêu thích!");
+                            } else if (data.action === "removed") {
+                                btn.classList.remove("active");
+                                svg.setAttribute("fill", "none");
+                                svg.setAttribute("stroke", "#374151");
+                                actionInput.value = "add";
+                                btn.setAttribute("title", "Thêm vào yêu thích");
+                                showToast("Đã xóa khỏi yêu thích!");
+                            }
+
+                            var badge = document.querySelector(".wishlist-badge");
+                            if (badge) {
+                                badge.textContent = data.wishlistCount;
+                                if (data.wishlistCount > 0) badge.classList.remove("hidden");
+                                else badge.classList.add("hidden");
+                            }
+                        } else {
+                            showToast("Có lỗi xảy ra, vui lòng thử lại.", true);
+                        }
+                    } else {
+                        showToast("Không thể thực hiện yêu cầu.", true);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast("Lỗi kết nối mạng.", true);
+                }
+            });
+        });
     });
 </script>
 

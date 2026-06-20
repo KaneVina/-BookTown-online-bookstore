@@ -1,6 +1,7 @@
 controller\AccountManagementController.class
 model\CartItem.class
 controller\HomeController.class
+controller\AdminProductController.class
 dao\OrderDAO.class
 model\OrderDetail.class
 utils\EmailUtil.class
@@ -10,6 +11,7 @@ controller\OrderConfirmationController.class
 dao\AccountDAO.class
 controller\RegisterController.class
 utils\HashMD5.class
+controller\DashboardController.class
 utils\DBContext.class
 model\Genre.class
 model\Review.class
@@ -32,6 +34,7 @@ dao\WishListDAO.class
 controller\AccountDetailController.class
 dao\BookDAO.class
 controller\OrderHistoryController.class
+model\WishlistItem.class
 controller\ProductController.class
 controller\ReviewController.class
 model\Order.class
