@@ -10,7 +10,7 @@ public class DBContext {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 
             String dbURL = "jdbc:sqlserver://localhost:1433;"
-                    + "databaseName=BookTown;"
+                    + "databaseName=BookstoreDB;"
                     + "user=sa;"
                     + "password=123456;"
                     + "encrypt=true;"

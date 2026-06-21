@@ -180,4 +180,46 @@ public class AddressDAO {
 
     return list;
 }
+    public int insertAddressAndReturnId(Address a) {
+    String sql = "INSERT INTO Address(customerID, street, district, city, country, is_default) "
+            + "VALUES (?, ?, ?, ?, ?, ?)";
+
+    try {
+        Connection conn = db.getConnection();
+
+        if (a.isDefault()) {
+            PreparedStatement reset = conn.prepareStatement(
+                    "UPDATE Address SET is_default = 0 WHERE customerID = ?"
+            );
+            reset.setInt(1, a.getCustomerID());
+            reset.executeUpdate();
+            reset.close();
+        }
+
+        PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+        ps.setInt(1, a.getCustomerID());
+        ps.setString(2, a.getStreet());
+        ps.setString(3, a.getDistrict());
+        ps.setString(4, a.getCity());
+        ps.setString(5, a.getCountry());
+        ps.setBoolean(6, a.isDefault());
+
+        ps.executeUpdate();
+
+        ResultSet rs = ps.getGeneratedKeys();
+
+        if (rs.next()) {
+            int id = rs.getInt(1);
+            conn.close();
+            return id;
+        }
+
+        conn.close();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return -1;
+}
 }

@@ -84,6 +84,12 @@ public class CheckoutController extends HttpServlet {
         }
 
         Account account = getAccount(request);
+        String action = request.getParameter("action");
+
+        if ("saveAddress".equals(action)) {
+            saveAddressAjax(request, response, account);
+            return;
+        }
 
         String fullname = request.getParameter("fullname");
         String phone = request.getParameter("phone");
@@ -176,6 +182,45 @@ public class CheckoutController extends HttpServlet {
         request.getSession().setAttribute("cartCount", 0);
 
         response.sendRedirect(request.getContextPath() + "/order-confirmation?orderID=" + orderID);
+    }
+
+    private void saveAddressAjax(HttpServletRequest request, HttpServletResponse response, Account account)
+            throws IOException {
+
+        String street = request.getParameter("street");
+        String ward = request.getParameter("ward");
+        String city = request.getParameter("city");
+        String isDefaultRaw = request.getParameter("isDefault");
+
+        response.setContentType("application/json;charset=UTF-8");
+
+        if (isEmpty(street) || isEmpty(ward) || isEmpty(city)) {
+            response.getWriter().write("{\"success\":false}");
+            return;
+        }
+
+        if (!isValidAddressPart(street) || !isValidAddressPart(ward) || !isValidAddressPart(city)) {
+            response.getWriter().write("{\"success\":false}");
+            return;
+        }
+
+        Address address = new Address();
+        address.setCustomerID(account.getId());
+        address.setStreet(street.trim());
+        address.setDistrict(ward.trim());
+        address.setCity(city.trim());
+        address.setCountry("Việt Nam");
+        address.setDefault("true".equals(isDefaultRaw));
+
+        AddressDAO addressDAO = new AddressDAO();
+        int addressID = addressDAO.insertAddressAndReturnId(address);
+
+        if (addressID == -1) {
+            response.getWriter().write("{\"success\":false}");
+            return;
+        }
+
+        response.getWriter().write("{\"success\":true,\"addressID\":" + addressID + "}");
     }
 
     private boolean isCustomer(HttpServletRequest request, HttpServletResponse response)
