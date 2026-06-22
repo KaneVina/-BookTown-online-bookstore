@@ -15,7 +15,6 @@ model\Genre.class
 model\Review.class
 filter\AuthFilter.class
 controller\LoginController.class
-controller\UpdateAccountController.class
 controller\VNPayReturnController.class
 controller\WishListController.class
 model\Voucher.class
@@ -29,7 +28,6 @@ controller\CartController.class
 dao\ReviewDAO.class
 controller\ProfileController.class
 dao\WishListDAO.class
-controller\AccountDetailController.class
 dao\BookDAO.class
 controller\OrderHistoryController.class
 controller\ProductController.class

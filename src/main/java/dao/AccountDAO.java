@@ -153,4 +153,126 @@ public class AccountDAO {
         }
         return list;
     }
+
+    public Account getStaffById(int id) {
+        String sql = "SELECT * FROM Account WHERE accountID = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new Account(
+                        rs.getInt("accountID"),
+                        rs.getString("fullname"),
+                        rs.getString("email"),
+                        rs.getString("phone"),
+                        rs.getString("role"),
+                        rs.getString("status")
+                );
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public boolean isEmailExists(String email) {
+        String sql1 = "SELECT 1 FROM Account WHERE email = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql1)) {
+            ps.setString(1, email);
+            if (ps.executeQuery().next()) {
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String sql2 = "SELECT 1 FROM Customer WHERE email = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql2)) {
+            ps.setString(1, email);
+            if (ps.executeQuery().next()) {
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean registerStaff(String fullname,
+            String email,
+            String phone,
+            String password,
+            String role,
+            String status) {
+        String sql = "INSERT INTO Account "
+                + "(fullname, email, password, phone, role, status) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, fullname);
+            ps.setString(2, email);
+            ps.setString(3, hashMD5(password));
+            ps.setString(4, phone);
+            ps.setString(5, role);
+            ps.setString(6, status);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean updateStaff(int id,
+            String fullname,
+            String email,
+            String phone,
+            String role) {
+        String sql = "UPDATE Account "
+                + "SET fullname = ?, "
+                + "email = ?, "
+                + "phone = ?, "
+                + "role = ? "
+                + "WHERE accountID = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, fullname);
+            ps.setString(2, email);
+            ps.setString(3, phone);
+            ps.setString(4, role);
+            ps.setInt(5, id);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean updateStaffByAdmin(int id, String fullname, String phone, String role, String status) {
+        String sql = "UPDATE Account SET fullname=?, phone=?, role=?, status=? WHERE accountID=?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, fullname);
+            ps.setString(2, phone);
+            ps.setString(3, role);
+            ps.setString(4, status);
+            ps.setInt(5, id);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean updateCustomerByAdmin(int id, String fullname, String phone, String status) {
+        String sql = "UPDATE Customer SET fullname=?, phone=?, status=? WHERE customerID=?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, fullname);
+            ps.setString(2, phone);
+            ps.setString(3, status);
+            ps.setInt(4, id);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
