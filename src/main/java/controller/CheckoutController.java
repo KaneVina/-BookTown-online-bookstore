@@ -36,7 +36,7 @@ public class CheckoutController extends HttpServlet {
                 try {
                     int addressID = Integer.parseInt(addressIdRaw);
                     AddressDAO addressDAO = new AddressDAO();
-                    addressDAO.deleteAddress(addressID);
+                    addressDAO.deleteAddressByCustomer(addressID, account.getId());
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }
@@ -88,6 +88,16 @@ public class CheckoutController extends HttpServlet {
 
         if ("saveAddress".equals(action)) {
             saveAddressAjax(request, response, account);
+            return;
+        }
+
+        if ("deleteAddressAjax".equals(action)) {
+            deleteAddressAjax(request, response, account);
+            return;
+        }
+
+        if ("setDefaultAddressAjax".equals(action)) {
+            setDefaultAddressAjax(request, response, account);
             return;
         }
 
@@ -155,12 +165,31 @@ public class CheckoutController extends HttpServlet {
 
         BigDecimal total = cartDAO.calcSubtotal(cartItems);
 
-        int addressID = orderDAO.createTempAddress(
-                account.getId(),
-                street.trim(),
-                ward.trim(),
-                city.trim()
-        );
+        AddressDAO addressDAO = new AddressDAO();
+
+        int addressID = -1;
+        List<Address> addresses = addressDAO.getAddressesByCustomerId(account.getId());
+
+        for (Address a : addresses) {
+            if (a.getStreet().equalsIgnoreCase(street.trim())
+                    && a.getDistrict().equalsIgnoreCase(ward.trim())
+                    && a.getCity().equalsIgnoreCase(city.trim())) {
+                addressID = a.getAddressID();
+                break;
+            }
+        }
+
+        if (addressID == -1) {
+            Address address = new Address();
+            address.setCustomerID(account.getId());
+            address.setStreet(street.trim());
+            address.setDistrict(ward.trim());
+            address.setCity(city.trim());
+            address.setCountry("Việt Nam");
+            address.setDefault(false);
+
+            addressID = addressDAO.insertAddressAndReturnId(address);
+        }
 
         if (addressID == -1) {
             request.getSession().setAttribute("errorMessage", "Lỗi khi lưu địa chỉ, vui lòng thử lại!");
@@ -221,6 +250,52 @@ public class CheckoutController extends HttpServlet {
         }
 
         response.getWriter().write("{\"success\":true,\"addressID\":" + addressID + "}");
+    }
+
+    private void deleteAddressAjax(HttpServletRequest request, HttpServletResponse response, Account account)
+            throws IOException {
+
+        response.setContentType("application/json;charset=UTF-8");
+
+        String addressIdRaw = request.getParameter("addressID");
+
+        if (isEmpty(addressIdRaw)) {
+            response.getWriter().write("{\"success\":false}");
+            return;
+        }
+
+        try {
+            int addressID = Integer.parseInt(addressIdRaw);
+            AddressDAO addressDAO = new AddressDAO();
+            boolean ok = addressDAO.deleteAddressByCustomer(addressID, account.getId());
+
+            response.getWriter().write("{\"success\":" + ok + "}");
+        } catch (NumberFormatException e) {
+            response.getWriter().write("{\"success\":false}");
+        }
+    }
+
+    private void setDefaultAddressAjax(HttpServletRequest request, HttpServletResponse response, Account account)
+            throws IOException {
+
+        response.setContentType("application/json;charset=UTF-8");
+
+        String addressIdRaw = request.getParameter("addressID");
+
+        if (isEmpty(addressIdRaw)) {
+            response.getWriter().write("{\"success\":false}");
+            return;
+        }
+
+        try {
+            int addressID = Integer.parseInt(addressIdRaw);
+            AddressDAO addressDAO = new AddressDAO();
+            addressDAO.setDefaultAddress(addressID, account.getId());
+
+            response.getWriter().write("{\"success\":true}");
+        } catch (NumberFormatException e) {
+            response.getWriter().write("{\"success\":false}");
+        }
     }
 
     private boolean isCustomer(HttpServletRequest request, HttpServletResponse response)
