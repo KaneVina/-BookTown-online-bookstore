@@ -68,6 +68,8 @@ public class OrderHistoryController extends HttpServlet {
 
         Account account = getAccount(request);
 
+        String status = request.getParameter("status");
+
         int pageSize = PAGE_SIZE;
         int currentPage = 1;
         try {
@@ -78,7 +80,7 @@ public class OrderHistoryController extends HttpServlet {
         } catch (Exception ignored) {
         }
 
-        int totalRecords = orderDAO.countOrdersByCustomer(account.getId());
+        int totalRecords = orderDAO.countOrdersByCustomerFiltered(account.getId(), status);
         int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
         if (totalPages == 0) {
             totalPages = 1;
@@ -89,13 +91,14 @@ public class OrderHistoryController extends HttpServlet {
 
         int offset = (currentPage - 1) * pageSize;
 
-        List<Order> orders = orderDAO.getOrdersByCustomer(account.getId(), offset, pageSize);
+        List<Order> orders = orderDAO.getOrdersByCustomerFiltered(account.getId(), status, offset, pageSize);
 
         request.setAttribute("orders", orders);
         request.setAttribute("currentPage", currentPage);
         request.setAttribute("totalPages", totalPages);
+        request.setAttribute("status", status);
 
-        String baseUrl = request.getContextPath() + "/profile/order-history?action=list";
+        String baseUrl = request.getContextPath() + "/profile/order-history?status=" + (status != null ? status : "");
         request.setAttribute("baseUrl", baseUrl);
 
         request.getRequestDispatcher("/views/order/order-history.jsp").forward(request, response);
@@ -133,7 +136,7 @@ public class OrderHistoryController extends HttpServlet {
 
         HttpSession session = request.getSession();
         if (ok) {
-           String orderCode = (order != null) ? order.getOrderCode() : String.valueOf(orderID);
+            String orderCode = (order != null) ? order.getOrderCode() : String.valueOf(orderID);
             session.setAttribute("successMessage", "Đã hủy đơn hàng #" + orderCode + " thành công!");
         } else {
             session.setAttribute("errorMessage", "Không thể hủy đơn hàng này (đơn đã được xử lý).");

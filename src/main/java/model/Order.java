@@ -13,16 +13,17 @@ import java.text.SimpleDateFormat;
  * @author Kim Chi
  */
 public class Order {
+
     private int orderID;
     private int customerID;
     private int addressID;
-    private Integer processedBy;       
-    private String status;             
-    private String paymentMethod;      
-    private String paymentStatus;     
+    private Integer processedBy;
+    private String status;
+    private String paymentMethod;
+    private String paymentStatus;
     private BigDecimal totalPrice;
     private Timestamp createdAt;
-
+    private String city;
     private String street;
     private String district;
 
@@ -49,12 +50,10 @@ public class Order {
     public void setCity(String city) {
         this.city = city;
     }
-    private String city;
 
-    
-    public Order() {}
+    public Order() {
+    }
 
-       
     public int getOrderID() {
         return orderID;
     }
@@ -126,7 +125,8 @@ public class Order {
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
-      public String getOrderCode() {
+
+    public String getOrderCode() {
         String datePart = "";
         if (createdAt != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("ddMMyy");
@@ -136,4 +136,31 @@ public class Order {
         return "BT-" + datePart + seqPart;
     }
 
+    private String customerName;
+    private String customerEmail;
+    private String customerPhone;
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getCustomerEmail() {
+        return customerEmail;
+    }
+
+    public void setCustomerEmail(String customerEmail) {
+        this.customerEmail = customerEmail;
+    }
+
+    public String getCustomerPhone() {
+        return customerPhone;
+    }
+
+    public void setCustomerPhone(String customerPhone) {
+        this.customerPhone = customerPhone;
+    }
 }

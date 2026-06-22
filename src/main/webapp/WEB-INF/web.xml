@@ -33,14 +33,6 @@
         <servlet-class>controller.CustomerOrderController</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>CustomerOrderDetailController</servlet-name>
-        <servlet-class>controller.CustomerOrderDetailController</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>OrderHistoryDetailController</servlet-name>
-        <servlet-class>controller.OrderHistoryDetailController</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>OrderHistoryController</servlet-name>
         <servlet-class>controller.OrderHistoryController</servlet-class>
     </servlet>
@@ -144,14 +136,6 @@
     <servlet-mapping>
         <servlet-name>CustomerOrderController</servlet-name>
         <url-pattern>/dashboard/customer-order</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CustomerOrderDetailController</servlet-name>
-        <url-pattern>/dashboard/customer-order-detail</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>OrderHistoryDetailController</servlet-name>
-        <url-pattern>/profile/order-history-detail</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>OrderHistoryController</servlet-name>

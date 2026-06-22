@@ -29,26 +29,28 @@ public class CheckoutController extends HttpServlet {
         Account account = getAccount(request);
         String action = request.getParameter("action");
 
-        if ("deleteAddress".equals(action)) {
-            String addressIdRaw = request.getParameter("addressID");
+        if (action != null) {
+            switch (action) {
+                case "deleteAddress":
+                    String addressIdRaw = request.getParameter("addressID");
 
-            if (addressIdRaw != null && !addressIdRaw.trim().isEmpty()) {
-                try {
-                    int addressID = Integer.parseInt(addressIdRaw);
-                    AddressDAO addressDAO = new AddressDAO();
-                    addressDAO.deleteAddress(addressID);
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
+                    if (addressIdRaw != null && !addressIdRaw.trim().isEmpty()) {
+                        try {
+                            int addressID = Integer.parseInt(addressIdRaw);
+                            AddressDAO addressDAO = new AddressDAO();
+                            addressDAO.deleteAddress(addressID);
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    response.sendRedirect(request.getContextPath() + "/checkout");
+                    return;
             }
-
-            response.sendRedirect(request.getContextPath() + "/checkout");
-            return;
         }
 
         CartDAO cartDAO = new CartDAO();
         AddressDAO addressDAO = new AddressDAO();
-
         List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
 
         if (cartItems.isEmpty()) {
@@ -64,7 +66,6 @@ public class CheckoutController extends HttpServlet {
         }
 
         List<Address> addressList = addressDAO.getAddressesByCustomerId(account.getId());
-
         request.setAttribute("cartItems", cartItems);
         request.setAttribute("total", total);
         request.setAttribute("totalQuantity", totalQuantity);
@@ -91,56 +92,22 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-        String fullname = request.getParameter("fullname");
-        String phone = request.getParameter("phone");
-        String street = request.getParameter("street");
-        String ward = request.getParameter("ward");
-        String city = request.getParameter("city");
-        String district = request.getParameter("district");
         String paymentMethod = request.getParameter("payment_method");
 
-        if (isEmpty(fullname) || isEmpty(phone) || isEmpty(street)
-                || isEmpty(ward) || isEmpty(city)) {
+        switch (paymentMethod) {
+            case "vnpay":
+                request.getRequestDispatcher("/vnpay-payment")
+                        .forward(request, response);
+                return;
 
-            request.getSession().setAttribute(
-                    "errorMessage",
-                    "Bạn chưa có địa chỉ. Vui lòng nhập địa chỉ giao hàng trước khi thanh toán."
-            );
-            response.sendRedirect(request.getContextPath() + "/checkout");
-            return;
-        }
+            case "cod":
+                break;
 
-        if (isEmpty(district)) {
-            district = "Không có";
-        }
-
-        if (!isValidFullname(fullname)) {
-            request.getSession().setAttribute("errorMessage", "Họ tên người nhận không hợp lệ!");
-            response.sendRedirect(request.getContextPath() + "/checkout");
-            return;
-        }
-
-        if (!isValidPhone(phone)) {
-            request.getSession().setAttribute("errorMessage", "Số điện thoại không hợp lệ!");
-            response.sendRedirect(request.getContextPath() + "/checkout");
-            return;
-        }
-
-        if (!isValidAddressPart(street) || !isValidAddressPart(ward) || !isValidAddressPart(city)) {
-            request.getSession().setAttribute("errorMessage", "Địa chỉ không hợp lệ, vui lòng nhập lại!");
-            response.sendRedirect(request.getContextPath() + "/checkout");
-            return;
-        }
-
-        if ("vnpay".equals(paymentMethod)) {
-            request.getRequestDispatcher("/vnpay-payment").forward(request, response);
-            return;
-        }
-
-        if (!"cod".equals(paymentMethod)) {
-            request.getSession().setAttribute("errorMessage", "Phương thức thanh toán chưa được hỗ trợ!");
-            response.sendRedirect(request.getContextPath() + "/checkout");
-            return;
+            default:
+                request.getSession().setAttribute("errorMessage",
+                        "Phương thức thanh toán chưa được hỗ trợ!");
+                response.sendRedirect(request.getContextPath() + "/checkout");
+                return;
         }
 
         CartDAO cartDAO = new CartDAO();
@@ -155,15 +122,27 @@ public class CheckoutController extends HttpServlet {
 
         BigDecimal total = cartDAO.calcSubtotal(cartItems);
 
-        int addressID = orderDAO.createTempAddress(
-                account.getId(),
-                street.trim(),
-                ward.trim(),
-                city.trim()
-        );
+        String fullname = request.getParameter("fullname");
+        String phone = request.getParameter("phone");
+        String street = request.getParameter("street");
+        String ward = request.getParameter("ward");
+        String city = request.getParameter("city");
+
+        AddressDAO addressDAO = new AddressDAO();
+        List<Address> addresses = addressDAO.getAddressesByCustomerId(account.getId());
+        int addressID = -1;
+        for (Address addr : addresses) {
+            if (street != null && ward != null && city != null
+                    && street.trim().equals(addr.getStreet())
+                    && ward.trim().equals(addr.getDistrict())
+                    && city.trim().equals(addr.getCity())) {
+                addressID = addr.getAddressID();
+                break;
+            }
+        }
 
         if (addressID == -1) {
-            request.getSession().setAttribute("errorMessage", "Lỗi khi lưu địa chỉ, vui lòng thử lại!");
+            request.getSession().setAttribute("errorMessage", "Vui lòng chọn địa chỉ giao hàng!");
             response.sendRedirect(request.getContextPath() + "/checkout");
             return;
         }
