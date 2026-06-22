@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <%@ include file="/views/layout/homepage/header.jsp" %>
 
@@ -41,9 +42,7 @@
         box-shadow:0 0 0 3px rgba(37,99,235,.15);
     }
 </style>
-
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-
 <div class="max-w-7xl mx-auto py-10 px-4">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- SIDEBAR -->
@@ -98,20 +97,17 @@
 
         <!--form nhập thông tin và lưu thay đổi-->
         <div class="lg:col-span-3 space-y-6">
+            <!-- Dữ liệu để bắn toast, không hiện box thông báo nữa -->
             <c:if test="${not empty sessionScope.message}">
-                <div class="bg-green-100 text-green-700 p-4 rounded-xl">
-                    ${sessionScope.message}
-                </div>
+                <div id="toastMessageData" class="hidden" data-message="${fn:escapeXml(sessionScope.message)}"></div>
                 <c:remove var="message" scope="session"/>
             </c:if>
 
             <c:if test="${not empty sessionScope.error}">
-                <div class="bg-red-100 text-red-700 p-4 rounded-xl">
-                    ${sessionScope.error}
-                </div>
+                <div id="toastErrorData" class="hidden" data-message="${fn:escapeXml(sessionScope.error)}"></div>
                 <c:remove var="error" scope="session"/>
             </c:if>
-            <!-- PROFILE -->
+
             <div id="profile" class="profile-card p-8">
                 <div class="mb-8">
                     <h1 class="text-3xl font-bold">
@@ -213,4 +209,20 @@
         </div>
     </div>
 </div>
+
+<%@ include file="/views/layout/common/toast.jsp" %>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const msgEl = document.getElementById('toastMessageData');
+        const errEl = document.getElementById('toastErrorData');
+
+        if (msgEl) {
+            showToast(msgEl.dataset.message);
+        }
+        if (errEl) {
+            showToast(errEl.dataset.message, true);
+        }
+    });
+</script>
+
 <%@ include file="/views/layout/homepage/footer.jsp" %>

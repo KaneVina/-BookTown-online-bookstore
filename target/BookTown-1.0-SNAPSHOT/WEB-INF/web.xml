@@ -69,14 +69,6 @@
         <servlet-class>controller.AccountDetailController</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>CreateStaffController</servlet-name>
-        <servlet-class>controller.CreateStaffController</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>UpdateAccountController</servlet-name>
-        <servlet-class>controller.UpdateAccountController</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>VoucherController</servlet-name>
         <servlet-class>controller.VoucherController</servlet-class>
     </servlet>
@@ -99,6 +91,10 @@
     <servlet>
         <servlet-name>ReviewManagementController</servlet-name>
         <servlet-class>controller.ReviewManagementController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CreateStaffController</servlet-name>
+        <servlet-class>controller.CreateStaffController</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>LoginController</servlet-name>
@@ -168,18 +164,6 @@
         <url-pattern>/review</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>AccountDetailController</servlet-name>
-        <url-pattern>/dashboard/account-detail</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CreateStaffController</servlet-name>
-        <url-pattern>/dashboard/add-staff</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>UpdateAccountController</servlet-name>
-        <url-pattern>/dashboard/update-account</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
         <servlet-name>VoucherController</servlet-name>
         <url-pattern>/dashboard/voucher-management</url-pattern>
     </servlet-mapping>
@@ -198,6 +182,10 @@
     <servlet-mapping>
         <servlet-name>VNPayReturnController</servlet-name>
         <url-pattern>/vnpay-return</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CreateStaffController</servlet-name>
+        <url-pattern>/dashboard/add-staff</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout> 30 </session-timeout>
