@@ -59,9 +59,7 @@ public class VNPayController extends HttpServlet {
         }
         BigDecimal total = cartDAO.calcSubtotal(cartItems);
 
-        // ✅ KHÔNG tạo đơn hàng ở đây nữa
-        // Lưu thông tin vào session, chỉ tạo đơn khi VNPAY callback thành công
-        String txnRef = VNPayConfig.getRandomNumber(12); // mã tạm gửi sang VNPAY
+        String txnRef = VNPayConfig.getRandomNumber(12); 
         session.setAttribute("vnpay_txnRef",  txnRef);
         session.setAttribute("vnpay_fullname", fullname.trim());
         session.setAttribute("vnpay_phone",    phone.trim());
@@ -91,7 +89,7 @@ public class VNPayController extends HttpServlet {
         vnp_Params.put("vnp_TmnCode",    VNPayConfig.vnp_TmnCode);
         vnp_Params.put("vnp_Amount",     String.valueOf(amount));
         vnp_Params.put("vnp_CurrCode",   VNPayConfig.vnp_CurrCode);
-        vnp_Params.put("vnp_TxnRef",     txnRef);                          // ✅ dùng txnRef tạm
+        vnp_Params.put("vnp_TxnRef",     txnRef);                         
         vnp_Params.put("vnp_OrderInfo",  "Thanh toan don hang:" + txnRef);
         vnp_Params.put("vnp_OrderType",  VNPayConfig.vnp_OrderType);
         vnp_Params.put("vnp_Locale",     VNPayConfig.vnp_Locale);
@@ -126,15 +124,8 @@ public class VNPayController extends HttpServlet {
 
         String secureHash = VNPayConfig.hmacSHA512(VNPayConfig.vnp_HashSecret, hashData.toString());
         query.append("&vnp_SecureHash=").append(secureHash);
-
-        System.out.println("=== VNPAY PAY ===");
-        System.out.println("txnRef    : " + txnRef);
-        System.out.println("hashData  : " + hashData.toString());
-        System.out.println("secureHash: " + secureHash);
-
         return VNPayConfig.vnp_PayUrl + "?" + query.toString();
     }
-
     private boolean isEmpty(String value) {
         return value == null || value.trim().isEmpty();
     }

@@ -1,5 +1,6 @@
 package controller;
 
+import dao.AddressDAO;
 import dao.CartDAO;
 import dao.OrderDAO;
 import jakarta.servlet.ServletException;
@@ -8,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Account;
+import model.Address;
 import model.CartItem;
 import model.Order;
 import utils.VNPayConfig;
@@ -24,7 +26,6 @@ public class VNPayReturnController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 1. Lấy tất cả tham số VNPAY gửi về, bỏ qua vnp_SecureHash
         Map<String, String> vnp_Params = new HashMap<>();
         for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
             String key = entry.getKey();
@@ -33,30 +34,13 @@ public class VNPayReturnController extends HttpServlet {
             }
         }
 
-        // 2. Lấy chữ ký VNPAY gửi về
         String vnp_SecureHash = request.getParameter("vnp_SecureHash");
-
-        // 3. Tự tính lại chữ ký
         String calculatedHash = VNPayConfig.hashAllFields(vnp_Params);
-
-        // 4. So sánh chữ ký
         boolean isValidSignature = calculatedHash.equalsIgnoreCase(vnp_SecureHash);
-
-        // Debug
-        System.out.println("=== VNPAY RETURN ===");
-        System.out.println("calculatedHash : " + calculatedHash);
-        System.out.println("vnp_SecureHash : " + vnp_SecureHash);
-        System.out.println("isValidSignature: " + isValidSignature);
-        System.out.println("vnp_ResponseCode: " + request.getParameter("vnp_ResponseCode"));
-
         String vnp_ResponseCode = request.getParameter("vnp_ResponseCode");
-
         HttpSession session = request.getSession(false);
 
         if (isValidSignature && "00".equals(vnp_ResponseCode)) {
-            // ===== THANH TOÁN THÀNH CÔNG =====
-
-            // Lấy thông tin giao hàng đã lưu trong session
             if (session == null) {
                 response.sendRedirect(request.getContextPath() + "/home");
                 return;
@@ -68,25 +52,34 @@ public class VNPayReturnController extends HttpServlet {
                 return;
             }
 
-            String street   = (String)     session.getAttribute("vnpay_street");
-            String district = (String)     session.getAttribute("vnpay_district");
-            String city     = (String)     session.getAttribute("vnpay_city");
+            String street = (String) session.getAttribute("vnpay_street");
+            String district = (String) session.getAttribute("vnpay_district");
+            String city = (String) session.getAttribute("vnpay_city");
             BigDecimal total = (BigDecimal) session.getAttribute("vnpay_total");
 
             if (street == null || district == null || city == null || total == null) {
-                // Session hết hạn hoặc dữ liệu bị mất
                 session.setAttribute("errorMessage", "Phiên thanh toán hết hạn, vui lòng thử lại!");
                 response.sendRedirect(request.getContextPath() + "/checkout");
                 return;
             }
 
-            // ✅ CHỈ tạo đơn hàng thật tại đây — khi chắc chắn thanh toán thành công
             CartDAO cartDAO = new CartDAO();
             List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
 
-            int addressID = orderDAO.createTempAddress(account.getId(), street, district, city);
+            AddressDAO addressDAO = new AddressDAO();
+            List<Address> addresses = addressDAO.getAddressesByCustomerId(account.getId());
+            int addressID = -1;
+            for (Address addr : addresses) {
+                if (street.equals(addr.getStreet())
+                        && district.equals(addr.getDistrict())
+                        && city.equals(addr.getCity())) {
+                    addressID = addr.getAddressID();
+                    break;
+                }
+            }
+
             if (addressID == -1) {
-                session.setAttribute("errorMessage", "Lỗi khi lưu địa chỉ!");
+                session.setAttribute("errorMessage", "Không tìm thấy địa chỉ giao hàng!");
                 response.sendRedirect(request.getContextPath() + "/checkout");
                 return;
             }
@@ -97,17 +90,10 @@ public class VNPayReturnController extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/checkout");
                 return;
             }
-
             orderDAO.createOrderDetails(orderID, cartItems);
-
-            // Cập nhật trạng thái đơn hàng: đã thanh toán + đã xác nhận
             orderDAO.updatePaymentStatus(orderID, "paid");
-            orderDAO.updateOrderStatus(orderID, "confirmed");
-
-            // Xóa giỏ hàng
             orderDAO.clearCart(account.getId());
 
-            // Xóa dữ liệu VNPAY pending khỏi session
             session.removeAttribute("vnpay_txnRef");
             session.removeAttribute("vnpay_fullname");
             session.removeAttribute("vnpay_phone");
@@ -116,7 +102,6 @@ public class VNPayReturnController extends HttpServlet {
             session.removeAttribute("vnpay_city");
             session.removeAttribute("vnpay_total");
 
-            // Hiển thị thông báo thành công
             Order order = orderDAO.getOrderByID(orderID);
             String orderCode = (order != null) ? order.getOrderCode() : "BT-" + orderID;
             session.setAttribute("cartCount", 0);
@@ -127,10 +112,6 @@ public class VNPayReturnController extends HttpServlet {
                     + "/order-confirmation?orderID=" + orderID);
 
         } else {
-            // ===== THANH TOÁN THẤT BẠI HOẶC NGƯỜI DÙNG HỦY =====
-            // ✅ Không có đơn hàng nào được tạo → không cần cancelOrderBySystem()
-
-            // Xóa dữ liệu pending khỏi session cho sạch
             if (session != null) {
                 session.removeAttribute("vnpay_txnRef");
                 session.removeAttribute("vnpay_fullname");
@@ -140,12 +121,18 @@ public class VNPayReturnController extends HttpServlet {
                 session.removeAttribute("vnpay_city");
                 session.removeAttribute("vnpay_total");
 
-                String msg = "24".equals(vnp_ResponseCode)
-                        ? "Bạn đã hủy giao dịch VNPAY!"
-                        : "Thanh toán VNPAY thất bại! Vui lòng thử lại.";
-                session.setAttribute("errorMessage", msg);
-            }
+                String msg;
 
+                switch (vnp_ResponseCode) {
+                    case "24":
+                        msg = "Bạn đã hủy giao dịch VNPAY!";
+                        break;
+
+                    default:
+                        msg = "Thanh toán VNPAY thất bại! Vui lòng thử lại.";
+                        break;
+                }
+            }
             response.sendRedirect(request.getContextPath() + "/checkout");
         }
     }
