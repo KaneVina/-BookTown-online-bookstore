@@ -88,7 +88,8 @@
                     <c:if test="${order.status != 'completed' && order.status != 'cancelled'}">
                         <div class="flex items-center gap-3">
                             <form action="${pageContext.request.contextPath}/dashboard/customer-order"
-                                  method="POST" class="m-0 inline-block">
+                                  method="POST" class="m-0 inline-block"
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng này không?');">
                                 <input type="hidden" name="action" value="updateStatus">
                                 <input type="hidden" name="orderID" value="${order.orderID}">
                                 <input type="hidden" name="redirect" value="detail">
