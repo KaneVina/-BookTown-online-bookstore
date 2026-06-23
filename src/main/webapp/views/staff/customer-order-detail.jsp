@@ -3,6 +3,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
+
     <head>
         <meta charset="utf-8">
         <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -88,15 +89,14 @@
                     <c:if test="${order.status != 'completed' && order.status != 'cancelled'}">
                         <div class="flex items-center gap-3">
                             <form action="${pageContext.request.contextPath}/dashboard/customer-order"
-                                  method="POST" class="m-0 inline-block"
-                                  onsubmit="return confirm('Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng này không?');">
+                                  method="POST" class="m-0 inline-block" id="statusForm">
                                 <input type="hidden" name="action" value="updateStatus">
                                 <input type="hidden" name="orderID" value="${order.orderID}">
                                 <input type="hidden" name="redirect" value="detail">
                                 <c:choose>
                                     <c:when test="${order.status == 'pending'}">
                                         <input type="hidden" name="status" value="confirmed">
-                                        <button type="submit"
+                                        <button type="button" onclick="confirmActionDetail('Xác nhận đơn hàng', 'Bạn có chắc chắn muốn xác nhận đơn hàng này không?', 'statusForm')"
                                                 class="flex items-center gap-2 px-4 py-2 bg-[#004d99] text-white rounded-lg text-sm font-semibold hover:opacity-90 shadow-sm transition-all">
                                             <span
                                                 class="material-symbols-outlined text-[20px]">task_alt</span>
@@ -105,7 +105,7 @@
                                     </c:when>
                                     <c:when test="${order.status == 'confirmed'}">
                                         <input type="hidden" name="status" value="shipping">
-                                        <button type="submit"
+                                        <button type="button" onclick="confirmActionDetail('Giao hàng', 'Bạn có chắc chắn muốn bắt đầu giao đơn hàng này không?', 'statusForm')"
                                                 class="flex items-center gap-2 px-4 py-2 bg-[#134aa4] text-white rounded-lg text-sm font-semibold hover:opacity-90 shadow-sm transition-all">
                                             <span
                                                 class="material-symbols-outlined text-[20px]">local_shipping</span>
@@ -114,7 +114,7 @@
                                     </c:when>
                                     <c:when test="${order.status == 'shipping'}">
                                         <input type="hidden" name="status" value="completed">
-                                        <button type="submit"
+                                        <button type="button" onclick="confirmActionDetail('Hoàn tất đơn', 'Bạn có chắc chắn muốn hoàn tất đơn hàng này không?', 'statusForm')"
                                                 class="flex items-center gap-2 px-4 py-2 bg-[#2E7D32] text-white rounded-lg text-sm font-semibold hover:opacity-90 shadow-sm transition-all">
                                             <span
                                                 class="material-symbols-outlined text-[20px]">check_circle</span>
@@ -125,13 +125,13 @@
                             </form>
 
                             <form action="${pageContext.request.contextPath}/dashboard/customer-order"
-                                  method="POST" class="m-0 inline-block">
+                                  method="POST" class="m-0 inline-block" id="cancelForm">
                                 <input type="hidden" name="action" value="updateStatus">
                                 <input type="hidden" name="orderID" value="${order.orderID}">
                                 <input type="hidden" name="redirect" value="detail">
                                 <input type="hidden" name="status" value="cancelled">
-                                <button type="submit"
-                                        onclick="return confirm('Bạn có chắc muốn hủy đơn hàng này không?')"
+                                <button type="button"
+                                        onclick="confirmActionDetail('Hủy đơn hàng', 'Bạn có chắc muốn hủy đơn hàng này không?', 'cancelForm')"
                                         class="flex items-center gap-2 px-4 py-2 bg-[#D32F2F] text-white rounded-lg text-sm font-semibold hover:opacity-90 shadow-sm transition-all">
                                     <span class="material-symbols-outlined text-[20px]">cancel</span>
                                     Hủy đơn hàng
@@ -208,27 +208,14 @@
                                 </table>
                             </div>
 
-                            <%-- Tổng kết bảng --%>
                             <div class="p-6 bg-[#f3faff] border-t border-[#c2c6d4]">
                                 <div class="flex flex-col items-end gap-2">
-                                    <div class="flex justify-between w-64 text-[#424752]">
-                                        <span class="text-base">Tạm tính:</span>
-                                        <span class="text-base">
-                                            <fmt:formatNumber value="${order.totalPrice}"
-                                                              pattern="#,###" />₫
-                                        </span>
-                                    </div>
-                                    <div class="flex justify-between w-64 text-[#424752]">
-                                        <span class="text-base">Phí vận chuyển:</span>
-                                        <span class="text-base">0₫</span>
-                                    </div>
-                                    <div
-                                        class="flex justify-between w-64 pt-2 border-t border-[#c2c6d4]">
+                                    <div class="flex justify-between w-64">
                                         <span class="text-xl font-semibold text-[#071e27]">Tổng
                                             cộng:</span>
                                         <span class="text-xl font-semibold text-[#004d99]">
-                                            <fmt:formatNumber value="${order.totalPrice}"
-                                                              pattern="#,###" />₫
+                                            <fmt:formatNumber value="${order.totalPrice}" pattern="#,###" />
+                                            ₫
                                         </span>
                                     </div>
                                 </div>
@@ -314,14 +301,16 @@
                                     </div>
                                 </div>
                                 <div class="flex items-start gap-3">
-                                    <span class="material-symbols-outlined text-[#727783] text-[20px]">phone</span>
+                                    <span
+                                        class="material-symbols-outlined text-[#727783] text-[20px]">phone</span>
                                     <div>
                                         <p class="text-xs text-[#424752]">Số điện thoại</p>
                                         <p class="text-sm text-[#071e27]">${order.customerPhone}</p>
                                     </div>
                                 </div>
                                 <div class="flex items-start gap-3">
-                                    <span class="material-symbols-outlined text-[#727783] text-[20px]">location_on</span>
+                                    <span
+                                        class="material-symbols-outlined text-[#727783] text-[20px]">location_on</span>
                                     <div>
                                         <p class="text-xs text-[#424752]">Địa chỉ giao hàng</p>
                                         <p class="text-sm text-[#071e27] leading-relaxed">
@@ -337,32 +326,40 @@
                             <div class="space-y-6">
 
                                 <div class="relative pl-8 stepper-line">
-                                    <div class="absolute left-0 top-0 w-8 h-8 flex items-center justify-center z-10">
-                                        <div class="w-3 h-3 rounded-full ${order.status == 'completed' ? 'bg-[#2E7D32]' : 'bg-[#c2c6d4]'}">
+                                    <div
+                                        class="absolute left-0 top-0 w-8 h-8 flex items-center justify-center z-10">
+                                        <div
+                                            class="w-3 h-3 rounded-full ${order.status == 'completed' ? 'bg-[#2E7D32]' : 'bg-[#c2c6d4]'}">
                                         </div>
                                     </div>
                                     <p class="text-sm font-semibold text-[#071e27]">Hoàn thành</p>
                                 </div>
 
                                 <div class="relative pl-8 stepper-line">
-                                    <div class="absolute left-0 top-0 w-8 h-8 flex items-center justify-center z-10">
-                                        <div class="w-3 h-3 rounded-full ${order.status == 'shipping' ? 'bg-[#134aa4]' : 'bg-[#c2c6d4]'}">
+                                    <div
+                                        class="absolute left-0 top-0 w-8 h-8 flex items-center justify-center z-10">
+                                        <div
+                                            class="w-3 h-3 rounded-full ${order.status == 'shipping' ? 'bg-[#134aa4]' : 'bg-[#c2c6d4]'}">
                                         </div>
                                     </div>
                                     <p class="text-sm font-semibold text-[#071e27]">Đang giao hàng</p>
                                 </div>
 
                                 <div class="relative pl-8 stepper-line">
-                                    <div class="absolute left-0 top-0 w-8 h-8 flex items-center justify-center z-10">
-                                        <div class="w-3 h-3 rounded-full ${order.status == 'confirmed' ? 'bg-[#FFA000]' : 'bg-[#c2c6d4]'}">
+                                    <div
+                                        class="absolute left-0 top-0 w-8 h-8 flex items-center justify-center z-10">
+                                        <div
+                                            class="w-3 h-3 rounded-full ${order.status == 'confirmed' ? 'bg-[#FFA000]' : 'bg-[#c2c6d4]'}">
                                         </div>
                                     </div>
                                     <p class="text-sm font-semibold text-[#071e27]">Đã xác nhận</p>
                                 </div>
 
                                 <div class="relative pl-8 stepper-line">
-                                    <div class="absolute left-0 top-0 w-8 h-8 flex items-center justify-center z-10">
-                                        <div class="w-3 h-3 rounded-full ${order.status == 'pending' ? 'bg-[#004d99]' : 'bg-[#c2c6d4]'}">
+                                    <div
+                                        class="absolute left-0 top-0 w-8 h-8 flex items-center justify-center z-10">
+                                        <div
+                                            class="w-3 h-3 rounded-full ${order.status == 'pending' ? 'bg-[#004d99]' : 'bg-[#c2c6d4]'}">
                                         </div>
                                     </div>
                                     <p class="text-sm font-semibold text-[#071e27]">Chờ xác nhận</p>
@@ -379,6 +376,79 @@
         </main>
 
         <%@ include file="/views/layout/common/toast.jsp" %>
+
+        <!-- Confirmation Modal -->
+        <div id="confirmModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[100]">
+            <div class="bg-white w-[450px] rounded-xl p-6 relative">
+                <button type="button" class="absolute top-3 right-4 text-2xl hover:text-gray-500 close-confirm">×</button>
+
+                <h3 class="text-xl font-bold mb-4" id="confirmTitle">Xác nhận hành động</h3>
+                <p class="text-gray-600 mb-6" id="confirmMessage">Bạn chắc chắn muốn thực hiện hành động này?</p>
+
+                <div class="flex justify-end gap-3">
+                    <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 close-confirm">
+                        Hủy
+                    </button>
+                    <button type="button" id="confirmAction" class="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90">
+                        Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            var confirmModal = null;
+            var pendingAction = null;
+
+            function initConfirmModal() {
+                confirmModal = document.getElementById('confirmModal');
+                document.querySelectorAll('.close-confirm').forEach(btn => {
+                    btn.addEventListener('click', closeConfirmModal);
+                });
+
+                if (confirmModal) {
+                    confirmModal.addEventListener('click', function (e) {
+                        if (e.target === confirmModal) {
+                            closeConfirmModal();
+                        }
+                    });
+                }
+
+                document.getElementById('confirmAction').addEventListener('click', executeAction);
+            }
+
+            function openConfirmModal(title, message, action) {
+                document.getElementById('confirmTitle').textContent = title;
+                document.getElementById('confirmMessage').textContent = message;
+                pendingAction = action;
+
+                confirmModal.classList.remove('hidden');
+                confirmModal.classList.add('flex');
+            }
+
+            function closeConfirmModal() {
+                confirmModal.classList.add('hidden');
+                confirmModal.classList.remove('flex');
+                pendingAction = null;
+            }
+
+            function executeAction() {
+                if (pendingAction) {
+                    pendingAction();
+                    closeConfirmModal();
+                }
+            }
+
+            function confirmActionDetail(title, message, formId) {
+                openConfirmModal(title, message, function () {
+                    document.getElementById(formId).submit();
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                initConfirmModal();
+            });
+        </script>
     </body>
 
 </html>
