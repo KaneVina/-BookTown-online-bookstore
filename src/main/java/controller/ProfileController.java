@@ -30,7 +30,6 @@ public class ProfileController extends HttpServlet {
         }
 
         Account loginUser = (Account) session.getAttribute("account");
-
         String idParam = request.getParameter("id");
 
         // Nếu không có id -> redirect về profile của chính user
@@ -38,9 +37,7 @@ public class ProfileController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/profile?id=" + loginUser.getId());
             return;
         }
-
         idParam = idParam.trim();
-
         // chỉ cho phép số nguyên dương
         if (!idParam.matches("^[1-9]\\d*$")) {
             request.getRequestDispatcher("/views/error/404.jsp")
@@ -63,8 +60,6 @@ public class ProfileController extends HttpServlet {
                     .forward(request, response);
             return;
         }
-
-        // Nếu user là customer -> load Customer và forward về customer profile (của bạn hiện tại)
         if ("customer".equalsIgnoreCase(loginUser.getRole())) {
             CustomerDAO customerDao = new CustomerDAO();
             Customer customer = customerDao.getCustomerById(id);
@@ -72,8 +67,6 @@ public class ProfileController extends HttpServlet {
             request.getRequestDispatcher("/views/profile/profile.jsp").forward(request, response);
             return;
         }
-
-        // Ngược lại (admin hoặc staff) -> load Account và forward sang profile_admin.jsp
         AccountDAO accountDao = new AccountDAO();
         Account account = accountDao.getStaffById(id);
         request.setAttribute("account", account);
@@ -98,10 +91,8 @@ public class ProfileController extends HttpServlet {
 
         String fullname = safeTrim(request.getParameter("fullname"));
         String phone = safeTrim(request.getParameter("phone"));
-        String gender = request.getParameter("gender"); // may be null for admin/staff
-        String dob = request.getParameter("dob"); // may be null for admin/staff
-
-        // Basic validation for fullname & phone
+        String gender = request.getParameter("gender"); 
+        String dob = request.getParameter("dob"); 
         if (fullname.isEmpty()) {
             session.setAttribute("error", "Họ tên không được để trống");
             response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
@@ -159,7 +150,6 @@ public class ProfileController extends HttpServlet {
             );
 
             if (success) {
-                // refresh session.account from updated customer
                 Customer updated = dao.getCustomerById(acc.getId());
                 if (updated != null) {
                     Account refreshed = new Account(
@@ -182,8 +172,6 @@ public class ProfileController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
             return;
         }
-
-        // Nếu admin/staff: chỉ cập nhật chính họ (fullname, phone). Không đổi role/email/status ở đây.
         AccountDAO accountDao = new AccountDAO();
         boolean success = accountDao.updateStaff(
                 acc.getId(),
@@ -194,7 +182,6 @@ public class ProfileController extends HttpServlet {
         );
 
         if (success) {
-            // refresh session.account
             Account updated = accountDao.getStaffById(acc.getId());
             if (updated != null) {
                 session.setAttribute("account", updated);
@@ -205,7 +192,6 @@ public class ProfileController extends HttpServlet {
             session.removeAttribute("message");
             session.setAttribute("error", "Cập nhật thất bại!");
         }
-
         response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
     }
 

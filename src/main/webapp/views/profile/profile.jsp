@@ -95,9 +95,7 @@
             </div>
         </div>
 
-        <!--form nhập thông tin và lưu thay đổi-->
         <div class="lg:col-span-3 space-y-6">
-            <!-- Dữ liệu để bắn toast, không hiện box thông báo nữa -->
             <c:if test="${not empty sessionScope.message}">
                 <div id="toastMessageData" class="hidden" data-message="${fn:escapeXml(sessionScope.message)}"></div>
                 <c:remove var="message" scope="session"/>
@@ -119,7 +117,7 @@
                 </div>
 
                 <form action="${pageContext.request.contextPath}/profile"
-                      method="post">
+                      method="post" id="profileForm">
                     <div class="grid md:grid-cols-2 gap-6">
                         <div>
                             <label class="block mb-2 font-medium">
@@ -128,6 +126,7 @@
                             <input
                                 type="text"
                                 name="fullname"
+                                id="fullname"
                                 value="${customer.fullname}"
                                 required
                                 class="input-style">
@@ -149,6 +148,7 @@
                             <input
                                 type="text"
                                 name="phone"
+                                id="phone"
                                 value="${customer.phone}"
                                 class="input-style">
                         </div>
@@ -167,7 +167,7 @@
                                 Giới tính
                             </label>
 
-                            <select name="gender" class="input-style">
+                            <select name="gender" id="gender" class="input-style">
                                 <option value="Male"
                                         ${customer.gender == 'Male' ? 'selected' : ''}>
                                     Nam
@@ -192,6 +192,7 @@
                             <input
                                 type="date"
                                 name="dob"
+                                id="dob"
                                 value="${customer.dob}"
                                 max="<%= java.time.LocalDate.now()%>"
                                 class="input-style">
@@ -200,7 +201,9 @@
                     <div class="mt-8">
                         <button
                             type="submit"
-                            class="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-xl shadow">
+                            id="saveBtn"
+                            class="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-xl shadow disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-60 transition-all"
+                            disabled>
                             Lưu thay đổi
                         </button>
                     </div>
@@ -212,12 +215,58 @@
 
 <%@ include file="/views/layout/common/toast.jsp" %>
 <script>
+    const initialValues = {
+        fullname: "${customer.fullname}",
+        phone: "${customer.phone}",
+        gender: "${customer.gender}",
+        dob: "${customer.dob}"
+    };
+
+    const form = document.getElementById('profileForm');
+    const saveBtn = document.getElementById('saveBtn');
+    const fullnameInput = document.getElementById('fullname');
+    const phoneInput = document.getElementById('phone');
+    const genderSelect = document.getElementById('gender');
+    const dobInput = document.getElementById('dob');
+
+    function checkFormChanges() {
+        const currentValues = {
+            fullname: fullnameInput.value.trim(),
+            phone: phoneInput.value.trim(),
+            gender: genderSelect.value,
+            dob: dobInput.value
+        };
+
+        if (!currentValues.fullname) {
+            saveBtn.disabled = true;
+            return;
+        }
+        const hasChanges = 
+            currentValues.fullname !== initialValues.fullname ||
+            currentValues.phone !== initialValues.phone ||
+            currentValues.gender !== initialValues.gender ||
+            currentValues.dob !== initialValues.dob;
+        saveBtn.disabled = !hasChanges;
+    }
+
+    fullnameInput.addEventListener('input', checkFormChanges);
+    fullnameInput.addEventListener('change', checkFormChanges);
+    phoneInput.addEventListener('input', checkFormChanges);
+    phoneInput.addEventListener('change', checkFormChanges);
+    genderSelect.addEventListener('change', checkFormChanges);
+    dobInput.addEventListener('change', checkFormChanges);
+
+    checkFormChanges();
+
     document.addEventListener('DOMContentLoaded', function () {
         const msgEl = document.getElementById('toastMessageData');
         const errEl = document.getElementById('toastErrorData');
 
         if (msgEl) {
             showToast(msgEl.dataset.message);
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
         }
         if (errEl) {
             showToast(errEl.dataset.message, true);
