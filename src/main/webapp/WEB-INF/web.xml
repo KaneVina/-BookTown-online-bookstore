@@ -33,14 +33,6 @@
         <servlet-class>controller.CustomerOrderController</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>CustomerOrderDetailController</servlet-name>
-        <servlet-class>controller.CustomerOrderDetailController</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>OrderHistoryDetailController</servlet-name>
-        <servlet-class>controller.OrderHistoryDetailController</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>OrderHistoryController</servlet-name>
         <servlet-class>controller.OrderHistoryController</servlet-class>
     </servlet>
@@ -81,6 +73,7 @@
         <servlet-class>controller.WishListController</servlet-class>
     </servlet>
     <servlet>
+
         <servlet-name>VNPayController</servlet-name>
         <servlet-class>controller.VNPayController</servlet-class>
     </servlet>
@@ -91,6 +84,14 @@
     <servlet>
         <servlet-name>ReviewManagementController</servlet-name>
         <servlet-class>controller.ReviewManagementController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CategoryManagementController</servlet-name>
+        <servlet-class>controller.CategoryManagementController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AddressManagementController</servlet-name>
+        <servlet-class>controller.AddressManagementController</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>CreateStaffController</servlet-name>
@@ -130,14 +131,6 @@
     <servlet-mapping>
         <servlet-name>CustomerOrderController</servlet-name>
         <url-pattern>/dashboard/customer-order</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CustomerOrderDetailController</servlet-name>
-        <url-pattern>/dashboard/customer-order-detail</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>OrderHistoryDetailController</servlet-name>
-        <url-pattern>/profile/order-history-detail</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>OrderHistoryController</servlet-name>
@@ -182,6 +175,14 @@
     <servlet-mapping>
         <servlet-name>VNPayReturnController</servlet-name>
         <url-pattern>/vnpay-return</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CategoryManagementController</servlet-name>
+        <url-pattern>/category</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AddressManagementController</servlet-name>
+        <url-pattern>/address</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>CreateStaffController</servlet-name>
