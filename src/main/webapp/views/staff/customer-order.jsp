@@ -133,54 +133,6 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-stack-lg">
-                    <div
-                        class="bg-surface p-stack-md rounded-xl shadow-sm border border-outline-variant/10 flex items-center gap-4">
-                        <div
-                            class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                            <span class="material-symbols-outlined">pending_actions</span>
-                        </div>
-                        <div>
-                            <p class="text-label-sm text-on-surface-variant">Chờ xác nhận</p>
-                            <p class="text-headline-sm font-bold">${countPending != null ? countPending : 0}
-                            </p>
-                        </div>
-                    </div>
-                    <div
-                        class="bg-surface p-stack-md rounded-xl shadow-sm border border-outline-variant/10 flex items-center gap-4">
-                        <div
-                            class="w-12 h-12 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
-                            <span class="material-symbols-outlined">task_alt</span>
-                        </div>
-                        <div>
-                            <p class="text-label-sm text-on-surface-variant">Đã xác nhận</p>
-                            <p class="text-headline-sm font-bold">${countConfirmed != null ? countConfirmed : 0}</p>
-                        </div>
-                    </div>
-                    <div
-                        class="bg-surface p-stack-md rounded-xl shadow-sm border border-outline-variant/10 flex items-center gap-4">
-                        <div
-                            class="w-12 h-12 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary">
-                            <span class="material-symbols-outlined">local_shipping</span>
-                        </div>
-                        <div>
-                            <p class="text-label-sm text-on-surface-variant">Đang giao</p>
-                            <p class="text-headline-sm font-bold">${countShipping != null ? countShipping : 0}</p>
-                        </div>
-                    </div>
-                    <div
-                        class="bg-surface p-stack-md rounded-xl shadow-sm border border-outline-variant/10 flex items-center gap-4">
-                        <div
-                            class="w-12 h-12 rounded-lg bg-success/10 flex items-center justify-center text-success">
-                            <span class="material-symbols-outlined">check_circle</span>
-                        </div>
-                        <div>
-                            <p class="text-label-sm text-on-surface-variant">Hoàn thành</p>
-                            <p class="text-headline-sm font-bold">${countCompleted != null ? countCompleted : 0}</p>
-                        </div>
-                    </div>
-                </div>
-
                 <div
                     class="bg-surface rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
                     <div
@@ -308,7 +260,7 @@
                                                             <input type="hidden" name="orderID"
                                                                    value="${order.orderID}">
                                                             <select name="status"
-                                                                    onchange="this.form.submit()"
+                                                                    onchange="confirmStatusChange(this)"
                                                                     class="bg-surface border border-outline-variant/30 text-on-surface rounded-lg text-body-sm focus:ring-primary focus:border-primary px-2 py-1 cursor-pointer">
                                                                 <option value="" disabled selected>-- Chọn --</option>
                                                                 <option value="confirmed">Đã xác nhận
@@ -326,7 +278,7 @@
                                                             <input type="hidden" name="orderID"
                                                                    value="${order.orderID}">
                                                             <select name="status"
-                                                                    onchange="this.form.submit()"
+                                                                    onchange="confirmStatusChange(this)"
                                                                     class="bg-surface border border-outline-variant/30 text-on-surface rounded-lg text-body-sm focus:ring-primary focus:border-primary px-2 py-1 cursor-pointer">
                                                                 <option value="" disabled selected>-- Chọn --</option>
                                                                 <option value="shipping">Đang giao</option>
@@ -343,7 +295,7 @@
                                                             <input type="hidden" name="orderID"
                                                                    value="${order.orderID}">
                                                             <select name="status"
-                                                                    onchange="this.form.submit()"
+                                                                    onchange="confirmStatusChange(this)"
                                                                     class="bg-surface border border-outline-variant/30 text-on-surface rounded-lg text-body-sm focus:ring-primary focus:border-primary px-2 py-1 cursor-pointer">
                                                                 <option value="" disabled selected>-- Chọn --</option>
                                                                 <option value="completed">Hoàn thành
@@ -403,6 +355,17 @@
         </main>
 
         <%@ include file="/views/layout/common/toast.jsp" %>
+        <script>
+            function confirmStatusChange(selectElement) {
+                var selectedOption = selectElement.options[selectElement.selectedIndex];
+                var nextStatusLabel = selectedOption.text;
+                if (confirm("Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng này thành '" + nextStatusLabel.trim() + "' không?")) {
+                    selectElement.form.submit();
+                } else {
+                    selectElement.value = "";
+                }
+            }
+        </script>
     </body>
 
 </html>
