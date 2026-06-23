@@ -71,6 +71,9 @@ public class ReviewController extends HttpServlet {
             case "add":
                 handleAddReview(request, response);
                 break;
+            case "edit":
+                handleEditReview(request, response);
+                break;
             case "reply":
                 handleReplyReview(request, response);
                 break;
@@ -90,16 +93,13 @@ public class ReviewController extends HttpServlet {
     private void handleAddReview(HttpServletRequest request,
             HttpServletResponse response)
             throws IOException {
-
         if (!isCustomer(request)) {
             sendJson(response,
                     "{\"success\":false,\"message\":\"Vui lòng đăng nhập\"}");
             return;
         }
-
         Account acc = getAccount(request);
         int customerID = acc.getId();
-
         int bookID = toInt(request.getParameter("bookID"), 0);
         int rating = toInt(request.getParameter("rating"), 0);
         String comment = request.getParameter("comment");
@@ -110,21 +110,17 @@ public class ReviewController extends HttpServlet {
                     "{\"success\":false,\"message\":\"Sách không hợp lệ\"}");
             return;
         }
-
         if (rating < 1 || rating > 5) {
             sendJson(response,
                     "{\"success\":false,\"message\":\"Đánh giá phải từ 1 đến 5 sao\"}");
             return;
         }
-
         if (comment == null || comment.trim().isEmpty()) {
             sendJson(response,
                     "{\"success\":false,\"message\":\"Vui lòng nhập nội dung đánh giá\"}");
             return;
         }
-
         comment = comment.trim();
-
         ReviewDAO dao = new ReviewDAO();
 
         // Kiểm tra customer có quyền review không
@@ -153,6 +149,65 @@ public class ReviewController extends HttpServlet {
                     "{\"success\":false,\"message\":\"Không thể gửi đánh giá\"}");
         }
     }
+    
+     private void handleEditReview(HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+ 
+        if (!isCustomer(request)) {
+            sendJson(response,
+                    "{\"success\":false,\"message\":\"Vui lòng đăng nhập\"}");
+            return;
+        }
+        Account acc = getAccount(request);
+        int customerID = acc.getId();
+ 
+        int reviewID = toInt(request.getParameter("reviewID"), 0);
+        int rating = toInt(request.getParameter("rating"), 0);
+        String comment = request.getParameter("comment");
+        if (reviewID <= 0) {
+            sendJson(response,
+                    "{\"success\":false,\"message\":\"Đánh giá không hợp lệ\"}");
+            return;
+        }
+        if (rating < 1 || rating > 5) {
+            sendJson(response,
+                    "{\"success\":false,\"message\":\"Đánh giá phải từ 1 đến 5 sao\"}");
+            return;
+        }
+        if (comment == null || comment.trim().isEmpty()) {
+            sendJson(response,
+                    "{\"success\":false,\"message\":\"Vui lòng nhập nội dung đánh giá\"}");
+            return;
+        }
+        comment = comment.trim();
+        ReviewDAO dao = new ReviewDAO();
+        // Kiểm tra review có tồn tại và đúng là của customer này không
+        Review review = dao.getReviewByID(reviewID);
+        if (review == null) {
+            sendJson(response,
+                    "{\"success\":false,\"message\":\"Đánh giá không tồn tại\"}");
+            return;
+        }
+        if (review.getCustomerID() != customerID) {
+            sendJson(response,
+                    "{\"success\":false,\"message\":\"Bạn không có quyền sửa đánh giá này\"}");
+            return;
+        }
+        boolean success = dao.updateReview(
+                reviewID,
+                customerID,
+                rating,
+                comment
+        );
+        if (success) {
+            sendJson(response,
+                    "{\"success\":true,\"message\":\"Cập nhật đánh giá thành công\"}");
+        } else {
+            sendJson(response,
+                    "{\"success\":false,\"message\":\"Không thể cập nhật đánh giá\"}");
+        }
+    }
 
     // admin/ staff phản hồi
     private void handleReplyReview(HttpServletRequest request, HttpServletResponse response)
@@ -169,38 +224,26 @@ public class ReviewController extends HttpServlet {
 
         int reviewID = toInt(request.getParameter("reviewID"), 0);
         String reply = request.getParameter("reply");
-
-        // Validate
         if (reviewID <= 0) {
             sendJson(response, "{\"success\":false,\"message\":\"Review không hợp lệ\"}");
             return;
         }
-
         if (reply == null || reply.trim().isEmpty()) {
             sendJson(response, "{\"success\":false,\"message\":\"Vui lòng nhập nội dung phản hồi\"}");
             return;
         }
-
         reply = reply.trim();
-
         ReviewDAO dao = new ReviewDAO();
-
-        // Kiểm tra review tồn tại
         Review review = dao.getReviewByID(reviewID);
         if (review == null) {
             sendJson(response, "{\"success\":false,\"message\":\"Review không tồn tại\"}");
             return;
         }
-
-        // Kiểm tra khách hàng có bị khóa không
         if (review.getCustomerStatus() != null && "inactive".equalsIgnoreCase(review.getCustomerStatus())) {
             sendJson(response, "{\"success\":false,\"message\":\"Không thể phản hồi - Tài khoản khách hàng đã bị khóa\"}");
             return;
         }
-
-        // Phản hồi review
         boolean success = dao.replyReview(reviewID, adminID, reply);
-
         if (success) {
             sendJson(response, "{\"success\":true,\"message\":\"Phản hồi thành công\"}");
         } else {
@@ -214,13 +257,11 @@ public class ReviewController extends HttpServlet {
             sendJson(response, "{\"success\":false,\"message\":\"Bạn không có quyền ẩn review\"}");
             return;
         }
-
         int reviewID = toInt(request.getParameter("reviewID"), 0);
         if (reviewID <= 0) {
             sendJson(response, "{\"success\":false,\"message\":\"Review không hợp lệ\"}");
             return;
         }
-
         ReviewDAO dao = new ReviewDAO();
         boolean success = dao.toggleHideReview(reviewID);
 
@@ -237,7 +278,6 @@ public class ReviewController extends HttpServlet {
             sendJson(response, "{\"success\":false,\"message\":\"Bạn không có quyền khóa tài khoản\"}");
             return;
         }
-
         int reviewID = toInt(request.getParameter("reviewID"), 0);
         if (reviewID <= 0) {
             sendJson(response, "{\"success\":false,\"message\":\"Review không hợp lệ\"}");
@@ -251,15 +291,11 @@ public class ReviewController extends HttpServlet {
             sendJson(response, "{\"success\":false,\"message\":\"Review không tồn tại\"}");
             return;
         }
-
-        // Kiểm tra xem tài khoản đã bị khóa chưa
         if (review.getCustomerStatus() != null && "inactive".equalsIgnoreCase(review.getCustomerStatus())) {
             sendJson(response, "{\"success\":false,\"message\":\"Tài khoản khách hàng đã bị khóa rồi\"}");
             return;
         }
-
         boolean success = dao.lockAccountByReview(review.getCustomerID());
-
         if (success) {
             sendJson(response, "{\"success\":true,\"message\":\"Khóa tài khoản thành công\"}");
         } else {

@@ -139,7 +139,6 @@
     </head>
     <body class="text-on-surface">
         <%@ include file="/views/layout/dashboard/sidebar.jsp" %>
-
         <main class="flex-1 md:ml-64 min-h-screen p-6 bg-background">
             <section class="mb-stack-lg flex justify-between items-end">
                 <div>
@@ -667,8 +666,6 @@
                     });
                 });
             }
-
-            // ── Search & Filter functionality ──────────────────────────────────────
             (function () {
                 const searchInput = document.querySelector('input[placeholder*="Tìm theo tên"]');
                 const ratingSelect = document.querySelector('select:nth-of-type(1)');
@@ -693,19 +690,13 @@
                         const statusCell = row.cells[5].textContent.trim();
 
                         let show = true;
-
-                        // Search filter
                         if (currentFilter.search) {
                             show = show && (customerName.includes(currentFilter.search) || bookTitle.includes(currentFilter.search));
                         }
-
-                        // Rating filter
                         if (currentFilter.rating) {
                             const filterRating = parseInt(currentFilter.rating);
                             show = show && (rating === filterRating);
                         }
-
-                        // Status filter
                         if (currentFilter.status !== 'all') {
                             if (currentFilter.status === 'pending') {
                                 show = show && statusCell.includes('Chờ duyệt');
@@ -717,16 +708,12 @@
                         row.style.display = show ? '' : 'none';
                     });
                 }
-
-                // Search event
                 if (searchInput) {
                     searchInput.addEventListener('input', function (e) {
                         currentFilter.search = e.target.value.toLowerCase();
                         filterTable();
                     });
                 }
-
-                // Rating select event
                 if (ratingSelect) {
                     ratingSelect.addEventListener('change', function (e) {
                         const value = e.target.value;
@@ -738,21 +725,14 @@
                         filterTable();
                     });
                 }
-
-                // Status button events
                 statusButtons.forEach((btn, index) => {
                     btn.addEventListener('click', function () {
-                        // Remove active state from all buttons
                         statusButtons.forEach(b => {
                             b.classList.remove('bg-surface', 'shadow-sm', 'text-primary');
                             b.classList.add('text-on-surface-variant');
                         });
-
-                        // Add active state to clicked button
                         this.classList.add('bg-surface', 'shadow-sm', 'text-primary');
                         this.classList.remove('text-on-surface-variant');
-
-                        // Update filter
                         if (index === 0) {
                             currentFilter.status = 'all';
                         } else if (index === 1) {

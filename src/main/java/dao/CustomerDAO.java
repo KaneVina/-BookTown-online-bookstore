@@ -186,31 +186,30 @@ public class CustomerDAO {
         }
         return list;
     }
-    
+
     // cập nhật trạng thái của người dùng
     public boolean toggleCustomerStatus(int customerID, String status) {
 
-    String sql = "UPDATE Customer SET status = ? WHERE customerID = ?";
+        String sql = "UPDATE Customer SET status = ? WHERE customerID = ?";
 
-    try (Connection conn = new DBContext().getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-        ps.setString(1, status);
-        ps.setInt(2, customerID);
+            ps.setString(1, status);
+            ps.setInt(2, customerID);
 
-        int rows = ps.executeUpdate();
+            int rows = ps.executeUpdate();
 
-        System.out.println("customerID = " + customerID);
-        System.out.println("status = " + status);
-        System.out.println("rows = " + rows);
+            System.out.println("customerID = " + customerID);
+            System.out.println("status = " + status);
+            System.out.println("rows = " + rows);
 
-        return rows > 0;
+            return rows > 0;
 
-    } catch (Exception e) {
-        e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
-    return false;
-}
 
     // thêm phân trang 
     public int countCustomers() {
@@ -229,7 +228,7 @@ public class CustomerDAO {
     public List<Customer> getCustomersPaging(int offset, int pageSize) {
         List<Customer> list = new ArrayList<>();
         String sql = "SELECT * FROM (" + " SELECT *, ROW_NUMBER() OVER(ORDER BY customerID DESC) AS rn " + " FROM Customer " + ") t " + "WHERE rn > ? AND rn <= ?";
-        
+
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, offset);
             ps.setInt(2, offset + pageSize);
@@ -252,4 +251,17 @@ public class CustomerDAO {
         return list;
     }
 
+    public boolean updateCustomerByAdmin(int id, String fullname, String phone, String status) {
+        String sql = "UPDATE Customer SET fullname=?, phone=?, status=? WHERE customerID=?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, fullname);
+            ps.setString(2, phone);
+            ps.setString(3, status);
+            ps.setInt(4, id);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

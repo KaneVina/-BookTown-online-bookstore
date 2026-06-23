@@ -41,13 +41,9 @@
         box-shadow:0 0 0 3px rgba(37,99,235,.15);
     }
 </style>
-
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-
 <div class="max-w-7xl mx-auto py-10 px-4">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-
-        <!--Thanh sidebar của trang profile-->
         <div class="lg:col-span-1">
             <div class="profile-card p-6">
 

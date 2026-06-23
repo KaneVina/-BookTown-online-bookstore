@@ -156,7 +156,6 @@ public class ReviewDAO {
     // lấy tất cả review để admin và staff xem 
     public List<Review> getAllReviews() {
         List<Review> list = new ArrayList<>();
-        // 🔥 THÊM c.status as customerStatus VÀ r.isHidden
         String sql = "SELECT r.*, c.fullname, c.status as customerStatus, b.title as bookTitle, b.thumbnail as bookCover "
                 + "FROM Review r "
                 + "JOIN Customer c ON r.customerID = c.customerID "
@@ -267,23 +266,17 @@ public class ReviewDAO {
 
     // mở ẩn review
     public boolean toggleHideReview(int reviewID) {
-        // 🔥 Lấy trạng thái hiện tại
         String checkSql = "SELECT isHidden FROM Review WHERE reviewID = ?";
         String updateSql = "UPDATE Review SET isHidden = ? WHERE reviewID = ?";
 
         try {
             Connection conn = db.getConnection();
-
-            // Lấy trạng thái hiện tại
             PreparedStatement checkPs = conn.prepareStatement(checkSql);
             checkPs.setInt(1, reviewID);
             ResultSet rs = checkPs.executeQuery();
-
             if (rs.next()) {
                 int currentStatus = rs.getInt("isHidden");
-                int newStatus = currentStatus == 1 ? 0 : 1; // Toggle: 1->0, 0->1
-
-                // Update ngược lại
+                int newStatus = currentStatus == 1 ? 0 : 1; 
                 PreparedStatement updatePs = conn.prepareStatement(updateSql);
                 updatePs.setInt(1, newStatus);
                 updatePs.setInt(2, reviewID);
@@ -292,7 +285,6 @@ public class ReviewDAO {
                 conn.close();
                 return result > 0;
             }
-
             conn.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -355,5 +347,28 @@ public class ReviewDAO {
         }
 
         return null;
+    }
+    
+        public boolean updateReview(int reviewID, int customerID, int rating, String comment) {
+ 
+        String sql = "UPDATE Review "
+                + "SET rating = ?, comment = ? "
+                + "WHERE reviewID = ? AND customerID = ?";
+ 
+        try {
+            Connection conn = db.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, rating);
+            ps.setString(2, comment);
+            ps.setInt(3, reviewID);
+            ps.setInt(4, customerID);
+            int result = ps.executeUpdate();
+            conn.close();
+            return result > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+ 
+        return false;
     }
 }
