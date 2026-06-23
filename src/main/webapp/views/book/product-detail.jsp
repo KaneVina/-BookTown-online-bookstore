@@ -378,14 +378,27 @@
                                             pattern="dd/MM/yyyy HH:mm"/>
                                     </span>
                                     <c:if test="${sessionScope.account != null && sessionScope.account.id == review.customerID}">
-                                        <button type="button"
-                                                class="edit-review-btn flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-                                                data-review-id="${review.reviewID}"
-                                                data-rating="${review.rating}"
-                                                data-comment="${fn:escapeXml(review.comment)}">
-                                            <span class="material-symbols-outlined text-base">edit</span>
-                                            Sửa
-                                        </button>
+                                        <c:choose>
+                                            <c:when test="${empty review.adminReply}">
+                                                <button type="button"
+                                                        class="edit-review-btn flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                                                        data-review-id="${review.reviewID}"
+                                                        data-rating="${review.rating}"
+                                                        data-comment="${fn:escapeXml(review.comment)}">
+                                                    <span class="material-symbols-outlined text-base">edit</span>
+                                                    Sửa
+                                                </button>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <button type="button"
+                                                        disabled
+                                                        title="Không thể sửa vì BookTown đã phản hồi đánh giá này"
+                                                        class="flex items-center gap-1 text-xs font-semibold text-gray-400 cursor-not-allowed">
+                                                    <span class="material-symbols-outlined text-base">edit_off</span>
+                                                    Sửa
+                                                </button>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </c:if>
                                 </div>
                             </div>

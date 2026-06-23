@@ -241,6 +241,14 @@
                 transform: translateY(-1px);
             }
 
+            .btn-submit:disabled {
+                background: #cbd5e1;
+                color: #94a3b8;
+                cursor: not-allowed;
+                box-shadow: none;
+                transform: none;
+            }
+
             /* Info card modern */
             .info-card {
                 background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
@@ -392,7 +400,7 @@
                                 <p class="text-slate-500 text-sm ml-10">Chỉnh sửa thông tin cá nhân của bạn</p>
                             </div>
                             <div class="separator"></div>
-                            <form action="${pageContext.request.contextPath}/profile" method="post" class="space-y-10">
+                            <form action="${pageContext.request.contextPath}/profile" method="post" id="profileForm" class="space-y-10">
                                 <div class="form-group">
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                         <div>
@@ -412,6 +420,7 @@
                                             <input 
                                                 type="text" 
                                                 name="fullname" 
+                                                id="fullname"
                                                 value="${fn:escapeXml(account.fullname)}" 
                                                 required 
                                                 class="input-premium" 
@@ -423,6 +432,7 @@
                                             <input 
                                                 type="tel" 
                                                 name="phone" 
+                                                id="phone"
                                                 value="${fn:escapeXml(account.phone)}" 
                                                 required 
                                                 class="input-premium" 
@@ -446,7 +456,7 @@
                                 </div>
                                 <div class="separator"></div>
                                 <div class="flex justify-end">
-                                    <button type="submit" class="btn-submit">
+                                    <button type="submit" id="saveBtn" class="btn-submit" disabled>
                                         <span class="material-symbols-outlined">save</span>
                                         Lưu thay đổi
                                     </button>
@@ -462,6 +472,38 @@
         <%@ include file="/views/layout/common/toast.jsp" %>
 
         <script>
+            const initialValues = {
+                fullname: "${account.fullname}",
+                phone: "${account.phone}"
+            };
+
+            const saveBtn = document.getElementById('saveBtn');
+            const fullnameInput = document.getElementById('fullname');
+            const phoneInput = document.getElementById('phone');
+
+            function checkFormChanges() {
+                const currentFullname = fullnameInput.value.trim();
+                const currentPhone = phoneInput.value.trim();
+
+                if (!currentFullname || !currentPhone) {
+                    saveBtn.disabled = true;
+                    return;
+                }
+
+                const hasChanges =
+                        currentFullname !== initialValues.fullname ||
+                        currentPhone !== initialValues.phone;
+
+                saveBtn.disabled = !hasChanges;
+            }
+
+            fullnameInput.addEventListener('input', checkFormChanges);
+            fullnameInput.addEventListener('change', checkFormChanges);
+            phoneInput.addEventListener('input', checkFormChanges);
+            phoneInput.addEventListener('change', checkFormChanges);
+
+            checkFormChanges();
+
             document.addEventListener('DOMContentLoaded', function () {
                 const msgEl = document.getElementById('toastMessageData');
                 const errEl = document.getElementById('toastErrorData');

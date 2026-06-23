@@ -110,9 +110,7 @@ public class AccountDAO {
 
     // thêm phân trang
     public int countStaffs() {
-
         String sql = "SELECT COUNT(*) FROM Account";
-
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 return rs.getInt(1);
