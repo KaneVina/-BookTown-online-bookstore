@@ -46,8 +46,6 @@
                 font-family: 'Inter', sans-serif;
                 min-height: 100vh;
             }
-
-            /* Input Styling */
             .input-premium {
                 display: block;
                 width: 100%;
@@ -80,8 +78,6 @@
                 border-color: #e2e8f0;
                 border-radius: 9999px !important;
             }
-
-            /* Enhanced Card */
             .card-modern {
                 background: white;
                 border-radius: 18px;
@@ -94,14 +90,10 @@
                 box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
                 border-color: #d4dce5;
             }
-
-            /* Sticky sidebar with smooth transition */
             .sidebar-sticky {
                 position: sticky;
                 top: 24px;
             }
-
-            /* Avatar with gradient animation */
             .avatar-gradient {
                 width: 120px;
                 height: 120px;
@@ -131,7 +123,6 @@
                 text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
             }
 
-            /* Badge with enhanced styling */
             .badge-role {
                 display: inline-flex;
                 align-items: center;
@@ -176,8 +167,6 @@
                     transform: scale(1.1);
                 }
             }
-
-            /* Form label */
             .form-label-modern {
                 display: block;
                 font-size: 0.8rem;
@@ -191,8 +180,6 @@
             .form-label-modern span {
                 color: #dc2626;
             }
-
-            /* Section title */
             .section-title {
                 font-size: 0.85rem;
                 font-weight: 700;
@@ -211,8 +198,6 @@
                 color: #004d99;
                 font-size: 20px;
             }
-
-            /* Enhanced Button */
             .btn-submit {
                 display: inline-flex;
                 align-items: center;
@@ -248,8 +233,6 @@
                 box-shadow: none;
                 transform: none;
             }
-
-            /* Info card modern */
             .info-card {
                 background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
                 padding: 16px;
@@ -257,13 +240,11 @@
                 border: 1px solid #e2e8f0;
                 transition: all 0.3s ease;
             }
-
             .info-card:hover {
                 background: linear-gradient(135deg, #f1f5f9 0%, #e8eef7 100%);
                 border-color: #cbd5e1;
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             }
-
             .info-label {
                 font-size: 0.75rem;
                 font-weight: 700;
@@ -272,20 +253,15 @@
                 letter-spacing: 0.4px;
                 margin-bottom: 8px;
             }
-
             .info-value {
                 font-size: 0.95rem;
                 font-weight: 600;
                 color: #1e293b;
             }
-
-            /* Separator */
             .separator {
                 border-top: 2px solid #e2e8f0;
                 margin: 24px 0;
             }
-
-            /* Header animation */
             .header-section {
                 animation: slideDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
             }
@@ -300,8 +276,6 @@
                     transform: translateY(0);
                 }
             }
-
-            /* Form group animation */
             .form-group {
                 animation: fadeIn 0.6s ease;
             }
@@ -310,8 +284,6 @@
                 from { opacity: 0; }
                 to { opacity: 1; }
             }
-
-            /* Smooth page transition */
             main {
                 animation: pageLoad 0.5s ease;
             }
@@ -366,13 +338,11 @@
                     <p class="text-slate-600 text-base ml-14">Quản lý thông tin tài khoản và cập nhật thông tin cá nhân của bạn</p>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
                     <div class="lg:col-span-1">
                         <div class="card-modern p-8 sidebar-sticky">
                             <h2 class="text-2xl font-bold text-center text-slate-900 mt-6 mb-2">
                                 ${fn:escapeXml(account.fullname)}
                             </h2>
-                            <p class="text-center text-sm text-slate-400 font-mono mb-6">ID #${account.id}</p>
                             <div class="separator"></div>
                             <div class="space-y-4">
                                 <div class="info-card">
@@ -404,7 +374,7 @@
                                 <div class="form-group">
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                         <div>
-                                            <label class="form-label-modern">Mã định danh</label>
+                                            <label class="form-label-modern">ID</label>
                                             <input type="text" value="${account.id}" disabled class="input-premium font-mono"/>
                                         </div>
                                         <div>
@@ -437,19 +407,6 @@
                                                 required 
                                                 class="input-premium" 
                                                 placeholder="0912345678"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                        <div>
-                                            <label class="form-label-modern">Trạng thái</label>
-                                            <input 
-                                                type="text" 
-                                                value="${account.status}" 
-                                                disabled 
-                                                class="input-premium capitalize"
                                             />
                                         </div>
                                     </div>
