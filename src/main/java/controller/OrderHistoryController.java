@@ -28,7 +28,9 @@ public class OrderHistoryController extends HttpServlet {
         }
 
         String action = request.getParameter("action");
-        if (action == null) action = "";
+        if (action == null) {
+            action = "";
+        }
 
         switch (action) {
             case "detail":
@@ -48,7 +50,9 @@ public class OrderHistoryController extends HttpServlet {
         }
 
         String action = request.getParameter("action");
-        if (action == null) action = "";
+        if (action == null) {
+            action = "";
+        }
 
         switch (action) {
             case "cancel":
@@ -64,6 +68,8 @@ public class OrderHistoryController extends HttpServlet {
 
         Account account = getAccount(request);
 
+        String status = request.getParameter("status");
+
         int pageSize = PAGE_SIZE;
         int currentPage = 1;
         try {
@@ -74,20 +80,25 @@ public class OrderHistoryController extends HttpServlet {
         } catch (Exception ignored) {
         }
 
-        int totalRecords = orderDAO.countOrdersByCustomer(account.getId());
+        int totalRecords = orderDAO.countOrdersByCustomerFiltered(account.getId(), status);
         int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
-        if (totalPages == 0) totalPages = 1;
-        if (currentPage > totalPages) currentPage = totalPages;
+        if (totalPages == 0) {
+            totalPages = 1;
+        }
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+        }
 
         int offset = (currentPage - 1) * pageSize;
 
-        List<Order> orders = orderDAO.getOrdersByCustomer(account.getId(), offset, pageSize);
+        List<Order> orders = orderDAO.getOrdersByCustomerFiltered(account.getId(), status, offset, pageSize);
 
         request.setAttribute("orders", orders);
         request.setAttribute("currentPage", currentPage);
         request.setAttribute("totalPages", totalPages);
+        request.setAttribute("status", status);
 
-        String baseUrl = request.getContextPath() + "/profile/order-history?action=list";
+        String baseUrl = request.getContextPath() + "/profile/order-history?status=" + (status != null ? status : "");
         request.setAttribute("baseUrl", baseUrl);
 
         request.getRequestDispatcher("/views/order/order-history.jsp").forward(request, response);
@@ -120,19 +131,19 @@ public class OrderHistoryController extends HttpServlet {
 
         Account account = getAccount(request);
         int orderID = toInt(request.getParameter("orderID"), 0);
-
+        Order order = orderDAO.getOrderByID(orderID);
         boolean ok = orderDAO.cancelOrder(orderID, account.getId());
 
         HttpSession session = request.getSession();
         if (ok) {
-            session.setAttribute("successMessage", "Đã hủy đơn hàng #BT-" + orderID + " thành công!");
+            String orderCode = (order != null) ? order.getOrderCode() : String.valueOf(orderID);
+            session.setAttribute("successMessage", "Đã hủy đơn hàng #" + orderCode + " thành công!");
         } else {
             session.setAttribute("errorMessage", "Không thể hủy đơn hàng này (đơn đã được xử lý).");
         }
 
         response.sendRedirect(request.getContextPath() + "/profile/order-history");
     }
-
 
     private boolean isCustomer(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
@@ -158,7 +169,9 @@ public class OrderHistoryController extends HttpServlet {
     }
 
     private int toInt(String value, int defaultVal) {
-        if (value == null || value.trim().isEmpty()) return defaultVal;
+        if (value == null || value.trim().isEmpty()) {
+            return defaultVal;
+        }
         try {
             return Integer.parseInt(value.trim());
         } catch (NumberFormatException e) {

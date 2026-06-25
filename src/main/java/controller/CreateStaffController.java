@@ -1,85 +1,125 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
+import dao.AccountDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import model.Account;
 
-/**
- *
- * @author Trương Trân
- */
 public class CreateStaffController extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet CreateStaffController</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet CreateStaffController at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        req.getRequestDispatcher("/views/admin/create-staff.jsp").forward(req, resp);
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        Account loginUser = (Account) session.getAttribute("account");
+        if (loginUser == null || !loginUser.getRole().equals("admin")) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        request.setAttribute("mode", "add");
+        request.getRequestDispatcher("/views/admin/account/create-staff.jsp")
+                .forward(request, response);
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            response.setStatus(401);
+            response.getWriter().write("{\"success\":false,\"message\":\"Chưa đăng nhập\"}");
+            return;
+        }
+        Account loginUser = (Account) session.getAttribute("account");
+        if (loginUser == null || !loginUser.getRole().equals("admin")) {
+            response.setStatus(403);
+            response.getWriter().write("{\"success\":false,\"message\":\"Không có quyền thực hiện\"}");
+            return;
+        }
+        AccountDAO dao = new AccountDAO();
+        try (PrintWriter out = response.getWriter()) {
+            String mode     = request.getParameter("mode");
+            String fullname = request.getParameter("fullname");
+            String email    = request.getParameter("email");
+            String phone    = request.getParameter("phone");
+            String role     = request.getParameter("role");
+            String password = request.getParameter("password");
+            String status   = request.getParameter("status");
+
+            // Validate bắt buộc
+            if (fullname == null || fullname.trim().isEmpty()) {
+                out.write("{\"success\":false,\"message\":\"Vui lòng nhập họ tên\"}");
+                return;
+            }
+            if (email == null || email.trim().isEmpty()) {
+                out.write("{\"success\":false,\"message\":\"Vui lòng nhập email\"}");
+                return;
+            }
+            if (role == null || role.trim().isEmpty()) {
+                out.write("{\"success\":false,\"message\":\"Vui lòng chọn vai trò\"}");
+                return;
+            }
+            // Chỉ cho phép tạo staff hoặc admin
+            if (!role.equals("staff") && !role.equals("admin")) {
+                out.write("{\"success\":false,\"message\":\"Vai trò không hợp lệ\"}");
+                return;
+            }
+            if (password == null || password.trim().isEmpty()) {
+                out.write("{\"success\":false,\"message\":\"Vui lòng nhập mật khẩu\"}");
+                return;
+            }
+            if (password.length() < 6) {
+                out.write("{\"success\":false,\"message\":\"Mật khẩu phải ít nhất 6 ký tự\"}");
+                return;
+            }
+            // Mặc định status = active nếu không truyền
+            if (status == null || status.isEmpty()) {
+                status = "active";
+            }
+            // Kiểm tra email đã tồn tại chưa
+            if (dao.isEmailExists(email.trim())) {
+                out.write("{\"success\":false,\"message\":\"Email đã tồn tại trong hệ thống\"}");
+                return;
+            }
+            if ("add".equals(mode)) {
+                boolean ok = dao.registerStaff(
+                        fullname.trim(),
+                        email.trim(),
+                        phone != null ? phone.trim() : "",
+                        password,
+                        role.trim(),
+                        status
+                );
+                if (ok) {
+                    out.write("{\"success\":true,\"message\":\"Tạo tài khoản thành công\"}");
+                } else {
+                    out.write("{\"success\":false,\"message\":\"Tạo tài khoản thất bại, vui lòng thử lại\"}");
+                }
+            } else {
+                out.write("{\"success\":false,\"message\":\"Action không hợp lệ\"}");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(500);
+            response.getWriter().write("{\"success\":false,\"message\":\"Lỗi server: " + e.getMessage() + "\"}");
+        }
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+        return "Create Staff Controller";
+    }
 }

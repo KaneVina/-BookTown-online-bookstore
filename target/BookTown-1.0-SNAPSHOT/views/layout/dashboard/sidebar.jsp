@@ -157,8 +157,8 @@
             Tài khoản
         </a>
 
-        <a href="${pageContext.request.contextPath}/dashboard/review-management"
-           class="sidebar-link <%= currentPage.contains("review-management") ? "active" : ""%>">
+        <a href="${pageContext.request.contextPath}/review"
+           class="sidebar-link <%= currentPage.contains("review") ? "active" : ""%>">
             <span class="material-symbols-outlined">rate_review</span>
             Đánh giá
         </a>

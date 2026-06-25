@@ -30,7 +30,7 @@ public class CartController extends HttpServlet {
         List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
 
         BigDecimal subtotal    = cartDAO.calcSubtotal(cartItems);
-        int        totalQty    = calcTotalQuantity(cartItems);
+        int totalQty    = calcTotalQuantity(cartItems);
 
         request.getSession().setAttribute("cartCount", totalQty);
 

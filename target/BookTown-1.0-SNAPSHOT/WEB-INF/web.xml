@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="6.0" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
     <servlet>
         <servlet-name>LoginController</servlet-name>
         <servlet-class>controller.LoginController</servlet-class>
@@ -33,14 +32,6 @@
         <servlet-class>controller.CustomerOrderController</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>CustomerOrderDetailController</servlet-name>
-        <servlet-class>controller.CustomerOrderDetailController</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>OrderHistoryDetailController</servlet-name>
-        <servlet-class>controller.OrderHistoryDetailController</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>OrderHistoryController</servlet-name>
         <servlet-class>controller.OrderHistoryController</servlet-class>
     </servlet>
@@ -69,18 +60,6 @@
         <servlet-class>controller.AccountDetailController</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>CreateStaffController</servlet-name>
-        <servlet-class>controller.CreateStaffController</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>UpdateAccountController</servlet-name>
-        <servlet-class>controller.UpdateAccountController</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>ReviewManagementController</servlet-name>
-        <servlet-class>controller.ReviewManagementController</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>VoucherController</servlet-name>
         <servlet-class>controller.VoucherController</servlet-class>
     </servlet>
@@ -99,6 +78,30 @@
     <servlet>
         <servlet-name>DashboardController</servlet-name>
         <servlet-class>controller.DashboardController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>VNPayController</servlet-name>
+        <servlet-class>controller.VNPayController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>VNPayReturnController</servlet-name>
+        <servlet-class>controller.VNPayReturnController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ReviewManagementController</servlet-name>
+        <servlet-class>controller.ReviewManagementController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CategoryManagementController</servlet-name>
+        <servlet-class>controller.CategoryManagementController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AddressManagementController</servlet-name>
+        <servlet-class>controller.AddressManagementController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CreateStaffController</servlet-name>
+        <servlet-class>controller.CreateStaffController</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>LoginController</servlet-name>
@@ -136,14 +139,6 @@
         <url-pattern>/dashboard/customer-order</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>CustomerOrderDetailController</servlet-name>
-        <url-pattern>/dashboard/customer-order-detail</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>OrderHistoryDetailController</servlet-name>
-        <url-pattern>/profile/order-history-detail</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
         <servlet-name>OrderHistoryController</servlet-name>
         <url-pattern>/profile/order-history</url-pattern>
     </servlet-mapping>
@@ -168,22 +163,6 @@
         <url-pattern>/review</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>AccountDetailController</servlet-name>
-        <url-pattern>/dashboard/account-detail</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CreateStaffController</servlet-name>
-        <url-pattern>/dashboard/add-staff</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>UpdateAccountController</servlet-name>
-        <url-pattern>/dashboard/update-account</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ReviewManagementController</servlet-name>
-        <url-pattern>/dashboard/review-management</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
         <servlet-name>VoucherController</servlet-name>
         <url-pattern>/dashboard/voucher-management</url-pattern>
     </servlet-mapping>
@@ -202,6 +181,26 @@
     <servlet-mapping>
         <servlet-name>DashboardController</servlet-name>
         <url-pattern>/dashboard</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>VNPayController</servlet-name>
+        <url-pattern>/vnpay-payment</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>VNPayReturnController</servlet-name>
+        <url-pattern>/vnpay-return</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CategoryManagementController</servlet-name>
+        <url-pattern>/category</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AddressManagementController</servlet-name>
+        <url-pattern>/address</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CreateStaffController</servlet-name>
+        <url-pattern>/dashboard/add-staff</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout> 30 </session-timeout>

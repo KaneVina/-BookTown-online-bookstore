@@ -28,7 +28,7 @@ public class ProductController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        String idParam     = req.getParameter("id");
+        String idParam = req.getParameter("id");
         String actionParam = req.getParameter("action");
 
         String action;
@@ -41,10 +41,10 @@ public class ProductController extends HttpServlet {
         }
 
         switch (action) {
-            case "list":    showList(req, resp);              break;
-            case "detail":  showDetail(req, resp, idParam);  break;
-            case "featured":showFeatured(req, resp);         break;
-            default:        show404(req, resp, "Hành động không tồn tại: " + action);
+            case "list":     showList(req, resp);             break;
+            case "detail":   showDetail(req, resp, idParam);  break;
+            case "featured": showFeatured(req, resp);         break;
+            default:         show404(req, resp, "Hành động không tồn tại: " + action);
         }
     }
 
@@ -58,14 +58,14 @@ public class ProductController extends HttpServlet {
     private void showList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        int page     = parsePage(req.getParameter("page"));
-        int pageSize = parsePageSize(req.getParameter("size"));
+        int page      = parsePage(req.getParameter("page"));
+        int pageSize  = parsePageSize(req.getParameter("size"));
         String sort    = req.getParameter("sort");
         String keyword = req.getParameter("keyword");
         String order   = buildOrderClause(sort);
 
         // Filter params
-        Integer genreID   = parseIntParam(req.getParameter("genre"));
+        Integer    genreID  = parseIntParam(req.getParameter("genre"));
         BigDecimal minPrice = parsePriceParam(req.getParameter("minPrice"));
         BigDecimal maxPrice = parsePriceParam(req.getParameter("maxPrice"));
 
@@ -77,9 +77,9 @@ public class ProductController extends HttpServlet {
         if (page > totalPages) {
             resp.sendRedirect(req.getContextPath() + "/products?page=" + totalPages
                     + "&size=" + pageSize
-                    + (sort    != null ? "&sort="     + sort    : "")
-                    + (keyword != null ? "&keyword="  + keyword : "")
-                    + (genreID != null ? "&genre="    + genreID : ""));
+                    + (sort    != null ? "&sort="    + sort    : "")
+                    + (keyword != null ? "&keyword=" + keyword : "")
+                    + (genreID != null ? "&genre="   + genreID : ""));
             return;
         }
 
@@ -130,16 +130,20 @@ public class ProductController extends HttpServlet {
         if (book == null) { show404(req, resp, "Không tìm thấy sách với ID = " + bookID); return; }
 
         List<Book> relatedBooks = bookDAO.getRelatedBooks(bookID, book.getGenreID(), 4);
+
         ReviewDAO reviewDAO = new ReviewDAO();
         List<Review> reviews = reviewDAO.getReviewsByBook(bookID);
 
-        // Wishlist status
+        // canReview: bổ sung từ main
+        boolean canReview = false;
         boolean inWishlist = false;
         java.util.Set<Integer> wishlistBookIds = new java.util.HashSet<>();
+
         HttpSession session = req.getSession(false);
         if (session != null) {
             Account acc = (Account) session.getAttribute("account");
             if (acc != null && "customer".equals(acc.getRole())) {
+                canReview = reviewDAO.canReview(acc.getId(), bookID);
                 WishListDAO wDAO = new WishListDAO();
                 inWishlist = wDAO.isInWishlist(acc.getId(), bookID);
                 wDAO.getWishlistItems(acc.getId()).forEach(wi -> wishlistBookIds.add(wi.getBookID()));
@@ -162,11 +166,12 @@ public class ProductController extends HttpServlet {
             req.setAttribute("errorMessage", "Vui lòng đăng nhập để dùng tính năng này.");
         }
 
-        req.setAttribute("book",         book);
-        req.setAttribute("relatedBooks", relatedBooks);
-        req.setAttribute("reviews",      reviews);
-        req.setAttribute("inWishlist",   inWishlist);
-        req.setAttribute("wishlistBookIds", wishlistBookIds);
+        req.setAttribute("book",             book);
+        req.setAttribute("relatedBooks",     relatedBooks);
+        req.setAttribute("reviews",          reviews);
+        req.setAttribute("canReview",        canReview);
+        req.setAttribute("inWishlist",       inWishlist);
+        req.setAttribute("wishlistBookIds",  wishlistBookIds);
 
         req.getRequestDispatcher("/views/book/product-detail.jsp").forward(req, resp);
     }
@@ -178,15 +183,15 @@ public class ProductController extends HttpServlet {
         List<Book> featuredBooks = bookDAO.getFeaturedByOrders(10);
         Map<Integer, String> genreMap = bookDAO.getGenreMap();
 
-        req.setAttribute("featuredBooks",  featuredBooks);
-        req.setAttribute("books",          featuredBooks);
-        req.setAttribute("page",           1);
-        req.setAttribute("pageSize",       featuredBooks.size());
-        req.setAttribute("totalPages",     1);
-        req.setAttribute("totalBooks",     featuredBooks.size());
-        req.setAttribute("sort",           "popular");
-        req.setAttribute("genreMap",       genreMap);
-        
+        req.setAttribute("featuredBooks", featuredBooks);
+        req.setAttribute("books",         featuredBooks);
+        req.setAttribute("page",          1);
+        req.setAttribute("pageSize",      featuredBooks.size());
+        req.setAttribute("totalPages",    1);
+        req.setAttribute("totalBooks",    featuredBooks.size());
+        req.setAttribute("sort",          "popular");
+        req.setAttribute("genreMap",      genreMap);
+
         HttpSession session = req.getSession(false);
         java.util.Set<Integer> wishlistBookIds = new java.util.HashSet<>();
         if (session != null) {

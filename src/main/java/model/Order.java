@@ -6,22 +6,24 @@ package model;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 
 /**
  *
  * @author Kim Chi
  */
 public class Order {
+
     private int orderID;
     private int customerID;
     private int addressID;
-    private Integer processedBy;       
-    private String status;             
-    private String paymentMethod;      
-    private String paymentStatus;     
+    private Integer processedBy;
+    private String status;
+    private String paymentMethod;
+    private String paymentStatus;
     private BigDecimal totalPrice;
     private Timestamp createdAt;
-
+    private String city;
     private String street;
     private String district;
 
@@ -48,15 +50,10 @@ public class Order {
     public void setCity(String city) {
         this.city = city;
     }
-    private String city;
 
-    
-    public Order() {}
-
-    public Order(int orderID, int customerID, int addressID, Integer processedBy, String status, String paymentMethod, String paymentStatus, BigDecimal totalPrice, Timestamp createdAt) {
-        
+    public Order() {
     }
-    
+
     public int getOrderID() {
         return orderID;
     }
@@ -129,4 +126,41 @@ public class Order {
         this.createdAt = createdAt;
     }
 
+    public String getOrderCode() {
+        String datePart = "";
+        if (createdAt != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("ddMMyy");
+            datePart = sdf.format(createdAt);
+        }
+        String seqPart = String.format("%06d", orderID);
+        return "BT-" + datePart + seqPart;
+    }
+
+    private String customerName;
+    private String customerEmail;
+    private String customerPhone;
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getCustomerEmail() {
+        return customerEmail;
+    }
+
+    public void setCustomerEmail(String customerEmail) {
+        this.customerEmail = customerEmail;
+    }
+
+    public String getCustomerPhone() {
+        return customerPhone;
+    }
+
+    public void setCustomerPhone(String customerPhone) {
+        this.customerPhone = customerPhone;
+    }
 }
