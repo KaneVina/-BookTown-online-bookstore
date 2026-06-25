@@ -106,24 +106,6 @@
                         Thêm tài khoản nhân viên
                     </a>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="bg-surface p-6 rounded-xl shadow-sm border border-outline-variant/30">
-                        <span class="text-primary font-semibold text-sm">Tổng tài khoản</span>
-                        <div class="text-3xl font-bold mt-2">${requestScope.totalAccounts != null ? requestScope.totalAccounts : 0}</div>
-                    </div>
-                    <div class="bg-surface p-6 rounded-xl shadow-sm border border-outline-variant/30">
-                        <span class="text-primary font-semibold text-sm">Khách hàng</span>
-                        <div class="text-3xl font-bold mt-2">${requestScope.customerCount != null ? requestScope.customerCount : 0}</div>
-                    </div>
-                    <div class="bg-surface p-6 rounded-xl shadow-sm border border-outline-variant/30">
-                        <span class="text-primary font-semibold text-sm">Staff</span>
-                        <div class="text-3xl font-bold mt-2">${requestScope.staffCount != null ? requestScope.staffCount : 0}</div>
-                    </div>
-                    <div class="bg-surface p-6 rounded-xl shadow-sm border border-outline-variant/30">
-                        <span class="text-primary font-semibold text-sm">Hoạt động</span>
-                        <div class="text-3xl font-bold mt-2">${requestScope.activeCount != null ? requestScope.activeCount : 0}</div>
-                    </div>
-                </div>
                 <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
                     <div class="p-6 border-b border-outline-variant/30">
                         <h3 class="text-xl font-bold mb-4">Danh sách tài khoản</h3>
