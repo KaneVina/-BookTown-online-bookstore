@@ -91,12 +91,11 @@
 
                 <div class="flex gap-3 w-full md:w-auto">
                     <c:if test="${order.status == 'pending'}">
-                        <form method="POST"
-                              action="${pageContext.request.contextPath}/profile/order-history"
-                              onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng ${order.orderCode}?');">
+                        <form id="cancelOrderForm" method="POST"
+                              action="${pageContext.request.contextPath}/profile/order-history">
                             <input type="hidden" name="action" value="cancel" />
                             <input type="hidden" name="orderID" value="${order.orderID}" />
-                            <button type="submit"
+                            <button type="button" onclick="confirmCancelOrder()"
                                     class="flex-1 md:flex-none px-5 py-2 bg-white border border-[#D32F2F] text-[#D32F2F] font-semibold text-sm rounded-lg hover:bg-red-50 transition-colors">
                                 Hủy đơn hàng
                             </button>
@@ -360,6 +359,94 @@
                 </div>
             </div>
         </main>
+
+        <!-- Confirmation Modal -->
+        <div id="confirmModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[9999]">
+            <div class="bg-white w-[450px] rounded-xl p-6 relative">
+                <button type="button" class="absolute top-3 right-4 text-2xl hover:text-gray-500 close-confirm">×</button>
+
+                <h3 class="text-xl font-bold mb-4" id="confirmTitle">Xác nhận hành động</h3>
+                <p class="text-gray-600 mb-6" id="confirmMessage">Bạn chắc chắn muốn thực hiện hành động này?</p>
+
+                <div class="flex justify-end gap-3">
+                    <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 close-confirm">
+                        Hủy
+                    </button>
+                    <button type="button" id="confirmAction" class="px-4 py-2 bg-[#004d99] text-white rounded-lg hover:opacity-90">
+                        Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            (function() {
+                var confirmModal = null;
+                var pendingAction = null;
+
+                function initConfirmModal() {
+                    confirmModal = document.getElementById('confirmModal');
+                    document.querySelectorAll('.close-confirm').forEach(function(btn) {
+                        btn.addEventListener('click', closeConfirmModal);
+                    });
+
+                    if (confirmModal) {
+                        confirmModal.addEventListener('click', function (e) {
+                            if (e.target === confirmModal) {
+                                closeConfirmModal();
+                            }
+                        });
+                    }
+
+                    var confirmActionBtn = document.getElementById('confirmAction');
+                    if (confirmActionBtn) {
+                        confirmActionBtn.addEventListener('click', executeAction);
+                    }
+                }
+
+                window.openConfirmModal = function(title, message, action) {
+                    document.getElementById('confirmTitle').textContent = title;
+                    document.getElementById('confirmMessage').textContent = message;
+                    pendingAction = action;
+
+                    if (confirmModal) {
+                        confirmModal.classList.remove('hidden');
+                        confirmModal.classList.add('flex');
+                    }
+                };
+
+                function closeConfirmModal() {
+                    if (confirmModal) {
+                        confirmModal.classList.add('hidden');
+                        confirmModal.classList.remove('flex');
+                    }
+                    pendingAction = null;
+                }
+
+                function executeAction() {
+                    if (pendingAction) {
+                        pendingAction();
+                        closeConfirmModal();
+                    }
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initConfirmModal);
+                } else {
+                    initConfirmModal();
+                }
+            })();
+
+            function confirmCancelOrder() {
+                openConfirmModal(
+                    'Hủy đơn hàng',
+                    'Bạn có chắc chắn muốn hủy đơn hàng này không?',
+                    function() {
+                        document.getElementById('cancelOrderForm').submit();
+                    }
+                );
+            }
+        </script>
     </body>
 
 </html>

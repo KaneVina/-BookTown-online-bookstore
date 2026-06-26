@@ -214,13 +214,15 @@
     }
 
     function removeItem(cartItemID) {
-        if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
-
-        fetch(CART_URL, {
-            method:  'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body:    'action=remove&cartItemID=' + cartItemID
-        })
+        openConfirmModal(
+            'Xóa sản phẩm',
+            'Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?',
+            function() {
+                fetch(CART_URL, {
+                    method:  'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body:    'action=remove&cartItemID=' + cartItemID
+                })
         .then(function(res) { return res.json(); })
         .then(function(data) {
             if (!data.ok) {
@@ -252,7 +254,87 @@
             console.error(err);
             showToast('Không kết nối được server', true);
         });
-    }
+        }
+    );
+}
+</script>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[9999]">
+    <div class="bg-white w-[450px] rounded-xl p-6 relative">
+        <button type="button" class="absolute top-3 right-4 text-2xl hover:text-gray-500 close-confirm">×</button>
+
+        <h3 class="text-xl font-bold mb-4" id="confirmTitle">Xác nhận hành động</h3>
+        <p class="text-gray-600 mb-6" id="confirmMessage">Bạn chắc chắn muốn thực hiện hành động này?</p>
+
+        <div class="flex justify-end gap-3">
+            <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 close-confirm">
+                Hủy
+            </button>
+            <button type="button" id="confirmAction" class="px-4 py-2 bg-[#004d99] text-white rounded-lg hover:opacity-90">
+                Xác nhận
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        var confirmModal = null;
+        var pendingAction = null;
+
+        function initConfirmModal() {
+            confirmModal = document.getElementById('confirmModal');
+            document.querySelectorAll('.close-confirm').forEach(function(btn) {
+                btn.addEventListener('click', closeConfirmModal);
+            });
+
+            if (confirmModal) {
+                confirmModal.addEventListener('click', function (e) {
+                    if (e.target === confirmModal) {
+                        closeConfirmModal();
+                    }
+                });
+            }
+
+            var confirmActionBtn = document.getElementById('confirmAction');
+            if (confirmActionBtn) {
+                confirmActionBtn.addEventListener('click', executeAction);
+            }
+        }
+
+        window.openConfirmModal = function(title, message, action) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            pendingAction = action;
+
+            if (confirmModal) {
+                confirmModal.classList.remove('hidden');
+                confirmModal.classList.add('flex');
+            }
+        };
+
+        function closeConfirmModal() {
+            if (confirmModal) {
+                confirmModal.classList.add('hidden');
+                confirmModal.classList.remove('flex');
+            }
+            pendingAction = null;
+        }
+
+        function executeAction() {
+            if (pendingAction) {
+                pendingAction();
+                closeConfirmModal();
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initConfirmModal);
+        } else {
+            initConfirmModal();
+        }
+    })();
 </script>
 
 </body>
