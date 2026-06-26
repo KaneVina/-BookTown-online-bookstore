@@ -184,19 +184,19 @@
                                             </c:otherwise>
                                         </c:choose>
 
-                                        <c:if test="${order.status == 'pending'}">
-                                            <form method="POST"
-                                                  action="${pageContext.request.contextPath}/profile/order-history"
-                                                  onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng ${order.orderCode}?');">
-                                                <input type="hidden" name="action" value="cancel" />
-                                                <input type="hidden" name="orderID"
-                                                       value="${order.orderID}" />
-                                                <button type="submit"
-                                                        class="px-5 py-2 border border-red-500 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
-                                                    Hủy đơn
-                                                </button>
-                                            </form>
-                                        </c:if>
+                                         <c:if test="${order.status == 'pending'}">
+                                             <form method="POST" id="cancelForm_${order.orderID}"
+                                                   action="${pageContext.request.contextPath}/profile/order-history">
+                                                 <input type="hidden" name="action" value="cancel" />
+                                                 <input type="hidden" name="orderID"
+                                                        value="${order.orderID}" />
+                                                 <button type="button"
+                                                         onclick="confirmCancelCustomer('Hủy đơn hàng', 'Bạn có chắc muốn hủy đơn hàng ${order.orderCode}?', 'cancelForm_${order.orderID}')"
+                                                         class="px-5 py-2 border border-red-500 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
+                                                     Hủy đơn
+                                                 </button>
+                                             </form>
+                                         </c:if>
 
                                         <a
                                             href="${pageContext.request.contextPath}/profile/order-history?action=detail&orderID=${order.orderID}">
@@ -223,3 +223,76 @@
 </div>
 
 <%@ include file="/views/layout/homepage/footer.jsp" %>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[100]">
+    <div class="bg-white w-[450px] rounded-xl p-6 relative">
+        <button type="button" class="absolute top-3 right-4 text-2xl hover:text-gray-500 close-confirm">×</button>
+
+        <h3 class="text-xl font-bold mb-4" id="confirmTitle">Xác nhận hành động</h3>
+        <p class="text-gray-600 mb-6" id="confirmMessage">Bạn chắc chắn muốn thực hiện hành động này?</p>
+
+        <div class="flex justify-end gap-3">
+            <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 close-confirm">
+                Hủy
+            </button>
+            <button type="button" id="confirmAction" class="px-4 py-2 bg-[#17479D] text-white rounded-lg hover:opacity-90">
+                Xác nhận
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    var confirmModal = null;
+    var pendingAction = null;
+
+    function initConfirmModal() {
+        confirmModal = document.getElementById('confirmModal');
+        document.querySelectorAll('.close-confirm').forEach(btn => {
+            btn.addEventListener('click', closeConfirmModal);
+        });
+
+        if (confirmModal) {
+            confirmModal.addEventListener('click', function (e) {
+                if (e.target === confirmModal) {
+                    closeConfirmModal();
+                }
+            });
+        }
+
+        document.getElementById('confirmAction').addEventListener('click', executeAction);
+    }
+
+    function openConfirmModal(title, message, action) {
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmMessage').textContent = message;
+        pendingAction = action;
+
+        confirmModal.classList.remove('hidden');
+        confirmModal.classList.add('flex');
+    }
+
+    function closeConfirmModal() {
+        confirmModal.classList.add('hidden');
+        confirmModal.classList.remove('flex');
+        pendingAction = null;
+    }
+
+    function executeAction() {
+        if (pendingAction) {
+            pendingAction();
+            closeConfirmModal();
+        }
+    }
+
+    function confirmCancelCustomer(title, message, formId) {
+        openConfirmModal(title, message, function() {
+            document.getElementById(formId).submit();
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        initConfirmModal();
+    });
+</script>

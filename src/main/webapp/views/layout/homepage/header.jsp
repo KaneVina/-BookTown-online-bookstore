@@ -33,6 +33,13 @@
             }
         </script>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/main.css">
+        <script>
+            window.addEventListener('pageshow', function (event) {
+                if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+                    window.location.reload();
+                }
+            });
+        </script>
     </head>
     <body class="text-on-surface">
 
