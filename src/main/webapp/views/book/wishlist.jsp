@@ -3,166 +3,141 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <%@ include file="/views/layout/homepage/header.jsp" %>
+<%@ include file="/views/layout/common/toast.jsp" %>
+
+<c:if test="${param.removed == '1'}">
+    <script>window.addEventListener('load', () => showToast('Đã xóa khỏi danh sách yêu thích!'));</script>
+</c:if>
+<c:if test="${param.movedToCart == '1'}">
+    <script>window.addEventListener('load', () => showToast('Đã chuyển sang giỏ hàng!'));</script>
+</c:if>
 
 <style>
-    .section-title-left {
-        border-left: 4px solid #FDD835;
-        padding-left: 12px;
-    }
+.wish-card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; overflow:hidden; display:flex; align-items:stretch; transition:box-shadow .2s; }
+.wish-card:hover { box-shadow:0 6px 20px rgba(23,71,157,.1); }
+.wish-thumb { width:100px; min-height:120px; flex-shrink:0; background:#f0f4ff; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.wish-thumb img { width:100%; height:100%; object-fit:cover; }
+.badge-stock-ok  { background:#dcfce7; color:#166534; font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; }
+.badge-stock-out { background:#fee2e2; color:#991b1b; font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; }
 </style>
 
-<main class="max-w-[1400px] mx-auto px-8 py-8 flex flex-col gap-6 min-h-[500px]">
-    
-    <!-- Breadcrumbs -->
-    <nav class="text-[13px] text-gray-500">
-        <a href="${pageContext.request.contextPath}/home" class="hover:text-primary transition-colors">Trang chủ</a>
-        <span class="mx-1.5">&gt;</span>
-        <span class="text-gray-400 font-medium">Danh sách yêu thích</span>
-    </nav>
-
-    <!-- Title and Subtitle Row -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-            <h1 class="section-title-left text-[24px] font-black text-primary uppercase tracking-wide">Danh sách yêu thích</h1>
-            <p class="text-gray-400 text-[14px] mt-1.5">Lưu lại những cuốn sách bạn yêu thích để dễ dàng mua sắm sau này.</p>
-        </div>
-        <c:if test="${not empty wishlistBooks}">
-            <div class="self-start sm:self-auto">
-                <span class="bg-[#E3F2FD] text-primary text-[12px] font-bold px-4 py-2 rounded-md uppercase tracking-wider">
-                    ${wishlistBooks.size()} cuốn sách
-                </span>
-            </div>
-        </c:if>
+<section class="hero-gradient px-8 py-7 relative overflow-hidden">
+    <div class="relative z-10">
+        <div class="bg-secondary text-primary font-bold text-xs px-3 py-1 rounded-full inline-block mb-2 tracking-wide uppercase">❤️ Yêu thích</div>
+        <h1 class="text-white text-[28px] font-black">Danh sách yêu thích của tôi</h1>
+        <p class="text-white/70 text-sm mt-1">${wishlistCount} sách trong danh sách</p>
     </div>
+</section>
 
-    <!-- Alert Notifications -->
-    <c:if test="${param.success == 'moveToCart'}">
-        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl flex items-center gap-3 shadow-sm">
-            <div class="w-7 h-7 bg-green-500/10 rounded-full flex items-center justify-center text-green-600">
-                <i data-lucide="check-circle" class="w-4 h-4"></i>
-            </div>
-            <span class="text-[13px] font-semibold">Đã chuyển sản phẩm vào giỏ hàng thành công!</span>
-        </div>
-    </c:if>
-    <c:if test="${param.error == 'moveToCart'}">
-        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-3 shadow-sm">
-            <div class="w-7 h-7 bg-red-500/10 rounded-full flex items-center justify-center text-red-600">
-                <i data-lucide="alert-circle" class="w-4 h-4"></i>
-            </div>
-            <span class="text-[13px] font-semibold">Đã xảy ra lỗi khi chuyển sản phẩm vào giỏ hàng. Vui lòng thử lại.</span>
-        </div>
-    </c:if>
+<main class="max-w-[900px] mx-auto px-6 py-8">
 
     <c:choose>
-        <c:when test="${not empty wishlistBooks}">
-            <!-- Wishlist Table Card -->
-            <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b border-gray-200 bg-gray-50/50">
-                                <th class="px-6 py-4 text-[12px] font-bold text-gray-400 uppercase tracking-wider w-[45%]">Sản phẩm</th>
-                                <th class="px-6 py-4 text-[12px] font-bold text-gray-400 uppercase tracking-wider">Giá</th>
-                                <th class="px-6 py-4 text-[12px] font-bold text-gray-400 uppercase tracking-wider">Tình trạng kho</th>
-                                <th class="px-6 py-4 text-[12px] font-bold text-gray-400 uppercase tracking-wider text-right w-[25%]">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-150">
-                            <c:forEach var="book" items="${wishlistBooks}">
-                                <tr>
-                                    <!-- Product Column -->
-                                    <td class="px-6 py-5">
-                                        <div class="flex items-center gap-4">
-                                            <!-- Cover Image Container -->
-                                            <div class="relative w-16 h-22 bg-[#f0f4ff] rounded overflow-visible flex-shrink-0 flex items-center justify-center border border-gray-100">
-                                                <c:choose>
-                                                    <c:when test="${not empty book.thumbnail}">
-                                                        <img src="${book.thumbnail}" alt="${book.title}" class="w-full h-full object-cover rounded">
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <i data-lucide="book-open" class="w-8 h-8 text-gray-300"></i>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                                
-                                                <!-- Remove Button Overlay -->
-                                                <form action="${pageContext.request.contextPath}/wishlist" method="POST" class="absolute -top-1.5 -right-1.5 z-10">
-                                                    <input type="hidden" name="action" value="remove" />
-                                                    <input type="hidden" name="bookID" value="${book.bookID}" />
-                                                    <button type="submit" class="w-4 h-4 bg-red-100 hover:bg-red-200 text-red-600 rounded-full flex items-center justify-center shadow-sm border border-red-200 transition-colors" title="Xóa khỏi yêu thích">
-                                                        <span class="text-[10px] font-black leading-none">&times;</span>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                            <!-- Book Title -->
-                                            <div class="min-w-0">
-                                                <a href="${pageContext.request.contextPath}/products?id=${book.bookID}" class="font-bold text-gray-800 hover:text-primary transition-colors text-[15px] line-clamp-2">
-                                                    ${book.title}
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    
-                                    <!-- Price Column -->
-                                    <td class="px-6 py-5 align-middle">
-                                        <span class="text-primary font-bold text-[15px]">
-                                            <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true" />đ
-                                        </span>
-                                    </td>
-                                    
-                                    <!-- Stock Status Column -->
-                                    <td class="px-6 py-5 align-middle">
-                                        <c:choose>
-                                            <c:when test="${book.stockQuantity > 0}">
-                                                <span class="text-green-600 font-bold text-[12px] uppercase">Còn hàng</span>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="text-red-500 font-bold text-[12px] uppercase">Hết hàng</span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    
-                                    <!-- Actions Column -->
-                                    <td class="px-6 py-5 align-middle text-right">
-                                        <div class="flex items-center justify-end gap-3">
-                                            <!-- Quick View Button -->
-                                            <a href="${pageContext.request.contextPath}/products?id=${book.bookID}" class="px-3.5 py-1.5 border border-gray-300 text-gray-500 hover:bg-gray-50 hover:text-gray-700 rounded text-[11px] font-bold transition-all uppercase tracking-wide">
-                                                Xem nhanh
-                                            </a>
-                                            <!-- Add to Cart Button -->
-                                            <c:choose>
-                                                <c:when test="${book.stockQuantity > 0}">
-                                                    <form action="${pageContext.request.contextPath}/wishlist" method="POST" class="inline">
-                                                        <input type="hidden" name="action" value="moveToCart" />
-                                                        <input type="hidden" name="bookID" value="${book.bookID}" />
-                                                        <button type="submit" class="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded text-[11px] font-bold transition-all uppercase tracking-wide shadow-sm">
-                                                            Thêm vào giỏ
-                                                        </button>
-                                                    </form>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <button type="button" disabled class="px-4 py-2 bg-gray-100 text-gray-400 border border-gray-200 rounded text-[11px] font-bold cursor-not-allowed uppercase tracking-wide">
-                                                        Thêm vào giỏ
-                                                    </button>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
+        <c:when test="${not empty wishlistItems}">
+            <div class="space-y-4">
+                <c:forEach var="item" items="${wishlistItems}">
+                <div class="wish-card">
+                    <div class="wish-thumb">
+                        <c:choose>
+                            <c:when test="${not empty item.thumbnail}">
+                                <img src="${item.thumbnail}" alt="${item.title}">
+                            </c:when>
+                            <c:otherwise>
+                                <i data-lucide="book-open" class="w-10 h-10 text-gray-200"></i>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                    <div class="flex-1 px-4 py-3 flex flex-col justify-between">
+                        <div>
+                            <a href="${pageContext.request.contextPath}/products?id=${item.bookID}"
+                               class="text-[15px] font-bold text-gray-800 hover:text-primary transition-colors line-clamp-2">${item.title}</a>
+                            <c:if test="${not empty item.authorsDisplay}">
+                                <p class="text-[13px] text-gray-400 mt-0.5">${item.authorsDisplay}</p>
+                            </c:if>
+
+                            <div class="flex items-center gap-3 mt-2 flex-wrap">
+                                <span class="text-primary text-[17px] font-bold">
+                                    <fmt:formatNumber value="${item.price}" type="number" groupingUsed="true"/>đ
+                                </span>
+                                <c:choose>
+                                    <c:when test="${item.stockQuantity > 0 and item.status == 'available'}">
+                                        <span class="badge-stock-ok">✓ Còn hàng (${item.stockQuantity})</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="badge-stock-out">✕ Hết hàng</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+
+                            <div class="text-[#FDD835] text-[11px] mt-1 flex items-center gap-0.5">
+                                <c:forEach begin="1" end="5" var="i">
+                                    <c:choose>
+                                        <c:when test="${i <= item.avgRating}">★</c:when>
+                                        <c:otherwise><span class="text-gray-200">★</span></c:otherwise>
+                                    </c:choose>
+                                </c:forEach>
+                                <span class="text-gray-400 text-[10px] ml-0.5">(${item.reviewCount})</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 mt-3 flex-wrap">
+                            <%-- Move to cart --%>
+                            <c:if test="${item.stockQuantity > 0 and item.status == 'available'}">
+                            <form method="post" action="${pageContext.request.contextPath}/wishlist">
+                                <input type="hidden" name="action"  value="moveToCart">
+                                <input type="hidden" name="bookID"  value="${item.bookID}">
+                                <button type="submit"
+                                    class="flex items-center gap-2 bg-primary text-white text-[13px] font-bold px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors">
+                                    <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i>
+                                    Chuyển vào giỏ
+                                </button>
+                            </form>
+                            </c:if>
+
+                            <a href="${pageContext.request.contextPath}/products?id=${item.bookID}"
+                               class="flex items-center gap-2 border border-primary text-primary text-[13px] font-bold px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors">
+                                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                Xem chi tiết
+                            </a>
+
+                            <%-- Remove --%>
+                            <form method="post" action="${pageContext.request.contextPath}/wishlist">
+                                <input type="hidden" name="action"  value="remove">
+                                <input type="hidden" name="bookID"  value="${item.bookID}">
+                                <button type="submit"
+                                    class="flex items-center gap-1.5 text-[13px] text-gray-400 hover:text-red-500 transition-colors px-2 py-2 rounded-lg hover:bg-red-50"
+                                    title="Xóa khỏi yêu thích">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    Xóa
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
+                </c:forEach>
+            </div>
+
+            <div class="mt-8 flex justify-between items-center">
+                <a href="${pageContext.request.contextPath}/products"
+                   class="flex items-center gap-2 text-primary font-medium hover:underline text-sm">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Tiếp tục mua sắm
+                </a>
+                <a href="${pageContext.request.contextPath}/cart"
+                   class="bg-secondary text-primary font-bold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity">
+                    🛒 Xem giỏ hàng
+                </a>
             </div>
         </c:when>
+
         <c:otherwise>
-            <div class="flex flex-col items-center justify-center py-20 bg-white border border-gray-150 rounded-2xl shadow-sm px-6">
-                <div class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4">
-                    <i data-lucide="heart" class="w-10 h-10" style="stroke-width:1.5"></i>
+            <div class="text-center py-24">
+                <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-red-50 flex items-center justify-center">
+                    <i data-lucide="heart" class="w-10 h-10 text-red-300"></i>
                 </div>
-                <h3 class="text-xl font-bold text-gray-800">Danh sách yêu thích trống</h3>
-                <p class="text-gray-500 mt-2 text-center max-w-md">Bạn chưa lưu bất kỳ sản phẩm nào. Hãy khám phá và thêm những cuốn sách bạn yêu thích vào danh sách này nhé!</p>
-                <a href="${pageContext.request.contextPath}/home" class="mt-6 bg-secondary text-primary font-bold px-6 py-3 rounded-full hover:opacity-90 transition-opacity">
-                    QUAY LẠI TRANG CHỦ
+                <h2 class="text-xl font-bold text-gray-700 mb-2">Chưa có sách yêu thích</h2>
+                <p class="text-gray-400 text-sm mb-6">Hãy khám phá kho sách và thêm những cuốn bạn thích vào đây!</p>
+                <a href="${pageContext.request.contextPath}/products"
+                   class="inline-flex items-center gap-2 bg-primary text-white font-bold px-8 py-3 rounded-full hover:bg-primary-dark transition-colors">
+                    <i data-lucide="search" class="w-4 h-4"></i> Khám phá sách ngay
                 </a>
             </div>
         </c:otherwise>

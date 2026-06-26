@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="6.0" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
     <servlet>
         <servlet-name>LoginController</servlet-name>
         <servlet-class>controller.LoginController</servlet-class>
@@ -73,7 +72,14 @@
         <servlet-class>controller.WishListController</servlet-class>
     </servlet>
     <servlet>
-
+        <servlet-name>AdminProductController</servlet-name>
+        <servlet-class>controller.AdminProductController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>DashboardController</servlet-name>
+        <servlet-class>controller.DashboardController</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>VNPayController</servlet-name>
         <servlet-class>controller.VNPayController</servlet-class>
     </servlet>
@@ -167,6 +173,14 @@
     <servlet-mapping>
         <servlet-name>WishListController</servlet-name>
         <url-pattern>/wishlist</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminProductController</servlet-name>
+        <url-pattern>/dashboard/product-management</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DashboardController</servlet-name>
+        <url-pattern>/dashboard</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>VNPayController</servlet-name>
