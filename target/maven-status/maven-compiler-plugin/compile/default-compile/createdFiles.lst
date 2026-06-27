@@ -26,6 +26,7 @@ dao\CartDAO.class
 dao\AccountDAO.class
 controller\RegisterController.class
 utils\HashMD5.class
+controller\DashboardController.class
 utils\DBContext.class
 model\Review.class
 filter\AuthFilter.class
@@ -41,6 +42,7 @@ controller\AccountDetailController.class
 dao\BookDAO.class
 controller\OrderHistoryController.class
 controller\CategoryManagementController.class
+dao\DashboardDAO.class
 controller\ProductController.class
 controller\ReviewController.class
 model\Order.class

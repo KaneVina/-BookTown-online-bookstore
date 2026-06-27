@@ -11,6 +11,7 @@ D:\code project 2\-BookTown-online-bookstore\src\main\java\utils\VNPayConfig.jav
 D:\code project 2\-BookTown-online-bookstore\src\main\java\controller\ProfileController.java
 D:\code project 2\-BookTown-online-bookstore\src\main\java\filter\AuthFilter.java
 D:\code project 2\-BookTown-online-bookstore\src\main\java\utils\HashMD5.java
+D:\code project 2\-BookTown-online-bookstore\src\main\java\controller\DashboardController.java
 D:\code project 2\-BookTown-online-bookstore\src\main\java\dao\ReviewDAO.java
 D:\code project 2\-BookTown-online-bookstore\src\main\java\dao\GenreDAO.java
 D:\code project 2\-BookTown-online-bookstore\src\main\java\dao\VoucherDAO.java
@@ -41,6 +42,7 @@ D:\code project 2\-BookTown-online-bookstore\src\main\java\controller\CartContro
 D:\code project 2\-BookTown-online-bookstore\src\main\java\utils\DBContext.java
 D:\code project 2\-BookTown-online-bookstore\src\main\java\model\Genre.java
 D:\code project 2\-BookTown-online-bookstore\src\main\java\controller\VoucherController.java
+D:\code project 2\-BookTown-online-bookstore\src\main\java\dao\DashboardDAO.java
 D:\code project 2\-BookTown-online-bookstore\src\main\java\controller\OtpController.java
 D:\code project 2\-BookTown-online-bookstore\src\main\java\controller\RegisterController.java
 D:\code project 2\-BookTown-online-bookstore\src\main\java\utils\EmailUtil.java
