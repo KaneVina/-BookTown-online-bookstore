@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <%@ include file="/views/layout/homepage/header.jsp" %>
 
@@ -41,9 +42,7 @@
         box-shadow:0 0 0 3px rgba(37,99,235,.15);
     }
 </style>
-
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-
 <div class="max-w-7xl mx-auto py-10 px-4">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- SIDEBAR -->
@@ -92,26 +91,26 @@
                         </span>
                         Đăng xuất
                     </a>
+                       <a href="${pageContext.request.contextPath}/address"
+   class="flex items-center gap-3 px-6 py-4 rounded-xl text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-semibold">
+    <i data-lucide="map-pin" class="w-6 h-6"></i>
+    Địa chỉ của tôi
+</a>
                 </nav>
             </div>
         </div>
 
-        <!--form nhập thông tin và lưu thay đổi-->
         <div class="lg:col-span-3 space-y-6">
             <c:if test="${not empty sessionScope.message}">
-                <div class="bg-green-100 text-green-700 p-4 rounded-xl">
-                    ${sessionScope.message}
-                </div>
+                <div id="toastMessageData" class="hidden" data-message="${fn:escapeXml(sessionScope.message)}"></div>
                 <c:remove var="message" scope="session"/>
             </c:if>
 
             <c:if test="${not empty sessionScope.error}">
-                <div class="bg-red-100 text-red-700 p-4 rounded-xl">
-                    ${sessionScope.error}
-                </div>
+                <div id="toastErrorData" class="hidden" data-message="${fn:escapeXml(sessionScope.error)}"></div>
                 <c:remove var="error" scope="session"/>
             </c:if>
-            <!-- PROFILE -->
+
             <div id="profile" class="profile-card p-8">
                 <div class="mb-8">
                     <h1 class="text-3xl font-bold">
@@ -123,7 +122,7 @@
                 </div>
 
                 <form action="${pageContext.request.contextPath}/profile"
-                      method="post">
+                      method="post" id="profileForm">
                     <div class="grid md:grid-cols-2 gap-6">
                         <div>
                             <label class="block mb-2 font-medium">
@@ -132,6 +131,7 @@
                             <input
                                 type="text"
                                 name="fullname"
+                                id="fullname"
                                 value="${customer.fullname}"
                                 required
                                 class="input-style">
@@ -153,6 +153,7 @@
                             <input
                                 type="text"
                                 name="phone"
+                                id="phone"
                                 value="${customer.phone}"
                                 class="input-style">
                         </div>
@@ -171,7 +172,7 @@
                                 Giới tính
                             </label>
 
-                            <select name="gender" class="input-style">
+                            <select name="gender" id="gender" class="input-style">
                                 <option value="Male"
                                         ${customer.gender == 'Male' ? 'selected' : ''}>
                                     Nam
@@ -196,6 +197,7 @@
                             <input
                                 type="date"
                                 name="dob"
+                                id="dob"
                                 value="${customer.dob}"
                                 max="<%= java.time.LocalDate.now()%>"
                                 class="input-style">
@@ -204,7 +206,9 @@
                     <div class="mt-8">
                         <button
                             type="submit"
-                            class="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-xl shadow">
+                            id="saveBtn"
+                            class="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-xl shadow disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-60 transition-all"
+                            disabled>
                             Lưu thay đổi
                         </button>
                     </div>
@@ -213,4 +217,66 @@
         </div>
     </div>
 </div>
+
+<%@ include file="/views/layout/common/toast.jsp" %>
+<script>
+    const initialValues = {
+        fullname: "${customer.fullname}",
+        phone: "${customer.phone}",
+        gender: "${customer.gender}",
+        dob: "${customer.dob}"
+    };
+
+    const form = document.getElementById('profileForm');
+    const saveBtn = document.getElementById('saveBtn');
+    const fullnameInput = document.getElementById('fullname');
+    const phoneInput = document.getElementById('phone');
+    const genderSelect = document.getElementById('gender');
+    const dobInput = document.getElementById('dob');
+
+    function checkFormChanges() {
+        const currentValues = {
+            fullname: fullnameInput.value.trim(),
+            phone: phoneInput.value.trim(),
+            gender: genderSelect.value,
+            dob: dobInput.value
+        };
+
+        if (!currentValues.fullname) {
+            saveBtn.disabled = true;
+            return;
+        }
+        const hasChanges = 
+            currentValues.fullname !== initialValues.fullname ||
+            currentValues.phone !== initialValues.phone ||
+            currentValues.gender !== initialValues.gender ||
+            currentValues.dob !== initialValues.dob;
+        saveBtn.disabled = !hasChanges;
+    }
+
+    fullnameInput.addEventListener('input', checkFormChanges);
+    fullnameInput.addEventListener('change', checkFormChanges);
+    phoneInput.addEventListener('input', checkFormChanges);
+    phoneInput.addEventListener('change', checkFormChanges);
+    genderSelect.addEventListener('change', checkFormChanges);
+    dobInput.addEventListener('change', checkFormChanges);
+
+    checkFormChanges();
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const msgEl = document.getElementById('toastMessageData');
+        const errEl = document.getElementById('toastErrorData');
+
+        if (msgEl) {
+            showToast(msgEl.dataset.message);
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        }
+        if (errEl) {
+            showToast(errEl.dataset.message, true);
+        }
+    });
+</script>
+
 <%@ include file="/views/layout/homepage/footer.jsp" %>

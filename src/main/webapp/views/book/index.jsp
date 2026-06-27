@@ -3,6 +3,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <%@ include file="/views/layout/homepage/header.jsp" %>
+<%@ include file="/views/layout/common/toast.jsp" %>
 
 <!-- HERO -->
 <section class="hero-gradient px-8 py-8 flex items-center justify-between min-h-[240px] relative overflow-hidden">
@@ -82,47 +83,110 @@
 
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <c:forEach var="book" items="${featuredBooks}">
-            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
-                <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
-                    <c:choose>
-                        <c:when test="${not empty book.thumbnail}">
-                            <img alt="${book.title}" class="w-full h-full object-cover" src="${book.thumbnail}">
-                        </c:when>
-                        <c:otherwise>
-                            <i data-lucide="book-open" class="w-16 h-16 text-gray-300"></i>
-                        </c:otherwise>
-                    </c:choose>
-                    <div class="absolute top-2.5 left-2.5 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">🔥 Hot</div>
+                <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col h-full">
+                    <!-- Vùng Ảnh -->
+                    <div class="relative w-full h-0 pb-[135%] bg-[#f0f4ff] overflow-hidden">
+                        <c:choose>
+                            <c:when test="${not empty book.thumbnail}">
+                                <img alt="${book.title}" class="absolute inset-0 w-full h-full object-cover object-center" src="${book.thumbnail}">
+                            </c:when>
+                            <c:otherwise>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <i data-lucide="book-open" class="w-16 h-16 text-gray-300"></i>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                        <div class="absolute top-2.5 left-2.5 z-10 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">🔥 Hot</div>
+                        <c:if test="${empty sessionScope.account or sessionScope.account.role == 'customer'}">
+                            <form method="post"
+                                  action="${pageContext.request.contextPath}/wishlist"
+                                  class="wishlist-form absolute top-2.5 right-2.5 z-20">
+
+                                <input type="hidden" name="bookID" value="${book.bookID}">
+
+                                <c:choose>
+
+                                    <c:when test="${not empty wishlistBookIds and wishlistBookIds.contains(book.bookID)}">
+                                        <input type="hidden" name="action" value="remove">
+
+                                        <button type="submit"
+                                                class="wish-btn active"
+                                                title="Xóa khỏi yêu thích">
+
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                 width="16"
+                                                 height="16"
+                                                 viewBox="0 0 24 24"
+                                                 fill="#ef4444"
+                                                 stroke="#ef4444"
+                                                 stroke-width="2">
+                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                            </svg>
+
+                                        </button>
+                                    </c:when>
+
+                                    <c:otherwise>
+
+                                        <input type="hidden" name="action" value="add">
+
+                                        <button type="submit"
+                                                class="wish-btn"
+                                                title="Thêm vào yêu thích">
+
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                 width="16"
+                                                 height="16"
+                                                 viewBox="0 0 24 24"
+                                                 fill="none"
+                                                 stroke="#374151"
+                                                 stroke-width="2">
+                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                            </svg>
+
+                                        </button>
+                                    </c:otherwise>
+
+                                </c:choose>
+
+                            </form>
+                        </c:if>
+                    </div>
+
+                    <!-- Vùng Thông Tin -->
+                    <div class="p-3 flex flex-col flex-1 justify-between min-h-[160px]">
+                        <div>
+                            <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 h-[38px] overflow-hidden">
+                                <a class="text-primary hover:underline"
+                                   href="${pageContext.request.contextPath}/products?id=${book.bookID}">
+                                    ${book.title}<c:if test="${not empty book.authors}"> – <c:forEach var="a" items="${book.authors}" varStatus="s">${a}<c:if test="${!s.last}">, </c:if></c:forEach></c:if>
+                                            </a>
+                                        </div>
+                                        <div class="text-[#FDD835] text-[12px] mb-2 flex items-center gap-1">
+                                <c:forEach begin="1" end="5" var="i">
+                                    <c:choose>
+                                        <c:when test="${i <= book.avgRating}">★</c:when>
+                                        <c:otherwise><span class="text-gray-300">★</span></c:otherwise>
+                                    </c:choose>
+                                </c:forEach>
+                                <span class="text-gray-400 text-[11px]">(${book.reviewCount})</span>
+                            </div>
+                        </div>
+                        <div class="mt-auto">
+                            <div class="text-primary text-[17px] font-bold mb-2.5">
+                                <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true" />đ
+                            </div>
+                            <a href="${pageContext.request.contextPath}/products?id=${book.bookID}"
+                               class="w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
+                                <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                <div class="p-3 flex flex-col flex-1">
-                    <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 min-h-[36px]">
-                        <a class="text-primary hover:underline"
-                           href="${pageContext.request.contextPath}/products?id=${book.bookID}">
-                            ${book.title}<c:if test="${not empty book.authors}"> – <c:forEach var="a" items="${book.authors}" varStatus="s">${a}<c:if test="${!s.last}">, </c:if></c:forEach></c:if>
-                        </a>
-                    </div>
-                    <div class="text-[#FDD835] text-[12px] mb-1.5 flex items-center gap-1">
-                        <c:forEach begin="1" end="5" var="i">
-                            <c:choose>
-                                <c:when test="${i <= book.avgRating}">★</c:when>
-                                <c:otherwise><span class="text-gray-300">★</span></c:otherwise>
-                            </c:choose>
-                        </c:forEach>
-                        <span class="text-gray-400 text-[11px]">(${book.reviewCount})</span>
-                    </div>
-                    <div class="text-primary text-[17px] font-bold mb-2.5">
-                        <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true" />đ
-                    </div>
-                    <a href="${pageContext.request.contextPath}/products?id=${book.bookID}"
-                       class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
-                        <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
-                    </a>
-                </div>
-            </div>
             </c:forEach>
 
             <c:if test="${empty featuredBooks}">
-            <div class="col-span-5 py-12 text-center text-gray-400 text-[14px]">Chưa có sách nào.</div>
+                <div class="col-span-5 py-12 text-center text-gray-400 text-[14px]">Chưa có sách nào.</div>
             </c:if>
         </div>
     </section>
@@ -153,51 +217,312 @@
 
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <c:forEach var="book" items="${newBooks}">
-            <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col">
-                <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center">
-                    <c:choose>
-                        <c:when test="${not empty book.thumbnail}">
-                            <img alt="${book.title}" class="w-full h-full object-cover" src="${book.thumbnail}">
-                        </c:when>
-                        <c:otherwise>
-                            <i data-lucide="book-open" class="w-16 h-16 text-gray-300"></i>
-                        </c:otherwise>
-                    </c:choose>
-                    <div class="absolute top-2.5 left-2.5 bg-[#E53935] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">👍 New</div>
+                <div class="prod-card-hover bg-white rounded-lg overflow-hidden cursor-pointer flex flex-col h-full">
+                    <!-- Vùng Ảnh -->
+                    <div class="relative w-full h-0 pb-[135%] bg-[#f0f4ff] overflow-hidden">
+                        <c:choose>
+                            <c:when test="${not empty book.thumbnail}">
+                                <img alt="${book.title}" class="absolute inset-0 w-full h-full object-cover object-center" src="${book.thumbnail}">
+                            </c:when>
+                            <c:otherwise>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <i data-lucide="book-open" class="w-16 h-16 text-gray-300"></i>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                        <div class="absolute top-2.5 left-2.5 z-10 bg-[#E53935] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">👍 New</div>
+                        <c:if test="${empty sessionScope.account or sessionScope.account.role == 'customer'}">
+                            <form method="post"
+                                  action="${pageContext.request.contextPath}/wishlist"
+                                  class="wishlist-form absolute top-2.5 right-2.5 z-20">
+
+                                <input type="hidden" name="bookID" value="${book.bookID}">
+
+                                <c:choose>
+
+                                    <c:when test="${not empty wishlistBookIds and wishlistBookIds.contains(book.bookID)}">
+                                        <input type="hidden" name="action" value="remove">
+
+                                        <button type="submit"
+                                                class="wish-btn active"
+                                                title="Xóa khỏi yêu thích">
+
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                 width="16"
+                                                 height="16"
+                                                 viewBox="0 0 24 24"
+                                                 fill="#ef4444"
+                                                 stroke="#ef4444"
+                                                 stroke-width="2">
+                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                            </svg>
+
+                                        </button>
+                                    </c:when>
+
+                                    <c:otherwise>
+
+                                        <input type="hidden" name="action" value="add">
+
+                                        <button type="submit"
+                                                class="wish-btn"
+                                                title="Thêm vào yêu thích">
+
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                 width="16"
+                                                 height="16"
+                                                 viewBox="0 0 24 24"
+                                                 fill="none"
+                                                 stroke="#374151"
+                                                 stroke-width="2">
+                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                            </svg>
+
+                                        </button>
+                                    </c:otherwise>
+
+                                </c:choose>
+
+                            </form>
+                        </c:if>
+                    </div>
+
+                    <!-- Vùng Thông Tin -->
+                    <div class="p-3 flex flex-col flex-1 justify-between min-h-[160px]">
+                        <div>
+                            <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 h-[38px] overflow-hidden">
+                                <a class="text-primary hover:underline"
+                                   href="${pageContext.request.contextPath}/products?id=${book.bookID}">
+                                    ${book.title}<c:if test="${not empty book.authors}"> – <c:forEach var="a" items="${book.authors}" varStatus="s">${a}<c:if test="${!s.last}">, </c:if></c:forEach></c:if>
+                                            </a>
+                                        </div>
+                                        <div class="text-[#FDD835] text-[12px] mb-2 flex items-center gap-1">
+                                <c:forEach begin="1" end="5" var="i">
+                                    <c:choose>
+                                        <c:when test="${i <= book.avgRating}">★</c:when>
+                                        <c:otherwise><span class="text-gray-300">★</span></c:otherwise>
+                                    </c:choose>
+                                </c:forEach>
+                                <span class="text-gray-400 text-[11px]">(${book.reviewCount})</span>
+                            </div>
+                        </div>
+                        <div class="mt-auto">
+                            <div class="text-primary text-[17px] font-bold mb-2.5">
+                                <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true" />đ
+                            </div>
+                            <a href="${pageContext.request.contextPath}/products?id=${book.bookID}"
+                               class="w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
+                                <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                <div class="p-3 flex flex-col flex-1">
-                    <div class="text-[13px] font-medium text-on-surface mb-1.5 line-clamp-2 min-h-[36px]">
-                        <a class="text-primary hover:underline"
-                           href="${pageContext.request.contextPath}/products?id=${book.bookID}">
-                            ${book.title}<c:if test="${not empty book.authors}"> – <c:forEach var="a" items="${book.authors}" varStatus="s">${a}<c:if test="${!s.last}">, </c:if></c:forEach></c:if>
-                        </a>
-                    </div>
-                    <div class="text-[#FDD835] text-[12px] mb-1.5 flex items-center gap-1">
-                        <c:forEach begin="1" end="5" var="i">
-                            <c:choose>
-                                <c:when test="${i <= book.avgRating}">★</c:when>
-                                <c:otherwise><span class="text-gray-300">★</span></c:otherwise>
-                            </c:choose>
-                        </c:forEach>
-                        <span class="text-gray-400 text-[11px]">(${book.reviewCount})</span>
-                    </div>
-                    <div class="text-primary text-[17px] font-bold mb-2.5">
-                        <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true" />đ
-                    </div>
-                    <a href="${pageContext.request.contextPath}/products?id=${book.bookID}"
-                       class="mt-auto w-full bg-primary text-white rounded-md py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors tracking-wide">
-                        <i data-lucide="eye" class="icon-sm"></i> XEM NHANH
-                    </a>
-                </div>
-            </div>
             </c:forEach>
 
             <c:if test="${empty newBooks}">
-            <div class="col-span-5 py-12 text-center text-gray-400 text-[14px]">Chưa có sách nào.</div>
+                <div class="col-span-5 py-12 text-center text-gray-400 text-[14px]">Chưa có sách nào.</div>
             </c:if>
         </div>
     </section>
 
 </main>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
 
+        document.querySelectorAll(".wishlist-form").forEach(form => {
+
+            form.addEventListener("submit", async function (e) {
+
+                e.preventDefault();
+
+                const btn = this.querySelector(".wish-btn");
+                const svg = btn.querySelector("svg");
+
+                const actionInput =
+                        this.querySelector("input[name='action']");
+
+                const bookIdInput =
+                        this.querySelector("input[name='bookID']");
+
+                const formData = new FormData();
+
+                formData.append(
+                        "action",
+                        actionInput.value
+                        );
+
+                formData.append(
+                        "bookID",
+                        bookIdInput.value
+                        );
+
+                formData.append(
+                        "ajax",
+                        "true"
+                        );
+
+                try {
+
+                    const response =
+                            await fetch(this.action, {
+
+                                method: "POST",
+
+                                headers: {
+                                    "X-Requested-With":
+                                            "XMLHttpRequest"
+                                },
+
+                                body: formData
+                            });
+
+                    if (response.status === 401) {
+
+                        const data =
+                                await response.json();
+
+                        if (data.redirect) {
+
+                            window.location.href =
+                                    data.redirect;
+                        }
+
+                        return;
+                    }
+
+                    const data =
+                            await response.json();
+
+                    if (!data.success) {
+                        showToast(
+                                "error",
+                                "Có lỗi xảy ra."
+                                );
+                        return;
+                    }
+
+                    if (data.action === "added") {
+
+                        btn.classList.add("active");
+
+                        svg.setAttribute(
+                                "fill",
+                                "#ef4444"
+                                );
+
+                        svg.setAttribute(
+                                "stroke",
+                                "#ef4444"
+                                );
+
+                        actionInput.value =
+                                "remove";
+
+                        btn.title =
+                                "Xóa khỏi yêu thích";
+
+                        showToast(
+                                "success",
+                                "Đã thêm vào yêu thích!"
+                                );
+
+                    } else {
+
+                        btn.classList.remove("active");
+
+                        svg.setAttribute(
+                                "fill",
+                                "none"
+                                );
+
+                        svg.setAttribute(
+                                "stroke",
+                                "#374151"
+                                );
+
+                        actionInput.value =
+                                "add";
+
+                        btn.title =
+                                "Thêm vào yêu thích";
+
+                        showToast(
+                                "success",
+                                "Đã xóa khỏi yêu thích!"
+                                );
+                    }
+
+                    const badge =
+                            document.querySelector(
+                                    ".wishlist-badge"
+                                    );
+
+                    if (badge) {
+
+                        badge.textContent =
+                                data.wishlistCount;
+
+                        badge.classList.toggle(
+                                "hidden",
+                                data.wishlistCount <= 0
+                                );
+                    }
+
+                } catch (err) {
+
+                    console.error(err);
+
+                    showToast(
+                            "error",
+                            "Lỗi kết nối mạng."
+                            );
+                }
+            });
+        });
+
+        function showToast(type, message) {
+
+            const container =
+                    document.getElementById(
+                            "toast-container"
+                            );
+
+            if (!container)
+                return;
+
+            const toast =
+                    document.createElement("div");
+
+            toast.className =
+                    "flex items-center gap-3 p-4 rounded-xl shadow-lg border text-sm font-semibold transition-all duration-300 transform translate-y-2 opacity-0 " +
+                    (type === "success"
+                            ? "bg-green-50 border-green-200 text-green-800"
+                            : "bg-red-50 border-red-200 text-red-800");
+
+            toast.innerHTML =
+                    "<span>" + message + "</span>";
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove(
+                        "translate-y-2",
+                        "opacity-0"
+                        );
+            }, 10);
+
+            setTimeout(() => {
+
+                toast.classList.add(
+                        "opacity-0"
+                        );
+
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+
+            }, 3000);
+        }
+    });
+</script>
 <%@ include file="/views/layout/homepage/footer.jsp" %>
