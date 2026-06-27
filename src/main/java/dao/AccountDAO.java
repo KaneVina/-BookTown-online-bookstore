@@ -29,7 +29,6 @@ public class AccountDAO {
         String hashedPassword = hashMD5(password);
         DBContext db = new DBContext();
 
-        // Kiểm tra bảng Customer
         String sqlCustomer = "SELECT customerID, fullname, email, phone, role, status "
                 + "FROM Customer WHERE email = ? AND password = ? AND status = 'active'";
         try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sqlCustomer)) {
@@ -37,21 +36,14 @@ public class AccountDAO {
             ps.setString(2, hashedPassword);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return new Account(
-                            rs.getInt("customerID"),
-                            rs.getString("fullname"),
-                            rs.getString("email"),
-                            rs.getString("phone"),
-                            "customer",
-                            rs.getString("status")
-                    );
+                    return new Account(rs.getInt("customerID"), rs.getString("fullname"),
+                            rs.getString("email"), rs.getString("phone"), "customer", rs.getString("status"));
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // Kiểm tra bảng Account 
         String sqlAccount = "SELECT accountID, fullname, email, phone, role, status "
                 + "FROM Account WHERE email = ? AND password = ? AND status = 'active'";
         try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sqlAccount)) {
@@ -59,14 +51,9 @@ public class AccountDAO {
             ps.setString(2, hashedPassword);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return new Account(
-                            rs.getInt("accountID"),
-                            rs.getString("fullname"),
-                            rs.getString("email"),
-                            rs.getString("phone"),
-                            rs.getString("role"),
-                            rs.getString("status")
-                    );
+                    return new Account(rs.getInt("accountID"), rs.getString("fullname"),
+                            rs.getString("email"), rs.getString("phone"),
+                            rs.getString("role"), rs.getString("status"));
                 }
             }
         } catch (Exception e) {
@@ -76,35 +63,51 @@ public class AccountDAO {
         return null;
     }
 
-    public List<Account> getAllStaffs() {
-
-        List<Account> list = new ArrayList<>();
-
-        String sql
-                = "SELECT * FROM Account";
-
-        try (
-                Connection conn
-                = new DBContext().getConnection(); PreparedStatement ps
-                = conn.prepareStatement(sql); ResultSet rs
-                = ps.executeQuery()) {
-
-            while (rs.next()) {
-
-                list.add(new Account(
-                        rs.getInt("accountID"),
-                        rs.getString("fullname"),
-                        rs.getString("email"),
-                        rs.getString("phone"),
-                        rs.getString("role"),
-                        rs.getString("status")
-                ));
-            }
-
+    // =====================================================================
+    // [MỚI] Đặt lại mật khẩu theo email cho staff/admin (bảng Account)
+    // =====================================================================
+    public boolean resetPasswordByEmail(String email, String newPassword) {
+        String sql = "UPDATE Account SET password = ? WHERE email = ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, hashMD5(newPassword));
+            ps.setString(2, email);
+            return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return false;
+    }
 
+    // =====================================================================
+    // [MỚI] Kiểm tra email có tồn tại trong bảng Account không
+    // =====================================================================
+    public boolean isEmailExists(String email) {
+        String sql = "SELECT 1 FROM Account WHERE email = ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            return ps.executeQuery().next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public List<Account> getAllStaffs() {
+        List<Account> list = new ArrayList<>();
+        String sql = "SELECT * FROM Account";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(new Account(rs.getInt("accountID"), rs.getString("fullname"),
+                        rs.getString("email"), rs.getString("phone"),
+                        rs.getString("role"), rs.getString("status")));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return list;
     }
 }
