@@ -50,21 +50,6 @@ public class CustomerDAO {
         return false;
     }
 
-    // Thêm customer mới vào database
-//    public boolean registerCustomer(String fullname, String email, String phone, String password) {
-//        String sql = "INSERT INTO Customer (fullname, email, password, phone) VALUES (?, ?, ?, ?)";
-//        try (Connection conn = new DBContext().getConnection();
-//             PreparedStatement ps = conn.prepareStatement(sql)) {
-//            ps.setString(1, fullname);
-//            ps.setString(2, email);
-//            ps.setString(3, hashMD5(password));
-//            ps.setString(4, phone);
-//            return ps.executeUpdate() > 0;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return false;
-//    }
     public boolean registerCustomer(String fullname, String email, String phone, String password) {
         String sql = "INSERT INTO Customer (fullname, email, password, phone) VALUES (?, ?, ?, ?)";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -74,30 +59,33 @@ public class CustomerDAO {
             ps.setString(4, phone);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
-            e.printStackTrace(); // 
-            System.out.println("REGISTER ERROR: " + e.getMessage()); // thêm dòng này
+            e.printStackTrace();
+            System.out.println("REGISTER ERROR: " + e.getMessage());
+        }
+        return false;
+    }
+
+    // =====================================================================
+    // [MỚI] Đặt lại mật khẩu theo email (dùng cho forgot password)
+    // Trả về true nếu tìm thấy email và cập nhật thành công
+    // =====================================================================
+    public boolean resetPasswordByEmail(String email, String newPassword) {
+        String sql = "UPDATE Customer SET password = ? WHERE email = ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, hashMD5(newPassword));
+            ps.setString(2, email);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return false;
     }
 
     // cập nhật dữ liệu của customer
-    public boolean updateCustomer(
-            int id,
-            String fullname,
-            String phone,
-            String gender,
-            String dob) {
-
-        String sql
-                = "UPDATE Customer "
-                + "SET fullname = ?, "
-                + "phone = ?, "
-                + "gender = ?, "
-                + "dob = ? "
-                + "WHERE customerID = ?";
-
+    public boolean updateCustomer(int id, String fullname, String phone, String gender, String dob) {
+        String sql = "UPDATE Customer SET fullname = ?, phone = ?, gender = ?, dob = ? WHERE customerID = ?";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setString(1, fullname);
             ps.setString(2, phone);
             ps.setString(3, gender);
@@ -107,157 +95,100 @@ public class CustomerDAO {
                 ps.setNull(4, java.sql.Types.DATE);
             }
             ps.setInt(5, id);
-
             int row = ps.executeUpdate();
-
             System.out.println("Updated rows = " + row);
-
             return row > 0;
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return false;
     }
 
-    // lấy id của customer ở trang profile
     public Customer getCustomerById(int id) {
-
-        String sql
-                = "SELECT customerID, fullname, email, password, "
-                + "phone, role, status, gender, dob "
-                + "FROM Customer "
-                + "WHERE customerID = ?";
-
+        String sql = "SELECT customerID, fullname, email, password, phone, role, status, gender, dob "
+                   + "FROM Customer WHERE customerID = ?";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setInt(1, id);
-
             ResultSet rs = ps.executeQuery();
-
             if (rs.next()) {
-
                 return new Customer(
-                        rs.getInt("customerID"),
-                        rs.getString("fullname"),
-                        rs.getString("email"),
-                        rs.getString("password"),
-                        rs.getString("phone"),
-                        rs.getString("role"),
-                        rs.getString("status"),
-                        null,
-                        rs.getString("gender"),
-                        rs.getDate("dob")
+                        rs.getInt("customerID"), rs.getString("fullname"),
+                        rs.getString("email"), rs.getString("password"),
+                        rs.getString("phone"), rs.getString("role"),
+                        rs.getString("status"), null,
+                        rs.getString("gender"), rs.getDate("dob")
                 );
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
-    public boolean changePassword(
-            int customerId,
-            String currentPassword,
-            String newPassword) {
-
-        String checkSql
-                = "SELECT password "
-                + "FROM Customer "
-                + "WHERE customerID = ?";
-
-        String updateSql
-                = "UPDATE Customer "
-                + "SET password = ? "
-                + "WHERE customerID = ?";
-
+    public boolean changePassword(int customerId, String currentPassword, String newPassword) {
+        String checkSql  = "SELECT password FROM Customer WHERE customerID = ?";
+        String updateSql = "UPDATE Customer SET password = ? WHERE customerID = ?";
         try (Connection conn = new DBContext().getConnection()) {
-
-            PreparedStatement ps
-                    = conn.prepareStatement(checkSql);
-
+            PreparedStatement ps = conn.prepareStatement(checkSql);
             ps.setInt(1, customerId);
-
             ResultSet rs = ps.executeQuery();
-
             if (rs.next()) {
-
-                String oldPassword
-                        = rs.getString("password");
-
-                if (!oldPassword.equals(
-                        hashMD5(currentPassword))) {
-
+                String oldPassword = rs.getString("password");
+                if (!oldPassword.equals(hashMD5(currentPassword))) {
                     return false;
                 }
-
-                PreparedStatement update
-                        = conn.prepareStatement(updateSql);
-
-                update.setString(
-                        1,
-                        hashMD5(newPassword));
-
-                update.setInt(
-                        2,
-                        customerId);
-
+                PreparedStatement update = conn.prepareStatement(updateSql);
+                update.setString(1, hashMD5(newPassword));
+                update.setInt(2, customerId);
                 return update.executeUpdate() > 0;
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return false;
     }
 
-    // admin và staff quản lý tài khoản người dùng 
     public List<Customer> getAllCustomers() {
-
         List<Customer> list = new ArrayList<>();
-
-        String sql
-                = "SELECT * FROM Customer";
-
-        try (
-                Connection conn
-                = new DBContext().getConnection(); PreparedStatement ps
-                = conn.prepareStatement(sql); ResultSet rs
-                = ps.executeQuery()) {
-
+        String sql = "SELECT * FROM Customer";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-
                 Customer c = new Customer();
-
-                c.setCustomerID(
-                        rs.getInt("customerID"));
-
-                c.setFullname(
-                        rs.getString("fullname"));
-
-                c.setEmail(
-                        rs.getString("email"));
-
-                c.setPhone(
-                        rs.getString("phone"));
-
-                c.setRole(
-                        rs.getString("role"));
-
-                c.setStatus(
-                        rs.getString("status"));
-
+                c.setCustomerID(rs.getInt("customerID"));
+                c.setFullname(rs.getString("fullname"));
+                c.setEmail(rs.getString("email"));
+                c.setPhone(rs.getString("phone"));
+                c.setRole(rs.getString("role"));
+                c.setStatus(rs.getString("status"));
                 list.add(c);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return list;
     }
+    public Account getAccountByEmail(String email) {
+    String sql = "SELECT customerID, fullname, email, phone, role, status "
+               + "FROM Customer WHERE email = ?";
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, email);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return new Account(
+                rs.getInt("customerID"),
+                rs.getString("fullname"),
+                rs.getString("email"),
+                rs.getString("phone") != null ? rs.getString("phone") : "",
+                "customer",
+                rs.getString("status")
+            );
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return null;
+}
 }
