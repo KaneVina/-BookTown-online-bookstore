@@ -166,14 +166,39 @@ public class CartController extends HttpServlet {
 
         int cartItemID = parseIntParam(req.getParameter("cartItemID"), 0);
 
-        if (cartItemID > 0) {
-            CartDAO cartDAO = new CartDAO();
-            cartDAO.removeItem(cartItemID, account.getId());
-
-            int newCount = cartDAO.countCartItems(account.getId());
-            req.getSession().setAttribute("cartCount", newCount);
+        if (cartItemID <= 0) {
+            sendJson(resp, "{\"ok\":false,\"message\":\"Item không hợp lệ\"}");
+            return;
         }
 
-        resp.sendRedirect(req.getContextPath() + "/cart");
+        CartDAO cartDAO = new CartDAO();
+        cartDAO.removeItem(cartItemID, account.getId());
+
+        List<CartItem> cartItemList = cartDAO.getCartItems(account.getId());
+        BigDecimal subtotal = cartDAO.calcSubtotal(cartItemList);
+        int newCount = calcTotalQuantity(cartItemList);
+
+        req.getSession().setAttribute("cartCount", newCount);
+
+        sendJson(resp, "{\"ok\":true"
+                + ",\"cartCount\":" + newCount
+                + ",\"subtotal\":" + subtotal.longValue()
+                + ",\"total\":" + subtotal.longValue()
+                + "}");
     }
+
+    private int calcTotalQuantity(List<CartItem> items) {
+        int total = 0;
+        for (CartItem item : items) {
+            total += item.getQuantity();
+        }
+        return total;
+    }
+
+    private void sendJson(HttpServletResponse resp, String json) throws IOException {
+    resp.setContentType("application/json");
+    resp.setCharacterEncoding("UTF-8");
+    resp.getWriter().write(json);
 }
+}
+

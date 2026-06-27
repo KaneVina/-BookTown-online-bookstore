@@ -58,7 +58,7 @@
                     <div>
                         <label class="block text-sm font-semibold mb-1.5" style="color:#071e27;">
                             Số lượng
-                            <span class="text-xs font-normal" style="color:#424752;">(bỏ trống = không giới hạn)</span>
+                            <span class="text-xs font-normal" style="color:#424752;"></span>
                         </label>
                         <input id="inputQuantity" name="quantity" type="number" min="1"
                                class="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 bg-white"
@@ -67,7 +67,33 @@
                     </div>
                 </div>
 
-                <%-- Ngày --%>
+                <%-- Đơn hàng tối thiểu + Giảm tối đa --%>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1.5" style="color:#071e27;">
+                            Đơn hàng tối thiểu (₫)
+                            <span class="text-xs font-normal" style="color:#424752;"></span>
+                        </label>
+                        <input id="inputMinOrder" name="minOrderValue" type="number" min="0" step="any"
+                               class="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 bg-white"
+                               style="border-color:#c2c6d4;"
+                               placeholder="100000"
+                               oninput="updatePreview()"/>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1.5" style="color:#071e27;">
+                            Giảm tối đa (₫)
+                            <span class="text-xs font-normal" style="color:#424752;"></span>
+                        </label>
+                        <input id="inputMaxDiscount" name="maxDiscountValue" type="number" min="0" step="any"
+                               class="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 bg-white"
+                               style="border-color:#c2c6d4;"
+                               placeholder="50000"
+                               oninput="updatePreview()"/>
+                    </div>
+                </div>
+
+                <%-- Ngày bắt đầu + Ngày kết thúc --%>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold mb-1.5" style="color:#071e27;">Ngày bắt đầu</label>
@@ -75,6 +101,7 @@
                                class="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 bg-white"
                                style="border-color:#c2c6d4;"
                                oninput="updatePreview()"/>
+                        <%-- min sẽ được set bằng JS khi mở modal tạo mới --%>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-1.5" style="color:#071e27;">Ngày kết thúc</label>
@@ -85,14 +112,14 @@
                     </div>
                 </div>
 
-                <%-- Trạng thái --%>
-                <div>
+                <%-- Toggle trạng thái — chỉ hiện khi EDIT --%>
+                <div id="statusSection" class="hidden">
                     <label class="block text-sm font-semibold mb-1.5" style="color:#071e27;">Trạng thái</label>
                     <label class="inline-flex items-center cursor-pointer gap-3">
-                        <input id="inputStatus" name="statusToggle" type="checkbox" checked class="sr-only peer"/>
+                        <input id="inputStatus" name="statusToggle" type="checkbox" class="sr-only peer"/>
                         <div class="relative w-11 h-6 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"
-                             style="background:#2E7D32;" id="toggleBg"></div>
-                        <span class="text-sm" style="color:#071e27;" id="statusLabel">Kích hoạt ngay</span>
+                             style="background:#c2c6d4;" id="toggleBg"></div>
+                        <span class="text-sm" style="color:#071e27;" id="statusLabel">Vô hiệu hóa</span>
                     </label>
                 </div>
 
@@ -116,7 +143,9 @@
                          style="background:#d6e3ff; color:#004d99; border:1px solid #a9c7ff;" id="previewCode">
                         CODE
                     </div>
-                    <p class="text-xs mt-2" style="color:#424752;" id="previewDate">HSD: --/--/----</p>
+                    <p class="text-xs mt-1" style="color:#424752;" id="previewDate">HSD: --/--/----</p>
+                    <p class="text-xs mt-1" style="color:#424752;" id="previewMinOrder"></p>
+                    <p class="text-xs mt-1" style="color:#424752;" id="previewMaxDiscount"></p>
                 </div>
                 <p class="text-xs text-center mt-3" style="color:#424752;">
                     Đây là cách voucher hiển thị với khách hàng.
@@ -171,3 +200,4 @@
         </form>
     </div>
 </div>
+
