@@ -139,6 +139,18 @@ public class AdminProductController extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/dashboard/product-management");
             return;
         }
+
+// Parse pipe-separated images: thumbnail|image2|image3|image4
+        String[] imgParts = book.getThumbnail() != null ? book.getThumbnail().split("\\|", -1) : new String[0];
+        String img1 = imgParts.length > 0 ? imgParts[0].trim() : "";
+        String img2 = imgParts.length > 1 ? imgParts[1].trim() : "";
+        String img3 = imgParts.length > 2 ? imgParts[2].trim() : "";
+        String img4 = imgParts.length > 3 ? imgParts[3].trim() : "";
+        book.setThumbnail(img1); // form chỉ hiện ảnh chính ở field thumbnail
+        req.setAttribute("image2", img2);
+        req.setAttribute("image3", img3);
+        req.setAttribute("image4", img4);
+
         req.setAttribute("book", book);
         req.setAttribute("genreMap", bookDAO.getGenreMap());
         req.setAttribute("originMap", bookDAO.getOriginMap());
@@ -200,12 +212,31 @@ public class AdminProductController extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/dashboard/product-management");
     }
 
+    private String clean(String s) {
+        return (s == null) ? "" : s.trim();
+    }
+
     // ── Build Book từ request ────────────────────────────────────────
     private Book buildBookFromRequest(HttpServletRequest req) {
+
         Book b = new Book();
         b.setTitle(req.getParameter("title"));
         b.setDescription(req.getParameter("description"));
-        b.setThumbnail(req.getParameter("thumbnail"));
+        String thumb = clean(req.getParameter("thumbnail"));
+        String img2 = clean(req.getParameter("image2"));
+        String img3 = clean(req.getParameter("image3"));
+        String img4 = clean(req.getParameter("image4"));
+        StringBuilder allImages = new StringBuilder(thumb);
+        if (!img2.isEmpty()) {
+            allImages.append("|").append(img2);
+        }
+        if (!img3.isEmpty()) {
+            allImages.append("|").append(img3);
+        }
+        if (!img4.isEmpty()) {
+            allImages.append("|").append(img4);
+        }
+        b.setThumbnail(allImages.toString());
         try {
             b.setPrice(new BigDecimal(req.getParameter("price")));
         } catch (Exception e) {

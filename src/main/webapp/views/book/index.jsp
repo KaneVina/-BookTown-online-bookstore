@@ -87,8 +87,8 @@
                     <!-- Vùng Ảnh -->
                     <div class="relative w-full h-0 pb-[135%] bg-[#f0f4ff] overflow-hidden">
                         <c:choose>
-                            <c:when test="${not empty book.thumbnail}">
-                                <img alt="${book.title}" class="absolute inset-0 w-full h-full object-cover object-center" src="${book.thumbnail}">
+                            <c:when test="${not empty book.thumbnailFirst}">
+                                <img alt="${book.title}" class="absolute inset-0 w-full h-full object-cover object-center" src="${book.thumbnailFirst}">
                             </c:when>
                             <c:otherwise>
                                 <div class="absolute inset-0 flex items-center justify-center">
@@ -221,8 +221,8 @@
                     <!-- Vùng Ảnh -->
                     <div class="relative w-full h-0 pb-[135%] bg-[#f0f4ff] overflow-hidden">
                         <c:choose>
-                            <c:when test="${not empty book.thumbnail}">
-                                <img alt="${book.title}" class="absolute inset-0 w-full h-full object-cover object-center" src="${book.thumbnail}">
+                            <c:when test="${not empty book.thumbnailFirst}">
+                                <img alt="${book.title}" class="absolute inset-0 w-full h-full object-cover object-center" src="${book.thumbnailFirst}">
                             </c:when>
                             <c:otherwise>
                                 <div class="absolute inset-0 flex items-center justify-center">
