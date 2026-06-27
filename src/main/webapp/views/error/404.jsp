@@ -11,11 +11,11 @@
             <span class="text-[72px] font-black text-primary leading-none tracking-tighter"
                   style="text-shadow: 3px 3px 0 #e8eef8;">404</span>
         </div>
-        <h1 class="text-[22px] font-black text-on-surface mb-2">Không tìm thấy sản phẩm này!</h1>
-        <p class="text-gray-500 text-[14px] mb-8 mt-4 leading-relaxed max-w-[420px]">
+        <h1 class="text-[22px] font-black text-on-surface mb-2">Không tìm thấy!</h1>
+<!--        <p class="text-gray-500 text-[14px] mb-8 mt-4 leading-relaxed max-w-[420px]">
             Sản phẩm bạn đang tìm có thể đã ngừng kinh doanh, đổi mã,<br>
             hoặc chưa từng tồn tại trong kho của BookTown.
-        </p>
+        </p>-->
         <div class="flex justify-center mb-10">
             <a href="${pageContext.request.contextPath}/home"
                class="inline-flex items-center justify-center gap-2 bg-primary text-white font-bold

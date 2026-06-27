@@ -64,46 +64,6 @@
                             "surface": "#FFFFFF",
                             "success": "#2E7D32",
                             "secondary-fixed": "#ffe16e"
-                        },
-                        "borderRadius": {
-                            "DEFAULT": "0.25rem",
-                            "lg": "0.5rem",
-                            "xl": "0.75rem",
-                            "full": "9999px"
-                        },
-                        "spacing": {
-                            "stack-lg": "48px",
-                            "container-max": "1280px",
-                            "margin-mobile": "16px",
-                            "margin-desktop": "64px",
-                            "gutter": "24px",
-                            "stack-md": "24px",
-                            "stack-sm": "12px",
-                            "base": "8px"
-                        },
-                        "fontFamily": {
-                            "label-md": ["Inter"],
-                            "body-md": ["Inter"],
-                            "headline-lg-mobile": ["Inter"],
-                            "headline-md": ["Inter"],
-                            "headline-lg": ["Inter"],
-                            "headline-xl": ["Inter"],
-                            "label-sm": ["Inter"],
-                            "headline-sm": ["Inter"],
-                            "body-sm": ["Inter"],
-                            "body-lg": ["Inter"]
-                        },
-                        "fontSize": {
-                            "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600"}],
-                            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
-                            "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
-                            "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
-                            "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
-                            "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
-                            "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
-                            "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
-                            "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
-                            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
                         }
                     }
                 }
@@ -133,148 +93,229 @@
     </head>
     <body class="text-on-surface">
         <%@ include file="/views/layout/dashboard/sidebar.jsp" %>
-
-        <main class="bg-ambient-glow min-h-screen ml-64">
-            <div class="max-w-container-max mx-auto px-margin-desktop py-stack-lg">
-                <div class="mb-stack-lg">
-                    <h1 class="font-headline-lg text-headline-lg text-on-surface mb-2">Thêm tài khoản nhân viên</h1>
-                    <p class="font-body-md text-body-md text-on-surface-variant">Nhập thông tin để tạo tài khoản mới cho đội ngũ nhân viên BookTown.</p>
+        <main class="min-h-screen ml-64">
+            <div class="max-w-5xl mx-auto px-16 py-12">
+                <div class="mb-8">
+                    <a href="${pageContext.request.contextPath}/dashboard/account-management"
+                       class="inline-flex items-center gap-1 text-sm text-on-surface-variant hover:text-primary transition-colors mb-4">
+                        <span class="material-symbols-outlined text-base">arrow_back</span>
+                        Quay lại Quản lý tài khoản
+                    </a>
+                    <h1 class="text-3xl font-bold text-on-surface mb-2">Thêm tài khoản nhân viên</h1>
+                    <p class="text-on-surface-variant">Nhập thông tin để tạo tài khoản mới cho đội ngũ nhân viên BookTown.</p>
                 </div>
 
-                <section class="glass-panel rounded-xl shadow-sm p-base sm:p-stack-md">
-                    <form class="space-y-stack-md">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-stack-lg">
-                            <div class="space-y-stack-md">
-                                <h3 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-primary">person</span>
-                                    Thông tin cá nhân
-                                </h3>
-                                <div class="flex flex-col items-center sm:flex-row sm:items-center gap-gutter p-4 bg-background-alt rounded-lg">
-                                    <div class="relative w-24 h-24 rounded-full bg-surface-container-highest border-2 border-dashed border-outline-variant flex items-center justify-center overflow-hidden">
-                                        <span class="material-symbols-outlined text-on-surface-variant text-4xl">account_circle</span>
-                                        <img alt="Preview" class="absolute inset-0 w-full h-full object-cover hidden" id="avatar-preview" src=""/>
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                        <button class="px-4 py-2 bg-white border border-primary text-primary rounded-lg font-label-md hover:bg-primary-container hover:text-white transition-all flex items-center gap-2" type="button">
-                                            <span class="material-symbols-outlined text-[18px]">upload</span>
-                                            Tải ảnh lên
-                                        </button>
-                                        <p class="text-label-sm text-on-surface-variant">Định dạng JPG, PNG. Tối đa 2MB.</p>
-                                    </div>
+                <section class="glass-panel rounded-xl shadow-sm p-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                        <div class="space-y-6">
+                            <h3 class="text-xl font-semibold text-on-surface flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">person</span>
+                                Thông tin cá nhân
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-sm font-semibold text-on-surface">Họ và tên <span class="text-error">*</span></label>
+                                    <input id="fullname" name="fullname"
+                                           class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white text-base"
+                                           placeholder="Họ và tên" type="text"/>
                                 </div>
-                                <div class="space-y-4">
-                                    <div class="flex flex-col gap-2">
-                                        <label class="font-label-md text-label-md text-on-surface">Họ và tên</label>
-                                        <input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white font-body-md text-body-md" placeholder="Nguyễn Văn A" type="text"/>
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                        <label class="font-label-md text-label-md text-on-surface">Địa chỉ Email</label>
-                                        <input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white font-body-md text-body-md" placeholder="example@booktown.vn" type="email"/>
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                        <label class="font-label-md text-label-md text-on-surface">Số điện thoại</label>
-                                        <input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white font-body-md text-body-md" placeholder="090 000 0000" type="tel"/>
-                                    </div>
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-sm font-semibold text-on-surface">Địa chỉ Email <span class="text-error">*</span></label>
+                                    <input id="email" name="email"
+                                           class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white text-base"
+                                           placeholder="example@booktown.vn" type="email"/>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-sm font-semibold text-on-surface">Số điện thoại</label>
+                                    <input id="phone" name="phone"
+                                           class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white text-base"
+                                           placeholder="090 000 0000" type="tel"/>
                                 </div>
                             </div>
-                            <div class="space-y-stack-md">
-                                <h3 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-primary">badge</span>
-                                    Thiết lập tài khoản
-                                </h3>
-                                <div class="space-y-4">
-                                    <div class="flex flex-col gap-2">
-                                        <label class="font-label-md text-label-md text-on-surface">Vai trò</label>
-                                        <select class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white font-body-md text-body-md appearance-none">
-                                            <option value="">Chọn vai trò</option>
-                                            <option>Staff</option>
-                                            <option>khách hàng</option>
-                                        </select>
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                        <label class="font-label-md text-label-md text-on-surface">Mật khẩu tạm thời</label>
-                                        <div class="flex gap-2">
-                                            <div class="relative flex-grow">
-                                                <input class="w-full h-12 px-4 pr-10 rounded-lg border border-outline-variant bg-white font-body-md text-body-md" id="temp-password" placeholder="••••••••" type="password"/>
-                                                <button class="absolute right-3 top-3 text-on-surface-variant material-symbols-outlined" type="button">visibility</button>
-                                            </div>
-                                            <button class="px-4 h-12 bg-surface-container-low border border-outline-variant text-on-surface rounded-lg font-label-md hover:bg-surface-container transition-all flex items-center gap-2 shrink-0" onclick="generatePassword(event)" type="button">
-                                                <span class="material-symbols-outlined text-[18px]">key</span>
-                                                Tạo mã
-                                            </button>
+                        </div>
+                        <div class="space-y-6">
+                            <h3 class="text-xl font-semibold text-on-surface flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">badge</span>
+                                Thiết lập tài khoản
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-sm font-semibold text-on-surface">Vai trò <span class="text-error">*</span></label>
+                                    <select id="role" name="role"
+                                            class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white text-base appearance-none">
+                                        <option value="staff">Staff</option>
+                                        <!--                                        <option value="admin">Admin</option>-->
+                                    </select>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-sm font-semibold text-on-surface">Mật khẩu tạm thời <span class="text-error">*</span></label>
+                                    <div class="flex gap-2">
+                                        <div class="relative flex-grow">
+                                            <input id="temp-password" name="password"
+                                                   class="w-full h-12 px-4 pr-10 rounded-lg border border-outline-variant bg-white text-base"
+                                                   placeholder="••••••••" type="password"/>
+                                            <button id="toggle-pw-visibility"
+                                                    class="absolute right-3 top-3 text-on-surface-variant material-symbols-outlined"
+                                                    type="button">visibility</button>
                                         </div>
+                                        <button id="generate-btn"
+                                                class="px-4 h-12 bg-surface-container-low border border-outline-variant text-on-surface rounded-lg text-sm font-semibold hover:bg-surface-container transition-all flex items-center gap-2 shrink-0"
+                                                type="button">
+                                            <span class="material-symbols-outlined text-lg">key</span>
+                                            Tạo mã
+                                        </button>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="pt-stack-md border-t border-outline-variant space-y-stack-md">
-                            <div class="flex flex-col gap-2">
-                                <label class="font-label-md text-label-md text-on-surface">Ghi chú nội bộ</label>
-                                <textarea class="w-full p-4 rounded-lg border border-outline-variant bg-white font-body-md text-body-md resize-none" placeholder="Nhập ghi chú hoặc thông tin bổ sung về nhân viên này..." rows="4"></textarea>
-                            </div>
-                            <label class="flex items-center gap-3 cursor-pointer group">
-                                <div class="relative flex items-center">
-                                    <input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-sm font-semibold text-on-surface">Trạng thái</label>
+                                    <select id="status" name="status"
+                                            class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white text-base appearance-none">
+                                        <option value="active">Hoạt động</option>
+                                        <option value="inactive">Tạm khóa</option>
+                                    </select>
                                 </div>
-                                <span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">Yêu cầu đổi mật khẩu trong lần đăng nhập đầu tiên</span>
-                            </label>
+                            </div>
                         </div>
-
-                        <div class="flex flex-col sm:flex-row justify-end gap-4 pt-stack-md">
-                            <button class="px-stack-md py-3 border border-outline-variant text-on-surface-variant rounded-lg font-label-md hover:bg-background-alt transition-colors" type="button">
-                                Hủy
-                            </button>
-                            <button class="px-stack-lg py-3 bg-primary text-white rounded-lg font-label-md shadow-md hover:bg-surface-tint active:scale-95 transition-all flex items-center justify-center gap-2" type="submit">
-                                <span class="material-symbols-outlined text-[20px]">person_add</span>
-                                Tạo tài khoản
-                            </button>
+                    </div>
+                    <div class="pt-8 border-t border-outline-variant mt-8 space-y-6">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-semibold text-on-surface">Ghi chú nội bộ</label>
+                            <textarea id="note"
+                                      class="w-full p-4 rounded-lg border border-outline-variant bg-white text-base resize-none"
+                                      placeholder="Nhập ghi chú hoặc thông tin bổ sung về nhân viên này..."
+                                      rows="3"></textarea>
                         </div>
-                    </form>
+                    </div>
+                    <div class="flex flex-col sm:flex-row justify-end gap-4 pt-8">
+                        <a href="${pageContext.request.contextPath}/dashboard/account-management"
+                           class="px-6 py-3 border border-outline-variant text-on-surface-variant rounded-lg text-sm font-semibold hover:bg-background-alt transition-colors text-center">
+                            Hủy
+                        </a>
+                        <button id="submit-btn"
+                                class="px-8 py-3 bg-primary text-white rounded-lg text-sm font-semibold shadow-md hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2"
+                                type="button">
+                            <span class="material-symbols-outlined text-xl">person_add</span>
+                            Tạo tài khoản
+                        </button>
+                    </div>
                 </section>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mt-stack-lg">
-                    <div class="p-6 rounded-xl bg-surface-container-low border border-outline-variant">
-                        <span class="material-symbols-outlined text-primary mb-3 text-3xl">security</span>
-                        <h4 class="font-headline-sm text-headline-sm mb-2 text-on-surface">Bảo mật tối đa</h4>
-                        <p class="font-body-sm text-body-sm text-on-surface-variant">Tất cả tài khoản mới đều được yêu cầu xác thực 2 lớp và quản lý theo phân quyền chặt chẽ.</p>
-                    </div>
-                    <div class="p-6 rounded-xl bg-surface-container-low border border-outline-variant">
-                        <span class="material-symbols-outlined text-primary mb-3 text-3xl">mail</span>
-                        <h4 class="font-headline-sm text-headline-sm mb-2 text-on-surface">Thông báo tự động</h4>
-                        <p class="font-body-sm text-body-sm text-on-surface-variant">Nhân viên sẽ nhận được email hướng dẫn kích hoạt tài khoản ngay sau khi bạn nhấn tạo.</p>
-                    </div>
-                    <div class="p-6 rounded-xl bg-surface-container-low border border-outline-variant">
-                        <span class="material-symbols-outlined text-primary mb-3 text-3xl">analytics</span>
-                        <h4 class="font-headline-sm text-headline-sm mb-2 text-on-surface">Theo dõi hoạt động</h4>
-                        <p class="font-body-sm text-body-sm text-on-surface-variant">Mọi thao tác của nhân viên trên hệ thống đều được ghi lại trong nhật ký hoạt động.</p>
-                    </div>
-                </div>
             </div>
         </main>
 
         <script>
-            function generatePassword(event) {
-                const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
-                const length = 12;
+            document.getElementById('toggle-pw-visibility').addEventListener('click', function () {
+                const pw = document.getElementById('temp-password');
+                if (pw.type === 'password') {
+                    pw.type = 'text';
+                    this.textContent = 'visibility_off';
+                } else {
+                    pw.type = 'password';
+                    this.textContent = 'visibility';
+                }
+            });
+            document.getElementById('generate-btn').addEventListener('click', function () {
+                const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
                 let password = "";
-                for (let i = 0; i < length; i++) {
+                for (let i = 0; i < 12; i++) {
                     password += chars.charAt(Math.floor(Math.random() * chars.length));
                 }
-                document.getElementById('temp-password').value = password;
+                const pw = document.getElementById('temp-password');
+                pw.type = 'text';
+                pw.value = password;
+                document.getElementById('toggle-pw-visibility').textContent = 'visibility_off';
 
-                // Sửa lỗi event bằng cách truyền trực tiếp từ onClick
-                const btn = event.currentTarget;
-                btn.classList.add('bg-success', 'text-white');
+                this.classList.add('bg-green-100', 'border-green-400', 'text-green-700');
                 setTimeout(() => {
-                    btn.classList.remove('bg-success', 'text-white');
-                }, 1000);
+                    this.classList.remove('bg-green-100', 'border-green-400', 'text-green-700');
+                }, 800);
+            });
+            function showToast(message, isError = false) {
+                const existing = document.getElementById('toast-msg');
+                if (existing)
+                    existing.remove();
+
+                const div = document.createElement("div");
+                div.id = "toast-msg";
+                div.innerText = message;
+                div.style.cssText = `
+                    position: fixed; bottom: 24px; right: 24px;
+                    padding: 14px 20px; border-radius: 10px;
+                    color: white; z-index: 9999; font-size: 14px; font-weight: 500;
+                    background: ${isError ? '#D32F2F' : '#2E7D32'};
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    transition: opacity 0.3s;
+                `;
+                document.body.appendChild(div);
+                setTimeout(() => {
+                    div.style.opacity = '0';
+                    setTimeout(() => div.remove(), 300);
+                }, 2500);
             }
 
-            // Xử lý sự kiện gửi form mẫu
-            document.querySelector('form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                alert('Đang tạo tài khoản nhân viên mới...');
+            // Submit
+            document.getElementById('submit-btn').addEventListener('click', async function () {
+                const fullname = document.getElementById('fullname').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                const role = document.getElementById('role').value;
+                const password = document.getElementById('temp-password').value.trim();
+                const status = document.getElementById('status').value;
+
+                if (!fullname) {
+                    showToast("Vui lòng nhập họ và tên", true);
+                    return;
+                }
+                if (!email) {
+                    showToast("Vui lòng nhập email", true);
+                    return;
+                }
+                if (!role) {
+                    showToast("Vui lòng chọn vai trò", true);
+                    return;
+                }
+                if (!password) {
+                    showToast("Vui lòng nhập mật khẩu", true);
+                    return;
+                }
+                if (password.length < 6) {
+                    showToast("Mật khẩu phải ít nhất 6 ký tự", true);
+                    return;
+                }
+                const btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-xl">progress_activity</span> Đang tạo...';
+                const formData = new URLSearchParams();
+                formData.append("mode", "add");
+                formData.append("fullname", fullname);
+                formData.append("email", email);
+                formData.append("phone", phone);
+                formData.append("role", role);
+                formData.append("password", password);
+                formData.append("status", status);
+
+                try {
+                    const res = await fetch("${pageContext.request.contextPath}/dashboard/add-staff", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                        body: formData.toString()
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast("Tạo tài khoản nhân viên thành công!");
+                        setTimeout(() => {
+                            window.location.href = "${pageContext.request.contextPath}/dashboard/account-management";
+                        }, 1000);
+                    } else {
+                        showToast(data.message || "Tạo thất bại, vui lòng thử lại", true);
+                        btn.disabled = false;
+                        btn.innerHTML = '<span class="material-symbols-outlined text-xl">person_add</span> Tạo tài khoản';
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast("Lỗi kết nối server", true);
+                    btn.disabled = false;
+                    btn.innerHTML = '<span class="material-symbols-outlined text-xl">person_add</span> Tạo tài khoản';
+                }
             });
         </script>
     </body>

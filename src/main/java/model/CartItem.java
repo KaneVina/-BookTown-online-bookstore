@@ -81,9 +81,7 @@ public class CartItem {
         this.authorsDisplay = authorsDisplay;
     }
 
-    /**
-     * Tổng tiền của 1 dòng: price × quantity
-     */
+    
     public BigDecimal getSubtotal() {
         if (price == null) {
             return BigDecimal.ZERO;

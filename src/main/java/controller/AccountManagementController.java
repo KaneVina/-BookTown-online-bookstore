@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import dao.AccountDAO;
@@ -14,115 +10,168 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Account;
-/**
- *
- * @author Trương Trân
- */
+
 public class AccountManagementController extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet AccountManagementController</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet AccountManagementController at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
-    protected void doGet(HttpServletRequest request,
-            HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-
-        if(session == null){
-            response.sendRedirect(
-                request.getContextPath()+"/login");
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        Account loginUser =
-                (Account) session.getAttribute("account");
+        Account loginUser = (Account) session.getAttribute("account");
+        if (loginUser == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
         CustomerDAO customerDAO = new CustomerDAO();
         AccountDAO accountDAO = new AccountDAO();
 
-        // staff chỉ xem customer
-        if(loginUser.getRole().equals("staff")){
+        int pageSize = 5;
+        int currentPage = 1;
 
-            request.setAttribute(
-                    "customers",
-                    customerDAO.getAllCustomers());
-
+        try {
+            String p = request.getParameter("page");
+            if (p != null) {
+                currentPage = Math.max(1, Integer.parseInt(p));
+            }
+        } catch (Exception e) {
         }
 
-        // admin xem customer + staff
-        else if(loginUser.getRole().equals("admin")){
+        int offset = (currentPage - 1) * pageSize;
 
-            request.setAttribute(
-                    "customers",
-                    customerDAO.getAllCustomers());
+        if (loginUser.getRole().equals("staff")) {
+            int totalRecords = customerDAO.countCustomers();
+            int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
 
-            request.setAttribute(
-                    "staffs",
-                    accountDAO.getAllStaffs());
+            request.setAttribute("customers", customerDAO.getCustomersPaging(offset, pageSize));
+            request.setAttribute("currentPage", currentPage);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("baseUrl", request.getContextPath() + "/dashboard/account-management?");
 
+        } else if (loginUser.getRole().equals("admin")) {
+            int totalRecords = customerDAO.countCustomers() + accountDAO.countStaffs();
+            int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
+
+            request.setAttribute("customers", customerDAO.getCustomersPaging(offset, pageSize));
+            request.setAttribute("staffs", accountDAO.getStaffsPaging(offset, pageSize));
+            request.setAttribute("currentPage", currentPage);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("baseUrl", request.getContextPath() + "/dashboard/account-management?");
         }
 
-        request.getRequestDispatcher(
-                "/views/admin/account/account-management.jsp")
-                .forward(request,response);
+        request.getRequestDispatcher("/views/admin/account/account-management.jsp")
+               .forward(request, response);
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+
+        HttpSession session = request.getSession(false);
+        Account loginUser = (session != null) ? (Account) session.getAttribute("account") : null;
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        if (loginUser == null) {
+            response.setStatus(401);
+            response.getWriter().write("{\"success\":false,\"message\":\"Chưa đăng nhập\"}");
+            return;
+        }
+
+        String action = request.getParameter("action");
+        if (action == null) action = "";
+
+        CustomerDAO customerDAO = new CustomerDAO();
+        AccountDAO accountDAO = new AccountDAO();
+
+        try (PrintWriter out = response.getWriter()) {
+            switch (action) {
+                case "toggleCustomer": {
+                    int customerID = Integer.parseInt(request.getParameter("id"));
+                    String status = request.getParameter("status");
+                    boolean ok = customerDAO.toggleCustomerStatus(customerID, status);
+                    out.write(ok
+                            ? "{\"success\":true}"
+                            : "{\"success\":false,\"message\":\"Cập nhật thất bại\"}");
+                    break;
+                }
+                case "toggleStaff": {
+                    if (!loginUser.getRole().equals("admin")) {
+                        out.write("{\"success\":false,\"message\":\"Không có quyền\"}");
+                        break;
+                    }
+                    int accountID = Integer.parseInt(request.getParameter("id"));
+                    String status = request.getParameter("status");
+                    boolean ok = accountDAO.toggleStaffStatus(accountID, status);
+                    out.write(ok
+                            ? "{\"success\":true}"
+                            : "{\"success\":false,\"message\":\"Cập nhật thất bại\"}");
+                    break;
+                }
+                case "updateCustomer": {
+                    int id = Integer.parseInt(request.getParameter("id"));
+                    String fullname = request.getParameter("fullname");
+                    String phone    = request.getParameter("phone");
+                    String status   = request.getParameter("status");
+
+                    if (fullname == null || fullname.trim().isEmpty()) {
+                        out.write("{\"success\":false,\"message\":\"Họ tên không được để trống\"}");
+                        break;
+                    }
+                    boolean ok = customerDAO.updateCustomerByAdmin(id, fullname.trim(), phone, status);
+                    out.write(ok
+                            ? "{\"success\":true}"
+                            : "{\"success\":false,\"message\":\"Cập nhật thất bại\"}");
+                    break;
+                }
+                case "updateStaff": {
+                    if (!loginUser.getRole().equals("admin")) {
+                        out.write("{\"success\":false,\"message\":\"Không có quyền\"}");
+                        break;
+                    }
+                    int id = Integer.parseInt(request.getParameter("id"));
+                    String fullname = request.getParameter("fullname");
+                    String phone    = request.getParameter("phone");
+                    String status   = request.getParameter("status");
+                    String role     = request.getParameter("role");
+
+                    if (fullname == null || fullname.trim().isEmpty()) {
+                        out.write("{\"success\":false,\"message\":\"Họ tên không được để trống\"}");
+                        break;
+                    }
+                    if (!"staff".equals(role) && !"admin".equals(role)) {
+                        out.write("{\"success\":false,\"message\":\"Vai trò không hợp lệ\"}");
+                        break;
+                    }
+                    boolean ok = accountDAO.updateStaffByAdmin(id, fullname.trim(), phone, role, status);
+                    out.write(ok
+                            ? "{\"success\":true}"
+                            : "{\"success\":false,\"message\":\"Cập nhật thất bại\"}");
+                    break;
+                }
+                default:
+                    out.write("{\"success\":false,\"message\":\"Action không hợp lệ\"}");
+                    break;
+            }
+        } catch (NumberFormatException e) {
+            response.setStatus(400);
+            response.getWriter().write("{\"success\":false,\"message\":\"ID không hợp lệ\"}");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(500);
+            response.getWriter().write("{\"success\":false,\"message\":\"Lỗi server\"}");
+        }
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+        return "Account Management Controller";
+    }
 }
