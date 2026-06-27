@@ -12,14 +12,20 @@ import java.net.URLEncoder;
 
 public class GoogleLoginController extends HttpServlet {
 
-    // ======================================================================
-    // ⚠️  THAY 2 GIÁ TRỊ NÀY bằng Client ID và Client Secret của bạn
-    // ======================================================================
-    private static final String CLIENT_ID = System.getenv("GOOGLE_CLIENT_ID");
-    private static final String CLIENT_SECRET = System.getenv("GOOGLE_CLIENT_SECRET");
+    private static String CLIENT_ID;
+    private static String CLIENT_SECRET;
+    private static final String REDIRECT_URI = "http://localhost:8080/auth/google/callback";
 
-    // Phải khớp với URI bạn đã khai báo trên Google Console
-    private static final String REDIRECT_URI  = "http://localhost:8080/auth/google/callback";
+    @Override
+    public void init() throws ServletException {
+        CLIENT_ID     = getServletContext().getInitParameter("GOOGLE_CLIENT_ID");
+        CLIENT_SECRET = getServletContext().getInitParameter("GOOGLE_CLIENT_SECRET");
+
+        if (CLIENT_ID == null || CLIENT_SECRET == null) {
+            throw new ServletException(
+                "Thiếu GOOGLE_CLIENT_ID hoặc GOOGLE_CLIENT_SECRET trong context.xml");
+        }
+    }
 
     public static String getClientId()     { return CLIENT_ID; }
     public static String getClientSecret() { return CLIENT_SECRET; }
@@ -36,11 +42,11 @@ public class GoogleLoginController extends HttpServlet {
 
         // Tạo URL redirect tới Google
         String googleAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth"
-                + "?client_id="     + URLEncoder.encode(CLIENT_ID,    "UTF-8")
-                + "&redirect_uri="  + URLEncoder.encode(REDIRECT_URI, "UTF-8")
+                + "?client_id="    + URLEncoder.encode(CLIENT_ID,    "UTF-8")
+                + "&redirect_uri=" + URLEncoder.encode(REDIRECT_URI, "UTF-8")
                 + "&response_type=code"
-                + "&scope="         + URLEncoder.encode("openid email profile", "UTF-8")
-                + "&state="         + URLEncoder.encode(state,        "UTF-8")
+                + "&scope="        + URLEncoder.encode("openid email profile", "UTF-8")
+                + "&state="        + URLEncoder.encode(state,        "UTF-8")
                 + "&access_type=online";
 
         response.sendRedirect(googleAuthUrl);
