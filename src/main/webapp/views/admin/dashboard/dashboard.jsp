@@ -1,0 +1,257 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<!DOCTYPE html>
+<html class="light" lang="vi">
+    <head>
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1.0" name="viewport">
+        <title>Bảng điều khiển - BookTown</title>
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+        <script id="tailwind-config">
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        "colors": {
+                            "tertiary": "#134aa4",
+                            "primary": "#004d99",
+                            "warning": "#FFA000",
+                            "surface-container-highest": "#cfe6f2",
+                            "surface-container-lowest": "#ffffff",
+                            "on-primary": "#ffffff",
+                            "surface": "#FFFFFF",
+                            "primary-container": "#1565c0",
+                            "on-background": "#071e27",
+                            "background": "#f3faff",
+                            "surface-container-low": "#e6f6ff",
+                            "background-alt": "#F5F7F9",
+                            "success": "#2E7D32",
+                            "error": "#D32F2F",
+                            "on-surface-variant": "#424752",
+                            "on-surface": "#071e27",
+                            "outline": "#727783",
+                            "outline-variant": "#c2c6d4"
+                        },
+                        "spacing": {
+                            "container-max": "1280px",
+                            "stack-lg": "48px",
+                            "gutter": "24px",
+                            "stack-md": "24px",
+                            "stack-sm": "12px"
+                        },
+                        "fontFamily": {"body": ["Inter"]}
+                    }
+                }
+            }
+        </script>
+        <style>
+            body { font-family: 'Inter', sans-serif; }
+            .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+            .bar-item { min-width: 18px; border-radius: 10px 10px 0 0; background: linear-gradient(180deg, #1565c0 0%, #004d99 100%); }
+        </style>
+    </head>
+    <body class="bg-background text-on-surface flex min-h-screen">
+        <%@ include file="/views/layout/dashboard/sidebar.jsp" %>
+
+        <main class="flex-1 md:ml-64 min-h-screen">
+            <div class="p-gutter max-w-container-max mx-auto space-y-stack-lg">
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <h2 class="text-3xl font-bold text-on-background">Bảng điều khiển</h2>
+                        <p class="text-body-md text-on-surface-variant mt-1">Theo dõi doanh thu, đơn hàng và hiệu quả bán sách của BookTown.</p>
+                    </div>
+                </div>
+
+                <form method="get" action="${pageContext.request.contextPath}/dashboard" class="bg-surface rounded-2xl shadow-[0_4px_20px_rgba(21,101,192,0.08)] border border-outline-variant/30 p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div>
+                            <label class="block text-sm font-semibold text-on-surface-variant mb-2">Từ ngày</label>
+                            <input type="date" name="fromDate" value="${fromDate}" class="w-full rounded-xl border-outline-variant bg-surface-container-low focus:ring-primary focus:border-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-on-surface-variant mb-2">Đến ngày</label>
+                            <input type="date" name="toDate" value="${toDate}" class="w-full rounded-xl border-outline-variant bg-surface-container-low focus:ring-primary focus:border-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-on-surface-variant mb-2">Thể loại</label>
+                            <select name="genreID" class="w-full rounded-xl border-outline-variant bg-surface-container-low focus:ring-primary focus:border-primary">
+                                <option value="0">Tất cả thể loại</option>
+                                <c:forEach var="g" items="${genres}">
+                                    <option value="${g.genreID}" <c:if test="${selectedGenreID == g.genreID}">selected</c:if>>${g.genreName}</option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                        <div class="flex gap-3">
+                            <button type="submit" class="flex-1 px-5 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary-container transition-colors flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-[18px]">filter_alt</span>
+                                Lọc
+                            </button>
+                            <a href="${pageContext.request.contextPath}/dashboard" class="px-5 py-3 rounded-xl bg-background-alt border border-outline-variant/40 text-primary font-bold hover:bg-surface-container-low transition-colors flex items-center justify-center">
+                                Xóa
+                            </a>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-surface p-6 rounded-2xl shadow-[0_4px_20px_rgba(21,101,192,0.08)] flex flex-col gap-2">
+                        <span class="text-primary font-semibold">Tổng doanh thu</span>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-3xl font-bold"><fmt:formatNumber value="${totalRevenue}" type="number" groupingUsed="true"/>đ</span>
+                        </div>
+                        <span class="text-on-surface-variant text-xs">Theo bộ lọc hiện tại</span>
+                    </div>
+                    <div class="bg-surface p-6 rounded-2xl shadow-[0_4px_20px_rgba(21,101,192,0.08)] flex flex-col gap-2">
+                        <span class="text-primary font-semibold">Tổng đơn hàng</span>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-3xl font-bold">${totalOrders}</span>
+                            <span class="material-symbols-outlined text-primary text-sm">shopping_cart</span>
+                        </div>
+                        <span class="text-on-surface-variant text-xs">Số đơn trong hệ thống</span>
+                    </div>
+                    <div class="bg-surface p-6 rounded-2xl shadow-[0_4px_20px_rgba(21,101,192,0.08)] flex flex-col gap-2 border-l-4 border-warning">
+                        <span class="text-primary font-semibold">Khách hàng mua</span>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-3xl font-bold">${totalCustomers}</span>
+                            <span class="text-on-surface-variant text-xs">khách</span>
+                        </div>
+                        <span class="text-on-surface-variant text-xs">Khách có đơn theo bộ lọc</span>
+                    </div>
+                    <div class="bg-surface p-6 rounded-2xl shadow-[0_4px_20px_rgba(21,101,192,0.08)] flex flex-col gap-2">
+                        <span class="text-primary font-semibold">Sách đã bán</span>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-3xl font-bold">${totalSoldBooks}</span>
+                            <span class="material-symbols-outlined text-success text-sm">trending_up</span>
+                        </div>
+                        <span class="text-on-surface-variant text-xs">Tổng sách: ${totalBooks}</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-gutter">
+                    <div class="bg-surface p-stack-md rounded-xl shadow-sm border border-outline-variant/10 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><span class="material-symbols-outlined">pending_actions</span></div>
+                        <div><p class="text-sm text-on-surface-variant">Chờ duyệt</p><p class="text-xl font-bold">${statusSummary.pending}</p></div>
+                    </div>
+                    <div class="bg-surface p-stack-md rounded-xl shadow-sm border border-outline-variant/10 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-lg bg-warning/10 flex items-center justify-center text-warning"><span class="material-symbols-outlined">inventory_2</span></div>
+                        <div><p class="text-sm text-on-surface-variant">Đang xử lý</p><p class="text-xl font-bold">${statusSummary.processing}</p></div>
+                    </div>
+                    <div class="bg-surface p-stack-md rounded-xl shadow-sm border border-outline-variant/10 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary"><span class="material-symbols-outlined">local_shipping</span></div>
+                        <div><p class="text-sm text-on-surface-variant">Đang giao</p><p class="text-xl font-bold">${statusSummary.shipping}</p></div>
+                    </div>
+                    <div class="bg-surface p-stack-md rounded-xl shadow-sm border border-outline-variant/10 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-lg bg-success/10 flex items-center justify-center text-success"><span class="material-symbols-outlined">check_circle</span></div>
+                        <div><p class="text-sm text-on-surface-variant">Hoàn thành</p><p class="text-xl font-bold">${statusSummary.completed}</p></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+                    <div class="bg-surface rounded-2xl shadow-[0_4px_20px_rgba(21,101,192,0.08)] border border-outline-variant/30 p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-xl font-bold">Doanh thu theo thể loại</h3>
+                                <p class="text-sm text-on-surface-variant">Phục vụ Task 12.3 Filter Dashboard by Category</p>
+                            </div>
+                            <span class="material-symbols-outlined text-primary">bar_chart</span>
+                        </div>
+                        <c:choose>
+                            <c:when test="${empty revenueByCategory}">
+                                <div class="text-center py-10 text-on-surface-variant">Chưa có dữ liệu doanh thu.</div>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="space-y-4">
+                                    <c:forEach var="row" items="${revenueByCategory}">
+                                        <div>
+                                            <div class="flex justify-between text-sm mb-1">
+                                                <span class="font-semibold">${row.genreName}</span>
+                                                <span class="text-primary font-bold"><fmt:formatNumber value="${row.revenue}" type="number" groupingUsed="true"/>đ</span>
+                                            </div>
+                                            <div class="h-3 bg-surface-container-low rounded-full overflow-hidden">
+                                                <div class="h-full bg-primary rounded-full" style="width: 70%"></div>
+                                            </div>
+                                        </div>
+                                    </c:forEach>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+
+                    <div class="bg-surface rounded-2xl shadow-[0_4px_20px_rgba(21,101,192,0.08)] border border-outline-variant/30 p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-xl font-bold">Sách bán chạy</h3>
+                                <p class="text-sm text-on-surface-variant">Top sách theo ngày và thể loại đã lọc</p>
+                            </div>
+                            <span class="material-symbols-outlined text-primary">workspace_premium</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead>
+                                    <tr class="border-b border-outline-variant/20">
+                                        <th class="py-3 text-xs uppercase text-on-surface-variant">Sách</th>
+                                        <th class="py-3 text-xs uppercase text-on-surface-variant">Thể loại</th>
+                                        <th class="py-3 text-xs uppercase text-on-surface-variant text-right">Đã bán</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-outline-variant/10">
+                                    <c:forEach var="book" items="${topSellingBooks}">
+                                        <tr>
+                                            <td class="py-3 font-semibold text-sm">${book.title}</td>
+                                            <td class="py-3 text-sm text-on-surface-variant">${book.genreName}</td>
+                                            <td class="py-3 text-sm font-bold text-primary text-right">${book.soldQuantity}</td>
+                                        </tr>
+                                    </c:forEach>
+                                    <c:if test="${empty topSellingBooks}">
+                                        <tr><td colspan="3" class="py-10 text-center text-on-surface-variant">Chưa có dữ liệu sách bán chạy.</td></tr>
+                                    </c:if>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-surface rounded-2xl shadow-[0_4px_20px_rgba(21,101,192,0.08)] overflow-hidden border border-outline-variant/30">
+                    <div class="p-6 border-b border-outline-variant/30 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold">Đơn hàng gần đây</h3>
+                            <p class="text-sm text-on-surface-variant">Danh sách 5 đơn mới nhất theo bộ lọc.</p>
+                        </div>
+                        <a href="${pageContext.request.contextPath}/dashboard/customer-order" class="text-primary font-bold text-sm hover:underline">Xem tất cả</a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-surface-container-low/50 border-b border-outline-variant/10">
+                                    <th class="px-gutter py-4 text-xs text-on-surface-variant uppercase tracking-wider font-bold">Mã đơn</th>
+                                    <th class="px-gutter py-4 text-xs text-on-surface-variant uppercase tracking-wider font-bold">Khách hàng</th>
+                                    <th class="px-gutter py-4 text-xs text-on-surface-variant uppercase tracking-wider font-bold">Ngày đặt</th>
+                                    <th class="px-gutter py-4 text-xs text-on-surface-variant uppercase tracking-wider font-bold">Tổng tiền</th>
+                                    <th class="px-gutter py-4 text-xs text-on-surface-variant uppercase tracking-wider font-bold">Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-outline-variant/5">
+                                <c:forEach var="order" items="${recentOrders}">
+                                    <tr class="hover:bg-background-alt/50 transition-colors">
+                                        <td class="px-gutter py-4"><span class="font-bold text-primary">#ORD-${order.orderID}</span></td>
+                                        <td class="px-gutter py-4 text-sm font-medium">${order.customerName}</td>
+                                        <td class="px-gutter py-4 text-sm text-on-surface-variant"><fmt:formatDate value="${order.createdAt}" pattern="HH:mm - dd/MM/yyyy"/></td>
+                                        <td class="px-gutter py-4 font-bold text-sm"><fmt:formatNumber value="${order.totalPrice}" type="number" groupingUsed="true"/>đ</td>
+                                        <td class="px-gutter py-4"><span class="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold">${order.status}</span></td>
+                                    </tr>
+                                </c:forEach>
+                                <c:if test="${empty recentOrders}">
+                                    <tr><td colspan="5" class="px-gutter py-10 text-center text-on-surface-variant">Không có đơn hàng phù hợp bộ lọc.</td></tr>
+                                </c:if>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <%@ include file="/views/layout/dashboard/footer.jsp" %>
+        </main>
+    </body>
+</html>

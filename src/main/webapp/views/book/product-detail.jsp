@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <%@ include file="/views/layout/homepage/header.jsp" %>
 
@@ -24,12 +24,12 @@
         box-shadow: 0 6px 20px rgba(0,0,0,.1);
         transform: translateY(-2px);
     }
-    .review-card        {
+    .review-card {
         border: 1px solid #E0E0E0;
         border-radius: 12px;
-        background:#fff;
+        background: #fff;
     }
-    .slider-track       {
+    .slider-track {
         display: flex;
         gap: 16px;
         overflow-x: auto;
@@ -39,7 +39,7 @@
     .slider-track::-webkit-scrollbar {
         display: none;
     }
-    .slider-item        {
+    .slider-item {
         flex: 0 0 calc(25% - 12px);
         scroll-snap-align: start;
     }
@@ -53,17 +53,56 @@
             flex: 0 0 calc(50% - 8px);
         }
     }
+
+    .review-summary {
+        background: linear-gradient(135deg,#f8fafc,#ffffff);
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+    }
+
+    .review-item {
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        background: white;
+        transition: all .25s ease;
+    }
+
+    .review-item:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+
+    .star-filled {
+        color: #facc15;
+    }
+
+    .star-empty {
+        color: #d1d5db;
+    }
+
+    .review-avatar{
+        width:40px;
+        height:40px;
+        border-radius:50%;
+        background:#4f46e5;
+        color:white;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-weight:bold;
+    }
 </style>
 
-
 <main class="max-w-[1400px] mx-auto px-8 py-8 flex flex-col gap-8">
+
+    <!-- ══ PRODUCT HERO ══════════════════════════════════════════════════ -->
     <section class="flex flex-col lg:flex-row gap-10">
+
+        <!-- LEFT: Image Gallery -->
         <div class="flex-shrink-0 w-full lg:w-[499px] flex flex-col gap-4">
             <div class="bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden aspect-[3/4] flex items-center justify-center relative">
                 <c:choose>
                     <c:when test="${not empty book.thumbnail}">
-                        <img id="mainImage" src="${book.thumbnail}" alt="${book.title}"
-                             class="w-full h-full object-cover">
+                        <img id="mainImage" src="${book.thumbnail}" alt="${book.title}" class="w-full h-full object-cover">
                     </c:when>
                     <c:otherwise>
                         <i data-lucide="book-open" class="w-24 h-24 text-gray-300"></i>
@@ -78,6 +117,7 @@
                     </div>
                 </c:if>
             </div>
+
             <c:if test="${not empty book.thumbnail}">
                 <div class="grid grid-cols-4 gap-3">
                     <button onclick="switchImg(this, '${book.thumbnail}')"
@@ -96,7 +136,11 @@
                 </div>
             </c:if>
         </div>
+
+        <!-- RIGHT: Product Info -->
         <div class="flex-1 min-w-0 flex flex-col gap-6">
+
+            <!-- Tags -->
             <div class="flex flex-wrap gap-2">
                 <c:if test="${not empty book.genreName}">
                     <span class="bg-primary/10 text-primary text-[12px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">${book.genreName}</span>
@@ -108,7 +152,11 @@
                     <span class="bg-gray-100 text-gray-600 text-[12px] font-medium px-3 py-1 rounded-full">🌏 ${book.originName}</span>
                 </c:if>
             </div>
+
+            <!-- Title -->
             <h1 class="text-[30px] font-black text-[#222222] leading-tight">${book.title}</h1>
+
+            <!-- Author -->
             <c:if test="${not empty book.authors}">
                 <p class="text-[18px] italic text-gray-500">
                     Tác giả:
@@ -117,6 +165,8 @@
                     </c:forEach>
                 </p>
             </c:if>
+
+            <!-- Rating -->
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-0.5 text-[#FDD835] text-[14px]">
                     <c:set var="rating" value="${book.avgRating}" />
@@ -132,12 +182,17 @@
                 </span>
             </div>
 
+            <!-- Price card -->
             <div class="bg-white border border-gray-200 shadow-sm rounded-xl px-6 pt-10 pb-6 flex flex-col gap-6">
+
+                <!-- Price -->
                 <div class="flex items-end gap-3">
                     <span class="text-[30px] font-bold text-primary leading-none">
                         <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true" />đ
                     </span>
                 </div>
+
+                <!-- Stock status -->
                 <div class="flex items-center gap-2 text-[14px] font-medium">
                     <c:choose>
                         <c:when test="${book.stockQuantity > 0}">
@@ -154,25 +209,41 @@
                         </c:otherwise>
                     </c:choose>
                 </div>
-                <form id="add-to-cart-form" method="post" action="${pageContext.request.contextPath}/cart">
-                    <input type="hidden" name="action"   value="add"/>
-                    <input type="hidden" name="bookID"   value="${book.bookID}"/>
-                    <input type="hidden" name="quantity" id="form-qty" value="1"/>
-                    <div class="flex items-center gap-4 flex-wrap">
-                        <div class="flex items-center border-2 border-gray-200 rounded-full overflow-hidden">
-                            <button type="button" id="qty-minus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">−</button>
-                            <input id="qty-input" type="number" value="1" min="1" max="${book.stockQuantity}"
-                                   class="w-12 text-center text-[15px] font-bold border-none outline-none py-2 bg-transparent" readonly>
-                            <button type="button" id="qty-plus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">+</button>
-                        </div>
+
+                <!-- ✅ FIX: Form có id="add-to-cart-form" và input qty có id="form-qty" -->
+                <div class="flex items-center gap-4 flex-wrap">
+                    <form id="add-to-cart-form" action="${pageContext.request.contextPath}/cart" method="POST" class="flex items-center gap-4 flex-wrap flex-1">
+                        <input type="hidden" name="action"   value="add" />
+                        <input type="hidden" name="bookID"   value="${book.bookID}" />
+                        <input type="hidden" name="redirect" value="${pageContext.request.contextPath}/products?id=${book.bookID}" />
+
+                        <c:if test="${book.stockQuantity > 0}">
+                            <div class="flex items-center border-2 border-gray-200 rounded-full overflow-hidden">
+                                <button type="button" id="qty-minus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">−</button>
+                                <!-- ✅ FIX: thêm id="form-qty" để JS tìm được -->
+                                <input id="form-qty" name="quantity" type="number" value="1" min="1" max="${book.stockQuantity}"
+                                       class="w-12 text-center text-[15px] font-bold border-none outline-none py-2 bg-transparent" readonly>
+                                <button type="button" id="qty-plus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">+</button>
+                            </div>
+                        </c:if>
+
                         <c:choose>
                             <c:when test="${book.stockQuantity > 0}">
-                                <button type="submit" class="flex-1 bg-secondary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-opacity min-w-[160px]">
-                                    <i data-lucide="shopping-cart" class="w-5 h-5"></i> Thêm vào giỏ
-                                </button>
-                                <button type="button" class="flex-1 border-2 border-primary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all min-w-[160px]">
-                                    <i data-lucide="heart" class="w-5 h-5"></i> Thêm vào yêu thích
-                                </button>
+                                <c:choose>
+                                    <c:when test="${not empty sessionScope.account and sessionScope.account.role == 'customer'}">
+                                        <!-- ✅ FIX: dùng id="btn-add-to-cart" để JS gắn event được -->
+                                        <button type="button" id="btn-add-to-cart"
+                                                class="flex-1 bg-secondary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-opacity min-w-[160px]">
+                                            <i data-lucide="shopping-cart" class="w-5 h-5"></i> Thêm vào giỏ
+                                        </button>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a href="${pageContext.request.contextPath}/login"
+                                           class="flex-1 bg-secondary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-opacity min-w-[160px]">
+                                            <i data-lucide="shopping-cart" class="w-5 h-5"></i> Thêm vào giỏ
+                                        </a>
+                                    </c:otherwise>
+                                </c:choose>
                             </c:when>
                             <c:otherwise>
                                 <button type="button" disabled class="flex-1 bg-gray-200 text-gray-400 font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 cursor-not-allowed min-w-[160px]">
@@ -180,9 +251,35 @@
                                 </button>
                             </c:otherwise>
                         </c:choose>
-                    </div>
-                </form>
+                    </form>
+
+                    <!-- Wishlist (giữ nguyên từ code 1) -->
+                    <c:choose>
+                        <c:when test="${isInWishlist}">
+                            <form action="${pageContext.request.contextPath}/wishlist" method="POST" class="flex-1 min-w-[160px]">
+                                <input type="hidden" name="action"  value="remove" />
+                                <input type="hidden" name="bookID"  value="${book.bookID}" />
+                                <input type="hidden" name="redirect" value="${pageContext.request.contextPath}/products?id=${book.bookID}" />
+                                <button type="submit" class="w-full bg-red-50 border-2 border-red-500 text-red-500 font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-red-500 hover:text-white transition-all">
+                                    <i data-lucide="heart" class="w-5 h-5 fill-current"></i> Đã thích
+                                </button>
+                            </form>
+                        </c:when>
+                        <c:otherwise>
+                            <form action="${pageContext.request.contextPath}/wishlist" method="POST" class="flex-1 min-w-[160px]">
+                                <input type="hidden" name="action"  value="add" />
+                                <input type="hidden" name="bookID"  value="${book.bookID}" />
+                                <input type="hidden" name="redirect" value="${pageContext.request.contextPath}/products?id=${book.bookID}" />
+                                <button type="submit" class="w-full border-2 border-primary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all">
+                                    <i data-lucide="heart" class="w-5 h-5"></i> Yêu thích
+                                </button>
+                            </form>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
             </div>
+
+            <!-- Specs grid -->
             <div class="border-y border-gray-200 grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-200 py-6">
                 <div class="flex flex-col gap-1 px-4 first:pl-0">
                     <span class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Nhà xuất bản</span>
@@ -211,6 +308,8 @@
                     <span class="text-[16px] font-medium text-[#222222]">BT-${book.bookID}</span>
                 </div>
             </div>
+
+            <!-- Description -->
             <c:if test="${not empty book.description}">
                 <div class="flex flex-col gap-3">
                     <h2 class="section-title-left text-[20px] font-bold text-primary">Mô tả</h2>
@@ -219,114 +318,188 @@
             </c:if>
         </div>
     </section>
-    <section class="pt-2">
 
-        <div class="flex items-center justify-between mb-5">
-            <h2 class="section-title-left text-[20px] font-bold text-primary">
-                Đánh giá
+    <!--phần review--> 
+    <section class="pt-8">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="section-title-left text-[22px] font-bold text-primary">
+                Đánh giá sản phẩm (${reviews.size()})
             </h2>
+            <button
+                id="openReviewModal"
+                data-can-review="${canReview}"
+                type="button"
+                class="flex items-center gap-2 bg-primary hover:opacity-90 text-white font-bold px-5 py-2.5 rounded-lg transition">
+
+                <span class="material-symbols-outlined">
+                    edit
+                </span>
+                Viết đánh giá
+            </button>
         </div>
         <c:choose>
             <c:when test="${not empty reviews}">
-                <c:forEach items="${reviews}" var="review">
-                    <div class="review-card p-4 mb-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold">
-                                Customer #${review.customerID}
-                            </span>
-                            <small class="text-gray-500">
-                                ${review.createdAt}
-                            </small>
+                <div class="flex flex-col gap-6">
+                    <c:forEach items="${reviews}" var="review">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-outline-variant hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <!--tên người dùng đã mua đánh giá-->
+                                    <div class="flex items-center gap-2">
+                                        <strong>${review.customerName}</strong>
+                                        <span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded font-bold uppercase">
+                                            Đã mua hàng
+                                        </span>
+                                    </div>
+                                    <!--phần sao-->
+                                    <div class="flex gap-1 mt-1 text-yellow-400">
+                                        <c:forEach begin="1" end="5" var="i">
+                                            <c:choose>
+                                                <c:when test="${i <= review.rating}">
+                                                    <span>★</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="text-gray-300">★</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </c:forEach>
+                                    </div>
+                                </div>
+                                <!--ngày và giờ đánh giá-->
+                                <span class="text-xs text-gray-400 italic">
+                                    <fmt:formatDate
+                                        value="${review.createdAt}"
+                                        pattern="dd/MM/yyyy HH:mm"/>
+                                </span>
+                            </div>
+                            <!--nội dung review-->
+                            <p class="text-gray-700 leading-relaxed text-sm">
+
+                                ${review.comment}
+                            </p>
+                            <!--admin trả lời người review-->
+                            <c:if test="${not empty review.adminReply}">
+                                <div class="mt-5 ml-6 p-4 bg-blue-50 rounded-lg border-l-4 border-primary">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="font-bold text-primary">
+                                            Admin BookTown
+                                        </span>
+                                        <span class="text-[10px] bg-primary text-white  px-2 py-1 rounded uppercase">
+                                            Admin
+                                        </span>
+                                    </div>
+                                    <!--nội dung trả lời-->
+                                    <p class="text-gray-700 text-sm leading-relaxed">
+                                        ${review.adminReply}
+
+                                    </p>
+                                    <c:if test="${review.adminReplyDate != null}">
+                                        <div class="text-xs text-gray-400 mt-2">
+                                            <fmt:formatDate
+                                                value="${review.adminReplyDate}"
+                                                pattern="dd/MM/yyyy HH:mm"/>
+                                        </div>
+                                    </c:if>
+                                </div>
+                            </c:if>
                         </div>
-                        <div class="text-yellow-500 mb-2">
-                            <c:forEach begin="1" end="5" var="i">
-                                <c:choose>
-                                    <c:when test="${i <= review.rating}">
-                                        ★
-                                    </c:when>
-                                    <c:otherwise>
-                                        ☆
-                                    </c:otherwise>
-                                </c:choose>
-                            </c:forEach>
-                        </div>
-                        <p class="text-gray-700">
-                            ${review.comment}
-                        </p>
-                    </div>
-                </c:forEach>
+                    </c:forEach>
+                </div>
             </c:when>
             <c:otherwise>
-                <div class="bg-gray-50 border rounded-lg p-4">
-                    Chưa có đánh giá nào.
+                <div class="bg-white border border-dashed border-gray-300 rounded-xl p-10 text-center">
+                    <div class="text-5xl mb-3">
+                        ⭐
+                    </div>
+                    <div class="font-semibold text-gray-600">
+                        Chưa có đánh giá nào
+                    </div>
+
+                    <div class="text-gray-400 mt-2">
+                        Hãy là người đầu tiên trải nghiệm và đánh giá cuốn sách này
+                    </div>
                 </div>
             </c:otherwise>
         </c:choose>
+        <!--form popup để viết đánh giá và vote sao-->
+            <div id="reviewModal"
+                 class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+                <div class="bg-white w-[600px] rounded-xl p-6 relative">
+                    <button id="closeReviewModal"
+                            class="absolute top-3 right-4 text-2xl">
+                        ×
+                    </button>
+                    <h3 class="text-xl font-bold mb-6">
+                        Viết đánh giá
+                    </h3>
+                    <form id="reviewForm"
+                          action="${pageContext.request.contextPath}/review"
+                          method="post">
 
-        <div class="mt-8 bg-white border rounded-xl p-6">
-            <h3 class="text-lg font-bold mb-4">
-                Viết đánh giá
-            </h3>
-            <form action="${pageContext.request.contextPath}/review"
-                  method="post">
+                        <input type="hidden" name="action" value="add">
+                        <input type="hidden" name="bookID" value="${book.bookID}">
+                        <input type="hidden"
+                               id="ratingValue"
+                               name="rating"
+                               value="5">
 
-                <input type="hidden"
-                       name="bookID"
-                       value="${book.bookID}">
-                <input type="hidden"
-                       name="customerID"
-                       value="1">
-                <input type="hidden"
-                       name="orderDetailID"
-                       value="1">
+                        <div class="mb-4">
+                            <label class="font-semibold block mb-2">
+                                Đánh giá của bạn
+                            </label>
 
-                <div class="mb-4">
+                            <div id="ratingStars"
+                                 class="flex gap-2 text-3xl cursor-pointer">
 
-                    <label class="font-medium">
-                        Đánh giá
-                    </label>
+                                <span class="star text-yellow-400"
+                                      data-value="1">★</span>
 
-                    <select name="rating"
-                            class="w-full border rounded p-2 mt-1">
+                                <span class="star text-yellow-400"
+                                      data-value="2">★</span>
 
-                        <option value="5">★★★★★</option>
-                        <option value="4">★★★★☆</option>
-                        <option value="3">★★★☆☆</option>
-                        <option value="2">★★☆☆☆</option>
-                        <option value="1">★☆☆☆☆</option>
+                                <span class="star text-yellow-400"
+                                      data-value="3">★</span>
 
-                    </select>
+                                <span class="star text-yellow-400"
+                                      data-value="4">★</span>
+
+                                <span class="star text-yellow-400"
+                                      data-value="5">★</span>
+                            </div>
+
+                            <p class="text-sm text-gray-500 mt-2">
+                                Bạn đang chọn:
+                                <span id="ratingText">5</span> sao
+                            </p>
+                        </div>
+
+                        <textarea
+                            name="comment"
+                            rows="5"
+                            required
+                            placeholder="Chia sẻ cảm nhận của bạn..."
+                            class="w-full border rounded-lg p-4">
+                        </textarea>
+
+                        <button type="submit"
+                                class="mt-4 bg-primary text-white px-6 py-3 rounded-lg">
+                            Gửi đánh giá
+                        </button>
+                    </form>
                 </div>
-                <div class="mb-4">
-                    <label class="font-medium">
-                        Nhận xét
-                    </label>
-                    <textarea
-                        name="comment"
-                        rows="4"
-                        required
-                        class="w-full border rounded p-3 mt-1"
-                        placeholder="Nhập đánh giá của bạn..."></textarea>
-                </div>
-                <button
-                    type="submit"
-                    class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700">
-                    Gửi đánh giá
-                </button>
-            </form>
-        </div>
+            </div>
     </section>
+
+    <!-- ══ RELATED BOOKS ══════════════════════════════════════════════════ -->
     <c:if test="${not empty relatedBooks}">
         <section class="pt-2">
             <div class="flex items-center justify-between mb-5">
                 <h2 class="section-title-left text-[20px] font-bold text-primary">📚 Bạn cũng có thể thích</h2>
                 <div class="flex gap-2">
-                    <button id="sliderPrev"
-                            class="w-[34px] h-[34px] border border-gray-200 rounded-full flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
+                    <button id="sliderPrev" class="w-[34px] h-[34px] border border-gray-200 rounded-full flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
                         <i data-lucide="chevron-left" class="w-4 h-4"></i>
                     </button>
-                    <button id="sliderNext"
-                            class="w-[34px] h-[34px] border border-gray-200 rounded-full flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
+                    <button id="sliderNext" class="w-[34px] h-[34px] border border-gray-200 rounded-full flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
                         <i data-lucide="chevron-right" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -388,52 +561,216 @@
 </main>
 
 <script>
+    // ── Qty +/- ──────────────────────────────────────────────────────────
     (function () {
-        var input = document.getElementById('qty-input');
-        var formQty = document.getElementById('form-qty');
+        var input = document.getElementById('form-qty');
+        if (!input)
+            return;
+        var max = parseInt(input.getAttribute('max')) || 1;
 
-        if (input) {
-            var max = parseInt(input.getAttribute('max')) || 1;
-
-            document.getElementById('qty-minus').addEventListener('click', function () {
-                var v = parseInt(input.value) || 1;
-                if (v > 1) {
-                    input.value = v - 1;
-                    formQty.value = v - 1;
-                }
-            });
-            document.getElementById('qty-plus').addEventListener('click', function () {
-                var v = parseInt(input.value) || 1;
-                if (v < max) {
-                    input.value = v + 1;
-                    formQty.value = v + 1;
-                }
-            });
-        }
-
-        window.switchImg = function (btn, src) {
-            var main = document.getElementById('mainImage');
-            if (main)
-                main.src = src;
-            document.querySelectorAll('[onclick^="switchImg"]').forEach(function (b) {
-                b.className = b.className.replace('prod-thumb-active', 'prod-thumb-idle');
-            });
-            btn.className = btn.className.replace('prod-thumb-idle', 'prod-thumb-active');
-        };
-
-        var slider = document.getElementById('relatedSlider');
-        var prev = document.getElementById('sliderPrev');
-        var next = document.getElementById('sliderNext');
-        if (slider && prev && next) {
-            var scrollAmt = 280;
-            prev.addEventListener('click', function () {
-                slider.scrollBy({left: -scrollAmt, behavior: 'smooth'});
-            });
-            next.addEventListener('click', function () {
-                slider.scrollBy({left: scrollAmt, behavior: 'smooth'});
-            });
-        }
+        document.getElementById('qty-minus').addEventListener('click', function () {
+            var v = parseInt(input.value) || 1;
+            if (v > 1)
+                input.value = v - 1;
+        });
+        document.getElementById('qty-plus').addEventListener('click', function () {
+            var v = parseInt(input.value) || 1;
+            if (v < max)
+                input.value = v + 1;
+        });
     })();
+
+    // ── Thumbnail switcher ───────────────────────────────────────────────
+    window.switchImg = function (btn, src) {
+        var main = document.getElementById('mainImage');
+        if (main)
+            main.src = src;
+        document.querySelectorAll('[onclick^="switchImg"]').forEach(function (b) {
+            b.className = b.className.replace('prod-thumb-active', 'prod-thumb-idle');
+        });
+        btn.className = btn.className.replace('prod-thumb-idle', 'prod-thumb-active');
+    };
+
+    // ── Add to cart (AJAX) ───────────────────────────────────────────────
+    var btnAdd = document.getElementById('btn-add-to-cart');
+    if (btnAdd) {
+        btnAdd.addEventListener('click', function () {
+            var bookID = document.querySelector('#add-to-cart-form input[name="bookID"]').value;
+            var quantity = document.getElementById('form-qty').value;
+
+            var params = new URLSearchParams();
+            params.append('action', 'add');
+            params.append('bookID', bookID);
+            params.append('quantity', quantity);
+
+            fetch('${pageContext.request.contextPath}/cart', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: params.toString()
+            })
+                    .then(function (res) {
+                        return res.json();
+                    })
+                    .then(function (data) {
+                        if (data.ok) {
+                            var badge = document.getElementById('cart-count');
+                            if (badge)
+                                badge.textContent = data.cartCount;
+                            showToast('Thêm vào giỏ hàng thành công!');
+                        } else {
+                            showToast(data.message || 'Thêm vào giỏ hàng thất bại!', true);
+                        }
+                    })
+                    .catch(function () {
+                        showToast('Lỗi kết nối, vui lòng thử lại!', true);
+                    });
+        });
+    }
+
+    // ── Related slider ───────────────────────────────────────────────────
+    var slider = document.getElementById('relatedSlider');
+    var prev = document.getElementById('sliderPrev');
+    var next = document.getElementById('sliderNext');
+    if (slider && prev && next) {
+        var scrollAmt = 280;
+        prev.addEventListener('click', function () {
+            slider.scrollBy({left: -scrollAmt, behavior: 'smooth'});
+        });
+        next.addEventListener('click', function () {
+            slider.scrollBy({left: scrollAmt, behavior: 'smooth'});
+        });
+    }
+
+    //phần đánh sao và review 
+    var stars = document.querySelectorAll('.star');
+    var ratingInput = document.getElementById('ratingValue');
+    var ratingText = document.getElementById('ratingText');
+    var currentRating = 5;
+
+    function updateStars(rating) {
+        stars.forEach(function (star) {
+            if (star.dataset.value <= rating) {
+                star.textContent = '★';
+                star.classList.add('text-yellow-400');
+            } else {
+                star.textContent = '☆';
+                star.classList.remove('text-yellow-400');
+            }
+        });
+    }
+
+    updateStars(currentRating); // hiển thị mặc định 5 sao
+
+    stars.forEach(function (star) {
+        star.addEventListener('mouseover', function () {
+            updateStars(star.dataset.value);
+        });
+        star.addEventListener('click', function () {
+            currentRating = star.dataset.value;
+            ratingInput.value = currentRating;
+            ratingText.textContent = currentRating;
+            updateStars(currentRating);
+        });
+    });
+
+    var ratingStars =
+            document.getElementById('ratingStars');
+
+    if (ratingStars) {
+
+        ratingStars.addEventListener(
+                'mouseleave',
+                function () {
+                    updateStars(currentRating);
+                }
+        );
+
+    }
+
+    var reviewModal = document.getElementById('reviewModal');
+    var openReviewBtn = document.getElementById('openReviewModal');
+    var closeReviewBtn = document.getElementById('closeReviewModal');
+
+    if (reviewModal && openReviewBtn) {
+        openReviewBtn.addEventListener('click', function () {
+            const canReview = this.dataset.canReview === 'true';
+            if (!canReview) {
+                showToast(
+                        'Bạn cần mua và nhận sách trước khi đánh giá.',
+                        true
+                        );
+                return;
+            }
+            reviewModal.classList.remove('hidden');
+            reviewModal.classList.add('flex');
+        });
+    }
+
+    if (closeReviewBtn && reviewModal) {
+        closeReviewBtn.addEventListener('click', function () {
+            reviewModal.classList.add('hidden');
+            reviewModal.classList.remove('flex');
+        });
+    }
+
+    // AJAX submit review
+    var reviewForm = document.getElementById('reviewForm');
+
+    if (reviewForm) {
+
+        reviewForm.addEventListener('submit', function (e) {
+
+            e.preventDefault();
+
+            var formData = new URLSearchParams(
+                    new FormData(reviewForm)
+                    );
+
+            fetch(
+                    '${pageContext.request.contextPath}/review',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type':
+                                    'application/x-www-form-urlencoded'
+                        },
+                        body: formData.toString()
+                    }
+            )
+                    .then(function (res) {
+
+                        if (!res.ok) {
+                            throw new Error();
+                        }
+
+                        return res.json();
+                    })
+                    .then(data => {
+
+                        if (data.success) {
+
+                            showToast(data.message);
+
+                            reviewModal.classList.add('hidden');
+                            reviewModal.classList.remove('flex');
+
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1000);
+
+                        } else {
+
+                            showToast(data.message, true);
+                        }
+                    })
+                    .catch(() => {
+                        showToast('Có lỗi xảy ra', true);
+                    });
+
+        });
+
+    }
 </script>
 
+<%@ include file="/views/layout/common/toast.jsp" %>
 <%@ include file="/views/layout/homepage/footer.jsp" %>

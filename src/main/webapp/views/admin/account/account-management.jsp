@@ -143,7 +143,6 @@
                         <p class="font-body-md text-body-md text-on-surface-variant">Xem và quản lý tải khoản của BookTown.</p>
                     </div>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div class="bg-surface p-6 rounded-2xl shadow-[0_4px_20px_rgba(21,101,192,0.08)] flex flex-col gap-2">
                         <span class="text-primary font-label-md">Tổng khách hàng</span>
@@ -177,9 +176,7 @@
                         <span class="text-on-surface-variant text-xs">Thanh toán trong 30 ngày</span>
                     </div>
                 </div>
-
                 <div class="bg-surface rounded-2xl shadow-[0_4px_20px_rgba(21,101,192,0.08)] overflow-hidden border border-outline-variant/30">
-
                     <div class="p-6 border-b border-outline-variant/30">
                         <div class="flex flex-col lg:flex-row gap-4 justify-between">
                             <div>
@@ -197,15 +194,12 @@
                                 </span>
                                 Thêm tài khoản
                             </a>
-
                         </div>
                     </div>
-
                     <div class="p-6 border-b border-outline-variant/30">
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div class="md:col-span-2 relative">
-                                <span
-                                    class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">
                                     search
                                 </span>
                                 <input
@@ -213,15 +207,13 @@
                                     placeholder="Tìm kiếm theo tên hoặc email..."
                                     class="w-full pl-11 pr-4 py-3 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary">
                             </div>
-                            <select
-                                class="px-4 py-3 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary">
+                            <select class="px-4 py-3 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary">
                                 <option>Tất cả vai trò</option>
                                 <option>Admin</option>
                                 <option>Staff</option>
                                 <option>Customer</option>
                             </select>
-                            <select
-                                class="px-4 py-3 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary">
+                            <select class="px-4 py-3 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary">
                                 <option>Tất cả trạng thái</option>
                                 <option>Hoạt động</option>
                                 <option>Đã khóa</option>
@@ -235,166 +227,172 @@
                                 <tr class="bg-background-alt">
                                     <th class="px-6 py-4">Tài khoản</th>
                                     <th class="px-6 py-4">Vai trò</th>
-                                    <th class="px-6 py-4">Ngày tham gia</th>
                                     <th class="px-6 py-4">Trạng thái</th>
                                     <th class="px-6 py-4 text-right">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-outline-variant/20">
-                                <tr class="hover:bg-surface-container-low">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-3">
-                                            <div>
-                                                <div class="font-medium">
-                                                    <a href="${pageContext.request.contextPath}/dashboard/account-detail"
-                                                       class="hover:text-primary hover:underline">
-                                                        Nguyễn Văn An
-                                                    </a>
-                                                </div>
-                                                <div
-                                                    class="text-xs text-on-surface-variant">
-                                                    an.nguyen@booktown.vn
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <td class="px-6 py-4">
-                                        <span
-                                            class="px-3 py-1 rounded-full bg-primary-fixed text-primary text-xs font-bold">
-                                            Staff
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        12/05/2023
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <span
-                                            class="flex items-center gap-2 text-success">
-                                            <span
-                                                class="w-2 h-2 rounded-full bg-success">
+                                <c:forEach items="${customers}" var="c">
+                                    <tr class="hover:bg-surface-container-low">
+                                        <td class="px-6 py-4">
+                                            <div class="font-medium">${c.fullname}</div>
+                                            <div class="text-xs text-on-surface-variant">${c.email}</div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span class="px-3 py-1 rounded-full bg-secondary-container text-secondary text-xs font-bold">
+                                                Customer
                                             </span>
-                                            Hoạt động
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <button class="text-primary">
-                                            <a href="${pageContext.request.contextPath}/dashboard/update-account"
-                                               <span class="material-symbols-outlined">
-                                                    edit
-                                                </span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <c:choose>
+                                                <c:when test="${c.status == 'active'}">
+                                                    <span class="status-text text-success">Hoạt động</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="status-text text-error">Đã khóa</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <a href="${pageContext.request.contextPath}/dashboard/account-detail" class="text-primary">
+                                                <span class="material-symbols-outlined">edit</span>
                                             </a>
-                                        </button>
-                                        <button class="text-warning ml-2">
-                                            <span class="material-symbols-outlined">
-                                                lock
-                                            </span>
-                                        </button>
 
-                                        <button class="text-error ml-2">
-                                            <span class="material-symbols-outlined">
-                                                delete
-                                            </span>
-                                        </button>
-                                    </td>
-                                </tr>
+                                            <form method="post"
+                                                  class="toggle-form inline"
+                                                  data-url="${pageContext.request.contextPath}/dashboard/account-management">
+                                                <input type="hidden" name="action" value="toggleCustomer">
+                                                <input type="hidden" name="id" value="${c.customerID}">
+                                                <input type="hidden" name="status"
+                                                       value="${c.status == 'active' ? 'inactive' : 'active'}">
+                                                <button type="submit" class="text-warning ml-2">
+                                                    <span class="material-symbols-outlined">
+                                                        ${c.status == 'active' ? 'lock' : 'lock_open'}
+                                                    </span>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                                <c:if test="${not empty staffs}">
+                                    <c:forEach items="${staffs}" var="s">
+                                        <tr class="hover:bg-surface-container-low">
+                                            <td class="px-6 py-4">
+                                                <div class="font-medium">${s.fullname}</div>
+                                                <div class="text-xs text-on-surface-variant">${s.email}</div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <c:choose>
+                                                    <c:when test="${s.role == 'admin'}">
+                                                        <span class="px-3 py-1 rounded-full bg-error-container text-error text-xs font-bold">Admin</span>
+                                                    </c:when>
+                                                    <c:when test="${s.role == 'staff'}">
+                                                        <span class="px-3 py-1 rounded-full bg-primary-fixed text-primary text-xs font-bold">Staff</span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span class="px-3 py-1 rounded-full bg-secondary-container text-secondary text-xs font-bold">${s.role}</span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <c:choose>
+                                                    <c:when test="${s.status == 'active'}">
+                                                        <%-- FIX: thêm class status-text để JS cập nhật được --%>
+                                                        <span class="status-text text-success">Hoạt động</span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span class="status-text text-error">Đã khóa</span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                            <td class="px-6 py-4 text-right">
+                                                <a href="${pageContext.request.contextPath}/dashboard/account-detail" class="text-primary">
+                                                    <span class="material-symbols-outlined">edit</span>
+                                                </a>
 
-                                <tr class="hover:bg-surface-container-low">
+                                                <c:if test="${s.role ne 'admin'}">
+                                                    <form method="post"
+                                                          class="toggle-form inline"
+                                                          data-url="${pageContext.request.contextPath}/dashboard/account-management">
+                                                        <input type="hidden" name="action" value="toggleStaff">
+                                                        <input type="hidden" name="id" value="${s.id}">
+                                                        <input type="hidden" name="status"
+                                                               value="${s.status == 'active' ? 'inactive' : 'active'}">
+                                                        <button type="submit" class="text-warning ml-2">
+                                                            <span class="material-symbols-outlined">
+                                                                ${s.status == 'active' ? 'lock' : 'lock_open'}
+                                                            </span>
+                                                        </button>
+                                                    </form>
+                                                </c:if>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </c:if>
 
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-3">
-                                            <div>
-                                                <div class="font-medium">
-                                                    Trần Huy
-                                                </div>
-                                                <div
-                                                    class="text-xs text-on-surface-variant">
-                                                    huy.tran@gmail.com
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <span
-                                            class="px-3 py-1 rounded-full bg-secondary-container text-secondary text-xs font-bold">
-                                            Customer
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        22/08/2022
-                                    </td>
-
-                                    <td class="px-6 py-4">
-                                        <span
-                                            class="flex items-center gap-2 text-success">
-                                            <span class="w-2 h-2 rounded-full bg-success">
-                                            </span>
-                                            Hoạt động
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <button class="text-primary">
-                                            <a href="${pageContext.request.contextPath}/dashboard/update-account"
-                                               <span class="material-symbols-outlined">
-                                                    edit
-                                                </span>
-                                            </a>
-                                        </button>
-                                        <button class="text-warning ml-2">
-                                            <span class="material-symbols-outlined">
-                                                lock
-                                            </span>
-                                        </button>
-
-                                        <button class="text-error ml-2">
-                                            <span class="material-symbols-outlined">
-                                                delete
-                                            </span>
-                                        </button>
-                                    </td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
-                    <div
-                        class="px-6 py-4 flex justify-between items-center border-t border-outline-variant/30">
-
-                        <span class="text-xs text-on-surface-variant">
-                            Hiển thị 1 - 10 trong 500 tài khoản
-                        </span>
-                        <div class="flex gap-2">
-                            <button
-                                class="p-2 border border-outline-variant rounded">
-                                <span class="material-symbols-outlined text-sm">
-                                    chevron_left
-                                </span>
-                            </button>
-                            <button
-                                class="w-8 h-8 bg-primary text-white rounded">
-                                1
-                            </button>
-
-                            <button
-                                class="w-8 h-8 hover:bg-surface-container-low rounded">
-                                2
-                            </button>
-                            <button
-                                class="w-8 h-8 hover:bg-surface-container-low rounded">
-                                3
-                            </button>
-                            <button
-                                class="p-2 border border-outline-variant rounded">
-                                <span class="material-symbols-outlined text-sm">
-                                    chevron_right
-                                </span>
-                            </button>
-
-                        </div>
-
-                    </div>
-
+                    <%@ include file="/views/layout/common/pagination.jsp" %>
                 </div>
             </div>
         </main>
+
+        <script>
+            document.querySelectorAll(".toggle-form").forEach(form => {
+                form.addEventListener("submit", async function (e) {
+                    e.preventDefault();
+
+                    const row = this.closest("tr");
+                    const statusText = row.querySelector(".status-text");
+                    // FIX: lấy icon từ button trong form, không phải từ form.action
+                    const icon = this.querySelector(".material-symbols-outlined");
+
+                    const isActive = statusText.textContent.trim() === "Hoạt động";
+                    const confirmMsg = isActive
+                        ? "Bạn có chắc muốn KHÓA tài khoản này?"
+                        : "Bạn có chắc muốn MỞ khóa tài khoản này?";
+
+                    if (!confirm(confirmMsg)) return;
+
+                    const formData = new FormData(this);
+
+                    try {
+                        // FIX: dùng data-url thay vì this.action để tránh lấy nhầm input[name="action"]
+                        const url = this.dataset.url;
+                        const response = await fetch(url, {
+                            method: "POST",
+                            body: formData
+                        });
+
+                        const text = await response.text();
+                        let result;
+                        try {
+                            result = JSON.parse(text);
+                        } catch (parseErr) {
+                            console.error("Server không trả JSON:", text);
+                            return;
+                        }
+
+                        if (result.success) {
+                            if (isActive) {
+                                icon.textContent = "lock";
+                                statusText.textContent = "Đã khóa";
+                                statusText.classList.replace("text-success", "text-error");
+                                this.querySelector("input[name='status']").value = "active"; // lần sau mở khóa
+                            } else {
+                                icon.textContent = "lock_open";
+                                statusText.textContent = "Hoạt động";
+                                statusText.classList.replace("text-error", "text-success");
+                                this.querySelector("input[name='status']").value = "inactive"; // lần sau khóa lại
+                            }
+                        }
+
+                    } catch (error) {
+                        console.error("Fetch error:", error);
+                    }
+                });
+            });
+        </script>
     </body>
 </html>

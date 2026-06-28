@@ -59,12 +59,11 @@ public class AccountDAO {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
     // =====================================================================
-    // [MỚI] Đặt lại mật khẩu theo email cho staff/admin (bảng Account)
+    // [khang] Đặt lại mật khẩu theo email cho staff/admin (bảng Account)
     // =====================================================================
     public boolean resetPasswordByEmail(String email, String newPassword) {
         String sql = "UPDATE Account SET password = ? WHERE email = ?";
@@ -80,7 +79,7 @@ public class AccountDAO {
     }
 
     // =====================================================================
-    // [MỚI] Kiểm tra email có tồn tại trong bảng Account không
+    // [khang] Kiểm tra email có tồn tại trong bảng Account không
     // =====================================================================
     public boolean isEmailExists(String email) {
         String sql = "SELECT 1 FROM Account WHERE email = ?";
@@ -104,6 +103,63 @@ public class AccountDAO {
                 list.add(new Account(rs.getInt("accountID"), rs.getString("fullname"),
                         rs.getString("email"), rs.getString("phone"),
                         rs.getString("role"), rs.getString("status")));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // [dat] cập nhật trạng thái của staff
+    public boolean toggleStaffStatus(int accountID, String status) {
+        String sql = "UPDATE Account SET status = ? WHERE accountID = ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, accountID);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // [dat] thêm phân trang
+    public int countStaffs() {
+        String sql = "SELECT COUNT(*) FROM Account";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public List<Account> getStaffsPaging(int offset, int pageSize) {
+        List<Account> list = new ArrayList<>();
+        String sql = "SELECT * FROM ("
+                + " SELECT *, ROW_NUMBER() OVER(ORDER BY accountID DESC) AS rn "
+                + " FROM Account "
+                + ") t "
+                + "WHERE rn > ? AND rn <= ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, offset);
+            ps.setInt(2, offset + pageSize);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(new Account(
+                        rs.getInt("accountID"),
+                        rs.getString("fullname"),
+                        rs.getString("email"),
+                        rs.getString("phone"),
+                        rs.getString("role"),
+                        rs.getString("status")
+                ));
             }
         } catch (Exception e) {
             e.printStackTrace();

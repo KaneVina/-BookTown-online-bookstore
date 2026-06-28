@@ -1,2 +1,35 @@
-/target/
+# Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# NetBeans
+nbproject/private/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+
+# Config
 src/main/webapp/META-INF/context.xml

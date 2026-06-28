@@ -10,181 +10,176 @@ import model.Account;
 import model.CartItem;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.util.List;
 
 public class CartController extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        HttpSession session = req.getSession(false);
-        if (session == null || session.getAttribute("account") == null) {
-            resp.sendRedirect(req.getContextPath() + "/login");
-            return;
-        }
+        if (!isCustomer(request, response)) return;
 
-        Account account = (Account) session.getAttribute("account");
-        if (!"customer".equals(account.getRole())) {
-            resp.sendRedirect(req.getContextPath() + "/");
-            return;
-        }
-
+        Account account = getAccount(request);
         CartDAO cartDAO = new CartDAO();
+
         List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
+
         BigDecimal subtotal = cartDAO.calcSubtotal(cartItems);
-        BigDecimal shippingFee = cartItems.isEmpty() ? BigDecimal.ZERO : new BigDecimal("30000");
-        BigDecimal total = subtotal.add(shippingFee);
+        int        totalQty = calcTotalQuantity(cartItems);
 
-        // Cập nhật badge giỏ hàng trên header
-        session.setAttribute("cartCount", cartItems.size());
+        request.getSession().setAttribute("cartCount", totalQty);
 
-        req.setAttribute("cartItems", cartItems);
-        req.setAttribute("subtotal", subtotal);
-        req.setAttribute("shippingFee", shippingFee);
-        req.setAttribute("total", total);
+        request.setAttribute("cartItems",     cartItems);
+        request.setAttribute("subtotal",      subtotal);
+        request.setAttribute("total",         subtotal);
+        request.setAttribute("totalQuantity", totalQty);
 
-        req.getRequestDispatcher("/views/cart/cart.jsp").forward(req, resp);
+        request.getRequestDispatcher("/views/cart/cart.jsp").forward(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        HttpSession session = req.getSession(false);
+        if (!isCustomer(request, response)) return;
 
-        // Chưa đăng nhập → redirect login, giữ lại URL để quay lại sau
-        if (session == null || session.getAttribute("account") == null) {
-            resp.sendRedirect(req.getContextPath() + "/login");
-            return;
-        }
-
-        Account account = (Account) session.getAttribute("account");
-        if (!"customer".equals(account.getRole())) {
-            resp.sendRedirect(req.getContextPath() + "/");
-            return;
-        }
-
-        String action = req.getParameter("action");
-        if (action == null) {
-            action = "";
-        }
+        String action = request.getParameter("action");
+        if (action == null) action = "";
 
         switch (action) {
             case "add":
-                handleAdd(req, resp, account);
+                handleAdd(request, response);
                 break;
             case "update":
-                handleUpdate(req, resp, account);
+                handleUpdate(request, response);
                 break;
             case "remove":
-                handleRemove(req, resp, account);
+                handleRemove(request, response);
                 break;
             default:
-                resp.sendRedirect(req.getContextPath() + "/cart");
+                sendJson(response, "{\"ok\":false,\"message\":\"Action không hợp lệ\"}");
         }
     }
 
-    // ── Thêm sản phẩm vào giỏ ────────────────────────────────────────────
-    private void handleAdd(HttpServletRequest req, HttpServletResponse resp, Account account)
+    private void handleAdd(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
-        String bookIDParam = req.getParameter("bookID");
-        String quantityParam = req.getParameter("quantity");
-
-        int bookID = parseIntParam(bookIDParam, 0);
-        int quantity = parseIntParam(quantityParam, 1);
+        int bookID   = toInt(request.getParameter("bookID"),   0);
+        int quantity = toInt(request.getParameter("quantity"), 1);
 
         if (bookID <= 0) {
-            resp.sendRedirect(req.getContextPath() + "/cart");
+            sendJson(response, "{\"ok\":false,\"message\":\"Sách không hợp lệ\"}");
             return;
         }
-        if (quantity < 1) {
-            quantity = 1;
-        }
+        if (quantity < 1) quantity = 1;
 
+        Account account = getAccount(request);
         CartDAO cartDAO = new CartDAO();
+
         boolean success = cartDAO.addToCart(account.getId(), bookID, quantity);
 
-        // Cập nhật badge cartCount trong session
+        int cartCount = 0;
         if (success) {
-            int newCount = cartDAO.countCartItems(account.getId());
-            req.getSession().setAttribute("cartCount", newCount);
+            List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
+            cartCount = calcTotalQuantity(cartItems);
+            request.getSession().setAttribute("cartCount", cartCount);
         }
 
-        // Redirect về trang sản phẩm vừa xem, kèm thông báo
-        String referer = req.getHeader("Referer");
-        if (referer != null && !referer.isEmpty()) {
-            resp.sendRedirect(referer + (referer.contains("?") ? "&" : "?")
-                    + "addResult=" + (success ? "success" : "error"));
-        } else {
-            resp.sendRedirect(req.getContextPath() + "/cart");
-        }
+        sendJson(response, "{\"ok\":" + success + ",\"cartCount\":" + cartCount + "}");
     }
 
-    private int parseIntParam(String param, int defaultVal) {
-        if (param == null || param.trim().isEmpty()) {
-            return defaultVal;
-        }
-        try {
-            return Integer.parseInt(param.trim());
-        } catch (NumberFormatException e) {
-            return defaultVal;
-        }
-    }
-
-    private void handleUpdate(HttpServletRequest req, HttpServletResponse resp, Account account)
+    private void handleUpdate(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
-        int cartItemID = parseIntParam(req.getParameter("cartItemID"), 0);
-        int newQty = parseIntParam(req.getParameter("quantity"), 1);
+        int cartItemID = toInt(request.getParameter("cartItemID"), 0);
+        int newQty     = toInt(request.getParameter("quantity"),   1);
 
         if (cartItemID <= 0) {
-            resp.sendRedirect(req.getContextPath() + "/cart");
+            sendJson(response, "{\"ok\":false,\"message\":\"Item không hợp lệ\"}");
             return;
         }
 
+        Account account = getAccount(request);
         CartDAO cartDAO = new CartDAO();
 
         if (newQty < 1) {
-            // Giảm xuống 0 → xóa luôn
             cartDAO.removeItem(cartItemID, account.getId());
         } else {
             cartDAO.updateQuantity(cartItemID, newQty);
         }
 
-        // Cập nhật badge
-        int newCount = cartDAO.countCartItems(account.getId());
-        req.getSession().setAttribute("cartCount", newCount);
+        List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
+        BigDecimal subtotal      = cartDAO.calcSubtotal(cartItems);
+        int        cartCount     = calcTotalQuantity(cartItems);
+        request.getSession().setAttribute("cartCount", cartCount);
 
-        resp.sendRedirect(req.getContextPath() + "/cart");
+        BigDecimal itemSubtotal = BigDecimal.ZERO;
+        for (CartItem item : cartItems) {
+            if (item.getCartItemID() == cartItemID) {
+                itemSubtotal = item.getSubtotal();
+                break;
+            }
+        }
+
+        sendJson(response, "{\"ok\":true"
+                + ",\"cartCount\":"    + cartCount
+                + ",\"itemSubtotal\":" + itemSubtotal.longValue()
+                + ",\"subtotal\":"     + subtotal.longValue()
+                + ",\"total\":"        + subtotal.longValue()
+                + "}");
     }
 
-    private void handleRemove(HttpServletRequest req, HttpServletResponse resp, Account account)
+    private void handleRemove(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
-        int cartItemID = parseIntParam(req.getParameter("cartItemID"), 0);
+        int cartItemID = toInt(request.getParameter("cartItemID"), 0);
 
         if (cartItemID <= 0) {
-            sendJson(resp, "{\"ok\":false,\"message\":\"Item không hợp lệ\"}");
+            sendJson(response, "{\"ok\":false,\"message\":\"Item không hợp lệ\"}");
             return;
         }
 
+        Account account = getAccount(request);
         CartDAO cartDAO = new CartDAO();
+
         cartDAO.removeItem(cartItemID, account.getId());
 
-        List<CartItem> cartItemList = cartDAO.getCartItems(account.getId());
-        BigDecimal subtotal = cartDAO.calcSubtotal(cartItemList);
-        int newCount = calcTotalQuantity(cartItemList);
+        List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
+        BigDecimal subtotal      = cartDAO.calcSubtotal(cartItems);
+        int        cartCount     = calcTotalQuantity(cartItems);
+        request.getSession().setAttribute("cartCount", cartCount);
 
-        req.getSession().setAttribute("cartCount", newCount);
-
-        sendJson(resp, "{\"ok\":true"
-                + ",\"cartCount\":" + newCount
-                + ",\"subtotal\":" + subtotal.longValue()
-                + ",\"total\":" + subtotal.longValue()
+        sendJson(response, "{\"ok\":true"
+                + ",\"cartCount\":" + cartCount
+                + ",\"subtotal\":"  + subtotal.longValue()
+                + ",\"total\":"     + subtotal.longValue()
                 + "}");
+    }
+
+    private boolean isCustomer(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null || session.getAttribute("account") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return false;
+        }
+
+        Account account = (Account) session.getAttribute("account");
+        if (!"customer".equals(account.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/home");
+            return false;
+        }
+
+        return true;
+    }
+
+    private Account getAccount(HttpServletRequest request) {
+        return (Account) request.getSession().getAttribute("account");
     }
 
     private int calcTotalQuantity(List<CartItem> items) {
@@ -195,10 +190,19 @@ public class CartController extends HttpServlet {
         return total;
     }
 
-    private void sendJson(HttpServletResponse resp, String json) throws IOException {
-    resp.setContentType("application/json");
-    resp.setCharacterEncoding("UTF-8");
-    resp.getWriter().write(json);
-}
-}
+    private int toInt(String value, int defaultVal) {
+        if (value == null || value.trim().isEmpty()) return defaultVal;
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            return defaultVal;
+        }
+    }
 
+    private void sendJson(HttpServletResponse response, String json) throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+        out.print(json);
+    }
+}

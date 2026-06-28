@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html class="light" lang="vi">
     <head>
@@ -139,37 +140,18 @@
     <body class="text-on-surface">
         <%@ include file="/views/layout/dashboard/sidebar.jsp" %>
 
-        <main class="flex-1 md:ml-64 min-h-screen p-6 bg-background">            <section class="mb-stack-lg flex justify-between items-end">
+        <main class="flex-1 md:ml-64 min-h-screen p-6 bg-background">
+            <section class="mb-stack-lg flex justify-between items-end">
                 <div>
                     <h2 class="font-headline-lg text-headline-lg text-on-surface">Quản lý Đánh giá</h2>
                     <p class="font-body-md text-body-md text-on-surface-variant">Theo dõi và phản hồi các nhận xét từ khách hàng trên hệ thống.</p>
                 </div>
             </section>
-
             <section class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-stack-lg">
                 <div class="bg-surface p-6 rounded-xl shadow-tonal border border-outline-variant/30 flex items-center justify-between">
                     <div>
-                        <p class="font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Đánh giá trung bình</p>
-                        <div class="flex items-baseline gap-2">
-                            <span class="font-headline-md text-headline-md">4.7</span>
-                            <span class="text-on-surface-variant font-body-sm text-body-sm">/ 5</span>
-                        </div>
-                        <div class="flex gap-0.5 mt-2 text-secondary">
-                            <span class="material-symbols-outlined text-[18px] stars-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-[18px] stars-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-[18px] stars-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-[18px] stars-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-[18px]" data-icon="star_half" style="font-variation-settings: 'FILL' 1;">star_half</span>
-                        </div>
-                    </div>
-                    <div class="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary">
-                        <span class="material-symbols-outlined text-[32px]" data-icon="trending_up">trending_up</span>
-                    </div>
-                </div>
-                <div class="bg-surface p-6 rounded-xl shadow-tonal border border-outline-variant/30 flex items-center justify-between">
-                    <div>
                         <p class="font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Tổng đánh giá</p>
-                        <span class="font-headline-md text-headline-md">1,240</span>
+                        <span class="font-headline-md text-headline-md">${reviews.size()}</span>
                         <p class="font-label-sm text-label-sm text-success flex items-center gap-1 mt-2">
                             <span class="material-symbols-outlined text-[14px]" data-icon="arrow_upward">arrow_upward</span>
                             12% so với tháng trước
@@ -181,8 +163,16 @@
                 </div>
                 <div class="bg-surface p-6 rounded-xl shadow-tonal border border-outline-variant/30 flex items-center justify-between">
                     <div>
-                        <p class="font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Chờ phê duyệt</p>
-                        <span class="font-headline-md text-headline-md text-warning">15</span>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Chờ phản hồi</p>
+                        <span class="font-headline-md text-headline-md text-warning">
+                            <c:set var="pendingCount" value="0" />
+                            <c:forEach items="${reviews}" var="review">
+                                <c:if test="${review.status == 'Chờ duyệt' && !review.isHidden}">
+                                    <c:set var="pendingCount" value="${pendingCount + 1}" />
+                                </c:if>
+                            </c:forEach>
+                            ${pendingCount}
+                        </span>
                         <p class="font-label-sm text-label-sm text-on-surface-variant mt-2 italic">Cần xử lý ngay</p>
                     </div>
                     <div class="w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center text-warning">
@@ -215,7 +205,6 @@
                         <button class="px-4 py-1.5 rounded-md font-label-sm text-label-sm bg-surface shadow-sm text-primary">Tất cả</button>
                         <button class="px-4 py-1.5 rounded-md font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-all">Chờ</button>
                         <button class="px-4 py-1.5 rounded-md font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-all">Đã duyệt</button>
-                        <button class="px-4 py-1.5 rounded-md font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-all">Báo cáo</button>
                     </div>
                 </div>
             </section>
@@ -235,19 +224,23 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-outline-variant/30">
-
                             <c:choose>
                                 <c:when test="${not empty reviews}">
                                     <c:forEach items="${reviews}" var="review">
-                                        <tr class="hover:bg-surface-container-lowest transition-colors group">
+                                        <tr class="hover:bg-surface-container-lowest transition-colors group ${review.isHidden ? 'opacity-50 bg-gray-100' : ''}">
                                             <td class="px-6 py-5">
                                                 <div class="flex items-center gap-3">
                                                     <span class="font-label-md text-label-md text-on-surface">${review.customerName}</span>
+                                                    <c:if test="${review.isHidden}">
+                                                        <span class="text-xs px-2 py-1 bg-gray-400 text-white rounded">Đã ẩn</span>
+                                                    </c:if>
                                                 </div>
                                             </td>
                                             <td class="px-6 py-5">
                                                 <div class="flex items-center gap-3">
-                                                    <img alt="Book Cover" class="w-10 h-14 object-cover rounded shadow-sm" src="${review.bookCover}"/>
+                                                    <c:if test="${not empty review.bookCover}">
+                                                        <img alt="Book Cover" class="w-10 h-14 object-cover rounded shadow-sm" src="${review.bookCover}"/>
+                                                    </c:if>
                                                     <span class="font-body-sm text-body-sm text-on-surface max-w-[120px] line-clamp-2">${review.bookTitle}</span>
                                                 </div>
                                             </td>
@@ -259,31 +252,52 @@
                                                 </div>
                                             </td>
                                             <td class="px-6 py-5">
-                                                <p class="font-body-sm text-body-sm text-on-surface-variant max-w-[200px] line-clamp-2">${review.content}</p>
+                                                <p class="font-body-sm text-body-sm text-on-surface-variant max-w-[200px] line-clamp-2">${review.comment}</p>
                                             </td>
                                             <td class="px-6 py-5">
-                                                <span class="font-body-sm text-body-sm text-on-surface-variant">${review.date}</span>
+                                                <span class="font-body-sm text-body-sm text-on-surface-variant">
+                                                    <fmt:formatDate value="${review.createdAt}" pattern="dd/MM/yyyy"/>
+                                                </span>
                                             </td>
                                             <td class="px-6 py-5">
                                                 <c:choose>
                                                     <c:when test="${review.status == 'Đã duyệt'}">
                                                         <span class="px-3 py-1 bg-success/10 text-success rounded-full font-label-sm text-label-sm inline-block">Đã duyệt</span>
                                                     </c:when>
-                                                    <c:when test="${review.status == 'Chờ duyệt'}">
-                                                        <span class="px-3 py-1 bg-warning/10 text-warning rounded-full font-label-sm text-label-sm inline-block">Chờ duyệt</span>
-                                                    </c:when>
                                                     <c:otherwise>
-                                                        <span class="px-3 py-1 bg-error/10 text-error rounded-full font-label-sm text-label-sm inline-block">${review.status}</span>
+                                                        <span class="px-3 py-1 bg-warning/10 text-warning rounded-full font-label-sm text-label-sm inline-block">Chờ duyệt</span>
                                                     </c:otherwise>
                                                 </c:choose>
                                             </td>
                                             <td class="px-6 py-5 text-right">
                                                 <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button class="p-2 hover:bg-surface-container-low rounded-lg text-primary transition-all border border-transparent hover:border-primary/20" title="Phản hồi">
-                                                        <span class="material-symbols-outlined text-[20px]" data-icon="reply">reply</span>
+                                                    <c:if test="${review.status != 'Đã duyệt' && !review.isHidden && review.customerStatus == 'active'}">
+                                                        <button data-reply-btn 
+                                                                data-review-id="${review.reviewID}"
+                                                                data-customer-name="${review.customerName}"
+                                                                data-book-title="${review.bookTitle}"
+                                                                data-rating="${review.rating}"
+                                                                data-comment="${review.comment}"
+                                                                class="p-2 hover:bg-surface-container-low rounded-lg text-primary transition-all border border-transparent hover:border-primary/20" 
+                                                                title="Phản hồi">
+                                                            <span class="material-symbols-outlined text-[20px]" data-icon="reply">reply</span>
+                                                        </button>
+                                                    </c:if>
+                                                    <button data-hide-btn 
+                                                            data-review-id="${review.reviewID}"
+                                                            class="p-2 hover:bg-warning/10 rounded-lg text-warning transition-all border border-transparent hover:border-warning/20" 
+                                                            title="${review.isHidden ? 'Hiện review' : 'Ẩn review'}">
+                                                        <span class="material-symbols-outlined text-[20px]" data-icon="${review.isHidden ? 'visibility' : 'visibility_off'}">
+                                                            ${review.isHidden ? 'visibility' : 'visibility_off'}
+                                                        </span>
                                                     </button>
-                                                    <button class="p-2 hover:bg-error/10 rounded-lg text-error transition-all border border-transparent hover:border-error/20" title="Xóa">
-                                                        <span class="material-symbols-outlined text-[20px]" data-icon="delete">delete</span>
+                                                    <button data-lock-btn 
+                                                            data-review-id="${review.reviewID}"
+                                                            data-customer-id="${review.customerID}"
+                                                            ${review.customerStatus == 'inactive' ? 'disabled' : ''}
+                                                            class="p-2 hover:bg-error/10 rounded-lg text-error transition-all border border-transparent hover:border-error/20 ${review.customerStatus == 'inactive' ? 'opacity-50 cursor-not-allowed' : ''}" 
+                                                            title="${review.customerStatus == 'inactive' ? 'Tài khoản đã bị khóa' : 'Khóa tài khoản'}">
+                                                        <span class="material-symbols-outlined text-[20px]" data-icon="lock">lock</span>
                                                     </button>
                                                 </div>
                                             </td>
@@ -291,127 +305,9 @@
                                     </c:forEach>
                                 </c:when>
                                 <c:otherwise>
-                                    <tr class="hover:bg-surface-container-lowest transition-colors group">
-                                        <td class="px-6 py-5">
-                                            <div class="flex items-center gap-3">
-                                                <span class="font-label-md text-label-md text-on-surface">Nguyễn Thu Hà</span>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-5">
-                                            <div class="flex items-center gap-3">
-                                                <img alt="Book Cover" class="w-10 h-14 object-cover rounded shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRCGYWY4CqMre7spwl_p93R2pG4GuyEBcXGVaQhg6WZgdYdzZvaOzym6CndtT0qKLOPKnl-EET1vfSg2TpvH8PeCy1djHL_l1y5wH3kj8isLooaZzdWgyCg0qqIytnJxGajsw0ls3wUCCMqZozRviFKGzJtxCI4iN_nXB3Melv_8DpFR3CTgPhvuunH409M_59GK_UyX1-b7U9fABaj7JIQed1uLwZEP7aWsnmM7NnRLu8r_bH-xUyLOZthwyoG-eAmWLTn_2_uTep"/>
-                                                <span class="font-body-sm text-body-sm text-on-surface max-w-[120px] line-clamp-2">Nhà Giả Kim</span>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-5">
-                                            <div class="flex gap-0.5 text-secondary">
-                                                <span class="material-symbols-outlined text-[16px] stars-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-                                                <span class="material-symbols-outlined text-[16px] stars-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-                                                <span class="material-symbols-outlined text-[16px] stars-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-                                                <span class="material-symbols-outlined text-[16px] stars-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-                                                <span class="material-symbols-outlined text-[16px] stars-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-5">
-                                            <p class="font-body-sm text-body-sm text-on-surface-variant max-w-[200px] line-clamp-2">Sách rất hay và ý nghĩa. Giao hàng nhanh, đóng gói cẩn thận. Rất hài lòng!</p>
-                                        </td>
-                                        <td class="px-6 py-5">
-                                            <span class="font-body-sm text-body-sm text-on-surface-variant">12/05/2024</span>
-                                        </td>
-                                        <td class="px-6 py-5">
-                                            <span class="px-3 py-1 bg-success/10 text-success rounded-full font-label-sm text-label-sm inline-block">Đã duyệt</span>
-                                        </td>
-                                        <td class="px-6 py-5 text-right">
-                                            <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button class="p-2 hover:bg-surface-container-low rounded-lg text-primary transition-all border border-transparent hover:border-primary/20" title="Phản hồi">
-                                                    <span class="material-symbols-outlined text-[20px]" data-icon="reply">reply</span>
-                                                </button>
-                                                <button class="p-2 hover:bg-error/10 rounded-lg text-error transition-all border border-transparent hover:border-error/20" title="Xóa">
-                                                    <span class="material-symbols-outlined text-[20px]" data-icon="delete">delete</span>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr class="hover:bg-surface-container-lowest transition-colors group">
-                                        <td class="px-6 py-5">
-                                            <div class="flex items-center gap-3">
-                                                <span class="font-label-md text-label-md text-on-surface">Lê Văn Nam</span>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-5">
-                                            <div class="flex items-center gap-3">
-                                                <img alt="Book Cover" class="w-10 h-14 object-cover rounded shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMwxurFE_C1jer894aHZSD1CsWPYvPeGurhSmb9qMcpy-ldjNEuxEGfp_gRQw8T4xQZITo-_mdz0Os_xBpFodeKfsD92yWvK3GIDuMdTTY562m8u2rbekhLmtH0g4IFJvgoukc44-d8xChysjObFL_77C9cZ9ip1YU1QX19W4iSEKOSrpYATBRU-hVY4lRcascQ7UHjrC7uFTLZjXRCcXfAoXjylpOeUGR0Ueq7aKgPz7OroO-3stpTyCN-FNDrpIOzB6Az42jg6dd"/>
-                                                <span class="font-body-sm text-body-sm text-on-surface max-w-[120px] line-clamp-2">Tư Duy Nhanh Và Chậm</span>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-5">
-                                            <div class="flex gap-0.5 text-secondary">
-                                                <span class="material-symbols-outlined text-[16px] stars-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-                                                <span class="material-symbols-outlined text-[16px] stars-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-                                                <span class="material-symbols-outlined text-[16px] stars-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-                                                <span class="material-symbols-outlined text-[16px] stars-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-                                                <span class="material-symbols-outlined text-[16px]" data-icon="star">star</span>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-5">
-                                            <p class="font-body-sm text-body-sm text-on-surface-variant max-w-[200px] line-clamp-2">Sách có vài trang bị nhăn mép, nhưng nội dung thì tuyệt vời.</p>
-                                        </td>
-                                        <td class="px-6 py-5">
-                                            <span class="font-body-sm text-body-sm text-on-surface-variant">11/05/2024</span>
-                                        </td>
-                                        <td class="px-6 py-5">
-                                            <span class="px-3 py-1 bg-warning/10 text-warning rounded-full font-label-sm text-label-sm inline-block">Chờ duyệt</span>
-                                        </td>
-                                        <td class="px-6 py-5 text-right">
-                                            <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button class="p-2 hover:bg-surface-container-low rounded-lg text-primary transition-all border border-transparent hover:border-primary/20" title="Phản hồi">
-                                                    <span class="material-symbols-outlined text-[20px]" data-icon="reply">reply</span>
-                                                </button>
-                                                <button class="p-2 hover:bg-error/10 rounded-lg text-error transition-all border border-transparent hover:border-error/20" title="Xóa">
-                                                    <span class="material-symbols-outlined text-[20px]" data-icon="delete">delete</span>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr class="hover:bg-surface-container-lowest transition-colors group">
-                                        <td class="px-6 py-5">
-                                            <div class="flex items-center gap-3">
-                                                <span class="font-label-md text-label-md text-on-surface">Trần Minh Anh</span>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-5">
-                                            <div class="flex items-center gap-3">
-                                                <img alt="Book Cover" class="w-10 h-14 object-cover rounded shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDo9tggSChWwbmV9ipNNA8ldv8Gj2FEMMj3osQvdt0XZAOGF6lF-FrIugDhdxfG2lw-1gse8KAFRGCJReL0hGs2fur6vDTTo3LqBKroGHGJoJfIrv5Psgy4_4gaPCeVZs6AEhNoZciNMwUgK7MchgBDMSHwufesQjNPR_HefdveUe6sZpH_Yt7X1Hzdk3EEvXNxxF-HhVOuTTo9xbi8pDeASttY2jtsRXEfYnPm-8lAzLa7ZatZz0v3I9O4ZXKw8u3JMQdgp7eA2Pht"/>
-                                                <span class="font-body-sm text-body-sm text-on-surface max-w-[120px] line-clamp-2">Sống Tối Giản</span>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-5">
-                                            <div class="flex gap-0.5 text-secondary">
-                                                <span class="material-symbols-outlined text-[16px] stars-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-                                                <span class="material-symbols-outlined text-[16px]" data-icon="star">star</span>
-                                                <span class="material-symbols-outlined text-[16px]" data-icon="star">star</span>
-                                                <span class="material-symbols-outlined text-[16px]" data-icon="star">star</span>
-                                                <span class="material-symbols-outlined text-[16px]" data-icon="star">star</span>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-5">
-                                            <p class="font-body-sm text-body-sm text-on-surface-variant max-w-[200px] line-clamp-2">Giao nhầm sách. Tôi đặt Sống Tối Giản nhưng nhận được cuốn khác.</p>
-                                        </td>
-                                        <td class="px-6 py-5">
-                                            <span class="font-body-sm text-body-sm text-on-surface-variant">10/05/2024</span>
-                                        </td>
-                                        <td class="px-6 py-5">
-                                            <span class="px-3 py-1 bg-error/10 text-error rounded-full font-label-sm text-label-sm inline-block">Báo cáo</span>
-                                        </td>
-                                        <td class="px-6 py-5 text-right">
-                                            <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button class="p-2 hover:bg-surface-container-low rounded-lg text-primary transition-all border border-transparent hover:border-primary/20" title="Phản hồi">
-                                                    <span class="material-symbols-outlined text-[20px]" data-icon="reply">reply</span>
-                                                </button>
-                                                <button class="p-2 hover:bg-error/10 rounded-lg text-error transition-all border border-transparent hover:border-error/20" title="Xóa">
-                                                    <span class="material-symbols-outlined text-[20px]" data-icon="delete">delete</span>
-                                                </button>
-                                            </div>
+                                    <tr>
+                                        <td colspan="7" class="px-6 py-8 text-center">
+                                            <p class="font-body-md text-on-surface-variant">Không có đánh giá nào</p>
                                         </td>
                                     </tr>
                                 </c:otherwise>
@@ -421,14 +317,12 @@
                 </div>
 
                 <div class="px-6 py-4 flex items-center justify-between border-t border-outline-variant bg-surface-container-lowest">
-                    <span class="font-body-sm text-body-sm text-on-surface-variant">Hiển thị 1 - 3 trong số 1,240 đánh giá</span>
+                    <span class="font-body-sm text-body-sm text-on-surface-variant">Hiển thị ${reviews.size()} đánh giá</span>
                     <div class="flex gap-2">
                         <button class="p-2 rounded-lg border border-outline-variant hover:bg-surface-container-low disabled:opacity-50 disabled:cursor-not-allowed transition-all" disabled="">
                             <span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
                         </button>
                         <button class="w-10 h-10 rounded-lg bg-primary text-on-primary font-label-md text-label-md">1</button>
-                        <button class="w-10 h-10 rounded-lg border border-outline-variant hover:bg-surface-container-low font-label-md text-label-md">2</button>
-                        <button class="w-10 h-10 rounded-lg border border-outline-variant hover:bg-surface-container-low font-label-md text-label-md">3</button>
                         <button class="p-2 rounded-lg border border-outline-variant hover:bg-surface-container-low transition-all">
                             <span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
                         </button>
@@ -437,27 +331,440 @@
             </section>
         </main>
 
+        <!-- Confirmation Modal -->
+        <div id="confirmModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+            <div class="bg-white w-[450px] rounded-xl p-6 relative">
+                <button class="absolute top-3 right-4 text-2xl hover:text-gray-500 close-confirm">×</button>
+
+                <h3 class="text-xl font-bold mb-4" id="confirmTitle">Xác nhận hành động</h3>
+                <p class="text-gray-600 mb-6" id="confirmMessage">Bạn chắc chắn muốn thực hiện hành động này?</p>
+
+                <div class="flex justify-end gap-3">
+                    <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 close-confirm">
+                        Hủy
+                    </button>
+                    <button id="confirmAction" class="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90">
+                        Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <script>
-            // Các hiệu ứng tương tác nhỏ (Micro-interactions)
-            document.querySelectorAll('tr').forEach(row => {
-                row.addEventListener('mouseenter', () => {
-                    row.style.transform = 'translateY(-2px)';
-                    row.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.05)';
+            var replyModal = null;
+            var replyForm = null;
+            var closeReplyBtn = null;
+            var confirmModal = null;
+            var currentReviewID = null;
+            var pendingAction = null;
+
+            function initReplyModal() {
+                if (!document.getElementById('replyModal')) {
+                    createReplyModal();
+                }
+                replyModal = document.getElementById('replyModal');
+                replyForm = document.getElementById('replyForm');
+                closeReplyBtn = document.getElementById('closeReplyModal');
+                if (closeReplyBtn) {
+                    closeReplyBtn.addEventListener('click', closeModal);
+                }
+                if (replyForm) {
+                    replyForm.addEventListener('submit', submitReply);
+                }
+                if (replyModal) {
+                    replyModal.addEventListener('click', function (e) {
+                        if (e.target === replyModal) {
+                            closeModal();
+                        }
+                    });
+                }
+            }
+
+            function initConfirmModal() {
+                confirmModal = document.getElementById('confirmModal');
+                document.querySelectorAll('.close-confirm').forEach(btn => {
+                    btn.addEventListener('click', closeConfirmModal);
                 });
-                row.addEventListener('mouseleave', () => {
-                    row.style.transform = 'translateY(0)';
-                    row.style.boxShadow = 'none';
-                });
+
+                if (confirmModal) {
+                    confirmModal.addEventListener('click', function (e) {
+                        if (e.target === confirmModal) {
+                            closeConfirmModal();
+                        }
+                    });
+                }
+
+                document.getElementById('confirmAction').addEventListener('click', executeAction);
+            }
+
+            function createReplyModal() {
+                const modalHTML = `
+                    <div id="replyModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+                        <div class="bg-white w-[600px] rounded-xl p-6 relative max-h-[90vh] overflow-y-auto">
+                            <button id="closeReplyModal" class="absolute top-3 right-4 text-2xl hover:text-gray-500">×</button>
+                            
+                            <h3 class="text-xl font-bold mb-4">Phản hồi đánh giá</h3>
+                            
+                            <div id="reviewPreview" class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <p class="text-sm text-gray-600 mb-2">
+                                    <strong>Khách hàng:</strong> <span id="previewCustomerName">-</span>
+                                </p>
+                                <p class="text-sm text-gray-600 mb-2">
+                                    <strong>Sách:</strong> <span id="previewBookTitle">-</span>
+                                </p>
+                                <p class="text-sm text-gray-600 mb-2">
+                                    <strong>Đánh giá:</strong> <span id="previewRating">-</span>
+                                </p>
+                                <p class="text-sm text-gray-600">
+                                    <strong>Nội dung:</strong>
+                                </p>
+                                <p id="previewComment" class="text-sm text-gray-700 mt-1 italic">-</p>
+                            </div>
+                            
+                            <form id="replyForm">
+                                <input type="hidden" id="replyReviewID" name="reviewID" value="">
+                                <input type="hidden" name="action" value="reply">
+                                
+                                <div class="mb-4">
+                                    <label class="block font-semibold mb-2">Phản hồi của bạn</label>
+                                    <textarea 
+                                        name="reply" 
+                                        id="replyContent"
+                                        rows="6"
+                                        required
+                                        placeholder="Nhập nội dung phản hồi..."
+                                        class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-primary focus:outline-none">
+                                    </textarea>
+                                </div>
+                                
+                                <div class="flex justify-end gap-3">
+                                    <button type="button" onclick="closeModal()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">
+                                        Hủy
+                                    </button>
+                                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90">
+                                        Gửi phản hồi
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+            }
+
+            function openReplyModal(reviewID, customerName, bookTitle, rating, comment) {
+                currentReviewID = reviewID;
+
+                document.getElementById('previewCustomerName').textContent = customerName;
+                document.getElementById('previewBookTitle').textContent = bookTitle;
+                document.getElementById('previewRating').textContent = '⭐'.repeat(rating);
+                document.getElementById('previewComment').textContent = comment;
+                document.getElementById('replyReviewID').value = reviewID;
+                document.getElementById('replyContent').value = '';
+
+                replyModal.classList.remove('hidden');
+                replyModal.classList.add('flex');
+            }
+
+            function closeModal() {
+                if (replyModal) {
+                    replyModal.classList.add('hidden');
+                    replyModal.classList.remove('flex');
+                }
+            }
+
+            function openConfirmModal(title, message, action) {
+                document.getElementById('confirmTitle').textContent = title;
+                document.getElementById('confirmMessage').textContent = message;
+                pendingAction = action;
+
+                confirmModal.classList.remove('hidden');
+                confirmModal.classList.add('flex');
+            }
+
+            function closeConfirmModal() {
+                confirmModal.classList.add('hidden');
+                confirmModal.classList.remove('flex');
+                pendingAction = null;
+            }
+
+            function executeAction() {
+                if (pendingAction) {
+                    pendingAction();
+                    closeConfirmModal();
+                }
+            }
+
+            function submitReply(e) {
+                e.preventDefault();
+
+                const formData = new URLSearchParams(new FormData(replyForm));
+
+                fetch('${pageContext.request.contextPath}/review', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: formData.toString()
+                })
+                        .then(res => {
+                            if (!res.ok)
+                                throw new Error('Network response was not ok');
+                            return res.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                showToast(data.message || 'Phản hồi thành công');
+                                closeModal();
+
+                                // Reload trang sau 1 giây
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 1000);
+                            } else {
+                                showToast(data.message || 'Có lỗi xảy ra', true);
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error:', err);
+                            showToast('Có lỗi xảy ra', true);
+                        });
+            }
+
+            function hideReview(reviewID) {
+                const formData = new URLSearchParams();
+                formData.append('action', 'hide');
+                formData.append('reviewID', reviewID);
+
+                fetch('${pageContext.request.contextPath}/review', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: formData.toString()
+                })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                showToast(data.message || 'Ẩn review thành công');
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 1000);
+                            } else {
+                                showToast(data.message || 'Có lỗi xảy ra', true);
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error:', err);
+                            showToast('Có lỗi xảy ra', true);
+                        });
+            }
+
+            function lockAccount(reviewID, customerID) {
+                const formData = new URLSearchParams();
+                formData.append('action', 'lock');
+                formData.append('reviewID', reviewID);
+                formData.append('customerID', customerID);
+
+                fetch('${pageContext.request.contextPath}/review', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: formData.toString()
+                })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                showToast(data.message || 'Khóa tài khoản thành công');
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 1000);
+                            } else {
+                                showToast(data.message || 'Có lỗi xảy ra', true);
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error:', err);
+                            showToast('Có lỗi xảy ra', true);
+                        });
+            }
+
+            function showToast(message, isError = false) {
+                const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+
+                const toast = document.createElement('div');
+                toast.className = `px-4 py-3 rounded-lg text-white mb-2 ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+                toast.textContent = message;
+
+                toastContainer.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            }
+
+            function createToastContainer() {
+                const container = document.createElement('div');
+                container.id = 'toastContainer';
+                container.className = 'fixed bottom-4 right-4 z-[9999]';
+                document.body.appendChild(container);
+                return container;
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                initReplyModal();
+                initConfirmModal();
+                initReplyButtons();
+                initHideButtons();
+                initLockButtons();
             });
 
-            // Hiệu ứng focus thanh tìm kiếm chính
-            const mainSearch = document.querySelector('header input');
-            mainSearch.addEventListener('focus', () => {
-                mainSearch.parentElement.classList.add('ring-2', 'ring-primary/20');
-            });
-            mainSearch.addEventListener('blur', () => {
-                mainSearch.parentElement.classList.remove('ring-2', 'ring-primary/20');
-            });
+            function initReplyButtons() {
+                document.querySelectorAll('[data-reply-btn]').forEach(btn => {
+                    btn.addEventListener('click', function (e) {
+                        e.preventDefault();
+
+                        const reviewID = this.dataset.reviewId;
+                        const customerName = this.dataset.customerName;
+                        const bookTitle = this.dataset.bookTitle;
+                        const rating = this.dataset.rating;
+                        const comment = this.dataset.comment;
+
+                        openReplyModal(reviewID, customerName, bookTitle, rating, comment);
+                    });
+                });
+            }
+
+            function initHideButtons() {
+                document.querySelectorAll('[data-hide-btn]').forEach(btn => {
+                    btn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const reviewID = this.dataset.reviewId;
+
+                        openConfirmModal(
+                                'Ẩn Review',
+                                'Bạn chắc chắn muốn ẩn review này? Review sẽ không hiển thị trên trang sản phẩm.',
+                                () => hideReview(reviewID)
+                        );
+                    });
+                });
+            }
+
+            function initLockButtons() {
+                document.querySelectorAll('[data-lock-btn]').forEach(btn => {
+                    btn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const reviewID = this.dataset.reviewId;
+                        const customerID = this.dataset.customerId;
+
+                        openConfirmModal(
+                                'Khóa Tài Khoản',
+                                '⚠️ Bạn chắc chắn muốn khóa tài khoản khách hàng này? Họ sẽ không thể đăng nhập và sử dụng các dịch vụ của hệ thống.',
+                                () => lockAccount(reviewID, customerID)
+                        );
+                    });
+                });
+            }
+
+            // ── Search & Filter functionality ──────────────────────────────────────
+            (function () {
+                const searchInput = document.querySelector('input[placeholder*="Tìm theo tên"]');
+                const ratingSelect = document.querySelector('select:nth-of-type(1)');
+                const statusButtons = document.querySelectorAll('.flex.bg-background-alt button');
+                const tableRows = document.querySelectorAll('tbody tr');
+
+                let currentFilter = {
+                    search: '',
+                    rating: '',
+                    status: 'all'
+                };
+
+                function filterTable() {
+                    tableRows.forEach(row => {
+                        if (row.textContent === 'Không có đánh giá nào')
+                            return;
+
+                        const customerName = row.cells[0].textContent.toLowerCase();
+                        const bookTitle = row.cells[1].textContent.toLowerCase();
+                        const ratingStars = row.querySelector('.stars-fill');
+                        const rating = ratingStars ? ratingStars.parentElement.querySelectorAll('.stars-fill').length : 0;
+                        const statusCell = row.cells[5].textContent.trim();
+
+                        let show = true;
+
+                        // Search filter
+                        if (currentFilter.search) {
+                            show = show && (customerName.includes(currentFilter.search) || bookTitle.includes(currentFilter.search));
+                        }
+
+                        // Rating filter
+                        if (currentFilter.rating) {
+                            const filterRating = parseInt(currentFilter.rating);
+                            show = show && (rating === filterRating);
+                        }
+
+                        // Status filter
+                        if (currentFilter.status !== 'all') {
+                            if (currentFilter.status === 'pending') {
+                                show = show && statusCell.includes('Chờ duyệt');
+                            } else if (currentFilter.status === 'approved') {
+                                show = show && statusCell.includes('Đã duyệt');
+                            }
+                        }
+
+                        row.style.display = show ? '' : 'none';
+                    });
+                }
+
+                // Search event
+                if (searchInput) {
+                    searchInput.addEventListener('input', function (e) {
+                        currentFilter.search = e.target.value.toLowerCase();
+                        filterTable();
+                    });
+                }
+
+                // Rating select event
+                if (ratingSelect) {
+                    ratingSelect.addEventListener('change', function (e) {
+                        const value = e.target.value;
+                        if (value === 'Tất cả sao') {
+                            currentFilter.rating = '';
+                        } else {
+                            currentFilter.rating = value.match(/\d+/)[0];
+                        }
+                        filterTable();
+                    });
+                }
+
+                // Status button events
+                statusButtons.forEach((btn, index) => {
+                    btn.addEventListener('click', function () {
+                        // Remove active state from all buttons
+                        statusButtons.forEach(b => {
+                            b.classList.remove('bg-surface', 'shadow-sm', 'text-primary');
+                            b.classList.add('text-on-surface-variant');
+                        });
+
+                        // Add active state to clicked button
+                        this.classList.add('bg-surface', 'shadow-sm', 'text-primary');
+                        this.classList.remove('text-on-surface-variant');
+
+                        // Update filter
+                        if (index === 0) {
+                            currentFilter.status = 'all';
+                        } else if (index === 1) {
+                            currentFilter.status = 'pending';
+                        } else if (index === 2) {
+                            currentFilter.status = 'approved';
+                        }
+
+                        filterTable();
+                    });
+                });
+            })();
         </script>
     </body>
 </html>
