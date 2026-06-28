@@ -14,7 +14,7 @@ import model.Account;
 import model.Genre;
 
 public class CategoryManagementController extends HttpServlet {
-
+// category
     private final GenreDAO genreDAO = new GenreDAO();
 
     @Override
