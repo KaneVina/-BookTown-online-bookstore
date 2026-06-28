@@ -365,6 +365,18 @@ public class OrderDAO {
 
     public List<Order> getAllOrders(String keyword, String status, int offset, int pageSize) {
         List<Order> list = new ArrayList<>();
+
+        // Tự động hủy các đơn 'pending' quá 2 ngày trước khi lấy danh sách
+        String sqlAutoCancel = "UPDATE [Order] SET status = N'cancelled' "
+                + "WHERE status = N'pending' "
+                + "AND created_at < DATEADD(DAY, -2, GETDATE())";
+        try (Connection connCancel = new DBContext().getConnection();
+             PreparedStatement psCancel = connCancel.prepareStatement(sqlAutoCancel)) {
+            psCancel.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         StringBuilder sql = new StringBuilder(
             "SELECT o.orderID, o.customerID, o.addressID, o.processed_by, o.status, "
             + "       o.payment_method, o.payment_status, o.total_price, o.created_at, "

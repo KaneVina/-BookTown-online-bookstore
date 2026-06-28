@@ -146,7 +146,7 @@
                                 Chờ xác nhận</a>
                             <a href="${pageContext.request.contextPath}/dashboard/customer-order?status=confirmed&keyword=${keyword}"
                                class="px-4 py-2 rounded-full text-label-md whitespace-nowrap ${status == 'confirmed' ? 'bg-primary text-white' : 'bg-background-alt hover:bg-surface-container-high transition-colors text-on-surface-variant'}">
-                                Đã xác nhận</a>
+                                Xác nhận</a>
                             <a href="${pageContext.request.contextPath}/dashboard/customer-order?status=shipping&keyword=${keyword}"
                                class="px-4 py-2 rounded-full text-label-md whitespace-nowrap ${status == 'shipping' ? 'bg-primary text-white' : 'bg-background-alt hover:bg-surface-container-high transition-colors text-on-surface-variant'}">
                                 Đang giao</a>
@@ -155,7 +155,7 @@
                                 Hoàn thành</a>
                             <a href="${pageContext.request.contextPath}/dashboard/customer-order?status=cancelled&keyword=${keyword}"
                                class="px-4 py-2 rounded-full text-label-md whitespace-nowrap ${status == 'cancelled' ? 'bg-primary text-white' : 'bg-background-alt hover:bg-surface-container-high transition-colors text-on-surface-variant'}">
-                                Đã hủy</a>
+                                Hủy đơn</a>
                         </div>
 
                     </div>
@@ -220,7 +220,7 @@
                                                         class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning/10 text-warning text-label-sm font-bold">
                                                         <span
                                                             class="w-2 h-2 rounded-full bg-warning"></span>
-                                                        Đã xác nhận
+                                                        Xác nhận
                                                     </span>
                                                 </c:when>
                                                 <c:when test="${order.status == 'shipping'}">
@@ -243,7 +243,7 @@
                                                     <span
                                                         class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error/10 text-error text-label-sm font-bold">
                                                         <span class="w-2 h-2 rounded-full bg-error"></span>
-                                                        Đã hủy
+                                                        Hủy đơn
                                                     </span>
                                                 </c:otherwise>
                                             </c:choose>
@@ -263,9 +263,8 @@
                                                                     onchange="confirmStatusChange(this)"
                                                                     class="bg-surface border border-outline-variant/30 text-on-surface rounded-lg text-body-sm focus:ring-primary focus:border-primary px-2 py-1 cursor-pointer">
                                                                 <option value="" disabled selected>-- Chọn --</option>
-                                                                <option value="confirmed">Đã xác nhận
-                                                                </option>
-                                                                <option value="cancelled">Đã hủy</option>
+                                                                <option value="confirmed">Xác nhận</option>
+                                                                <option value="cancelled">Hủy đơn</option>
                                                             </select>
                                                         </form>
                                                     </c:when>
@@ -282,7 +281,7 @@
                                                                     class="bg-surface border border-outline-variant/30 text-on-surface rounded-lg text-body-sm focus:ring-primary focus:border-primary px-2 py-1 cursor-pointer">
                                                                 <option value="" disabled selected>-- Chọn --</option>
                                                                 <option value="shipping">Đang giao</option>
-                                                                <option value="cancelled">Đã hủy</option>
+                                                                <option value="cancelled">Hủy đơn</option>
                                                             </select>
                                                         </form>
                                                     </c:when>
@@ -298,9 +297,8 @@
                                                                     onchange="confirmStatusChange(this)"
                                                                     class="bg-surface border border-outline-variant/30 text-on-surface rounded-lg text-body-sm focus:ring-primary focus:border-primary px-2 py-1 cursor-pointer">
                                                                 <option value="" disabled selected>-- Chọn --</option>
-                                                                <option value="completed">Hoàn thành
-                                                                </option>
-                                                                <option value="cancelled">Đã hủy</option>
+                                                                <option value="completed">Hoàn thành</option>
+                                                                <option value="cancelled">Hủy đơn</option>
                                                             </select>
                                                         </form>
                                                     </c:when>

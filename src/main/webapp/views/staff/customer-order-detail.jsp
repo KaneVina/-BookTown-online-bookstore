@@ -74,13 +74,20 @@
                             <h1 class="text-3xl font-bold text-[#071e27]">Đơn hàng #${order.orderCode}</h1>
 
                             <span
-                                class="px-3 py-1 bg-[#cfe6f2] text-[#004d99] rounded-full text-sm font-semibold">
+                                class="px-3 py-1 rounded-full text-sm font-semibold
+                                <c:choose>
+                                    <c:when test="${order.status == 'pending'}">bg-[#dbeafe] text-[#004d99]</c:when>
+                                    <c:when test="${order.status == 'confirmed'}">bg-[#fff3cd] text-[#e65c00]</c:when>
+                                    <c:when test="${order.status == 'shipping'}">bg-[#e0e7ff] text-[#134aa4]</c:when>
+                                    <c:when test="${order.status == 'completed'}">bg-[#d4edda] text-[#2E7D32]</c:when>
+                                    <c:otherwise>bg-[#ffdad6] text-[#D32F2F]</c:otherwise>
+                                </c:choose>">
                                 <c:choose>
                                     <c:when test="${order.status == 'pending'}">Chờ xác nhận</c:when>
-                                    <c:when test="${order.status == 'confirmed'}">Đã xác nhận</c:when>
-                                    <c:when test="${order.status == 'shipping'}">Đang giao</c:when>
+                                    <c:when test="${order.status == 'confirmed'}">Xác nhận</c:when>
+                                    <c:when test="${order.status == 'shipping'}">Giao hàng</c:when>
                                     <c:when test="${order.status == 'completed'}">Hoàn thành</c:when>
-                                    <c:otherwise>Đã hủy</c:otherwise>
+                                    <c:otherwise>Hủy đơn</c:otherwise>
                                 </c:choose>
                             </span>
                         </div>
@@ -325,49 +332,56 @@
                             <h3 class="text-xl font-semibold text-[#071e27] mb-6">Tiến trình đơn hàng</h3>
                             <div class="space-y-6">
 
-                                <div class="relative pl-8 stepper-line">
-                                    <div
-                                        class="absolute left-0 top-0 w-8 h-8 flex items-center justify-center z-10">
-                                        <div
-                                            class="w-3 h-3 rounded-full ${order.status == 'completed' ? 'bg-[#2E7D32]' : 'bg-[#c2c6d4]'}">
-                                        </div>
-                                    </div>
-                                    <p class="text-sm font-semibold text-[#071e27]">Hoàn thành</p>
-                                </div>
+                                <%-- Giải thích: kiểm tra xem status hiện tại có đã vượt qua step đó chưa --%>
+                                <%-- Thứ tự: pending=1, confirmed=2, shipping=3, completed=4 --%>
+                                <%-- Nếu đơn đang 'shipping' thì pending và confirmed cũng phải sáng lên --%>
 
-                                <div class="relative pl-8 stepper-line">
-                                    <div
-                                        class="absolute left-0 top-0 w-8 h-8 flex items-center justify-center z-10">
-                                        <div
-                                            class="w-3 h-3 rounded-full ${order.status == 'shipping' ? 'bg-[#134aa4]' : 'bg-[#c2c6d4]'}">
-                                        </div>
-                                    </div>
-                                    <p class="text-sm font-semibold text-[#071e27]">Đang giao hàng</p>
-                                </div>
+                                <c:set var="currentStep" value="0" />
+                                <c:if test="${order.status == 'pending'}"><c:set var="currentStep" value="1" /></c:if>
+                                <c:if test="${order.status == 'confirmed'}"><c:set var="currentStep" value="2" /></c:if>
+                                <c:if test="${order.status == 'shipping'}"><c:set var="currentStep" value="3" /></c:if>
+                                <c:if test="${order.status == 'completed'}"><c:set var="currentStep" value="4" /></c:if>
 
-                                <div class="relative pl-8 stepper-line">
-                                    <div
-                                        class="absolute left-0 top-0 w-8 h-8 flex items-center justify-center z-10">
-                                        <div
-                                            class="w-3 h-3 rounded-full ${order.status == 'confirmed' ? 'bg-[#FFA000]' : 'bg-[#c2c6d4]'}">
+                                <c:choose>
+                                    <c:when test="${order.status == 'cancelled'}">
+                                        <div class="flex items-center gap-3 p-4 bg-red-50 rounded-lg border border-red-200">
+                                            <span class="material-symbols-outlined text-[#D32F2F] text-[22px]">cancel</span>
+                                            <p class="text-sm font-semibold text-[#D32F2F]">Đơn hàng đã bị hủy</p>
                                         </div>
-                                    </div>
-                                    <p class="text-sm font-semibold text-[#071e27]">Đã xác nhận</p>
-                                </div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="relative pl-8 stepper-line">
+                                            <div class="absolute left-0 top-0 w-8 h-8 flex items-center justify-center z-10">
+                                                <div class="w-3 h-3 rounded-full ${currentStep >= 4 ? 'bg-[#2E7D32]' : 'bg-[#c2c6d4]'}"></div>
+                                            </div>
+                                            <p class="text-sm font-semibold ${currentStep >= 4 ? 'text-[#2E7D32]' : 'text-[#071e27]'}">Hoàn thành</p>
+                                        </div>
 
-                                <div class="relative pl-8 stepper-line">
-                                    <div
-                                        class="absolute left-0 top-0 w-8 h-8 flex items-center justify-center z-10">
-                                        <div
-                                            class="w-3 h-3 rounded-full ${order.status == 'pending' ? 'bg-[#004d99]' : 'bg-[#c2c6d4]'}">
+                                        <div class="relative pl-8 stepper-line">
+                                            <div class="absolute left-0 top-0 w-8 h-8 flex items-center justify-center z-10">
+                                                <div class="w-3 h-3 rounded-full ${currentStep >= 3 ? 'bg-[#134aa4]' : 'bg-[#c2c6d4]'}"></div>
+                                            </div>
+                                            <p class="text-sm font-semibold ${currentStep >= 3 ? 'text-[#134aa4]' : 'text-[#071e27]'}">Đang giao hàng</p>
                                         </div>
-                                    </div>
-                                    <p class="text-sm font-semibold text-[#071e27]">Chờ xác nhận</p>
-                                    <p class="text-sm text-[#424752]">
-                                        <fmt:formatDate value="${order.createdAt}"
-                                                        pattern="HH:mm - dd/MM/yyyy" />
-                                    </p>
-                                </div>
+
+                                        <div class="relative pl-8 stepper-line">
+                                            <div class="absolute left-0 top-0 w-8 h-8 flex items-center justify-center z-10">
+                                                <div class="w-3 h-3 rounded-full ${currentStep >= 2 ? 'bg-[#FFA000]' : 'bg-[#c2c6d4]'}"></div>
+                                            </div>
+                                            <p class="text-sm font-semibold ${currentStep >= 2 ? 'text-[#FFA000]' : 'text-[#071e27]'}">Xác nhận</p>
+                                        </div>
+
+                                        <div class="relative pl-8 stepper-line">
+                                            <div class="absolute left-0 top-0 w-8 h-8 flex items-center justify-center z-10">
+                                                <div class="w-3 h-3 rounded-full ${currentStep >= 1 ? 'bg-[#004d99]' : 'bg-[#c2c6d4]'}"></div>
+                                            </div>
+                                            <p class="text-sm font-semibold ${currentStep >= 1 ? 'text-[#004d99]' : 'text-[#071e27]'}">Chờ xác nhận</p>
+                                            <p class="text-sm text-[#424752]">
+                                                <fmt:formatDate value="${order.createdAt}" pattern="HH:mm - dd/MM/yyyy" />
+                                            </p>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
                         </div>
                     </div>
@@ -389,7 +403,7 @@
                     <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 close-confirm">
                         Hủy
                     </button>
-                    <button type="button" id="confirmAction" class="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90">
+                    <button type="button" id="confirmAction" class="px-4 py-2 bg-[#004d99] text-white rounded-lg hover:opacity-90">
                         Xác nhận
                     </button>
                 </div>
