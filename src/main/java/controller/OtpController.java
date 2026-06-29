@@ -12,16 +12,21 @@ import java.util.Random;
 
 public class OtpController extends HttpServlet {
 
-    private static final long OTP_EXPIRE_MS     = 5 * 60 * 1000L; // 5 phút
+    private static final long OTP_EXPIRE_MS      = 5 * 60 * 1000L; // 5 phút
     private static final long RESEND_COOLDOWN_MS = 60 * 1000L;     // chống spam: 60 giây
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
-        // Nếu không có session OTP → quay về đăng ký
         if (session == null || session.getAttribute("otp_code") == null) {
-            response.sendRedirect(request.getContextPath() + "/register");
+            // Phân biệt luồng để redirect đúng chỗ
+            String flow = (session != null) ? (String) session.getAttribute("otp_flow") : null;
+            if ("forgot".equals(flow)) {
+                response.sendRedirect(request.getContextPath() + "/forgot-password");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/register");
+            }
             return;
         }
         request.getRequestDispatcher("/views/auth/otp.jsp").forward(request, response);
@@ -31,7 +36,6 @@ public class OtpController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
-
         if ("resend".equals(action)) {
             handleResend(request, response);
         } else {
@@ -39,7 +43,9 @@ public class OtpController extends HttpServlet {
         }
     }
 
-    // Xác thực OTP người dùng nhập
+    // =====================================================================
+    // Xác thực OTP người dùng nhập — xử lý cả 2 luồng
+    // =====================================================================
     private void handleVerify(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
@@ -50,7 +56,8 @@ public class OtpController extends HttpServlet {
 
         String inputOtp  = request.getParameter("otp");
         String savedOtp  = (String) session.getAttribute("otp_code");
-        Long   createdAt = (Long) session.getAttribute("otp_created");
+        Long   createdAt = (Long)   session.getAttribute("otp_created");
+        String flow      = (String) session.getAttribute("otp_flow"); // "register" hoặc "forgot"
 
         // Kiểm tra hết hạn
         if (System.currentTimeMillis() - createdAt > OTP_EXPIRE_MS) {
@@ -66,24 +73,26 @@ public class OtpController extends HttpServlet {
             return;
         }
 
-        // OTP đúng → tạo tài khoản
+        // ── Luồng QUÊN MẬT KHẨU ──────────────────────────────────────────
+        if ("forgot".equals(flow)) {
+            // Đánh dấu OTP đã xác thực, giữ lại email để ResetPasswordController dùng
+            session.setAttribute("fp_verified", true);
+            // Dọn OTP khỏi session (giữ otp_email để bước sau biết email)
+            clearOtpAttributes(session, false);
+            response.sendRedirect(request.getContextPath() + "/reset-password");
+            return;
+        }
+
+        // ── Luồng ĐĂNG KÝ ────────────────────────────────────────────────
         String fullname = (String) session.getAttribute("otp_fullname");
         String email    = (String) session.getAttribute("otp_email");
         String phone    = (String) session.getAttribute("otp_phone");
         String password = (String) session.getAttribute("otp_password");
 
-        CustomerDAO dao = new CustomerDAO();
-        boolean success = dao.registerCustomer(fullname, email, phone, password);
+        CustomerDAO dao  = new CustomerDAO();
+        boolean success  = dao.registerCustomer(fullname, email, phone, password);
 
-        // Xóa toàn bộ OTP khỏi session
-        session.removeAttribute("otp_code");
-        session.removeAttribute("otp_email");
-        session.removeAttribute("otp_fullname");
-        session.removeAttribute("otp_phone");
-        session.removeAttribute("otp_password");
-        session.removeAttribute("otp_created");
-        session.removeAttribute("otp_resend_at");
-        session.removeAttribute("otp_error");
+        clearOtpAttributes(session, true);
 
         if (success) {
             session.setAttribute("register_success", "Đăng ký thành công! Vui lòng đăng nhập.");
@@ -94,7 +103,9 @@ public class OtpController extends HttpServlet {
         }
     }
 
+    // =====================================================================
     // Gửi lại OTP (có chống spam 60 giây)
+    // =====================================================================
     private void handleResend(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         HttpSession session = request.getSession(false);
@@ -104,9 +115,8 @@ public class OtpController extends HttpServlet {
         }
 
         Long resendAt = (Long) session.getAttribute("otp_resend_at");
-        long now = System.currentTimeMillis();
+        long now      = System.currentTimeMillis();
 
-        // Chống spam: phải chờ đủ 60 giây
         if (resendAt != null && now - resendAt < RESEND_COOLDOWN_MS) {
             long waitSec = (RESEND_COOLDOWN_MS - (now - resendAt)) / 1000;
             session.setAttribute("otp_error", "Vui lòng chờ " + waitSec + " giây trước khi gửi lại.");
@@ -114,12 +124,11 @@ public class OtpController extends HttpServlet {
             return;
         }
 
-        // Sinh OTP mới
         String newOtp = String.format("%06d", new Random().nextInt(999999));
         String email  = (String) session.getAttribute("otp_email");
 
-        session.setAttribute("otp_code",     newOtp);
-        session.setAttribute("otp_created",  now);
+        session.setAttribute("otp_code",      newOtp);
+        session.setAttribute("otp_created",   now);
         session.setAttribute("otp_resend_at", now);
         session.removeAttribute("otp_error");
 
@@ -132,5 +141,25 @@ public class OtpController extends HttpServlet {
         }
 
         request.getRequestDispatcher("/views/auth/otp.jsp").forward(request, response);
+    }
+
+    // =====================================================================
+    // Dọn dẹp các attribute OTP khỏi session
+    // keepEmail = false → giữ lại otp_email (dùng ở bước reset password)
+    // keepEmail = true  → xóa luôn tất cả
+    // =====================================================================
+    private void clearOtpAttributes(HttpSession session, boolean keepEmail) {
+        session.removeAttribute("otp_code");
+        session.removeAttribute("otp_created");
+        session.removeAttribute("otp_resend_at");
+        session.removeAttribute("otp_error");
+        session.removeAttribute("otp_success");
+        session.removeAttribute("otp_flow");
+        session.removeAttribute("otp_fullname");
+        session.removeAttribute("otp_phone");
+        session.removeAttribute("otp_password");
+        if (keepEmail) {
+            session.removeAttribute("otp_email");
+        }
     }
 }

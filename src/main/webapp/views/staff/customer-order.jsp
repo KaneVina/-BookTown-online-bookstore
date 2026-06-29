@@ -355,15 +355,93 @@
         </main>
 
         <%@ include file="/views/layout/common/toast.jsp" %>
+
+        <!-- Confirmation Modal -->
+        <div id="confirmModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[100]">
+            <div class="bg-white w-[450px] rounded-xl p-6 relative">
+                <button type="button" class="absolute top-3 right-4 text-2xl hover:text-gray-500 close-confirm">×</button>
+
+                <h3 class="text-xl font-bold mb-4" id="confirmTitle">Xác nhận hành động</h3>
+                <p class="text-gray-600 mb-6" id="confirmMessage">Bạn chắc chắn muốn thực hiện hành động này?</p>
+
+                <div class="flex justify-end gap-3">
+                    <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 close-confirm">
+                        Hủy
+                    </button>
+                    <button type="button" id="confirmAction" class="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90">
+                        Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <script>
+            var confirmModal = null;
+            var pendingAction = null;
+            var activeSelect = null;
+
+            function initConfirmModal() {
+                confirmModal = document.getElementById('confirmModal');
+                document.querySelectorAll('.close-confirm').forEach(btn => {
+                    btn.addEventListener('click', closeConfirmModal);
+                });
+
+                if (confirmModal) {
+                    confirmModal.addEventListener('click', function (e) {
+                        if (e.target === confirmModal) {
+                            closeConfirmModal();
+                        }
+                    });
+                }
+
+                document.getElementById('confirmAction').addEventListener('click', executeAction);
+            }
+
+            function openConfirmModal(title, message, selectElement, action) {
+                document.getElementById('confirmTitle').textContent = title;
+                document.getElementById('confirmMessage').textContent = message;
+                pendingAction = action;
+                activeSelect = selectElement;
+
+                confirmModal.classList.remove('hidden');
+                confirmModal.classList.add('flex');
+            }
+
+            function closeConfirmModal() {
+                confirmModal.classList.add('hidden');
+                confirmModal.classList.remove('flex');
+                pendingAction = null;
+                if (activeSelect) {
+                    activeSelect.value = "";
+                    activeSelect = null;
+                }
+            }
+
+            function executeAction() {
+                if (pendingAction) {
+                    pendingAction();
+                    confirmModal.classList.add('hidden');
+                    confirmModal.classList.remove('flex');
+                    pendingAction = null;
+                    activeSelect = null;
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                initConfirmModal();
+            });
+
             function confirmStatusChange(selectElement) {
                 var selectedOption = selectElement.options[selectElement.selectedIndex];
-                var nextStatusLabel = selectedOption.text;
-                if (confirm("Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng này thành '" + nextStatusLabel.trim() + "' không?")) {
-                    selectElement.form.submit();
-                } else {
-                    selectElement.value = "";
-                }
+                var nextStatusLabel = selectedOption.text.trim();
+                openConfirmModal(
+                    'Cập nhật trạng thái',
+                    'Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng này thành "' + nextStatusLabel + '" không?',
+                    selectElement,
+                    function() {
+                        selectElement.form.submit();
+                    }
+                );
             }
         </script>
     </body>

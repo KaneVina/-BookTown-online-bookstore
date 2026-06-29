@@ -1,17 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 
 import java.sql.Timestamp;
 
-/**
- *
- * @author PHUC KHANG
- */
 public class Voucher {
- 
+
     private int voucherID;
     private String code;
     private double discountPercent;
@@ -20,11 +12,17 @@ public class Voucher {
     private Timestamp endDate;
     private String status;
     private int usedCount;
+    private boolean deleted;
+    private Double minOrderValue;      // đơn hàng tối thiểu (null = không giới hạn)
+    private Double maxDiscountValue;   // số tiền giảm tối đa (null = không giới hạn)
 
     public Voucher() {
     }
 
-    public Voucher(int voucherID, String code, double discountPercent, Integer quantity, Timestamp startDate, Timestamp endDate, String status, int usedCount) {
+    public Voucher(int voucherID, String code, double discountPercent, Integer quantity,
+            Timestamp startDate, Timestamp endDate, String status,
+            int usedCount, boolean deleted,
+            Double minOrderValue, Double maxDiscountValue) {
         this.voucherID = voucherID;
         this.code = code;
         this.discountPercent = discountPercent;
@@ -33,6 +31,9 @@ public class Voucher {
         this.endDate = endDate;
         this.status = status;
         this.usedCount = usedCount;
+        this.deleted = deleted;
+        this.minOrderValue = minOrderValue;
+        this.maxDiscountValue = maxDiscountValue;
     }
 
     public int getVoucherID() {
@@ -55,8 +56,8 @@ public class Voucher {
         return discountPercent;
     }
 
-    public void setDiscountPercent(double discountPercent) {
-        this.discountPercent = discountPercent;
+    public void setDiscountPercent(double v) {
+        this.discountPercent = v;
     }
 
     public Integer getQuantity() {
@@ -98,6 +99,28 @@ public class Voucher {
     public void setUsedCount(int usedCount) {
         this.usedCount = usedCount;
     }
-    
-    
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public Double getMinOrderValue() {
+        return minOrderValue;
+    }
+
+    public void setMinOrderValue(Double minOrderValue) {
+        this.minOrderValue = minOrderValue;
+    }
+
+    public Double getMaxDiscountValue() {
+        return maxDiscountValue;
+    }
+
+    public void setMaxDiscountValue(Double maxDiscountValue) {
+        this.maxDiscountValue = maxDiscountValue;
+    }
 }
