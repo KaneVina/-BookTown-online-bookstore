@@ -56,7 +56,11 @@
     }
 
     /* ── Tabs ── */
-    .tab-nav { border-bottom: 1px solid #E0E0E0; display: flex; gap: 0; }
+    .tab-nav {
+        border-bottom: 1px solid #E0E0E0;
+        display: flex;
+        gap: 0;
+    }
     .tab-btn {
         padding: 14px 24px;
         font-size: 15px;
@@ -69,24 +73,43 @@
         margin-bottom: -1px;
         transition: color .2s, border-color .2s;
     }
-    .tab-btn:hover { color: #17479D; }
-    .tab-btn.active { color: #17479D; border-bottom-color: #17479D; }
-    .tab-panel { display: none; padding-top: 24px; }
-    .tab-panel.active { display: block; }
+    .tab-btn:hover {
+        color: #17479D;
+    }
+    .tab-btn.active {
+        color: #17479D;
+        border-bottom-color: #17479D;
+    }
+    .tab-panel {
+        display: none;
+        padding-top: 24px;
+    }
+    .tab-panel.active {
+        display: block;
+    }
 
     /* ── Review cards ── */
     .badge-purchased {
-        display: inline-flex; align-items: center; gap: 4px;
-        background: #e8f5e9; color: #2e7d32;
-        font-size: 11px; font-weight: 700;
-        padding: 2px 8px; border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #e8f5e9;
+        color: #2e7d32;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 20px;
     }
     .badge-admin {
         display: inline-block;
-        background: #1565C0; color: #fff;
-        font-size: 10px; font-weight: 700;
-        padding: 1px 7px; border-radius: 4px;
-        margin-left: 6px; vertical-align: middle;
+        background: #1565C0;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 1px 7px;
+        border-radius: 4px;
+        margin-left: 6px;
+        vertical-align: middle;
     }
     .admin-reply {
         background: #e3f0fb;
@@ -97,15 +120,24 @@
 
     /* ── Write review form ── */
     .btn-write-review {
-        display: inline-flex; align-items: center; gap: 8px;
-        background: #17479D; color: #fff;
-        font-size: 14px; font-weight: 700;
-        padding: 12px 24px; border-radius: 8px;
-        border: none; cursor: pointer;
-        text-transform: uppercase; letter-spacing: .5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #17479D;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: .5px;
         transition: background .2s;
     }
-    .btn-write-review:hover { background: #0D47A1; }
+    .btn-write-review:hover {
+        background: #0D47A1;
+    }
     .write-review-form {
         background: #fff;
         border: 1px solid #E0E0E0;
@@ -114,7 +146,9 @@
         margin-top: 24px;
         display: none;
     }
-    .write-review-form.open { display: block; }
+    .write-review-form.open {
+        display: block;
+    }
 
     .review-summary {
         background: linear-gradient(135deg,#f8fafc,#ffffff);
@@ -133,15 +167,23 @@
         box-shadow: 0 8px 24px rgba(0,0,0,.08);
     }
 
-    .star-filled { color: #facc15; }
-    .star-empty  { color: #d1d5db; }
+    .star-filled {
+        color: #facc15;
+    }
+    .star-empty  {
+        color: #d1d5db;
+    }
 
     .review-avatar {
-        width: 40px; height: 40px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
-        background: #4f46e5; color: white;
-        display: flex; align-items: center;
-        justify-content: center; font-weight: bold;
+        background: #4f46e5;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
     }
 
     .btn-disabled {
@@ -158,40 +200,99 @@
 
         <!-- LEFT: Image Gallery -->
         <div class="flex-shrink-0 w-full lg:w-[499px] flex flex-col gap-4">
+
+            <%-- [FIX] book.thumbnail lưu dạng "url1|url2|url3|url4" nhưng JSP gốc
+                 dùng thẳng ${img1}..${img4} mà không hề tách chuỗi -> ảnh luôn trống.
+                 Bổ sung đoạn tách chuỗi này (lấy từ code 2) để gallery hoạt động đúng. --%>
+            <%
+                String rawThumb = (request.getAttribute("book") != null)
+                        ? ((model.Book) request.getAttribute("book")).getThumbnail() : "";
+                if (rawThumb == null) rawThumb = "";
+                String[] imgArr = rawThumb.split("\\|", -1);
+                String img1 = imgArr.length > 0 ? imgArr[0].trim() : "";
+                String img2 = imgArr.length > 1 ? imgArr[1].trim() : "";
+                String img3 = imgArr.length > 2 ? imgArr[2].trim() : "";
+                String img4 = imgArr.length > 3 ? imgArr[3].trim() : "";
+                pageContext.setAttribute("img1", img1);
+                pageContext.setAttribute("img2", img2);
+                pageContext.setAttribute("img3", img3);
+                pageContext.setAttribute("img4", img4);
+            %>
+
             <div class="bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden aspect-[3/4] flex items-center justify-center relative">
                 <c:choose>
-                    <c:when test="${not empty book.thumbnail}">
-                        <img id="mainImage" src="${book.thumbnail}" alt="${book.title}" class="w-full h-full object-cover">
+                    <c:when test="${not empty img1}">
+                        <img id="mainImage" src="${img1}" alt="${book.title}" class="w-full h-full object-cover">
                     </c:when>
                     <c:otherwise>
                         <i data-lucide="book-open" class="w-24 h-24 text-gray-300"></i>
                     </c:otherwise>
                 </c:choose>
+
                 <c:if test="${book.featured}">
                     <div class="absolute top-3 left-3 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">🔥 Nổi bật</div>
                 </c:if>
-                <c:if test="${book.stockQuantity == 0}">
+
+                <%-- [FIX] Hợp nhất 2 overlay "Hết hàng" bị lặp ở bản gốc thành 1,
+                     kiểm tra cả status và stockQuantity cho đồng bộ với phần bên dưới --%>
+                <c:if test="${book.status == 'out_of_stock' or book.stockQuantity == 0}">
                     <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
                         <span class="bg-white text-red-600 font-bold text-sm px-4 py-2 rounded-full">Hết hàng</span>
                     </div>
                 </c:if>
             </div>
 
-            <c:if test="${not empty book.thumbnail}">
+            <%-- [FIX] Bỏ khối thumbnail-strip thứ 2 (dùng nhầm chuỗi thô book.thumbnail
+                 làm src ảnh) — chỉ giữ lại 1 thumbnail-strip dùng img1..img4 đã tách đúng --%>
+            <c:if test="${not empty img1}">
                 <div class="grid grid-cols-4 gap-3">
-                    <button onclick="switchImg(this, '${book.thumbnail}')"
+                    <%-- Ảnh 1: bìa chính --%>
+                    <button onclick="switchImg(this, '${img1}')"
                             class="prod-thumb-active rounded-lg overflow-hidden aspect-square bg-gray-50">
-                        <img src="${book.thumbnail}" class="w-full h-full object-cover" alt="">
+                        <img src="${img1}" class="w-full h-full object-cover" alt="">
                     </button>
-                    <button class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50 flex items-center justify-center">
-                        <i data-lucide="image" class="w-6 h-6 text-gray-300"></i>
-                    </button>
-                    <button class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50 flex items-center justify-center">
-                        <i data-lucide="image" class="w-6 h-6 text-gray-300"></i>
-                    </button>
-                    <button class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50 flex items-center justify-center">
-                        <i data-lucide="image" class="w-6 h-6 text-gray-300"></i>
-                    </button>
+                    <%-- Ảnh 2 --%>
+                    <c:choose>
+                        <c:when test="${not empty img2}">
+                            <button onclick="switchImg(this, '${img2}')"
+                                    class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50">
+                                <img src="${img2}" class="w-full h-full object-cover" alt="">
+                            </button>
+                        </c:when>
+                        <c:otherwise>
+                            <button class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50 flex items-center justify-center opacity-40 cursor-not-allowed">
+                                <i data-lucide="image" class="w-6 h-6 text-gray-300"></i>
+                            </button>
+                        </c:otherwise>
+                    </c:choose>
+                    <%-- Ảnh 3 --%>
+                    <c:choose>
+                        <c:when test="${not empty img3}">
+                            <button onclick="switchImg(this, '${img3}')"
+                                    class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50">
+                                <img src="${img3}" class="w-full h-full object-cover" alt="">
+                            </button>
+                        </c:when>
+                        <c:otherwise>
+                            <button class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50 flex items-center justify-center opacity-40 cursor-not-allowed">
+                                <i data-lucide="image" class="w-6 h-6 text-gray-300"></i>
+                            </button>
+                        </c:otherwise>
+                    </c:choose>
+                    <%-- Ảnh 4 --%>
+                    <c:choose>
+                        <c:when test="${not empty img4}">
+                            <button onclick="switchImg(this, '${img4}')"
+                                    class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50">
+                                <img src="${img4}" class="w-full h-full object-cover" alt="">
+                            </button>
+                        </c:when>
+                        <c:otherwise>
+                            <button class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50 flex items-center justify-center opacity-40 cursor-not-allowed">
+                                <i data-lucide="image" class="w-6 h-6 text-gray-300"></i>
+                            </button>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
             </c:if>
         </div>
@@ -252,9 +353,11 @@
                 </div>
 
                 <!-- Stock status -->
+                <%-- [FIX] kiểm tra thêm book.status để đồng bộ với overlay "Hết hàng" ở ảnh
+                     (trước đây chỉ check stockQuantity > 0, không khớp với overlay) --%>
                 <div class="flex items-center gap-2 text-[14px] font-medium">
                     <c:choose>
-                        <c:when test="${book.stockQuantity > 0}">
+                        <c:when test="${book.status != 'out_of_stock' and book.stockQuantity > 0}">
                             <div class="w-5 h-5 bg-green-700 rounded-full flex items-center justify-center">
                                 <i data-lucide="check" class="w-3 h-3 text-white"></i>
                             </div>
@@ -275,7 +378,7 @@
                         <input type="hidden" name="bookID"   value="${book.bookID}" />
                         <input type="hidden" name="redirect" value="${pageContext.request.contextPath}/products?id=${book.bookID}" />
 
-                        <c:if test="${book.stockQuantity > 0}">
+                        <c:if test="${book.status != 'out_of_stock' and book.stockQuantity > 0}">
                             <div class="flex items-center border-2 border-gray-200 rounded-full overflow-hidden">
                                 <button type="button" id="qty-minus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">−</button>
                                 <input id="form-qty" name="quantity" type="number" value="1" min="1" max="${book.stockQuantity}"
@@ -285,7 +388,7 @@
                         </c:if>
 
                         <c:choose>
-                            <c:when test="${book.stockQuantity > 0}">
+                            <c:when test="${book.status != 'out_of_stock' and book.stockQuantity > 0}">
                                 <c:choose>
                                     <c:when test="${not empty sessionScope.account and sessionScope.account.role == 'customer'}">
                                         <button type="button" id="btn-add-to-cart"
@@ -364,16 +467,11 @@
                     <span class="text-[16px] font-medium text-[#222222]">BT-${book.bookID}</span>
                 </div>
             </div>
-
-            <!-- Description -->
-            <c:if test="${not empty book.description}">
-                <div class="flex flex-col gap-3">
-                    <h2 class="section-title-left text-[20px] font-bold text-primary">Mô tả</h2>
-                    <p class="text-[16px] text-gray-500 leading-relaxed line-clamp-5">${book.description}</p>
-                </div>
-            </c:if>
         </div>
     </section>
+    <%-- [FIX] Bản gốc có 1 thẻ </section> dư ở đây (đóng nhầm 2 lần) khiến phần
+         Tabs/Modal/Related books bị lồng sai cấp. Đã bỏ thẻ dư và để các section
+         dưới đây làm anh em (sibling) trực tiếp của <main>, giống cấu trúc sạch của code 2. --%>
 
     <!-- ══ TABS: Mô tả / Thông tin / Đánh giá ══════════════════════════ -->
     <section class="pt-2">
@@ -428,6 +526,19 @@
                         <td class="py-3 font-semibold text-gray-500">Mã SKU</td>
                         <td class="py-3 text-gray-800">BT-${book.bookID}</td>
                     </tr>
+                    <%-- [NEW] Bổ sung Kích thước / Trọng lượng từ code 2 (chỉ hiện khi có dữ liệu) --%>
+                    <c:if test="${not empty book.dimensions}">
+                        <tr class="border-b border-gray-100">
+                            <td class="py-3 font-semibold text-gray-500">Kích thước</td>
+                            <td class="py-3 text-gray-800">${book.dimensions}</td>
+                        </tr>
+                    </c:if>
+                    <c:if test="${not empty book.weight}">
+                        <tr>
+                            <td class="py-3 font-semibold text-gray-500">Trọng lượng</td>
+                            <td class="py-3 text-gray-800">${book.weight} kg</td>
+                        </tr>
+                    </c:if>
                 </tbody>
             </table>
         </div>
@@ -583,9 +694,11 @@
                     <div class="slider-item prod-card-hover bg-white rounded-xl overflow-hidden flex flex-col">
                         <div class="relative block bg-[#f0f4ff] aspect-[3/4] overflow-hidden">
                             <a href="${pageContext.request.contextPath}/products?id=${rb.bookID}">
+                                <%-- [FIX] check đúng field đang được hiển thị (rb.thumbnailFirst)
+                                     thay vì check rb.thumbnail (chuỗi thô, có thể khác trạng thái rỗng) --%>
                                 <c:choose>
-                                    <c:when test="${not empty rb.thumbnail}">
-                                        <img src="${rb.thumbnail}" alt="${rb.title}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                                    <c:when test="${not empty rb.thumbnailFirst}">
+                                        <img src="${rb.thumbnailFirst}" alt="${rb.title}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                                     </c:when>
                                     <c:otherwise>
                                         <div class="w-full h-full flex items-center justify-center">
@@ -657,8 +770,12 @@
 <script>
     // ── Tab switching ────────────────────────────────────────────────────
     function switchTab(panelId, btn) {
-        document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
-        document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+        document.querySelectorAll('.tab-panel').forEach(function (p) {
+            p.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-btn').forEach(function (b) {
+            b.classList.remove('active');
+        });
         document.getElementById(panelId).classList.add('active');
         btn.classList.add('active');
     }
@@ -666,71 +783,92 @@
     // ── Qty +/- ──────────────────────────────────────────────────────────
     (function () {
         var input = document.getElementById('form-qty');
-        if (!input) return;
+        if (!input)
+            return;
         var max = parseInt(input.getAttribute('max')) || 1;
         document.getElementById('qty-minus').addEventListener('click', function () {
             var v = parseInt(input.value) || 1;
-            if (v > 1) input.value = v - 1;
+            if (v > 1)
+                input.value = v - 1;
         });
         document.getElementById('qty-plus').addEventListener('click', function () {
             var v = parseInt(input.value) || 1;
-            if (v < max) input.value = v + 1;
+            if (v < max)
+                input.value = v + 1;
         });
     })();
 
     // ── Thumbnail switcher ───────────────────────────────────────────────
+    // [FIX] Bản gốc khai báo switchImg 2 lần (1 lần gán window.switchImg dùng
+    // className.replace, 1 lần function switchImg dùng classList) khiến bản
+    // gán sau cùng đè bản kia một cách khó kiểm soát. Giờ chỉ giữ 1 bản dùng
+    // classList (an toàn hơn vì không phụ thuộc thứ tự class trong className).
     window.switchImg = function (btn, src) {
         var main = document.getElementById('mainImage');
-        if (main) main.src = src;
-        document.querySelectorAll('[onclick^="switchImg"]').forEach(function (b) {
-            b.className = b.className.replace('prod-thumb-active', 'prod-thumb-idle');
+        if (main && src)
+            main.src = src;
+        document.querySelectorAll('.prod-thumb-active, .prod-thumb-idle').forEach(function (el) {
+            el.classList.remove('prod-thumb-active');
+            el.classList.add('prod-thumb-idle');
         });
-        btn.className = btn.className.replace('prod-thumb-idle', 'prod-thumb-active');
+        if (btn) {
+            btn.classList.remove('prod-thumb-idle');
+            btn.classList.add('prod-thumb-active');
+        }
     };
 
     // ── Add to cart (AJAX) ───────────────────────────────────────────────
     var btnAdd = document.getElementById('btn-add-to-cart');
     if (btnAdd) {
         btnAdd.addEventListener('click', function () {
-            var bookID   = document.querySelector('#add-to-cart-form input[name="bookID"]').value;
+            var bookID = document.querySelector('#add-to-cart-form input[name="bookID"]').value;
             var quantity = document.getElementById('form-qty').value;
-            var params   = new URLSearchParams();
-            params.append('action',   'add');
-            params.append('bookID',   bookID);
+            var params = new URLSearchParams();
+            params.append('action', 'add');
+            params.append('bookID', bookID);
             params.append('quantity', quantity);
             fetch('${pageContext.request.contextPath}/cart', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                 body: params.toString()
             })
-            .then(function (res) { return res.json(); })
-            .then(function (data) {
-                if (data.ok) {
-                    var badge = document.getElementById('cart-count');
-                    if (badge) badge.textContent = data.cartCount;
-                    showToast('Thêm vào giỏ hàng thành công!');
-                } else {
-                    showToast(data.message || 'Thêm vào giỏ hàng thất bại!', true);
-                }
-            })
-            .catch(function () { showToast('Lỗi kết nối, vui lòng thử lại!', true); });
+                    .then(function (res) {
+                        return res.json();
+                    })
+                    .then(function (data) {
+                        if (data.ok) {
+                            var badge = document.getElementById('cart-count');
+                            if (badge)
+                                badge.textContent = data.cartCount;
+                            showToast('Thêm vào giỏ hàng thành công!');
+                        } else {
+                            showToast(data.message || 'Thêm vào giỏ hàng thất bại!', true);
+                        }
+                    })
+                    .catch(function () {
+                        showToast('Lỗi kết nối, vui lòng thử lại!', true);
+                    });
         });
     }
 
     // ── Related slider ───────────────────────────────────────────────────
     var slider = document.getElementById('relatedSlider');
-    var prev   = document.getElementById('sliderPrev');
-    var next   = document.getElementById('sliderNext');
+    var prev = document.getElementById('sliderPrev');
+    var next = document.getElementById('sliderNext');
     if (slider && prev && next) {
         var scrollAmt = 280;
-        prev.addEventListener('click', function () { slider.scrollBy({left: -scrollAmt, behavior: 'smooth'}); });
-        next.addEventListener('click', function () { slider.scrollBy({left:  scrollAmt, behavior: 'smooth'}); });
+        prev.addEventListener('click', function () {
+            slider.scrollBy({left: -scrollAmt, behavior: 'smooth'});
+        });
+        next.addEventListener('click', function () {
+            slider.scrollBy({left: scrollAmt, behavior: 'smooth'});
+        });
     }
 
     // ── Star rating ──────────────────────────────────────────────────────
-    var stars       = document.querySelectorAll('.star');
+    var stars = document.querySelectorAll('.star');
     var ratingInput = document.getElementById('ratingValue');
-    var ratingText  = document.getElementById('ratingText');
+    var ratingText = document.getElementById('ratingText');
     var currentRating = 5;
 
     function updateStars(rating) {
@@ -747,53 +885,57 @@
     updateStars(currentRating);
 
     stars.forEach(function (star) {
-        star.addEventListener('mouseover', function () { updateStars(star.dataset.value); });
+        star.addEventListener('mouseover', function () {
+            updateStars(star.dataset.value);
+        });
         star.addEventListener('click', function () {
-            currentRating      = star.dataset.value;
-            ratingInput.value  = currentRating;
+            currentRating = star.dataset.value;
+            ratingInput.value = currentRating;
             ratingText.textContent = currentRating;
             updateStars(currentRating);
         });
     });
     var ratingStars = document.getElementById('ratingStars');
     if (ratingStars) {
-        ratingStars.addEventListener('mouseleave', function () { updateStars(currentRating); });
+        ratingStars.addEventListener('mouseleave', function () {
+            updateStars(currentRating);
+        });
     }
 
     // ── Review modal ─────────────────────────────────────────────────────
-    var reviewModal      = document.getElementById('reviewModal');
-    var openReviewBtn    = document.getElementById('openReviewModal');
-    var closeReviewBtn   = document.getElementById('closeReviewModal');
-    var formActionInput  = document.getElementById('formAction');
-    var reviewIDInput    = document.getElementById('reviewIDInput');
+    var reviewModal = document.getElementById('reviewModal');
+    var openReviewBtn = document.getElementById('openReviewModal');
+    var closeReviewBtn = document.getElementById('closeReviewModal');
+    var formActionInput = document.getElementById('formAction');
+    var reviewIDInput = document.getElementById('reviewIDInput');
     var reviewModalTitle = document.getElementById('reviewModalTitle');
-    var reviewSubmitBtn  = document.getElementById('reviewSubmitBtn');
-    var commentInput     = document.getElementById('commentInput');
+    var reviewSubmitBtn = document.getElementById('reviewSubmitBtn');
+    var commentInput = document.getElementById('commentInput');
 
     function setRating(value) {
-        currentRating      = value;
-        ratingInput.value  = value;
+        currentRating = value;
+        ratingInput.value = value;
         ratingText.textContent = value;
         updateStars(value);
     }
 
     function openModalForCreate() {
-        formActionInput.value      = 'add';
-        reviewIDInput.value        = '';
-        commentInput.value         = '';
+        formActionInput.value = 'add';
+        reviewIDInput.value = '';
+        commentInput.value = '';
         reviewModalTitle.textContent = 'Viết đánh giá';
-        reviewSubmitBtn.textContent  = 'Gửi đánh giá';
+        reviewSubmitBtn.textContent = 'Gửi đánh giá';
         setRating(5);
         reviewModal.classList.remove('hidden');
         reviewModal.classList.add('flex');
     }
 
     function openModalForEdit(btn) {
-        formActionInput.value        = 'edit';
-        reviewIDInput.value          = btn.dataset.reviewId;
-        commentInput.value           = btn.dataset.comment;
+        formActionInput.value = 'edit';
+        reviewIDInput.value = btn.dataset.reviewId;
+        commentInput.value = btn.dataset.comment;
         reviewModalTitle.textContent = 'Sửa đánh giá';
-        reviewSubmitBtn.textContent  = 'Lưu thay đổi';
+        reviewSubmitBtn.textContent = 'Lưu thay đổi';
         setRating(parseInt(btn.dataset.rating, 10) || 5);
         reviewModal.classList.remove('hidden');
         reviewModal.classList.add('flex');
@@ -823,10 +965,12 @@
     }
 
     document.querySelectorAll('.edit-review-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () { openModalForEdit(btn); });
+        btn.addEventListener('click', function () {
+            openModalForEdit(btn);
+        });
     });
 
-    // ── Review form AJAX submit (từ main) ────────────────────────────────
+    // ── Review form AJAX submit ──────────────────────────────────────────
     var reviewForm = document.getElementById('reviewForm');
     if (reviewForm) {
         reviewForm.addEventListener('submit', function (e) {
@@ -837,21 +981,26 @@
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                 body: formData.toString()
             })
-            .then(function (res) {
-                if (!res.ok) throw new Error();
-                return res.json();
-            })
-            .then(function (data) {
-                if (data.success) {
-                    showToast(data.message);
-                    reviewModal.classList.add('hidden');
-                    reviewModal.classList.remove('flex');
-                    setTimeout(function () { location.reload(); }, 1000);
-                } else {
-                    showToast(data.message, true);
-                }
-            })
-            .catch(function () { showToast('Có lỗi xảy ra', true); });
+                    .then(function (res) {
+                        if (!res.ok)
+                            throw new Error();
+                        return res.json();
+                    })
+                    .then(function (data) {
+                        if (data.success) {
+                            showToast(data.message);
+                            reviewModal.classList.add('hidden');
+                            reviewModal.classList.remove('flex');
+                            setTimeout(function () {
+                                location.reload();
+                            }, 1000);
+                        } else {
+                            showToast(data.message, true);
+                        }
+                    })
+                    .catch(function () {
+                        showToast('Có lỗi xảy ra', true);
+                    });
         });
     }
 
@@ -863,17 +1012,17 @@
         if (detailForm) {
             detailForm.addEventListener("submit", async function (e) {
                 e.preventDefault();
-                var form        = e.currentTarget;
-                var btn         = form.querySelector("button[type='submit']");
-                var svg         = btn.querySelector("svg");
-                var textSpan    = form.querySelector(".wishlist-text");
+                var form = e.currentTarget;
+                var btn = form.querySelector("button[type='submit']");
+                var svg = btn.querySelector("svg");
+                var textSpan = form.querySelector(".wishlist-text");
                 var actionInput = form.querySelector("input[name='action']");
-                var bookID      = form.querySelector("input[name='bookID']").value;
-                var action      = actionInput.value;
-                var params      = new URLSearchParams();
+                var bookID = form.querySelector("input[name='bookID']").value;
+                var action = actionInput.value;
+                var params = new URLSearchParams();
                 params.append("action", action);
                 params.append("bookID", bookID);
-                params.append("ajax",   "true");
+                params.append("ajax", "true");
                 try {
                     var response = await fetch(form.getAttribute("action"), {
                         method: "POST",
@@ -882,7 +1031,8 @@
                     });
                     if (response.status === 401) {
                         var data = await response.json();
-                        if (data.redirect) window.location.href = data.redirect;
+                        if (data.redirect)
+                            window.location.href = data.redirect;
                         return;
                     }
                     if (response.ok) {
@@ -890,13 +1040,15 @@
                         if (data.success) {
                             if (data.action === "added") {
                                 btn.className = "w-full bg-red-50 border-2 border-red-500 text-red-500 font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-red-500 hover:text-white transition-all";
-                                svg.setAttribute("fill", "#ef4444"); svg.setAttribute("stroke", "#ef4444");
+                                svg.setAttribute("fill", "#ef4444");
+                                svg.setAttribute("stroke", "#ef4444");
                                 textSpan.textContent = "Đã thích";
                                 actionInput.value = "remove";
                                 showToast("Đã thêm vào yêu thích!");
                             } else {
                                 btn.className = "w-full border-2 border-primary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all";
-                                svg.setAttribute("fill", "none"); svg.setAttribute("stroke", "currentColor");
+                                svg.setAttribute("fill", "none");
+                                svg.setAttribute("stroke", "currentColor");
                                 textSpan.textContent = "Yêu thích";
                                 actionInput.value = "add";
                                 showToast("Đã xóa khỏi yêu thích!");
@@ -906,9 +1058,16 @@
                                 badge.textContent = data.wishlistCount;
                                 data.wishlistCount > 0 ? badge.classList.remove("hidden") : badge.classList.add("hidden");
                             }
-                        } else { showToast("Có lỗi xảy ra, vui lòng thử lại.", true); }
-                    } else { showToast("Không thể thực hiện yêu cầu.", true); }
-                } catch (err) { console.error(err); showToast("Lỗi kết nối mạng.", true); }
+                        } else {
+                            showToast("Có lỗi xảy ra, vui lòng thử lại.", true);
+                        }
+                    } else {
+                        showToast("Không thể thực hiện yêu cầu.", true);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast("Lỗi kết nối mạng.", true);
+                }
             });
         }
 
@@ -916,16 +1075,16 @@
         document.querySelectorAll(".wishlist-form").forEach(function (form) {
             form.addEventListener("submit", async function (e) {
                 e.preventDefault();
-                var f           = e.currentTarget;
-                var btn         = f.querySelector(".wish-btn");
-                var svg         = btn.querySelector("svg");
+                var f = e.currentTarget;
+                var btn = f.querySelector(".wish-btn");
+                var svg = btn.querySelector("svg");
                 var actionInput = f.querySelector("input[name='action']");
-                var bookID      = f.querySelector("input[name='bookID']").value;
-                var action      = actionInput.value;
-                var params      = new URLSearchParams();
+                var bookID = f.querySelector("input[name='bookID']").value;
+                var action = actionInput.value;
+                var params = new URLSearchParams();
                 params.append("action", action);
                 params.append("bookID", bookID);
-                params.append("ajax",   "true");
+                params.append("ajax", "true");
                 try {
                     var response = await fetch(f.getAttribute("action"), {
                         method: "POST",
@@ -934,7 +1093,8 @@
                     });
                     if (response.status === 401) {
                         var data = await response.json();
-                        if (data.redirect) window.location.href = data.redirect;
+                        if (data.redirect)
+                            window.location.href = data.redirect;
                         return;
                     }
                     if (response.ok) {
@@ -942,13 +1102,15 @@
                         if (data.success) {
                             if (data.action === "added") {
                                 btn.classList.add("active");
-                                svg.setAttribute("fill", "#ef4444"); svg.setAttribute("stroke", "#ef4444");
+                                svg.setAttribute("fill", "#ef4444");
+                                svg.setAttribute("stroke", "#ef4444");
                                 actionInput.value = "remove";
                                 btn.setAttribute("title", "Xóa khỏi yêu thích");
                                 showToast("Đã thêm vào yêu thích!");
                             } else if (data.action === "removed") {
                                 btn.classList.remove("active");
-                                svg.setAttribute("fill", "none"); svg.setAttribute("stroke", "#374151");
+                                svg.setAttribute("fill", "none");
+                                svg.setAttribute("stroke", "#374151");
                                 actionInput.value = "add";
                                 btn.setAttribute("title", "Thêm vào yêu thích");
                                 showToast("Đã xóa khỏi yêu thích!");
@@ -958,9 +1120,16 @@
                                 badge.textContent = data.wishlistCount;
                                 data.wishlistCount > 0 ? badge.classList.remove("hidden") : badge.classList.add("hidden");
                             }
-                        } else { showToast("Có lỗi xảy ra, vui lòng thử lại.", true); }
-                    } else { showToast("Không thể thực hiện yêu cầu.", true); }
-                } catch (err) { console.error(err); showToast("Lỗi kết nối mạng.", true); }
+                        } else {
+                            showToast("Có lỗi xảy ra, vui lòng thử lại.", true);
+                        }
+                    } else {
+                        showToast("Không thể thực hiện yêu cầu.", true);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast("Lỗi kết nối mạng.", true);
+                }
             });
         });
     });
