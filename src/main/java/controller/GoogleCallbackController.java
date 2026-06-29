@@ -58,39 +58,39 @@ public class GoogleCallbackController extends HttpServlet {
         String fullname = userInfo[1];
 
         // 5. Kiểm tra email trong DB
-CustomerDAO customerDAO = new CustomerDAO();
-AccountDAO accountDAO = new AccountDAO();
+        CustomerDAO customerDAO = new CustomerDAO();
+        AccountDAO accountDAO = new AccountDAO();
 
-Account acc = null;
+        Account acc = null;
 
 // Kiểm tra xem email có trong bảng Account (staff/admin) không
-if (accountDAO.isEmailExists(email)) {
-    // Staff/admin không được login bằng Google
-    request.setAttribute("errorMessage", "Tài khoản này không hỗ trợ đăng nhập bằng Google.");
-    request.getRequestDispatcher("/views/auth/login.jsp").forward(request, response);
-    return;
-}
+        if (accountDAO.isEmailExists(email)) {
+            // Staff/admin không được login bằng Google
+            request.setAttribute("errorMessage", "Tài khoản này không hỗ trợ đăng nhập bằng Google.");
+            request.getRequestDispatcher("/views/auth/login.jsp").forward(request, response);
+            return;
+        }
 
 // Tìm trong bảng Customer
-acc = customerDAO.getAccountByEmail(email);
+        acc = customerDAO.getAccountByEmail(email);
 
-if (acc == null) {
-    // Chưa có → tự đăng ký mới
-    customerDAO.registerCustomer(fullname, email, "", "google_oauth_" + System.currentTimeMillis());
-    // Lấy lại account vừa tạo
-    acc = customerDAO.getAccountByEmail(email);
-}
+        if (acc == null) {
+            // Chưa có → tự đăng ký mới
+            customerDAO.registerCustomer(fullname, email, "", "google_oauth_" + System.currentTimeMillis());
+            // Lấy lại account vừa tạo
+            acc = customerDAO.getAccountByEmail(email);
+        }
 
-if (acc == null) {
-    request.setAttribute("errorMessage", "Đăng ký tài khoản Google thất bại.");
-    request.getRequestDispatcher("/views/auth/login.jsp").forward(request, response);
-    return;
-}
+        if (acc == null) {
+            request.setAttribute("errorMessage", "Đăng ký tài khoản Google thất bại.");
+            request.getRequestDispatcher("/views/auth/login.jsp").forward(request, response);
+            return;
+        }
 
 // 6. Tạo session với account thật từ DB
-session.setAttribute("account", acc);
-session.setMaxInactiveInterval(30 * 60);
-response.sendRedirect(request.getContextPath() + "/home");
+        session.setAttribute("account", acc);
+        session.setMaxInactiveInterval(30 * 60);
+        response.sendRedirect(request.getContextPath() + "/home");
     }
 
     // ---------------------------------------------------------------
@@ -104,10 +104,10 @@ response.sendRedirect(request.getContextPath() + "/home");
             conn.setDoOutput(true);
             conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
-            String body = "code="          + URLEncoder.encode(code, "UTF-8")
-                    + "&client_id="        + URLEncoder.encode(GoogleLoginController.getClientId(), "UTF-8")
-                    + "&client_secret="    + URLEncoder.encode(GoogleLoginController.getClientSecret(), "UTF-8")
-                    + "&redirect_uri="     + URLEncoder.encode(GoogleLoginController.getRedirectUri(), "UTF-8")
+            String body = "code=" + URLEncoder.encode(code, "UTF-8")
+                    + "&client_id=" + URLEncoder.encode(GoogleLoginController.getClientId(), "UTF-8")
+                    + "&client_secret=" + URLEncoder.encode(GoogleLoginController.getClientSecret(), "UTF-8")
+                    + "&redirect_uri=" + URLEncoder.encode(GoogleLoginController.getRedirectUri(), "UTF-8")
                     + "&grant_type=authorization_code";
 
             try (OutputStream os = conn.getOutputStream()) {
@@ -119,7 +119,9 @@ response.sendRedirect(request.getContextPath() + "/home");
                     new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
             StringBuilder sb = new StringBuilder();
             String line;
-            while ((line = br.readLine()) != null) sb.append(line);
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
 
             // Parse access_token từ JSON thủ công (không cần thư viện)
             String json = sb.toString();
@@ -145,13 +147,17 @@ response.sendRedirect(request.getContextPath() + "/home");
                     new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
             StringBuilder sb = new StringBuilder();
             String line;
-            while ((line = br.readLine()) != null) sb.append(line);
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
 
             String json = sb.toString();
             String email = extractJsonValue(json, "email");
-            String name  = extractJsonValue(json, "name");
+            String name = extractJsonValue(json, "name");
 
-            if (email == null) return null;
+            if (email == null) {
+                return null;
+            }
             return new String[]{email, name != null ? name : email};
 
         } catch (Exception e) {
@@ -166,10 +172,14 @@ response.sendRedirect(request.getContextPath() + "/home");
     private String extractJsonValue(String json, String key) {
         String search = "\"" + key + "\"";
         int idx = json.indexOf(search);
-        if (idx == -1) return null;
+        if (idx == -1) {
+            return null;
+        }
         idx = json.indexOf(":", idx) + 1;
         // Bỏ qua khoảng trắng
-        while (idx < json.length() && json.charAt(idx) == ' ') idx++;
+        while (idx < json.length() && json.charAt(idx) == ' ') {
+            idx++;
+        }
         if (json.charAt(idx) == '"') {
             int start = idx + 1;
             int end = json.indexOf("\"", start);
