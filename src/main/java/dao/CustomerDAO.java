@@ -264,4 +264,39 @@ public class CustomerDAO {
         }
         return false;
     }
+
+    public boolean resetPasswordByEmail(String email, String newPassword) {
+        String sql = "UPDATE Customer SET password = ? WHERE email = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, hashMD5(newPassword));
+            ps.setString(2, email);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public Account getAccountByEmail(String email) {
+        String sql = "SELECT customerID, fullname, email, phone, role, status "
+                + "FROM Customer WHERE email = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new Account(
+                        rs.getInt("customerID"),
+                        rs.getString("fullname"),
+                        rs.getString("email"),
+                        rs.getString("phone") != null ? rs.getString("phone") : "",
+                        "customer",
+                        rs.getString("status")
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

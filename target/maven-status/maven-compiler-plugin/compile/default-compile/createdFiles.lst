@@ -13,9 +13,11 @@ dao\AddressDAO.class
 controller\CheckoutController.class
 model\Customer.class
 controller\CartController.class
+controller\GoogleLoginController.class
 controller\ProfileController.class
 dao\WishListDAO.class
 controller\AddressManagementController.class
+controller\VoucherController$VoucherInput.class
 model\Author.class
 utils\VNPayConfig.class
 model\Book.class
@@ -28,6 +30,7 @@ controller\RegisterController.class
 utils\HashMD5.class
 controller\DashboardController.class
 utils\DBContext.class
+controller\ForgotPasswordController.class
 model\Review.class
 filter\AuthFilter.class
 controller\LoginController.class
@@ -47,6 +50,8 @@ controller\ReviewController.class
 model\Order.class
 utils\EmailUtil$1.class
 controller\OtpController.class
+controller\ResetPasswordController.class
 controller\VoucherController.class
+controller\GoogleCallbackController.class
 controller\VNPayController.class
 controller\CustomerOrderController.class

@@ -196,7 +196,7 @@
                         </div>
 
                         <button class="w-full py-4 bg-primary text-on-primary font-headline-sm text-headline-sm rounded-lg hover:bg-primary-container active:opacity-80 transition-all shadow-md mt-4" type="submit">
-                            Đăng ký ngay
+                            Đăng ký
                         </button>
                     </form>
 

@@ -129,8 +129,8 @@
 
         <header class="w-full px-4 md:px-margin-desktop h-16 flex items-center justify-between bg-transparent">
             <div class="font-headline-md text-headline-md font-bold text-primary">
-               <img src="${pageContext.request.contextPath}/assets/images/logo/logoBT_2.png"
-         alt="BookTown Logo" class="w-[220px] mb-3"/>
+                <img src="${pageContext.request.contextPath}/assets/images/logo/logoBT_2.png"
+                     alt="BookTown Logo" class="w-[220px] mb-3"/>
             </div>
             <div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
                 <span class="material-symbols-outlined text-primary">help_outline</span>
@@ -188,7 +188,7 @@
                         <div class="space-y-2">
                             <div class="flex justify-between items-center">
                                 <label class="font-label-md text-label-md text-on-surface" for="password">Mật khẩu</label>
-                                <a class="font-label-sm text-label-sm text-primary hover:underline transition-all" href="#">Quên mật khẩu?</a>
+                                <a class="font-label-sm text-label-sm text-primary hover:underline transition-all" href="${pageContext.request.contextPath}/forgot-password">Quên mật khẩu?</a>
                             </div>
                             <div class="relative">
                                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">lock</span>
@@ -214,7 +214,12 @@
                     </div>
 
                     <div class="w-full">
-                        <button class="w-full flex items-center justify-center gap-3 py-3 bg-white border border-[#dadce0] rounded-lg hover:bg-[#f8f9fa] hover:shadow-md active:bg-[#f1f3f4] transition-all font-label-md text-label-md text-[#3c4043]" style="font-family: 'Google Sans', Roboto, sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 0.25px;">
+                        <button
+                            type="button"
+                            onclick="window.location.href = '${pageContext.request.contextPath}/auth/google/login'"
+                            class="w-full flex items-center justify-center gap-3 py-3 bg-white border border-[#dadce0] rounded-lg hover:bg-[#f8f9fa] hover:shadow-md active:bg-[#f1f3f4] transition-all font-label-md text-label-md text-[#3c4043]"
+                            style="font-family: 'Google Sans', Roboto, sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 0.25px;"
+                            >
                             <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="w-5 h-5 flex-shrink-0">
                             <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
                             <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
