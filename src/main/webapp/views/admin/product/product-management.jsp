@@ -115,9 +115,6 @@
                                 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px] pointer-events-none">expand_more</span>
                             </div>
 
-                            <button type="submit" class="bg-primary text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity flex items-center gap-1.5 whitespace-nowrap">
-                                <span class="material-symbols-outlined" style="font-size:18px">filter_list</span> Lọc
-                            </button>
 
                         <c:if test="${not empty keyword or not empty status or not empty genreID}">
                             <a href="${pageContext.request.contextPath}/dashboard/product-management"
