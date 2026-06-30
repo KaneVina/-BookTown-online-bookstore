@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Account;
+import utils.EmailUtil;
 
 public class CreateStaffController extends HttpServlet {
 
@@ -108,12 +109,23 @@ public class CreateStaffController extends HttpServlet {
                 boolean ok = dao.registerStaff(
                         fullname.trim(),
                         email.trim(),
-                        phone != null ? phone.trim() : "",
+                        phone.trim(),
                         password,
                         role.trim(),
                         status
                 );
                 if (ok) {
+                    try {
+                        EmailUtil.sendStaffAccount(
+                                email.trim(),
+                                fullname.trim(),
+                                email.trim(), // username hiện tại
+                                password
+                        );
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
                     out.write("{\"success\":true,\"message\":\"Tạo tài khoản thành công\"}");
                 } else {
                     out.write("{\"success\":false,\"message\":\"Tạo tài khoản thất bại, vui lòng thử lại\"}");
