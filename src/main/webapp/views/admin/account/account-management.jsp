@@ -247,7 +247,6 @@
         <!-- Update Modal -->
         <div id="updateModal" class="modal-hidden fixed inset-0 bg-black/50 z-50 items-center justify-center p-4">
             <div class="bg-surface rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto custom-scrollbar">
-                <!-- Header gradient -->
                 <div class="relative bg-gradient-to-br from-primary to-primary/70 rounded-t-2xl px-6 pt-6 pb-6">
                     <button id="updateCancelX" type="button" class="absolute top-4 right-4 text-white/80 hover:text-white transition">
                         <span class="material-symbols-outlined">close</span>
@@ -285,6 +284,35 @@
                                     <input type="text" id="updateEmail" disabled
                                            class="w-full h-11 px-4 border border-outline-variant rounded-lg bg-background-alt text-on-surface-variant cursor-not-allowed truncate">
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="customerStatsSection"
+                         class="hidden pt-4 border-t border-outline-variant/60">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="material-symbols-outlined text-primary">
+                                shopping_bag
+                            </span>
+                            <h4 class="font-bold text-sm">
+                                Thống kê mua hàng
+                            </h4>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-blue-50 rounded-lg p-4">
+                                <p class="text-xs text-gray-500">
+                                    Tổng đơn hàng
+                                </p>
+                                <p id="totalOrders" class="text-2xl font-bold">
+                                    0
+                                </p>
+                            </div>
+                            <div class="bg-green-50 rounded-lg p-4">
+                                <p class="text-xs text-gray-500">
+                                    Tổng chi tiêu
+                                </p>
+                                <p id="totalSpent" class="text-2xl font-bold">
+                                    0 VNĐ
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -360,9 +388,9 @@
             });
             modalConfirm.addEventListener('click', async function () {
                 if (pendingAction) {
-                    const action = pendingAction;  
-                    hideConfirmModal();            
-                    await action();               
+                    const action = pendingAction;
+                    hideConfirmModal();
+                    await action();
                 }
             });
             const searchInput = document.getElementById('searchInput');
@@ -473,6 +501,9 @@
             const updatePreviewName = document.getElementById('updatePreviewName');
             const updateRoleBadgePreview = document.getElementById('updateRoleBadgePreview');
             const updateStatusBadgePreview = document.getElementById('updateStatusBadgePreview');
+            const customerStatsSection = document.getElementById('customerStatsSection');
+            const totalOrders = document.getElementById('totalOrders');
+            const totalSpent = document.getElementById('totalSpent');
 
             function refreshUpdatePreview() {
                 const name = updateFullname.value.trim() || '—';
@@ -533,10 +564,46 @@
                     updateStatusToggle.checked = (this.dataset.status || 'active') === 'active';
 
                     if (type === 'staff') {
+
                         updateRoleWrapper.classList.remove('hidden');
-                        updateRole.value = this.dataset.roleValue || 'staff';
+                        customerStatsSection.classList.add('hidden');
+
+                        updateRole.value =
+                                this.dataset.roleValue || 'staff';
+
                     } else {
+
                         updateRoleWrapper.classList.add('hidden');
+                        customerStatsSection.classList.remove('hidden');
+
+                        fetch(
+                                '${pageContext.request.contextPath}/dashboard/account-management',
+                                {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type':
+                                                'application/x-www-form-urlencoded'
+                                    },
+                                    body:
+                                            'action=customerStats&id=' +
+                                            this.dataset.id
+                                }
+                        )
+                                .then(res => res.json())
+                                .then(data => {
+
+                                    totalOrders.textContent =
+                                            data.totalOrders;
+
+                                    totalSpent.textContent =
+                                            Number(data.totalSpent)
+                                            .toLocaleString('vi-VN')
+                                            + ' VNĐ';
+
+                                })
+                                .catch(err => {
+                                    console.log(err);
+                                });
                     }
 
                     refreshUpdatePreview();
