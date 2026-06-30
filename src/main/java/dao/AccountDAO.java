@@ -312,4 +312,118 @@ public class AccountDAO {
 
         return false;
     }
+
+    public List<Account> searchStaffs(
+            String keyword,
+            String role,
+            String status,
+            int offset,
+            int pageSize) {
+
+        List<Account> list = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT * FROM ("
+                + " SELECT *, ROW_NUMBER() OVER(ORDER BY accountID DESC) rn "
+                + " FROM Account "
+                + " WHERE (fullname LIKE ? OR email LIKE ?) "
+        );
+
+        if (!role.isEmpty()) {
+            sql.append(" AND role = ? ");
+        }
+
+        if (!status.isEmpty()) {
+            sql.append(" AND status = ? ");
+        }
+
+        sql.append(") t WHERE rn > ? AND rn <= ?");
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int i = 1;
+
+            ps.setString(i++, "%" + keyword + "%");
+            ps.setString(i++, "%" + keyword + "%");
+
+            if (!role.isEmpty()) {
+                ps.setString(i++, role);
+            }
+
+            if (!status.isEmpty()) {
+                ps.setString(i++, status);
+            }
+
+            ps.setInt(i++, offset);
+            ps.setInt(i, offset + pageSize);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                list.add(
+                        new Account(
+                                rs.getInt("accountID"),
+                                rs.getString("fullname"),
+                                rs.getString("email"),
+                                rs.getString("phone"),
+                                rs.getString("role"),
+                                rs.getString("status")
+                        )
+                );
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public int countStaffsFiltered(
+            String keyword,
+            String role,
+            String status) {
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT COUNT(*) "
+                + "FROM Account "
+                + "WHERE (fullname LIKE ? OR email LIKE ?)"
+        );
+
+        if (!role.isEmpty()) {
+            sql.append(" AND role = ?");
+        }
+
+        if (!status.isEmpty()) {
+            sql.append(" AND status = ?");
+        }
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int i = 1;
+
+            ps.setString(i++, "%" + keyword + "%");
+            ps.setString(i++, "%" + keyword + "%");
+
+            if (!role.isEmpty()) {
+                ps.setString(i++, role);
+            }
+
+            if (!status.isEmpty()) {
+                ps.setString(i++, status);
+            }
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
 }

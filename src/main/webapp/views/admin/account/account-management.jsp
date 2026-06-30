@@ -4,162 +4,147 @@
 
 <!DOCTYPE html>
 <html class="light" lang="vi">
-    <head>
-        <meta charset="utf-8">
-        <meta content="width=device-width, initial-scale=1.0" name="viewport">
-        <title>Quản lý Tài khoản - BookTown</title>
-        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Quản lý Tài khoản - BookTown</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
-        <script id="tailwind-config">
-            tailwind.config = {
-                darkMode: "class",
-                theme: {
-                    extend: {
-                        "colors": {
-                            "primary": "#004d99",
-                            "secondary": "#705d00",
-                            "success": "#2E7D32",
-                            "error": "#D32F2F",
-                            "warning": "#FFA000",
-                            "background": "#f3faff",
-                            "background-alt": "#F5F7F9",
-                            "surface": "#FFFFFF",
-                            "on-surface": "#071e27",
-                            "on-surface-variant": "#424752",
-                            "outline": "#727783",
-                            "outline-variant": "#c2c6d4",
-                            "surface-container-low": "#e6f6ff",
-                            "surface-container": "#dbf1fe",
-                            "surface-container-high": "#d5ecf8",
-                            "primary-fixed": "#d6e3ff",
-                            "secondary-container": "#fdd835",
-                            "error-container": "#ffdad6"
-                        }
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#004d99",
+                        "secondary": "#705d00",
+                        "success": "#2E7D32",
+                        "error": "#D32F2F",
+                        "warning": "#FFA000",
+                        "background": "#f3faff",
+                        "background-alt": "#F5F7F9",
+                        "surface": "#FFFFFF",
+                        "on-surface": "#071e27",
+                        "on-surface-variant": "#424752",
+                        "outline": "#727783",
+                        "outline-variant": "#c2c6d4",
+                        "surface-container-low": "#e6f6ff",
+                        "surface-container": "#dbf1fe",
+                        "surface-container-high": "#d5ecf8",
+                        "primary-fixed": "#d6e3ff",
+                        "secondary-container": "#fdd835",
+                        "error-container": "#ffdad6"
                     }
                 }
             }
-        </script>
+        }
+    </script>
 
-        <style>
-            body {
-                font-family: 'Inter', sans-serif;
-            }
-            .material-symbols-outlined {
-                font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-                vertical-align: middle;
-            }
-            .custom-scrollbar::-webkit-scrollbar {
-                width: 6px;
-            }
-            .custom-scrollbar::-webkit-scrollbar-track {
-                background: transparent;
-            }
-            .custom-scrollbar::-webkit-scrollbar-thumb {
-                background: #cbd5e1;
-                border-radius: 10px;
-            }
-            .status-badge-active {
-                background: #E8F5E9;
-                color: #2E7D32;
-            }
-            .status-badge-inactive {
-                background: #FFEBEE;
-                color: #D32F2F;
-            }
-            .role-badge-admin {
-                background: #FCE4EC;
-                color: #D32F2F;
-            }
-            .role-badge-staff {
-                background: #E3F2FD;
-                color: #004d99;
-            }
-            .role-badge-customer {
-                background: #FFF3E0;
-                color: #E65100;
-            }
-            .table-hover:hover {
-                background-color: #f5f9ff;
-            }
-            .modal-hidden {
-                display: none;
-            }
-            .modal-visible {
-                display: flex;
-            }
-        </style>
-    </head>
-    <body class="bg-background text-on-surface flex min-h-screen">
-        <%@ include file="/views/layout/dashboard/sidebar.jsp" %>
-        <main class="flex-1 md:ml-64 min-h-screen">
-            <div class="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
-                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                    <div>
-                        <h2 class="text-3xl font-bold text-on-surface mb-2">Quản lý Tài khoản</h2>
-                        <p class="text-on-surface-variant">Xem và quản lý tài khoản của BookTown</p>
-                    </div>
-                    <a href="${pageContext.request.contextPath}/dashboard/add-staff"
-                       class="bg-primary text-white px-6 py-3 rounded-xl flex items-center gap-2 hover:opacity-90 transition w-fit">
-                        <span class="material-symbols-outlined">person_add</span>
-                        Thêm tài khoản nhân viên
-                    </a>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .status-badge-active  { background: #E8F5E9; color: #2E7D32; }
+        .status-badge-inactive { background: #FFEBEE; color: #D32F2F; }
+        .role-badge-admin    { background: #FCE4EC; color: #D32F2F; }
+        .role-badge-staff    { background: #E3F2FD; color: #004d99; }
+        .role-badge-customer { background: #FFF3E0; color: #E65100; }
+        .table-hover:hover   { background-color: #f5f9ff; }
+        .modal-hidden  { display: none; }
+        .modal-visible { display: flex; }
+    </style>
+</head>
+
+<body class="bg-background text-on-surface flex min-h-screen">
+    <%@ include file="/views/layout/dashboard/sidebar.jsp" %>
+
+    <main class="flex-1 md:ml-64 min-h-screen">
+        <div class="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h2 class="text-3xl font-bold text-on-surface mb-2">Quản lý Tài khoản</h2>
+                    <p class="text-on-surface-variant">Xem và quản lý tài khoản của BookTown</p>
                 </div>
-                <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
-                    <div class="p-6 border-b border-outline-variant/30">
-                        <h3 class="text-xl font-bold mb-4">Danh sách tài khoản</h3>
-                        <c:set var="loginUser" value="${sessionScope.account}" />
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div class="md:col-span-2 relative">
-                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-                                <input type="text" id="searchInput" placeholder="Tìm kiếm theo tên hoặc email..."
-                                       class="w-full pl-11 pr-4 py-3 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
-                            </div>
-                            <select id="roleFilter" class="px-4 py-3 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary">
-                                <option value="">Tất cả vai trò</option>
-                                <option value="customer">Khách hàng</option>
-                                <c:if test="${loginUser.role == 'admin'}">
-                                    <option value="staff">Staff</option>
-                                    <option value="admin">Admin</option>
-                                </c:if>
-                            </select>
-                            <select id="statusFilter" class="px-4 py-3 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary">
-                                <option value="">Tất cả trạng thái</option>
-                                <option value="active">Hoạt động</option>
-                                <option value="inactive">Đã khóa</option>
-                            </select>
+                <a href="${pageContext.request.contextPath}/dashboard/add-staff"
+                   class="bg-primary text-white px-6 py-3 rounded-xl flex items-center gap-2 hover:opacity-90 transition w-fit">
+                    <span class="material-symbols-outlined">person_add</span>
+                    Thêm tài khoản nhân viên
+                </a>
+            </div>
+
+            <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
+                <div class="p-6 border-b border-outline-variant/30">
+                    <h3 class="text-xl font-bold mb-4">Danh sách tài khoản</h3>
+                    <c:set var="loginUser" value="${sessionScope.account}" />
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="md:col-span-2 relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+                            <input type="text" id="searchInput"
+                                   placeholder="Tìm kiếm theo tên hoặc email..."
+                                   value="${keyword}"
+                                   class="w-full pl-11 pr-4 py-3 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
                         </div>
+
+                        <select id="roleFilter" class="px-4 py-3 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                            <option value=""         ${role == ''         ? 'selected' : ''}>Tất cả vai trò</option>
+                            <option value="customer" ${role == 'customer' ? 'selected' : ''}>Khách hàng</option>
+                            <c:if test="${loginUser.role == 'admin'}">
+                                <option value="staff" ${role == 'staff' ? 'selected' : ''}>Staff</option>
+                                <option value="admin" ${role == 'admin' ? 'selected' : ''}>Admin</option>
+                            </c:if>
+                        </select>
+
+                        <select id="statusFilter" class="px-4 py-3 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                            <option value=""         ${status == ''         ? 'selected' : ''}>Tất cả trạng thái</option>
+                            <option value="active"   ${status == 'active'   ? 'selected' : ''}>Hoạt động</option>
+                            <option value="inactive" ${status == 'inactive' ? 'selected' : ''}>Đã khóa</option>
+                        </select>
                     </div>
-                    <div class="overflow-x-auto custom-scrollbar">
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead>
-                                <tr class="bg-background-alt border-b border-outline-variant/30">
-                                    <th class="px-6 py-4 font-semibold text-on-surface">Tài khoản</th>
-                                    <th class="px-6 py-4 font-semibold text-on-surface">Vai trò</th>
-                                    <th class="px-6 py-4 font-semibold text-on-surface">Trạng thái</th>
-                                    <th class="px-6 py-4 font-semibold text-on-surface text-right">Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody id="accountTableBody" class="divide-y divide-outline-variant/20">
-                                <c:forEach items="${customers}" var="c">
-                                    <tr class="table-hover" data-account-id="${c.customerID}" data-type="customer" data-role="customer" data-status="${c.status}">
-                                        <td class="px-6 py-4">
-                                            <div class="font-semibold">${c.fullname}</div>
-                                            <div class="text-xs text-on-surface-variant">${c.email}</div>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <span class="role-badge-customer px-3 py-1 rounded-full text-xs font-bold">Khách hàng</span>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <span class="status-badge ${c.status == 'active' ? 'status-badge-active' : 'status-badge-inactive'} px-3 py-1 rounded-full text-xs font-bold">
-                                                ${c.status == 'active' ? 'Hoạt động' : 'Đã khóa'}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 text-right flex justify-end gap-2">
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-background-alt border-b border-outline-variant/30">
+                                <th class="px-6 py-4 font-semibold text-on-surface">Tài khoản</th>
+                                <th class="px-6 py-4 font-semibold text-on-surface">Vai trò</th>
+                                <th class="px-6 py-4 font-semibold text-on-surface">Trạng thái</th>
+                                <th class="px-6 py-4 font-semibold text-on-surface text-right">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accountTableBody" class="divide-y divide-outline-variant/20">
+                            <c:forEach items="${customers}" var="c">
+                                <tr class="table-hover"
+                                    data-account-id="${c.customerID}"
+                                    data-type="customer"
+                                    data-role="customer"
+                                    data-status="${c.status}">
+                                    <td class="px-6 py-4">
+                                        <div class="font-semibold">${c.fullname}</div>
+                                        <div class="text-xs text-on-surface-variant">${c.email}</div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="role-badge-customer px-3 py-1 rounded-full text-xs font-bold">Khách hàng</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="status-badge ${c.status == 'active' ? 'status-badge-active' : 'status-badge-inactive'} px-3 py-1 rounded-full text-xs font-bold">
+                                            ${c.status == 'active' ? 'Hoạt động' : 'Đã khóa'}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex justify-end gap-2">
                                             <button type="button" class="edit-btn text-primary hover:text-primary/80 p-2 rounded hover:bg-surface-container transition"
                                                     data-id="${c.customerID}" data-type="customer"
-                                                    data-fullname="${c.fullname}" data-phone="${c.phone}" data-status="${c.status}" data-email="${c.email}"
+                                                    data-fullname="${c.fullname}" data-phone="${c.phone}"
+                                                    data-status="${c.status}" data-email="${c.email}"
                                                     title="Cập nhật thông tin">
                                                 <span class="material-symbols-outlined text-sm">edit</span>
                                             </button>
@@ -168,35 +153,43 @@
                                                     title="${c.status == 'active' ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}">
                                                 <span class="material-symbols-outlined text-sm">${c.status == 'active' ? 'lock' : 'lock_open'}</span>
                                             </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+
+                            <c:if test="${not empty staffs}">
+                                <c:forEach items="${staffs}" var="s">
+                                    <tr class="table-hover"
+                                        data-account-id="${s.id}"
+                                        data-type="staff"
+                                        data-role="${s.role == 'admin' ? 'admin' : 'staff'}"
+                                        data-status="${s.status}">
+                                        <td class="px-6 py-4">
+                                            <div class="font-semibold">${s.fullname}</div>
+                                            <div class="text-xs text-on-surface-variant">${s.email}</div>
                                         </td>
-                                    </tr>
-                                </c:forEach>
-                                <c:if test="${not empty staffs}">
-                                    <c:forEach items="${staffs}" var="s">
-                                        <tr class="table-hover" data-account-id="${s.id}" data-type="staff" data-role="${s.role == 'admin' ? 'admin' : 'staff'}" data-status="${s.status}">
-                                            <td class="px-6 py-4">
-                                                <div class="font-semibold">${s.fullname}</div>
-                                                <div class="text-xs text-on-surface-variant">${s.email}</div>
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                <c:choose>
-                                                    <c:when test="${s.role == 'admin'}">
-                                                        <span class="role-badge-admin px-3 py-1 rounded-full text-xs font-bold">Admin</span>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <span class="role-badge-staff px-3 py-1 rounded-full text-xs font-bold">Staff</span>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                <span class="status-badge ${s.status == 'active' ? 'status-badge-active' : 'status-badge-inactive'} px-3 py-1 rounded-full text-xs font-bold">
-                                                    ${s.status == 'active' ? 'Hoạt động' : 'Đã khóa'}
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 text-right flex justify-end gap-2">
+                                        <td class="px-6 py-4">
+                                            <c:choose>
+                                                <c:when test="${s.role == 'admin'}">
+                                                    <span class="role-badge-admin px-3 py-1 rounded-full text-xs font-bold">Admin</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="role-badge-staff px-3 py-1 rounded-full text-xs font-bold">Staff</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span class="status-badge ${s.status == 'active' ? 'status-badge-active' : 'status-badge-inactive'} px-3 py-1 rounded-full text-xs font-bold">
+                                                ${s.status == 'active' ? 'Hoạt động' : 'Đã khóa'}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <div class="flex justify-end gap-2">
                                                 <button type="button" class="edit-btn text-primary hover:text-primary/80 p-2 rounded hover:bg-surface-container transition"
                                                         data-id="${s.id}" data-type="staff"
-                                                        data-fullname="${s.fullname}" data-phone="${s.phone}" data-status="${s.status}" data-role-value="${s.role}" data-email="${s.email}"
+                                                        data-fullname="${s.fullname}" data-phone="${s.phone}"
+                                                        data-status="${s.status}" data-role-value="${s.role}" data-email="${s.email}"
                                                         title="Cập nhật thông tin">
                                                     <span class="material-symbols-outlined text-sm">edit</span>
                                                 </button>
@@ -207,498 +200,419 @@
                                                         <span class="material-symbols-outlined text-sm">${s.status == 'active' ? 'lock' : 'lock_open'}</span>
                                                     </button>
                                                 </c:if>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                </c:if>
-                            </tbody>
-                        </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </c:if>
+
+                        </tbody>
+                    </table>
+                </div>
+
+                <c:if test="${empty customers and empty staffs}">
+                    <div class="p-8 text-center">
+                        <span class="material-symbols-outlined text-5xl text-on-surface-variant mb-2">person_off</span>
+                        <p class="text-on-surface-variant mt-2">Không tìm thấy tài khoản nào</p>
                     </div>
-                    <c:if test="${empty customers and empty staffs}">
-                        <div class="p-8 text-center">
-                            <span class="material-symbols-outlined text-5xl text-on-surface-variant mb-2">person_off</span>
-                            <p class="text-on-surface-variant">Không có tài khoản nào</p>
-                        </div>
-                    </c:if>
-                    <%@ include file="/views/layout/common/pagination.jsp" %>
-                </div>
-            </div>
-        </main>
-        <div id="confirmModal" class="modal-hidden fixed inset-0 bg-black/50 z-50 items-center justify-center">
-            <div class="bg-surface rounded-xl shadow-lg p-6 w-96 max-w-[90vw]">
-                <div class="flex items-center gap-3 mb-4">
-                    <span class="material-symbols-outlined text-4xl text-warning">warning</span>
-                    <div>
-                        <h3 class="text-xl font-bold" id="modalTitle">Xác nhận</h3>
-                    </div>
-                </div>
-                <p class="text-on-surface-variant mb-6" id="modalMessage">Bạn có chắc muốn thực hiện hành động này?</p>
-                <div class="flex gap-3 justify-end">
-                    <button id="modalCancel" class="px-6 py-2 border border-outline-variant text-on-surface rounded-lg hover:bg-background-alt transition">
-                        Hủy
-                    </button>
-                    <button id="modalConfirm" class="px-6 py-2 bg-error text-white rounded-lg hover:opacity-90 transition">
-                        Xác nhận
-                    </button>
-                </div>
+                </c:if>
+
+                <%@ include file="/views/layout/common/pagination.jsp" %>
             </div>
         </div>
+    </main>
 
-        <!-- Update Modal -->
-        <div id="updateModal" class="modal-hidden fixed inset-0 bg-black/50 z-50 items-center justify-center p-4">
-            <div class="bg-surface rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto custom-scrollbar">
-                <div class="relative bg-gradient-to-br from-primary to-primary/70 rounded-t-2xl px-6 pt-6 pb-6">
-                    <button id="updateCancelX" type="button" class="absolute top-4 right-4 text-white/80 hover:text-white transition">
-                        <span class="material-symbols-outlined">close</span>
-                    </button>
-                    <p class="text-white/80 text-sm font-medium mb-2">Cập nhật thông tin tài khoản</p>
-                    <div id="updatePreviewName" class="font-bold text-xl text-white truncate">—</div>
-                    <div class="flex items-center gap-2 mt-2">
-                        <span id="updateRoleBadgePreview" class="role-badge-customer px-3 py-0.5 rounded-full text-xs font-bold">Khách hàng</span>
-                        <span id="updateStatusBadgePreview" class="status-badge-active px-3 py-0.5 rounded-full text-xs font-bold">Hoạt động</span>
-                    </div>
+    <div id="confirmModal" class="modal-hidden fixed inset-0 bg-black/50 z-50 items-center justify-center">
+        <div class="bg-surface rounded-xl shadow-lg p-6 w-96 max-w-[90vw]">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="material-symbols-outlined text-4xl text-warning">warning</span>
+                <h3 class="text-xl font-bold" id="modalTitle">Xác nhận</h3>
+            </div>
+            <p class="text-on-surface-variant mb-6" id="modalMessage">Bạn có chắc muốn thực hiện hành động này?</p>
+            <div class="flex gap-3 justify-end">
+                <button id="modalCancel" class="px-6 py-2 border border-outline-variant text-on-surface rounded-lg hover:bg-background-alt transition">Hủy</button>
+                <button id="modalConfirm" class="px-6 py-2 bg-error text-white rounded-lg hover:opacity-90 transition">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="updateModal" class="modal-hidden fixed inset-0 bg-black/50 z-50 items-center justify-center p-4">
+        <div class="bg-surface rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="relative bg-gradient-to-br from-primary to-primary/70 rounded-t-2xl px-6 pt-6 pb-6">
+                <button id="updateCancelX" type="button" class="absolute top-4 right-4 text-white/80 hover:text-white transition">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+                <p class="text-white/80 text-sm font-medium mb-2">Cập nhật thông tin tài khoản</p>
+                <div id="updatePreviewName" class="font-bold text-xl text-white truncate">—</div>
+                <div class="flex items-center gap-2 mt-2">
+                    <span id="updateRoleBadgePreview" class="role-badge-customer px-3 py-0.5 rounded-full text-xs font-bold">Khách hàng</span>
+                    <span id="updateStatusBadgePreview" class="status-badge-active px-3 py-0.5 rounded-full text-xs font-bold">Hoạt động</span>
                 </div>
+            </div>
 
-                <div class="p-6 pt-5 space-y-5">
-                    <input type="hidden" id="updateId">
-                    <input type="hidden" id="updateType">
-                    <div>
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="material-symbols-outlined text-primary text-lg">badge</span>
-                            <h4 class="font-bold text-sm text-on-surface">Thông tin cá nhân</h4>
-                        </div>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-xs font-medium text-on-surface-variant mb-1">Họ và tên</label>
-                                <input type="text" id="updateFullname"
-                                       class="w-full h-11 px-4 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition">
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-xs font-medium text-on-surface-variant mb-1">Số điện thoại</label>
-                                    <input type="text" id="updatePhone"
-                                           class="w-full h-11 px-4 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-on-surface-variant mb-1">Email</label>
-                                    <input type="text" id="updateEmail" disabled
-                                           class="w-full h-11 px-4 border border-outline-variant rounded-lg bg-background-alt text-on-surface-variant cursor-not-allowed truncate">
-                                </div>
-                            </div>
-                        </div>
+            <div class="p-6 pt-5 space-y-5">
+                <input type="hidden" id="updateId">
+                <input type="hidden" id="updateType">
+
+                <div>
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="material-symbols-outlined text-primary text-lg">badge</span>
+                        <h4 class="font-bold text-sm text-on-surface">Thông tin cá nhân</h4>
                     </div>
-                    <div id="customerStatsSection"
-                         class="hidden pt-4 border-t border-outline-variant/60">
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="material-symbols-outlined text-primary">
-                                shopping_bag
-                            </span>
-                            <h4 class="font-bold text-sm">
-                                Thống kê mua hàng
-                            </h4>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium text-on-surface-variant mb-1">Họ và tên</label>
+                            <input type="text" id="updateFullname"
+                                   class="w-full h-11 px-4 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition">
                         </div>
                         <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-blue-50 rounded-lg p-4">
-                                <p class="text-xs text-gray-500">
-                                    Tổng đơn hàng
-                                </p>
-                                <p id="totalOrders" class="text-2xl font-bold">
-                                    0
-                                </p>
+                            <div>
+                                <label class="block text-xs font-medium text-on-surface-variant mb-1">Số điện thoại</label>
+                                <input type="text" id="updatePhone"
+                                       class="w-full h-11 px-4 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition">
                             </div>
-                            <div class="bg-green-50 rounded-lg p-4">
-                                <p class="text-xs text-gray-500">
-                                    Tổng chi tiêu
-                                </p>
-                                <p id="totalSpent" class="text-2xl font-bold">
-                                    0 VNĐ
-                                </p>
+                            <div>
+                                <label class="block text-xs font-medium text-on-surface-variant mb-1">Email</label>
+                                <input type="text" id="updateEmail" disabled
+                                       class="w-full h-11 px-4 border border-outline-variant rounded-lg bg-background-alt text-on-surface-variant cursor-not-allowed truncate">
                             </div>
                         </div>
                     </div>
-                    <div class="pt-4 border-t border-outline-variant/60">
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="material-symbols-outlined text-primary text-lg">settings_applications</span>
-                            <h4 class="font-bold text-sm text-on-surface">Cài đặt tài khoản</h4>
+                </div>
+
+                <div id="customerStatsSection" class="hidden pt-4 border-t border-outline-variant/60">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="material-symbols-outlined text-primary">shopping_bag</span>
+                        <h4 class="font-bold text-sm">Thống kê mua hàng</h4>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <p class="text-xs text-gray-500">Tổng đơn hàng</p>
+                            <p id="totalOrders" class="text-2xl font-bold">0</p>
                         </div>
-                        <div class="space-y-3">
-                            <div id="updateRoleWrapper" class="hidden">
-                                <label class="block text-xs font-medium text-on-surface-variant mb-1">Vai trò hệ thống</label>
-                                <select id="updateRole" class="w-full h-11 px-4 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition cursor-pointer">
-                                    <option value="staff">Staff</option>
-                                    <option value="admin">Admin</option>
-                                </select>
-                            </div>
-                            <div class="flex items-center justify-between p-3 bg-surface-container-low rounded-lg">
-                                <div>
-                                    <p class="text-sm font-medium text-on-surface">Trạng thái hoạt động</p>
-                                    <p class="text-xs text-on-surface-variant">Cho phép tài khoản truy cập hệ thống</p>
-                                </div>
-                                <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                                    <input type="checkbox" id="updateStatusToggle" class="sr-only peer">
-                                    <div class="w-11 h-6 bg-outline-variant peer-checked:bg-success rounded-full peer transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
-                                </label>
-                            </div>
+                        <div class="bg-green-50 rounded-lg p-4">
+                            <p class="text-xs text-gray-500">Tổng chi tiêu</p>
+                            <p id="totalSpent" class="text-2xl font-bold">0 VNĐ</p>
                         </div>
                     </div>
-
-                    <p id="updateError" class="text-error text-sm hidden"></p>
                 </div>
 
-                <div class="flex gap-3 justify-end px-6 py-4 border-t border-outline-variant/60 bg-background-alt rounded-b-2xl">
-                    <button id="updateCancel" type="button" class="px-6 py-2.5 border border-outline-variant text-on-surface rounded-lg hover:bg-surface transition font-medium">
-                        Hủy
-                    </button>
-                    <button id="updateSubmit" type="button" class="px-6 py-2.5 bg-primary text-white rounded-lg hover:opacity-90 transition font-medium shadow-md shadow-primary/20">
-                        Lưu thay đổi
-                    </button>
+                <div class="pt-4 border-t border-outline-variant/60">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="material-symbols-outlined text-primary text-lg">settings_applications</span>
+                        <h4 class="font-bold text-sm text-on-surface">Cài đặt tài khoản</h4>
+                    </div>
+                    <div class="space-y-3">
+                        <div id="updateRoleWrapper" class="hidden">
+                            <label class="block text-xs font-medium text-on-surface-variant mb-1">Vai trò hệ thống</label>
+                            <select id="updateRole" class="w-full h-11 px-4 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition cursor-pointer">
+                                <option value="staff">Staff</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-surface-container-low rounded-lg">
+                            <div>
+                                <p class="text-sm font-medium text-on-surface">Trạng thái hoạt động</p>
+                                <p class="text-xs text-on-surface-variant">Cho phép tài khoản truy cập hệ thống</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                <input type="checkbox" id="updateStatusToggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-outline-variant peer-checked:bg-success rounded-full peer transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                            </label>
+                        </div>
+                    </div>
                 </div>
+
+                <p id="updateError" class="text-error text-sm hidden"></p>
+            </div>
+
+            <div class="flex gap-3 justify-end px-6 py-4 border-t border-outline-variant/60 bg-background-alt rounded-b-2xl">
+                <button id="updateCancel" type="button" class="px-6 py-2.5 border border-outline-variant text-on-surface rounded-lg hover:bg-surface transition font-medium">Hủy</button>
+                <button id="updateSubmit" type="button" class="px-6 py-2.5 bg-primary text-white rounded-lg hover:opacity-90 transition font-medium shadow-md shadow-primary/20">Lưu thay đổi</button>
             </div>
         </div>
-        <%@ include file="/views/layout/common/toast.jsp" %>
-        <script>
-            const confirmModal = document.getElementById('confirmModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalMessage = document.getElementById('modalMessage');
-            const modalCancel = document.getElementById('modalCancel');
-            const modalConfirm = document.getElementById('modalConfirm');
+    </div>
 
-            let pendingAction = null;
+    <%@ include file="/views/layout/common/toast.jsp" %>
 
-            function showConfirmModal(title, message, callback) {
-                modalTitle.textContent = title;
-                modalMessage.textContent = message;
-                pendingAction = callback;
-                confirmModal.classList.remove('modal-hidden');
-                confirmModal.classList.add('modal-visible');
-            }
+    <script>
+        const BASE_URL = '${pageContext.request.contextPath}/dashboard/account-management';
 
-            function hideConfirmModal() {
-                confirmModal.classList.add('modal-hidden');
-                confirmModal.classList.remove('modal-visible');
-                pendingAction = null;
-            }
+        let searchTimeout = null;
 
-            modalCancel.addEventListener('click', hideConfirmModal);
+        function applyFilters() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            const role    = document.getElementById('roleFilter').value;
+            const status  = document.getElementById('statusFilter').value;
+            const params  = new URLSearchParams({ keyword, role, status, page: 1 });
+            window.location.href = BASE_URL + '?' + params.toString();
+        }
 
-            confirmModal.addEventListener('click', function (e) {
-                if (e.target === confirmModal) {
-                    hideConfirmModal();
-                }
-            });
-            modalConfirm.addEventListener('click', async function () {
-                if (pendingAction) {
-                    const action = pendingAction;
-                    hideConfirmModal();
-                    await action();
-                }
-            });
-            const searchInput = document.getElementById('searchInput');
-            const roleFilter = document.getElementById('roleFilter');
-            const statusFilter = document.getElementById('statusFilter');
-            const tableBody = document.getElementById('accountTableBody');
+        document.getElementById('searchInput').addEventListener('input', function () {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(applyFilters, 400);
+        });
 
-            function filterTable() {
-                const searchTerm = searchInput.value.toLowerCase();
-                const roleValue = roleFilter.value.toLowerCase();
-                const statusValue = statusFilter.value.toLowerCase();
+        document.getElementById('roleFilter').addEventListener('change', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        const confirmModal  = document.getElementById('confirmModal');
+        const modalTitle    = document.getElementById('modalTitle');
+        const modalMessage  = document.getElementById('modalMessage');
+        const modalCancel   = document.getElementById('modalCancel');
+        const modalConfirm  = document.getElementById('modalConfirm');
+        let pendingAction   = null;
 
-                tableBody.querySelectorAll('tr').forEach(row => {
-                    const name = row.querySelector('td:first-child').textContent.toLowerCase();
-                    const email = row.querySelector('td:first-child div:last-child').textContent.toLowerCase();
-                    const role = row.dataset.role.toLowerCase();
-                    const status = row.dataset.status.toLowerCase();
+        function showConfirmModal(title, message, callback) {
+            modalTitle.textContent   = title;
+            modalMessage.textContent = message;
+            pendingAction = callback;
+            confirmModal.classList.replace('modal-hidden', 'modal-visible');
+        }
 
-                    const matchSearch = name.includes(searchTerm) || email.includes(searchTerm);
-                    const matchRole = !roleValue || role === roleValue;
-                    const matchStatus = !statusValue || status === statusValue;
+        function hideConfirmModal() {
+            confirmModal.classList.replace('modal-visible', 'modal-hidden');
+            pendingAction = null;
+        }
 
-                    row.style.display = matchSearch && matchRole && matchStatus ? '' : 'none';
-                });
-            }
+        modalCancel.addEventListener('click', hideConfirmModal);
+        confirmModal.addEventListener('click', e => { if (e.target === confirmModal) hideConfirmModal(); });
+        modalConfirm.addEventListener('click', async () => {
+            if (pendingAction) { const fn = pendingAction; hideConfirmModal(); await fn(); }
+        });
+        document.querySelectorAll('.toggle-status-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const accountId     = this.dataset.accountId;
+                const role          = this.dataset.role;
+                const currentStatus = this.dataset.currentStatus;
+                const newStatus     = currentStatus === 'active' ? 'inactive' : 'active';
+                const row           = this.closest('tr');
 
-            searchInput.addEventListener('input', filterTable);
-            roleFilter.addEventListener('change', filterTable);
-            statusFilter.addEventListener('change', filterTable);
-            document.querySelectorAll('.toggle-status-btn').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const accountId = this.dataset.accountId;
-                    const role = this.dataset.role;
-                    const currentStatus = this.dataset.currentStatus;
-                    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-                    const row = this.closest('tr');
+                const title   = currentStatus === 'active' ? 'Khóa tài khoản'    : 'Mở khóa tài khoản';
+                const message = currentStatus === 'active'
+                    ? 'Bạn có chắc muốn KHÓA tài khoản này?'
+                    : 'Bạn có chắc muốn MỞ KHÓA tài khoản này?';
 
-                    const title = currentStatus === 'active'
-                            ? 'Khóa tài khoản'
-                            : 'Mở khóa tài khoản';
+                showConfirmModal(title, message, async () => {
+                    try {
+                        const body = new URLSearchParams({
+                            action: role === 'customer' ? 'toggleCustomer' : 'toggleStaff',
+                            id: accountId,
+                            status: newStatus
+                        });
 
-                    const message = currentStatus === 'active'
-                            ? `Bạn có chắc muốn KHÓA tài khoản này?`
-                            : `Bạn có chắc muốn MỞ KHÓA tài khoản này?`;
+                        const res    = await fetch(BASE_URL, { method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body });
+                        const result = await res.json();
 
-                    showConfirmModal(title, message, async () => {
-                        try {
-                            const formData = new URLSearchParams();
-                            formData.append('action', role === 'customer' ? 'toggleCustomer' : 'toggleStaff');
-                            formData.append('id', accountId);
-                            formData.append('status', newStatus);
-
-                            const response = await fetch('${pageContext.request.contextPath}/dashboard/account-management', {
-                                method: 'POST',
-                                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                                body: formData.toString()
-                            });
-
-                            const result = await response.json();
-
-                            if (result.success) {
-                                const statusBadge = row.querySelector('.status-badge');
-                                const icon = btn.querySelector('.material-symbols-outlined');
-
-                                if (newStatus === 'active') {
-                                    statusBadge.classList.remove('status-badge-inactive');
-                                    statusBadge.classList.add('status-badge-active');
-                                    statusBadge.textContent = 'Hoạt động';
-                                    icon.textContent = 'lock';
-                                    btn.title = 'Khóa tài khoản';
-                                } else {
-                                    statusBadge.classList.remove('status-badge-active');
-                                    statusBadge.classList.add('status-badge-inactive');
-                                    statusBadge.textContent = 'Đã khóa';
-                                    icon.textContent = 'lock_open';
-                                    btn.title = 'Mở khóa tài khoản';
-                                }
-                                row.dataset.status = newStatus;
-                                btn.dataset.currentStatus = newStatus;
-                                const editBtn = row.querySelector('.edit-btn');
-                                if (editBtn) {
-                                    editBtn.dataset.status = newStatus;
-                                }
-                                showToast('Cập nhật trạng thái thành công!');
-                            } else {
-                                showToast(result.message || 'Cập nhật thất bại!', true);
-                            }
-                        } catch (error) {
-                            console.error('Error:', error);
-                            showToast('Lỗi kết nối, vui lòng thử lại!', true);
-                        }
-                    });
-                });
-            });
-            const updateModal = document.getElementById('updateModal');
-            const updateId = document.getElementById('updateId');
-            const updateType = document.getElementById('updateType');
-            const updateFullname = document.getElementById('updateFullname');
-            const updatePhone = document.getElementById('updatePhone');
-            const updateEmail = document.getElementById('updateEmail');
-            const updateStatusToggle = document.getElementById('updateStatusToggle');
-            const updateRole = document.getElementById('updateRole');
-            const updateRoleWrapper = document.getElementById('updateRoleWrapper');
-            const updateError = document.getElementById('updateError');
-            const updateCancel = document.getElementById('updateCancel');
-            const updateCancelX = document.getElementById('updateCancelX');
-            const updateSubmit = document.getElementById('updateSubmit');
-            const updatePreviewName = document.getElementById('updatePreviewName');
-            const updateRoleBadgePreview = document.getElementById('updateRoleBadgePreview');
-            const updateStatusBadgePreview = document.getElementById('updateStatusBadgePreview');
-            const customerStatsSection = document.getElementById('customerStatsSection');
-            const totalOrders = document.getElementById('totalOrders');
-            const totalSpent = document.getElementById('totalSpent');
-
-            function refreshUpdatePreview() {
-                const name = updateFullname.value.trim() || '—';
-                updatePreviewName.textContent = name;
-
-                let roleLabel, roleClass;
-                if (updateType.value === 'customer') {
-                    roleLabel = 'Khách hàng';
-                    roleClass = 'role-badge-customer';
-                } else if (updateRole.value === 'admin') {
-                    roleLabel = 'Admin';
-                    roleClass = 'role-badge-admin';
-                } else {
-                    roleLabel = 'Staff';
-                    roleClass = 'role-badge-staff';
-                }
-                updateRoleBadgePreview.className = roleClass + ' px-3 py-0.5 rounded-full text-xs font-bold';
-                updateRoleBadgePreview.textContent = roleLabel;
-
-                const isActive = updateStatusToggle.checked;
-                updateStatusBadgePreview.className = (isActive ? 'status-badge-active' : 'status-badge-inactive') + ' px-3 py-0.5 rounded-full text-xs font-bold';
-                updateStatusBadgePreview.textContent = isActive ? 'Hoạt động' : 'Đã khóa';
-            }
-
-            updateFullname.addEventListener('input', refreshUpdatePreview);
-            updateRole.addEventListener('change', refreshUpdatePreview);
-            updateStatusToggle.addEventListener('change', refreshUpdatePreview);
-
-            function showUpdateModal() {
-                updateError.classList.add('hidden');
-                updateModal.classList.remove('modal-hidden');
-                updateModal.classList.add('modal-visible');
-            }
-
-            function hideUpdateModal() {
-                updateModal.classList.add('modal-hidden');
-                updateModal.classList.remove('modal-visible');
-            }
-
-            updateCancel.addEventListener('click', hideUpdateModal);
-            updateCancelX.addEventListener('click', hideUpdateModal);
-
-            updateModal.addEventListener('click', function (e) {
-                if (e.target === updateModal) {
-                    hideUpdateModal();
-                }
-            });
-
-            document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const type = this.dataset.type;
-
-                    updateId.value = this.dataset.id;
-                    updateType.value = type;
-                    updateFullname.value = this.dataset.fullname || '';
-                    updatePhone.value = this.dataset.phone || '';
-                    updateEmail.value = this.dataset.email || '';
-                    updateStatusToggle.checked = (this.dataset.status || 'active') === 'active';
-
-                    if (type === 'staff') {
-
-                        updateRoleWrapper.classList.remove('hidden');
-                        customerStatsSection.classList.add('hidden');
-
-                        updateRole.value =
-                                this.dataset.roleValue || 'staff';
-
-                    } else {
-
-                        updateRoleWrapper.classList.add('hidden');
-                        customerStatsSection.classList.remove('hidden');
-
-                        fetch(
-                                '${pageContext.request.contextPath}/dashboard/account-management',
-                                {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type':
-                                                'application/x-www-form-urlencoded'
-                                    },
-                                    body:
-                                            'action=customerStats&id=' +
-                                            this.dataset.id
-                                }
-                        )
-                                .then(res => res.json())
-                                .then(data => {
-
-                                    totalOrders.textContent =
-                                            data.totalOrders;
-
-                                    totalSpent.textContent =
-                                            Number(data.totalSpent)
-                                            .toLocaleString('vi-VN')
-                                            + ' VNĐ';
-
-                                })
-                                .catch(err => {
-                                    console.log(err);
-                                });
-                    }
-
-                    refreshUpdatePreview();
-                    showUpdateModal();
-                });
-            });
-
-            updateSubmit.addEventListener('click', async function () {
-                const fullname = updateFullname.value.trim();
-                if (!fullname) {
-                    updateError.textContent = 'Họ tên không được để trống';
-                    updateError.classList.remove('hidden');
-                    return;
-                }
-
-                const type = updateType.value;
-                const id = updateId.value;
-                const newStatus = updateStatusToggle.checked ? 'active' : 'inactive';
-
-                const formData = new URLSearchParams();
-                formData.append('action', type === 'customer' ? 'updateCustomer' : 'updateStaff');
-                formData.append('id', id);
-                formData.append('fullname', fullname);
-                formData.append('phone', updatePhone.value.trim());
-                formData.append('status', newStatus);
-                if (type === 'staff') {
-                    formData.append('role', updateRole.value);
-                }
-
-                try {
-                    const response = await fetch('${pageContext.request.contextPath}/dashboard/account-management', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                        body: formData.toString()
-                    });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        hideUpdateModal();
-
-                        const row = document.querySelector('tr[data-account-id="' + id + '"][data-type="' + type + '"]');
-                        if (row) {
-                            row.querySelector('td:first-child .font-semibold').textContent = fullname;
-
+                        if (result.success) {
                             const statusBadge = row.querySelector('.status-badge');
-                            if (newStatus === 'active') {
-                                statusBadge.classList.remove('status-badge-inactive');
-                                statusBadge.classList.add('status-badge-active');
-                                statusBadge.textContent = 'Hoạt động';
-                            } else {
-                                statusBadge.classList.remove('status-badge-active');
-                                statusBadge.classList.add('status-badge-inactive');
-                                statusBadge.textContent = 'Đã khóa';
-                            }
-                            row.dataset.status = newStatus;
+                            const icon        = btn.querySelector('.material-symbols-outlined');
 
-                            const toggleBtn = row.querySelector('.toggle-status-btn');
-                            if (toggleBtn) {
-                                toggleBtn.dataset.currentStatus = newStatus;
-                                const icon = toggleBtn.querySelector('.material-symbols-outlined');
-                                icon.textContent = newStatus === 'active' ? 'lock' : 'lock_open';
-                                toggleBtn.title = newStatus === 'active' ? 'Khóa tài khoản' : 'Mở khóa tài khoản';
+                            if (newStatus === 'active') {
+                                statusBadge.classList.replace('status-badge-inactive', 'status-badge-active');
+                                statusBadge.textContent = 'Hoạt động';
+                                icon.textContent = 'lock';
+                                btn.title = 'Khóa tài khoản';
+                            } else {
+                                statusBadge.classList.replace('status-badge-active', 'status-badge-inactive');
+                                statusBadge.textContent = 'Đã khóa';
+                                icon.textContent = 'lock_open';
+                                btn.title = 'Mở khóa tài khoản';
                             }
+
+                            row.dataset.status       = newStatus;
+                            btn.dataset.currentStatus = newStatus;
 
                             const editBtn = row.querySelector('.edit-btn');
-                            if (editBtn) {
-                                editBtn.dataset.fullname = fullname;
-                                editBtn.dataset.phone = updatePhone.value.trim();
-                                editBtn.dataset.status = newStatus;
+                            if (editBtn) editBtn.dataset.status = newStatus;
 
-                                if (type === 'staff') {
-                                    const newRole = updateRole.value;
-                                    editBtn.dataset.roleValue = newRole;
-                                    row.dataset.role = newRole === 'admin' ? 'admin' : 'staff';
+                            showToast('Cập nhật trạng thái thành công!');
+                        } else {
+                            showToast(result.message || 'Cập nhật thất bại!', true);
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        showToast('Lỗi kết nối, vui lòng thử lại!', true);
+                    }
+                });
+            });
+        });
 
-                                    const roleCell = row.children[1];
-                                    roleCell.innerHTML = newRole === 'admin'
-                                            ? '<span class="role-badge-admin px-3 py-1 rounded-full text-xs font-bold">Admin</span>'
-                                            : '<span class="role-badge-staff px-3 py-1 rounded-full text-xs font-bold">Staff</span>';
-                                }
-                            }
+        const updateModal            = document.getElementById('updateModal');
+        const updateId               = document.getElementById('updateId');
+        const updateType             = document.getElementById('updateType');
+        const updateFullname         = document.getElementById('updateFullname');
+        const updatePhone            = document.getElementById('updatePhone');
+        const updateEmail            = document.getElementById('updateEmail');
+        const updateStatusToggle     = document.getElementById('updateStatusToggle');
+        const updateRole             = document.getElementById('updateRole');
+        const updateRoleWrapper      = document.getElementById('updateRoleWrapper');
+        const updateError            = document.getElementById('updateError');
+        const updateCancel           = document.getElementById('updateCancel');
+        const updateCancelX          = document.getElementById('updateCancelX');
+        const updateSubmit           = document.getElementById('updateSubmit');
+        const updatePreviewName      = document.getElementById('updatePreviewName');
+        const updateRoleBadgePreview = document.getElementById('updateRoleBadgePreview');
+        const updateStatusBadgePreview = document.getElementById('updateStatusBadgePreview');
+        const customerStatsSection   = document.getElementById('customerStatsSection');
+        const totalOrders            = document.getElementById('totalOrders');
+        const totalSpent             = document.getElementById('totalSpent');
+
+        function refreshUpdatePreview() {
+            updatePreviewName.textContent = updateFullname.value.trim() || '—';
+
+            let roleLabel, roleClass;
+            if (updateType.value === 'customer') {
+                roleLabel = 'Khách hàng'; roleClass = 'role-badge-customer';
+            } else if (updateRole.value === 'admin') {
+                roleLabel = 'Admin'; roleClass = 'role-badge-admin';
+            } else {
+                roleLabel = 'Staff'; roleClass = 'role-badge-staff';
+            }
+            updateRoleBadgePreview.className = roleClass + ' px-3 py-0.5 rounded-full text-xs font-bold';
+            updateRoleBadgePreview.textContent = roleLabel;
+
+            const isActive = updateStatusToggle.checked;
+            updateStatusBadgePreview.className = (isActive ? 'status-badge-active' : 'status-badge-inactive') + ' px-3 py-0.5 rounded-full text-xs font-bold';
+            updateStatusBadgePreview.textContent = isActive ? 'Hoạt động' : 'Đã khóa';
+        }
+
+        updateFullname.addEventListener('input', refreshUpdatePreview);
+        updateRole.addEventListener('change', refreshUpdatePreview);
+        updateStatusToggle.addEventListener('change', refreshUpdatePreview);
+
+        function showUpdateModal() {
+            updateError.classList.add('hidden');
+            updateModal.classList.replace('modal-hidden', 'modal-visible');
+        }
+
+        function hideUpdateModal() {
+            updateModal.classList.replace('modal-visible', 'modal-hidden');
+        }
+
+        updateCancel.addEventListener('click', hideUpdateModal);
+        updateCancelX.addEventListener('click', hideUpdateModal);
+        updateModal.addEventListener('click', e => { if (e.target === updateModal) hideUpdateModal(); });
+
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const type = this.dataset.type;
+
+                updateId.value              = this.dataset.id;
+                updateType.value            = type;
+                updateFullname.value        = this.dataset.fullname || '';
+                updatePhone.value           = this.dataset.phone    || '';
+                updateEmail.value           = this.dataset.email    || '';
+                updateStatusToggle.checked  = (this.dataset.status || 'active') === 'active';
+
+                if (type === 'staff') {
+                    updateRoleWrapper.classList.remove('hidden');
+                    customerStatsSection.classList.add('hidden');
+                    updateRole.value = this.dataset.roleValue || 'staff';
+                } else {
+                    updateRoleWrapper.classList.add('hidden');
+                    customerStatsSection.classList.remove('hidden');
+                    totalOrders.textContent = '…';
+                    totalSpent.textContent  = '…';
+
+                    fetch(BASE_URL, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                        body: 'action=customerStats&id=' + this.dataset.id
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        totalOrders.textContent = data.totalOrders;
+                        totalSpent.textContent  = Number(data.totalSpent).toLocaleString('vi-VN') + ' VNĐ';
+                    })
+                    .catch(err => console.error(err));
+                }
+
+                refreshUpdatePreview();
+                showUpdateModal();
+            });
+        });
+
+        updateSubmit.addEventListener('click', async function () {
+            const fullname = updateFullname.value.trim();
+            if (!fullname) {
+                updateError.textContent = 'Họ tên không được để trống';
+                updateError.classList.remove('hidden');
+                return;
+            }
+
+            updateError.classList.add('hidden');
+
+            const type      = updateType.value;
+            const id        = updateId.value;
+            const newStatus = updateStatusToggle.checked ? 'active' : 'inactive';
+
+            const body = new URLSearchParams({
+                action:   type === 'customer' ? 'updateCustomer' : 'updateStaff',
+                id,
+                fullname,
+                phone:    updatePhone.value.trim(),
+                status:   newStatus
+            });
+
+            if (type === 'staff') body.append('role', updateRole.value);
+
+            try {
+                const res    = await fetch(BASE_URL, { method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body });
+                const result = await res.json();
+
+                if (result.success) {
+                    hideUpdateModal();
+
+                    const row = document.querySelector('tr[data-account-id="' + id + '"][data-type="' + type + '"]');
+                    if (row) {
+                        row.querySelector('td:first-child .font-semibold').textContent = fullname;
+
+                        const statusBadge = row.querySelector('.status-badge');
+                        if (newStatus === 'active') {
+                            statusBadge.classList.replace('status-badge-inactive', 'status-badge-active');
+                            statusBadge.textContent = 'Hoạt động';
+                        } else {
+                            statusBadge.classList.replace('status-badge-active', 'status-badge-inactive');
+                            statusBadge.textContent = 'Đã khóa';
+                        }
+                        row.dataset.status = newStatus;
+
+                        const toggleBtn = row.querySelector('.toggle-status-btn');
+                        if (toggleBtn) {
+                            toggleBtn.dataset.currentStatus = newStatus;
+                            toggleBtn.querySelector('.material-symbols-outlined').textContent = newStatus === 'active' ? 'lock' : 'lock_open';
+                            toggleBtn.title = newStatus === 'active' ? 'Khóa tài khoản' : 'Mở khóa tài khoản';
                         }
 
-                        showToast('Cập nhật thành công!');
-                    } else {
-                        updateError.textContent = result.message || 'Cập nhật thất bại!';
-                        updateError.classList.remove('hidden');
+                        const editBtn = row.querySelector('.edit-btn');
+                        if (editBtn) {
+                            editBtn.dataset.fullname = fullname;
+                            editBtn.dataset.phone    = updatePhone.value.trim();
+                            editBtn.dataset.status   = newStatus;
+
+                            if (type === 'staff') {
+                                const newRole = updateRole.value;
+                                editBtn.dataset.roleValue = newRole;
+                                row.dataset.role = newRole;
+
+                                row.children[1].innerHTML = newRole === 'admin'
+                                    ? '<span class="role-badge-admin px-3 py-1 rounded-full text-xs font-bold">Admin</span>'
+                                    : '<span class="role-badge-staff px-3 py-1 rounded-full text-xs font-bold">Staff</span>';
+                            }
+                        }
                     }
-                } catch (error) {
-                    console.error('Error:', error);
-                    updateError.textContent = 'Lỗi kết nối, vui lòng thử lại!';
+
+                    showToast('Cập nhật thành công!');
+                } else {
+                    updateError.textContent = result.message || 'Cập nhật thất bại!';
                     updateError.classList.remove('hidden');
                 }
-            });
-        </script>
-    </body>
+            } catch (err) {
+                console.error(err);
+                updateError.textContent = 'Lỗi kết nối, vui lòng thử lại!';
+                updateError.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
 </html>
