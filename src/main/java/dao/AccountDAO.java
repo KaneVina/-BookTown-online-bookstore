@@ -31,7 +31,7 @@ public class AccountDAO {
 
         // Kiểm tra bảng Customer
         String sqlCustomer = "SELECT customerID, fullname, email, phone, role, status "
-                + "FROM Customer WHERE email = ? AND password = ? AND status = 'active'";
+                + "FROM Customer WHERE email = ? AND password = ?";
         try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sqlCustomer)) {
             ps.setString(1, email);
             ps.setString(2, hashedPassword);
@@ -53,7 +53,7 @@ public class AccountDAO {
 
         // Kiểm tra bảng Account 
         String sqlAccount = "SELECT accountID, fullname, email, phone, role, status "
-                + "FROM Account WHERE email = ? AND password = ? AND status = 'active'";
+                + "FROM Account WHERE email = ? AND password = ?";
         try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sqlAccount)) {
             ps.setString(1, email);
             ps.setString(2, hashedPassword);
@@ -291,7 +291,6 @@ public class AccountDAO {
             String currentPassword,
             String newPassword
     ) {
-
         String sql
                 = "UPDATE Account "
                 + "SET password = ? "

@@ -2,6 +2,7 @@ package controller;
 
 import dao.AccountDAO;
 import dao.CustomerDAO;
+import dao.OrderDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -109,6 +110,9 @@ public class AccountManagementController extends HttpServlet {
                     break;
                 case "updateStaff":
                     handleUpdateStaff(request, out, loginUser);
+                    break;
+                case "customerStats":
+                    getCustomerStats(request, out);
                     break;
                 default:
                     out.write("{\"success\":false,\"message\":\"Action không hợp lệ\"}");
@@ -244,6 +248,30 @@ public class AccountManagementController extends HttpServlet {
         }
 
         return null;
+    }
+
+    private void getCustomerStats(
+            HttpServletRequest request,
+            PrintWriter out) {
+
+        int customerId
+                = Integer.parseInt(request.getParameter("id"));
+
+        OrderDAO orderDAO = new OrderDAO();
+
+        int totalOrders
+                = orderDAO.getTotalOrdersByCustomer(customerId);
+
+        double totalSpent
+                = orderDAO.getTotalSpentByCustomer(customerId);
+
+        out.write(
+                "{"
+                + "\"success\":true,"
+                + "\"totalOrders\":" + totalOrders + ","
+                + "\"totalSpent\":" + totalSpent
+                + "}"
+        );
     }
 
     @Override
