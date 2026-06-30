@@ -18,6 +18,7 @@ controller\ProfileController.class
 dao\WishListDAO.class
 controller\AddressManagementController.class
 controller\VoucherController$VoucherInput.class
+utils\EmailUtil$2.class
 model\Author.class
 utils\VNPayConfig.class
 model\Book.class

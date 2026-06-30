@@ -1,9 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
+import dao.AccountDAO;
 import dao.CustomerDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -14,109 +11,198 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Account;
 
-/**
- *
- * @author Trương Trân
- */
 public class ChangePasswordController extends HttpServlet {
-    @Override
-    protected void doGet(HttpServletRequest request,
-            HttpServletResponse response)
-            throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
-        if (session == null
-                || session.getAttribute("account") == null) {
 
-            response.sendRedirect("login");
+    private final CustomerDAO customerDAO = new CustomerDAO();
+    private final AccountDAO accountDAO = new AccountDAO();
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null || session.getAttribute("account") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-        request.getRequestDispatcher(
-                "/views/profile/changePassword.jsp")
-                .forward(request, response);
+
+        Account acc = (Account) session.getAttribute("account");
+
+        if ("customer".equalsIgnoreCase(acc.getRole())) {
+            request.getRequestDispatcher(
+                    "/views/profile/changePassword.jsp"
+            ).forward(request, response);
+        } else {
+            request.getRequestDispatcher(
+                    "/views/profile/changePassword-admin.jsp"
+            ).forward(request, response);
+        }
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
-    protected void doPost(HttpServletRequest request,
-            HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
         HttpSession session = request.getSession(false);
 
+        if (session == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write(
+                    "{\"success\":false,\"message\":\"Chưa đăng nhập\"}"
+            );
+            return;
+        }
+
         Account acc = (Account) session.getAttribute("account");
+
+        if (acc == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write(
+                    "{\"success\":false,\"message\":\"Chưa đăng nhập\"}"
+            );
+            return;
+        }
 
         String currentPassword = request.getParameter("currentPassword");
         String newPassword = request.getParameter("newPassword");
         String confirmPassword = request.getParameter("confirmPassword");
 
-        // Không được để trống
-        if (currentPassword == null || currentPassword.trim().isEmpty()
-                || newPassword == null || newPassword.trim().isEmpty()
-                || confirmPassword == null || confirmPassword.trim().isEmpty()) {
+        try (PrintWriter out = response.getWriter()) {
 
-            session.setAttribute("error", "Vui lòng nhập đầy đủ thông tin");
-            response.sendRedirect(request.getContextPath() + "/change-password");
-            return;
+            String validationError = validatePasswordChange(
+                    currentPassword,
+                    newPassword,
+                    confirmPassword
+            );
+
+            if (validationError != null) {
+                out.write(
+                        "{\"success\":false,\"message\":\""
+                        + validationError
+                        + "\"}"
+                );
+                return;
+            }
+
+            boolean success;
+
+            if ("customer".equalsIgnoreCase(acc.getRole())) {
+
+                success = customerDAO.changePassword(
+                        acc.getId(),
+                        currentPassword.trim(),
+                        newPassword
+                );
+
+            } else {
+
+                success = accountDAO.changePassword(
+                        acc.getId(),
+                        currentPassword.trim(),
+                        newPassword
+                );
+            }
+
+            if (success) {
+
+                out.write(
+                        "{\"success\":true,\"message\":\"Đổi mật khẩu thành công\"}"
+                );
+
+            } else {
+
+                out.write(
+                        "{\"success\":false,\"message\":\"Mật khẩu hiện tại không đúng\"}"
+                );
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+
+            response.getWriter().write(
+                    "{\"success\":false,\"message\":\"Đã xảy ra lỗi hệ thống\"}"
+            );
         }
-        // kiểm tra độ dài của mật khẩu
-        if (newPassword.length() < 8 || newPassword.length() > 15) {
-
-            session.setAttribute("error", "Mật khẩu phải từ 8 đến 15 ký tự");
-            response.sendRedirect(request.getContextPath() + "/change-password");
-            return;
-        }
-
-        // mật khẩu mới ko khớp với mật khẩu hiện tại
-        if (currentPassword.equals(newPassword)) {
-
-            session.setAttribute("error", "Mật khẩu mới phải khác mật khẩu hiện tại");
-            response.sendRedirect(request.getContextPath() + "/change-password");
-            return;
-        }
-
-        // nếu mật khẩu mới ko khớp với xác nhận mật khẩu
-        if (!newPassword.equals(confirmPassword)) {
-
-            session.setAttribute("error", "Xác nhận mật khẩu không khớp");
-            response.sendRedirect(request.getContextPath() + "/change-password");
-            return;
-        }
-
-        // kiểm tra độ mạnh của mật khẩu
-        if (!newPassword.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,15}$")) {
-            session.setAttribute("error", "Mật khẩu phải chứa chữ hoa, chữ thường và số");
-            response.sendRedirect(request.getContextPath() + "/change-password");
-
-            return;
-        }
-
-        CustomerDAO dao = new CustomerDAO();
-
-        boolean success = dao.changePassword(acc.getId(), currentPassword, newPassword);
-
-        if (success) {
-            session.setAttribute("message", "Đổi mật khẩu thành công");
-        } else {
-            session.setAttribute("error", "Mật khẩu hiện tại không đúng");
-        }
-        response.sendRedirect(request.getContextPath() + "/change-password");
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
+    private String validatePasswordChange(
+            String currentPassword,
+            String newPassword,
+            String confirmPassword) {
+
+        if (currentPassword == null || currentPassword.trim().isEmpty()) {
+            return "Vui lòng nhập mật khẩu hiện tại";
+        }
+
+        if (newPassword == null || newPassword.isEmpty()) {
+            return "Vui lòng nhập mật khẩu mới";
+        }
+
+        if (confirmPassword == null || confirmPassword.isEmpty()) {
+            return "Vui lòng xác nhận mật khẩu mới";
+        }
+
+        currentPassword = currentPassword.trim();
+
+        // Không cho phép khoảng trắng ở bất kỳ vị trí nào
+        if (newPassword.matches(".*\\s.*")) {
+            return "Mật khẩu không được chứa khoảng trắng";
+        }
+
+        if (confirmPassword.matches(".*\\s.*")) {
+            return "Mật khẩu xác nhận không được chứa khoảng trắng";
+        }
+
+        String error = validateNewPassword(newPassword);
+
+        if (error != null) {
+            return error;
+        }
+
+        if (currentPassword.equals(newPassword)) {
+            return "Mật khẩu mới phải khác mật khẩu hiện tại";
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            return "Xác nhận mật khẩu không khớp";
+        }
+
+        return null;
+    }
+
+    private String validateNewPassword(String newPassword) {
+
+        if (newPassword == null || newPassword.isEmpty()) {
+            return "Mật khẩu không được để trống";
+        }
+
+        if (newPassword.length() < 8) {
+            return "Mật khẩu phải ít nhất 8 ký tự";
+        }
+
+        if (newPassword.length() > 15) {
+            return "Mật khẩu không được vượt quá 15 ký tự";
+        }
+
+        String passwordPattern
+                = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&.#^_+=-])[A-Za-z\\d@$!%*?&.#^_+=-]{8,15}$";
+
+        if (!newPassword.matches(passwordPattern)) {
+            return "Mật khẩu phải chứa chữ hoa, chữ thường, số và ký tự đặc biệt";
+        }
+
+        return null;
+    }
+
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+        return "Change Password Controller";
+    }
 }

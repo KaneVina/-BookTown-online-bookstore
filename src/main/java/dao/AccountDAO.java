@@ -273,17 +273,44 @@ public class AccountDAO {
         }
         return false;
     }
-    
+
     public boolean resetPasswordByEmail(String email, String newPassword) {
         String sql = "UPDATE Account SET password = ? WHERE email = ?";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, hashMD5(newPassword));
             ps.setString(2, email);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return false;
+    }
+
+    public boolean changePassword(
+            int accountId,
+            String currentPassword,
+            String newPassword
+    ) {
+
+        String sql
+                = "UPDATE Account "
+                + "SET password = ? "
+                + "WHERE accountID = ? "
+                + "AND password = ?";
+
+        try (
+                Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, hashMD5(newPassword));
+            ps.setInt(2, accountId);
+            ps.setString(3, hashMD5(currentPassword));
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return false;
     }
 }

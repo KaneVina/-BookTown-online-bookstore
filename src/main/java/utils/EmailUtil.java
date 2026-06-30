@@ -9,12 +9,10 @@ import java.util.Properties;
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-
 /**
  *
  * @author PHUC KHANG
  */
-
 public class EmailUtil {
 
     private static final String FROM_EMAIL = "khangnpce181578@fpt.edu.vn";
@@ -79,6 +77,73 @@ public class EmailUtil {
                 + "      </p>"
                 + "    </div>"
                 + "  </div>"
+                + "</div>";
+    }
+
+    public static void sendStaffAccount(
+            String toEmail,
+            String fullName,
+            String username,
+            String password
+    ) throws MessagingException, UnsupportedEncodingException {
+
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(FROM_EMAIL, APP_PASSWORD);
+            }
+        });
+
+        Message message = new MimeMessage(session);
+
+        message.setFrom(new InternetAddress(
+                FROM_EMAIL,
+                "BookTown Support",
+                "UTF-8"
+        ));
+
+        message.setRecipients(
+                Message.RecipientType.TO,
+                InternetAddress.parse(toEmail)
+        );
+
+        message.setSubject("BookTown - Tài khoản nhân viên");
+
+        message.setContent(
+                buildStaffAccountHtml(fullName, username, password),
+                "text/html; charset=UTF-8"
+        );
+
+        Transport.send(message);
+    }
+
+    private static String buildStaffAccountHtml(
+            String fullName,
+            String username,
+            String password
+    ) {
+        return "<div style='font-family: Arial, sans-serif;'>"
+                + "<h2>Chào " + fullName + ",</h2>"
+                + "<p>Tài khoản nhân viên BookTown của bạn đã được tạo thành công.</p>"
+                + "<table style='border-collapse: collapse;'>"
+                + "<tr>"
+                + "<td style='padding:8px'><b>Tên đăng nhập:</b></td>"
+                + "<td style='padding:8px'>" + username + "</td>"
+                + "</tr>"
+                + "<tr>"
+                + "<td style='padding:8px'><b>Mật khẩu:</b></td>"
+                + "<td style='padding:8px'>" + password + "</td>"
+                + "</tr>"
+                + "</table>"
+                + "<p>Vui lòng đổi mật khẩu sau lần đăng nhập đầu tiên.</p>"
+                + "<br>"
+                + "<p>BookTown Team</p>"
                 + "</div>";
     }
 }
