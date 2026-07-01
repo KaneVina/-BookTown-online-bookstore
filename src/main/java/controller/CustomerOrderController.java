@@ -140,6 +140,34 @@ public class CustomerOrderController extends HttpServlet {
         HttpSession session = request.getSession();
         Account staff = (Account) session.getAttribute("account");
 
+        
+        model.Order order = orderDAO.getOrderByID(orderID);
+        if (order != null) {
+          
+            if ("completed".equalsIgnoreCase(status)) {
+                if ("cod".equalsIgnoreCase(order.getPaymentMethod()) && "unpaid".equalsIgnoreCase(order.getPaymentStatus())) {
+                    orderDAO.updatePaymentStatus(orderID, "paid");
+                }
+            }
+            else if ("cancelled".equalsIgnoreCase(status)) {
+                if ("vnpay".equalsIgnoreCase(order.getPaymentMethod()) && "paid".equalsIgnoreCase(order.getPaymentStatus())) {
+                    orderDAO.updatePaymentStatus(orderID, "refunded");
+                    
+                    final model.Order finalOrder = order;
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                utils.EmailUtil.sendRefundEmail(finalOrder.getCustomerEmail(), finalOrder);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
+                }
+            }
+        }
+
         boolean ok = orderDAO.updateOrderStatusAndStaff(orderID, status, staff.getId());
 
         if (ok) {
