@@ -1,6 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+
 <!DOCTYPE html>
 <html class="light" lang="vi">
     <head>
@@ -151,10 +153,6 @@
                     <div>
                         <p class="font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Tổng đánh giá</p>
                         <span class="font-headline-md text-headline-md">${reviews.size()}</span>
-                        <p class="font-label-sm text-label-sm text-success flex items-center gap-1 mt-2">
-                            <span class="material-symbols-outlined text-[14px]" data-icon="arrow_upward">arrow_upward</span>
-                            12% so với tháng trước
-                        </p>
                     </div>
                     <div class="w-12 h-12 rounded-full bg-primary-container/10 flex items-center justify-center text-primary">
                         <span class="material-symbols-outlined text-[32px]" data-icon="forum">forum</span>
@@ -179,35 +177,38 @@
                     </div>
                 </div>
             </section>
-
             <section class="bg-surface p-stack-sm rounded-xl shadow-sm border border-outline-variant/50 mb-stack-md flex flex-wrap gap-4 items-center">
                 <div class="flex flex-1 gap-2 min-w-[300px]">
                     <div class="relative flex-1">
                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]" data-icon="search">search</span>
-                        <input class="w-full pl-10 pr-4 py-2 border border-outline-variant rounded-lg focus:ring-1 focus:ring-primary focus:outline-none font-body-sm text-body-sm" placeholder="Tìm theo tên khách hàng hoặc tên sách..." type="text"/>
+                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 border border-outline-variant rounded-lg focus:ring-1 focus:ring-primary focus:outline-none font-body-sm text-body-sm"
+                               placeholder="Tìm theo tên khách hàng hoặc tên sách..." type="text"
+                               value="${fn:escapeXml(searchValue)}"/>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
                     <span class="font-label-sm text-label-sm text-on-surface-variant">Xếp hạng:</span>
-                    <select class="border border-outline-variant rounded-lg py-2 pl-3 pr-8 font-body-sm text-body-sm focus:ring-1 focus:ring-primary focus:outline-none appearance-none bg-no-repeat bg-[right_8px_center]">
-                        <option>Tất cả sao</option>
-                        <option>5 sao</option>
-                        <option>4 sao</option>
-                        <option>3 sao</option>
-                        <option>2 sao</option>
-                        <option>1 sao</option>
+                    <select id="ratingSelect" class="border border-outline-variant rounded-lg py-2 pl-3 pr-8 font-body-sm text-body-sm focus:ring-1 focus:ring-primary focus:outline-none appearance-none bg-no-repeat bg-[right_8px_center]">
+                        <option value="" ${empty ratingValue ? 'selected' : ''}>Tất cả sao</option>
+                        <option value="5" ${ratingValue == '5' ? 'selected' : ''}>5 sao</option>
+                        <option value="4" ${ratingValue == '4' ? 'selected' : ''}>4 sao</option>
+                        <option value="3" ${ratingValue == '3' ? 'selected' : ''}>3 sao</option>
+                        <option value="2" ${ratingValue == '2' ? 'selected' : ''}>2 sao</option>
+                        <option value="1" ${ratingValue == '1' ? 'selected' : ''}>1 sao</option>
                     </select>
                 </div>
                 <div class="flex items-center gap-3">
                     <span class="font-label-sm text-label-sm text-on-surface-variant">Trạng thái:</span>
-                    <div class="flex bg-background-alt p-1 rounded-lg border border-outline-variant">
-                        <button class="px-4 py-1.5 rounded-md font-label-sm text-label-sm bg-surface shadow-sm text-primary">Tất cả</button>
-                        <button class="px-4 py-1.5 rounded-md font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-all">Chờ</button>
-                        <button class="px-4 py-1.5 rounded-md font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-all">Đã duyệt</button>
+                    <div id="statusGroup" class="flex bg-background-alt p-1 rounded-lg border border-outline-variant">
+                        <button type="button" data-status="all"
+                                class="px-4 py-1.5 rounded-md font-label-sm text-label-sm transition-all ${statusValue == 'all' ? 'bg-surface shadow-sm text-primary' : 'text-on-surface-variant hover:text-on-surface'}">Tất cả</button>
+                        <button type="button" data-status="pending"
+                                class="px-4 py-1.5 rounded-md font-label-sm text-label-sm transition-all ${statusValue == 'pending' ? 'bg-surface shadow-sm text-primary' : 'text-on-surface-variant hover:text-on-surface'}">Chờ</button>
+                        <button type="button" data-status="approved"
+                                class="px-4 py-1.5 rounded-md font-label-sm text-label-sm transition-all ${statusValue == 'approved' ? 'bg-surface shadow-sm text-primary' : 'text-on-surface-variant hover:text-on-surface'}">Đã duyệt</button>
                     </div>
                 </div>
             </section>
-
             <section class="bg-surface rounded-2xl shadow-tonal border border-outline-variant/30 overflow-hidden">
                 <div class="overflow-x-auto custom-scrollbar">
                     <table class="w-full text-left border-collapse">
@@ -314,7 +315,6 @@
                         </tbody>
                     </table>
                 </div>
-
                 <div class="px-6 py-4 flex items-center justify-between border-t border-outline-variant bg-surface-container-lowest">
                     <span class="font-body-sm text-body-sm text-on-surface-variant">Hiển thị ${reviews.size()} đánh giá</span>
                     <div class="flex gap-2">
@@ -329,15 +329,11 @@
                 </div>
             </section>
         </main>
-
-        <!-- Confirmation Modal -->
         <div id="confirmModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
             <div class="bg-white w-[450px] rounded-xl p-6 relative">
                 <button class="absolute top-3 right-4 text-2xl hover:text-gray-500 close-confirm">×</button>
-
                 <h3 class="text-xl font-bold mb-4" id="confirmTitle">Xác nhận hành động</h3>
                 <p class="text-gray-600 mb-6" id="confirmMessage">Bạn chắc chắn muốn thực hiện hành động này?</p>
-
                 <div class="flex justify-end gap-3">
                     <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 close-confirm">
                         Hủy
@@ -667,81 +663,55 @@
                 });
             }
             (function () {
-                const searchInput = document.querySelector('input[placeholder*="Tìm theo tên"]');
-                const ratingSelect = document.querySelector('select:nth-of-type(1)');
-                const statusButtons = document.querySelectorAll('.flex.bg-background-alt button');
-                const tableRows = document.querySelectorAll('tbody tr');
+                const searchInput = document.getElementById('searchInput');
+                const ratingSelect = document.getElementById('ratingSelect');
+                const statusButtons = document.querySelectorAll('#statusGroup button');
 
-                let currentFilter = {
-                    search: '',
-                    rating: '',
-                    status: 'all'
-                };
+                function buildUrl(overrides) {
+                    const params = new URLSearchParams(window.location.search);
 
-                function filterTable() {
-                    tableRows.forEach(row => {
-                        if (row.textContent === 'Không có đánh giá nào')
-                            return;
+                    const search = overrides.search !== undefined ? overrides.search : (searchInput ? searchInput.value : '');
+                    const rating = overrides.rating !== undefined ? overrides.rating : (ratingSelect ? ratingSelect.value : '');
+                    const status = overrides.status !== undefined ? overrides.status : (params.get('status') || 'all');
 
-                        const customerName = row.cells[0].textContent.toLowerCase();
-                        const bookTitle = row.cells[1].textContent.toLowerCase();
-                        const ratingStars = row.querySelector('.stars-fill');
-                        const rating = ratingStars ? ratingStars.parentElement.querySelectorAll('.stars-fill').length : 0;
-                        const statusCell = row.cells[5].textContent.trim();
+                    if (search) {
+                        params.set('search', search);
+                    } else {
+                        params.delete('search');
+                    }
+                    if (rating) {
+                        params.set('rating', rating);
+                    } else {
+                        params.delete('rating');
+                    }
+                    if (status && status !== 'all') {
+                        params.set('status', status);
+                    } else {
+                        params.delete('status');
+                    }
 
-                        let show = true;
-                        if (currentFilter.search) {
-                            show = show && (customerName.includes(currentFilter.search) || bookTitle.includes(currentFilter.search));
-                        }
-                        if (currentFilter.rating) {
-                            const filterRating = parseInt(currentFilter.rating);
-                            show = show && (rating === filterRating);
-                        }
-                        if (currentFilter.status !== 'all') {
-                            if (currentFilter.status === 'pending') {
-                                show = show && statusCell.includes('Chờ duyệt');
-                            } else if (currentFilter.status === 'approved') {
-                                show = show && statusCell.includes('Đã duyệt');
-                            }
-                        }
-
-                        row.style.display = show ? '' : 'none';
-                    });
+                    return '${pageContext.request.contextPath}/review?' + params.toString();
                 }
+
+                let debounceTimer = null;
                 if (searchInput) {
-                    searchInput.addEventListener('input', function (e) {
-                        currentFilter.search = e.target.value.toLowerCase();
-                        filterTable();
+                    searchInput.addEventListener('input', function () {
+                        clearTimeout(debounceTimer);
+                        debounceTimer = setTimeout(function () {
+                            window.location.href = buildUrl({});
+                        }, 500);
                     });
                 }
-                if (ratingSelect) {
-                    ratingSelect.addEventListener('change', function (e) {
-                        const value = e.target.value;
-                        if (value === 'Tất cả sao') {
-                            currentFilter.rating = '';
-                        } else {
-                            currentFilter.rating = value.match(/\d+/)[0];
-                        }
-                        filterTable();
-                    });
-                }
-                statusButtons.forEach((btn, index) => {
-                    btn.addEventListener('click', function () {
-                        statusButtons.forEach(b => {
-                            b.classList.remove('bg-surface', 'shadow-sm', 'text-primary');
-                            b.classList.add('text-on-surface-variant');
-                        });
-                        this.classList.add('bg-surface', 'shadow-sm', 'text-primary');
-                        this.classList.remove('text-on-surface-variant');
-                        if (index === 0) {
-                            currentFilter.status = 'all';
-                        } else if (index === 1) {
-                            currentFilter.status = 'pending';
-                        } else if (index === 2) {
-                            currentFilter.status = 'approved';
-                        }
 
-                        filterTable();
+                if (ratingSelect) {
+                    ratingSelect.addEventListener('change', function () {
+                        window.location.href = buildUrl({});
+                    });
+                }
+
+                statusButtons.forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        window.location.href = buildUrl({status: this.dataset.status});
                     });
                 });
             })();

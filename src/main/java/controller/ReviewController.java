@@ -22,37 +22,44 @@ public class ReviewController extends HttpServlet {
 
         if (session == null
                 || session.getAttribute("account") == null) {
-
-            response.sendRedirect(
-                    request.getContextPath()
-                    + "/login"
-            );
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
         Account acc = (Account) session.getAttribute("account");
         String role = acc.getRole();
 
-        // Chỉ admin và staff được phép truy cập
         if (!"admin".equalsIgnoreCase(role)
                 && !"staff".equalsIgnoreCase(role)) {
-
-            response.sendRedirect(
-                    request.getContextPath()
-                    + "/home"
-            );
+            response.sendRedirect(request.getContextPath() + "/home");
             return;
+        }
+
+        // Đọc tham số search/filter từ query string
+        String search = request.getParameter("search");
+        String ratingParam = request.getParameter("rating");
+        String status = request.getParameter("status");
+
+        Integer rating = null;
+        if (ratingParam != null && !ratingParam.trim().isEmpty()) {
+            try {
+                rating = Integer.parseInt(ratingParam.trim());
+            } catch (NumberFormatException e) {
+                rating = null;
+            }
         }
 
         ReviewDAO dao = new ReviewDAO();
 
-        request.setAttribute(
-                "reviews",
-                dao.getAllReviews()
-        );
+        request.setAttribute("reviews", dao.getAllReviews(search, rating, status));
+
+        // Trả lại giá trị filter hiện tại cho JSP để hiển thị đúng trạng thái UI
+        request.setAttribute("searchValue", search == null ? "" : search);
+        request.setAttribute("ratingValue", ratingParam == null ? "" : ratingParam);
+        request.setAttribute("statusValue", status == null ? "all" : status);
 
         request.getRequestDispatcher(
-                "/views/review/review-management.jsp"
+                "/views/admin/review/review-management.jsp"
         ).forward(request, response);
     }
 
@@ -149,11 +156,11 @@ public class ReviewController extends HttpServlet {
                     "{\"success\":false,\"message\":\"Không thể gửi đánh giá\"}");
         }
     }
-    
-     private void handleEditReview(HttpServletRequest request,
+
+    private void handleEditReview(HttpServletRequest request,
             HttpServletResponse response)
             throws IOException {
- 
+
         if (!isCustomer(request)) {
             sendJson(response,
                     "{\"success\":false,\"message\":\"Vui lòng đăng nhập\"}");
@@ -161,7 +168,7 @@ public class ReviewController extends HttpServlet {
         }
         Account acc = getAccount(request);
         int customerID = acc.getId();
- 
+
         int reviewID = toInt(request.getParameter("reviewID"), 0);
         int rating = toInt(request.getParameter("rating"), 0);
         String comment = request.getParameter("comment");

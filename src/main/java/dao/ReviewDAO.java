@@ -154,19 +154,57 @@ public class ReviewDAO {
     }
 
     // lấy tất cả review để admin và staff xem 
-    public List<Review> getAllReviews() {
+    public List<Review> getAllReviews(String search, Integer rating, String status) {
         List<Review> list = new ArrayList<>();
-        String sql = "SELECT r.*, c.fullname, c.status as customerStatus, b.title as bookTitle, b.thumbnail as bookCover "
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT r.*, c.fullname, c.status as customerStatus, "
+                + "b.title as bookTitle, b.thumbnail as bookCover "
                 + "FROM Review r "
                 + "JOIN Customer c ON r.customerID = c.customerID "
                 + "JOIN Book b ON r.bookID = b.bookID "
-                + "ORDER BY r.created_at DESC";
+                + "WHERE 1=1 "
+        );
+
+        List<Object> params = new ArrayList<>();
+
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append("AND (c.fullname COLLATE Vietnamese_CI_AI LIKE ? COLLATE Vietnamese_CI_AI ")
+                    .append("OR b.title COLLATE Vietnamese_CI_AI LIKE ? COLLATE Vietnamese_CI_AI) ");
+            String kw = "%" + search.trim() + "%";
+            params.add(kw);
+            params.add(kw);
+        }
+
+        if (rating != null && rating >= 1 && rating <= 5) {
+            sql.append("AND r.rating = ? ");
+            params.add(rating);
+        }
+
+        if (status != null) {
+            if ("pending".equalsIgnoreCase(status)) {
+                sql.append("AND (r.adminReply IS NULL OR LTRIM(RTRIM(r.adminReply)) = '') ");
+            } else if ("approved".equalsIgnoreCase(status)) {
+                sql.append("AND r.adminReply IS NOT NULL AND LTRIM(RTRIM(r.adminReply)) <> '' ");
+            }
+        }
+
+        sql.append("ORDER BY r.created_at DESC");
 
         try {
             Connection conn = db.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
+            PreparedStatement ps = conn.prepareStatement(sql.toString());
 
+            for (int i = 0; i < params.size(); i++) {
+                Object p = params.get(i);
+                if (p instanceof String) {
+                    ps.setString(i + 1, (String) p);
+                } else if (p instanceof Integer) {
+                    ps.setInt(i + 1, (Integer) p);
+                }
+            }
+
+            ResultSet rs = ps.executeQuery();
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
             while (rs.next()) {
@@ -185,20 +223,17 @@ public class ReviewDAO {
                 review.setAdminID(rs.getInt("adminID") == 0 ? null : rs.getInt("adminID"));
                 review.setAdminReply(rs.getString("adminReply"));
                 review.setAdminReplyDate(rs.getTimestamp("adminReplyDate"));
-
-                // lấy isHidden từ database
                 review.setIsHidden(rs.getInt("isHidden") == 1);
 
-                // Set date in format dd/MM/yyyy
                 if (rs.getTimestamp("created_at") != null) {
                     review.setDate(sdf.format(rs.getTimestamp("created_at")));
                 }
 
-                String status = "Chờ duyệt";
+                String st = "Chờ duyệt";
                 if (rs.getString("adminReply") != null && !rs.getString("adminReply").trim().isEmpty()) {
-                    status = "Đã duyệt";
+                    st = "Đã duyệt";
                 }
-                review.setStatus(status);
+                review.setStatus(st);
 
                 list.add(review);
             }
@@ -276,7 +311,7 @@ public class ReviewDAO {
             ResultSet rs = checkPs.executeQuery();
             if (rs.next()) {
                 int currentStatus = rs.getInt("isHidden");
-                int newStatus = currentStatus == 1 ? 0 : 1; 
+                int newStatus = currentStatus == 1 ? 0 : 1;
                 PreparedStatement updatePs = conn.prepareStatement(updateSql);
                 updatePs.setInt(1, newStatus);
                 updatePs.setInt(2, reviewID);
@@ -348,13 +383,13 @@ public class ReviewDAO {
 
         return null;
     }
-    
-        public boolean updateReview(int reviewID, int customerID, int rating, String comment) {
- 
+
+    public boolean updateReview(int reviewID, int customerID, int rating, String comment) {
+
         String sql = "UPDATE Review "
                 + "SET rating = ?, comment = ? "
                 + "WHERE reviewID = ? AND customerID = ?";
- 
+
         try {
             Connection conn = db.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -368,7 +403,7 @@ public class ReviewDAO {
         } catch (Exception e) {
             e.printStackTrace();
         }
- 
+
         return false;
     }
 }
