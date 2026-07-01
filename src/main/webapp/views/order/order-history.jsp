@@ -148,37 +148,32 @@
                                         class="flex items-center justify-between sm:justify-end gap-4">
                                         <c:choose>
                                             <c:when test="${order.status == 'pending'}">
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-[#004d99] text-xs font-semibold">
-                                                    <span class="w-2 h-2 rounded-full bg-[#004d99] animate-pulse"></span>
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-yellow-50 text-[#e65c00] text-xs font-semibold">
                                                     Chờ xác nhận
                                                 </span>
                                             </c:when>
                                             <c:when test="${order.status == 'confirmed'}">
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-50 text-[#e65c00] text-xs font-semibold">
-                                                    <span class="w-2 h-2 rounded-full bg-[#FFA000]"></span>
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-[#004d99] text-xs font-semibold">
                                                     Xác nhận
                                                 </span>
                                             </c:when>
                                             <c:when test="${order.status == 'shipping'}">
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-[#134aa4] text-xs font-semibold">
-                                                    <span class="w-2 h-2 rounded-full bg-[#134aa4]"></span>
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 text-[#134aa4] text-xs font-semibold">
                                                     Đang giao
                                                 </span>
                                             </c:when>
                                             <c:when test="${order.status == 'completed'}">
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-50 text-[#2E7D32] text-xs font-semibold">
-                                                    <span class="w-2 h-2 rounded-full bg-[#2E7D32]"></span>
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-50 text-[#2E7D32] text-xs font-semibold">
                                                     Hoàn thành
                                                 </span>
                                             </c:when>
                                             <c:when test="${order.status == 'cancelled'}">
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-[#D32F2F] text-xs font-semibold">
-                                                    <span class="w-2 h-2 rounded-full bg-[#D32F2F]"></span>
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-50 text-[#D32F2F] text-xs font-semibold">
                                                     Hủy đơn
                                                 </span>
                                             </c:when>
                                             <c:otherwise>
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-semibold">
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-semibold">
                                                     ${order.status}
                                                 </span>
                                             </c:otherwise>

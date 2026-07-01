@@ -136,6 +136,24 @@ public class OrderHistoryController extends HttpServlet {
 
         HttpSession session = request.getSession();
         if (ok) {
+            if (order != null) {
+                if ("vnpay".equalsIgnoreCase(order.getPaymentMethod()) && "paid".equalsIgnoreCase(order.getPaymentStatus())) {
+                    orderDAO.updatePaymentStatus(orderID, "refunded");
+                    
+                    final Order finalOrder = order;
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                utils.EmailUtil.sendRefundEmail(finalOrder.getCustomerEmail(), finalOrder);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
+                }
+            }
+
             String orderCode = (order != null) ? order.getOrderCode() : String.valueOf(orderID);
             session.setAttribute("successMessage", "Đã hủy đơn hàng #" + orderCode + " thành công!");
         } else {

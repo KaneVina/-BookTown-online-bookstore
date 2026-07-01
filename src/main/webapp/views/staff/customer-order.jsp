@@ -41,6 +41,7 @@
                             "on-primary-fixed-variant": "#00468c",
                             "on-error-container": "#93000a",
                             "primary": "#004d99",
+                            "primary-container": "#1565c0",
                             "surface-container": "#dbf1fe",
                             "surface-container-low": "#e6f6ff",
                             "surface-container-highest": "#cfe6f2",
@@ -209,40 +210,31 @@
                                             <c:choose>
                                                 <c:when test="${order.status == 'pending'}">
                                                     <span
-                                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-container/20 text-primary text-label-sm font-bold">
-                                                        <span
-                                                            class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                                                        class="inline-flex items-center px-3 py-1 rounded-full bg-warning/10 text-warning text-label-sm font-bold">
                                                         Chờ xác nhận
                                                     </span>
                                                 </c:when>
                                                 <c:when test="${order.status == 'confirmed'}">
                                                     <span
-                                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning/10 text-warning text-label-sm font-bold">
-                                                        <span
-                                                            class="w-2 h-2 rounded-full bg-warning"></span>
+                                                        class="inline-flex items-center px-3 py-1 rounded-full bg-primary-container/20 text-primary text-label-sm font-bold">
                                                         Xác nhận
                                                     </span>
                                                 </c:when>
                                                 <c:when test="${order.status == 'shipping'}">
                                                     <span
-                                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-tertiary/10 text-tertiary text-label-sm font-bold">
-                                                        <span
-                                                            class="w-2 h-2 rounded-full bg-tertiary"></span>
+                                                        class="inline-flex items-center px-3 py-1 rounded-full bg-tertiary/10 text-tertiary text-label-sm font-bold">
                                                         Đang giao
                                                     </span>
                                                 </c:when>
                                                 <c:when test="${order.status == 'completed'}">
                                                     <span
-                                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 text-success text-label-sm font-bold">
-                                                        <span
-                                                            class="w-2 h-2 rounded-full bg-success"></span>
+                                                        class="inline-flex items-center px-3 py-1 rounded-full bg-success/10 text-success text-label-sm font-bold">
                                                         Hoàn thành
                                                     </span>
                                                 </c:when>
                                                 <c:otherwise>
                                                     <span
-                                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error/10 text-error text-label-sm font-bold">
-                                                        <span class="w-2 h-2 rounded-full bg-error"></span>
+                                                        class="inline-flex items-center px-3 py-1 rounded-full bg-error/10 text-error text-label-sm font-bold">
                                                         Hủy đơn
                                                     </span>
                                                 </c:otherwise>
