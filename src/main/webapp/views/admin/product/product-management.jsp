@@ -3,281 +3,299 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html class="light" lang="vi">
-<head>
-    <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Quản lý Sách - BookTown</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: { extend: {
-                colors: {
-                    "primary": "#004d99", "primary-container": "#1565c0",
-                    "secondary-container": "#fdd835", "secondary": "#705d00",
-                    "background": "#f3faff", "surface": "#ffffff",
-                    "on-surface": "#071e27", "on-surface-variant": "#424752",
-                    "outline-variant": "#c2c6d4", "success": "#2E7D32",
-                    "error": "#D32F2F", "warning": "#FFA000",
-                    "error-container": "#ffdad6", "primary-fixed": "#d6e3ff",
-                    "surface-container-low": "#e6f6ff", "background-alt": "#F5F7F9"
-                },
-                fontFamily: { sans: ["Inter", "sans-serif"] }
-            }}
-        }
-    </script>
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
-    </style>
-</head>
-<body class="bg-background text-on-surface flex min-h-screen">
+    <head>
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1.0" name="viewport">
+        <title>Quản lý Sách - BookTown</title>
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+        <script id="tailwind-config">
+            tailwind.config = {
+                darkMode: "class",
+                theme: {extend: {
+                        colors: {
+                            "primary": "#004d99", "primary-container": "#1565c0",
+                            "secondary-container": "#fdd835", "secondary": "#705d00",
+                            "background": "#f3faff", "surface": "#ffffff",
+                            "on-surface": "#071e27", "on-surface-variant": "#424752",
+                            "outline-variant": "#c2c6d4", "success": "#2E7D32",
+                            "error": "#D32F2F", "warning": "#FFA000",
+                            "error-container": "#ffdad6", "primary-fixed": "#d6e3ff",
+                            "surface-container-low": "#e6f6ff", "background-alt": "#F5F7F9"
+                        },
+                        fontFamily: {sans: ["Inter", "sans-serif"]}
+                    }}
+            }
+        </script>
+        <style>
+            body {
+                font-family: 'Inter', sans-serif;
+            }
+            .material-symbols-outlined {
+                font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+                vertical-align: middle;
+            }
+        </style>
+    </head>
+    <body class="bg-background text-on-surface flex min-h-screen">
 
-    <%@ include file="/views/layout/dashboard/sidebar.jsp" %>
-    <%@ include file="/views/layout/common/toast.jsp" %>
+        <%@ include file="/views/layout/dashboard/sidebar.jsp" %>
+        <%@ include file="/views/layout/common/toast.jsp" %>
 
-    <main class="flex-1 md:ml-64 min-h-screen p-6">
-        <div class="max-w-[1200px] mx-auto space-y-6">
+        <main class="flex-1 md:ml-64 min-h-screen p-6">
+            <div class="max-w-[1200px] mx-auto space-y-6">
 
-            <%-- HEADER --%>
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div>
-                    <h2 class="text-2xl font-bold text-on-surface">📦 Quản lý Kho sách</h2>
-                    <p class="text-sm text-on-surface-variant mt-1">Thêm, sửa, ngừng bán sách trong hệ thống BookTown</p>
-                </div>
-                <a href="${pageContext.request.contextPath}/dashboard/product-management?action=create"
-                   class="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl font-semibold hover:opacity-90 transition-opacity whitespace-nowrap">
-                    <span class="material-symbols-outlined">add</span>
-                    Thêm sách mới
-                </a>
-            </div>
-
-            <%-- STATS --%>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-surface p-4 rounded-2xl border border-outline-variant/30 flex flex-col gap-1">
-                    <span class="text-xs font-semibold text-on-surface-variant uppercase">Tổng sách</span>
-                    <span class="text-2xl font-bold text-primary">${total}</span>
-                </div>
-                <div class="bg-surface p-4 rounded-2xl border border-outline-variant/30 flex flex-col gap-1">
-                    <span class="text-xs font-semibold text-on-surface-variant uppercase">Hiển thị</span>
-                    <span class="text-2xl font-bold text-success">${books.size()}</span>
-                </div>
-                <div class="bg-surface p-4 rounded-2xl border border-outline-variant/30 flex flex-col gap-1">
-                    <span class="text-xs font-semibold text-on-surface-variant uppercase">Trang</span>
-                    <span class="text-2xl font-bold">${page}/${totalPages}</span>
-                </div>
-                <div class="bg-surface p-4 rounded-2xl border border-outline-variant/30 flex flex-col gap-1">
-                    <span class="text-xs font-semibold text-on-surface-variant uppercase">Thể loại</span>
-                    <span class="text-2xl font-bold">${genreMap.size()}</span>
-                </div>
-            </div>
-
-            <%-- FILTER & SEARCH BAR --%>
-            <div class="bg-surface rounded-2xl border border-outline-variant/30 p-5">
-                <form method="get" action="${pageContext.request.contextPath}/dashboard/product-management"
-                      class="flex flex-wrap gap-3 items-end">
-                    <div class="flex-1 min-w-[200px] relative">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
-                        <input type="text" name="keyword" value="${keyword}"
-                               placeholder="Tìm theo tên sách, ID..."
-                               class="w-full pl-10 pr-4 py-2.5 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-sm outline-none">
+                <%-- HEADER --%>
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-on-surface">📦 Quản lý Kho sách</h2>
+                        <p class="text-sm text-on-surface-variant mt-1">Thêm, sửa, ngừng bán sách trong hệ thống BookTown</p>
                     </div>
-                    <select name="genre" class="px-3 py-2.5 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary text-sm outline-none">
-                        <option value="">Tất cả thể loại</option>
-                        <c:forEach var="entry" items="${genreMap}">
-                            <option value="${entry.key}" <c:if test="${genreID == entry.key}">selected</c:if>>${entry.value}</option>
-                        </c:forEach>
-                    </select>
-                    <select name="status" class="px-3 py-2.5 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary text-sm outline-none">
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="available"    <c:if test="${status == 'available'}">selected</c:if>>Đang bán</option>
-                        <option value="out_of_stock" <c:if test="${status == 'out_of_stock'}">selected</c:if>>Hết hàng</option>
-                        <option value="discontinued" <c:if test="${status == 'discontinued'}">selected</c:if>>Ngừng bán</option>
-                    </select>
-                    <button type="submit" class="bg-primary text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity flex items-center gap-1.5">
-                        <span class="material-symbols-outlined" style="font-size:18px">filter_list</span> Lọc
-                    </button>
-                    <c:if test="${not empty keyword or not empty status or not empty genreID}">
-                        <a href="${pageContext.request.contextPath}/dashboard/product-management"
-                           class="text-sm text-gray-400 hover:text-error transition-colors px-2 py-2.5">✕ Xóa lọc</a>
-                    </c:if>
-                </form>
-            </div>
+                    <a href="${pageContext.request.contextPath}/dashboard/product-management?action=create"
+                       class="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl font-semibold hover:opacity-90 transition-opacity whitespace-nowrap">
+                        <span class="material-symbols-outlined">add</span>
+                        Thêm sách mới
+                    </a>
+                </div>
 
-            <%-- TABLE --%>
-            <div class="bg-surface rounded-2xl border border-outline-variant/30 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead>
-                        <tr class="bg-background-alt border-b border-outline-variant/30">
-                            <th class="px-4 py-3 font-semibold text-on-surface-variant">Sách</th>
-                            <th class="px-4 py-3 font-semibold text-on-surface-variant">Thể loại</th>
-                            <th class="px-4 py-3 font-semibold text-on-surface-variant text-right">Giá</th>
-                            <th class="px-4 py-3 font-semibold text-on-surface-variant text-center">Tồn kho</th>
-                            <th class="px-4 py-3 font-semibold text-on-surface-variant text-center">Trạng thái</th>
-                            <th class="px-4 py-3 font-semibold text-on-surface-variant text-center">Ngày tạo</th>
-                            <th class="px-4 py-3 font-semibold text-on-surface-variant text-right">Thao tác</th>
-                        </tr>
-                        </thead>
-                        <tbody class="divide-y divide-outline-variant/20">
-                        <c:forEach var="book" items="${books}">
-                        <tr class="hover:bg-surface-container-low transition-colors">
-                            <td class="px-4 py-3">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center">
-                                        <c:choose>
-                                            <c:when test="${not empty book.thumbnail}">
-                                                <img src="${book.thumbnail}" alt="" class="w-full h-full object-cover">
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="material-symbols-outlined text-gray-300" style="font-size:18px">book</span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </div>
-                                    <div>
-                                        <div class="font-semibold text-on-surface line-clamp-1 max-w-[220px]">${book.title}</div>
-                                        <div class="text-xs text-on-surface-variant">ID: ${book.bookID}
-                                            <c:if test="${not empty book.authors}">
-                                                · <c:forEach var="a" items="${book.authors}" varStatus="s">${a}<c:if test="${!s.last}">, </c:if></c:forEach>
-                                            </c:if>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-4 py-3">
-                                <c:if test="${not empty book.genreName}">
-                                    <span class="bg-primary-fixed text-primary text-xs font-semibold px-2.5 py-0.5 rounded-full">${book.genreName}</span>
-                                </c:if>
-                            </td>
-                            <td class="px-4 py-3 text-right font-semibold text-primary">
-                                <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true"/>đ
-                            </td>
-                            <td class="px-4 py-3 text-center">
-                                <c:choose>
-                                    <c:when test="${book.stockQuantity > 10}">
-                                        <span class="text-success font-semibold">${book.stockQuantity}</span>
-                                    </c:when>
-                                    <c:when test="${book.stockQuantity > 0}">
-                                        <span class="text-warning font-semibold">${book.stockQuantity}</span>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span class="text-error font-semibold">0</span>
-                                    </c:otherwise>
-                                </c:choose>
-                            </td>
-                            <td class="px-4 py-3 text-center">
-                                <c:choose>
-                                    <c:when test="${book.status == 'available'}">
-                                        <span class="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">Đang bán</span>
-                                    </c:when>
-                                    <c:when test="${book.status == 'out_of_stock'}">
-                                        <span class="bg-yellow-100 text-yellow-700 text-xs font-bold px-2.5 py-1 rounded-full">Hết hàng</span>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span class="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-1 rounded-full">Ngừng bán</span>
-                                    </c:otherwise>
-                                </c:choose>
-                            </td>
-                            <td class="px-4 py-3 text-center text-xs text-on-surface-variant">
-                                <c:if test="${not empty book.createdAt}">
-                                    <fmt:formatDate value="${book.createdAt}" pattern="dd/MM/yyyy"/>
-                                </c:if>
-                            </td>
-                            <td class="px-4 py-3 text-right">
-                                <div class="flex items-center justify-end gap-2">
-                                    <a href="${pageContext.request.contextPath}/dashboard/product-management?action=edit&id=${book.bookID}"
-                                       class="w-8 h-8 flex items-center justify-center rounded-lg border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
-                                       title="Chỉnh sửa">
-                                        <span class="material-symbols-outlined" style="font-size:17px">edit</span>
-                                    </a>
-                                    <c:if test="${book.status != 'discontinued'}">
-                                    <button type="button"
-                                            onclick="confirmDelete(${book.bookID}, '${book.title}')"
-                                            class="w-8 h-8 flex items-center justify-center rounded-lg border border-red-200 text-error hover:bg-red-50 transition-colors"
-                                            title="Ngừng bán">
-                                        <span class="material-symbols-outlined" style="font-size:17px">block</span>
-                                    </button>
-                                    </c:if>
-                                </div>
-                            </td>
-                        </tr>
-                        </c:forEach>
+                <%-- STATS --%>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-surface p-4 rounded-2xl border border-outline-variant/30 flex flex-col gap-1">
+                        <span class="text-xs font-semibold text-on-surface-variant uppercase">Tổng sách</span>
+                        <span class="text-2xl font-bold text-primary">${total}</span>
+                    </div>
+                    <div class="bg-surface p-4 rounded-2xl border border-outline-variant/30 flex flex-col gap-1">
+                        <span class="text-xs font-semibold text-on-surface-variant uppercase">Hiển thị</span>
+                        <span class="text-2xl font-bold text-success">${books.size()}</span>
+                    </div>
+                    <div class="bg-surface p-4 rounded-2xl border border-outline-variant/30 flex flex-col gap-1">
+                        <span class="text-xs font-semibold text-on-surface-variant uppercase">Trang</span>
+                        <span class="text-2xl font-bold">${page}/${totalPages}</span>
+                    </div>
+                    <div class="bg-surface p-4 rounded-2xl border border-outline-variant/30 flex flex-col gap-1">
+                        <span class="text-xs font-semibold text-on-surface-variant uppercase">Thể loại</span>
+                        <span class="text-2xl font-bold">${genreMap.size()}</span>
+                    </div>
+                </div>
 
-                        <c:if test="${empty books}">
-                        <tr>
-                            <td colspan="7" class="px-4 py-16 text-center text-on-surface-variant">
-                                <span class="material-symbols-outlined text-5xl opacity-30 block mb-2">inventory_2</span>
-                                Không tìm thấy sách nào
-                            </td>
-                        </tr>
+                <%-- FILTER & SEARCH BAR --%>
+                <div class="bg-surface rounded-2xl border border-outline-variant/30 p-5">
+                    <form method="get" action="${pageContext.request.contextPath}/dashboard/product-management"
+                          class="flex flex-wrap gap-3 items-end">
+
+                        <div class="flex-1 min-w-[200px] relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+                            <input type="text" name="keyword" value="${keyword}"
+                                   placeholder="Tìm theo tên sách, ID..."
+                                   class="w-full pl-10 pr-4 py-2.5 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-sm outline-none">
+                        </div>
+
+                        <!-- Thể loại -->
+                        <div class="relative min-w-[150px]">
+                            <select name="genre" onchange="this.form.submit()"
+                                    class="appearance-none w-full pl-3 pr-9 py-2.5 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary text-sm outline-none cursor-pointer bg-white">
+                                <option value="">Thể loại</option>
+                                <c:forEach var="entry" items="${genreMap}">
+                                    <option value="${entry.key}" <c:if test="${genreID == entry.key}">selected</c:if>>${entry.value}</option>
+                                </c:forEach>
+                            </select>
+                            <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px] pointer-events-none">expand_more</span>
+                        </div>
+
+                        <!-- Trạng thái -->
+                        <div class="relative min-w-[150px]">
+                            <select name="status" onchange="this.form.submit()"
+                                    class="appearance-none w-full pl-3 pr-9 py-2.5 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary text-sm outline-none cursor-pointer bg-white">
+                                <option value="">Trạng thái</option>
+                                <option value="available"    <c:if test="${status == 'available'}">selected</c:if>>Đang bán</option>
+                                <option value="out_of_stock" <c:if test="${status == 'out_of_stock'}">selected</c:if>>Hết hàng</option>
+                                <option value="discontinued" <c:if test="${status == 'discontinued'}">selected</c:if>>Ngừng bán</option>
+                                </select>
+                                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px] pointer-events-none">expand_more</span>
+                            </div>
+
+
+                        <c:if test="${not empty keyword or not empty status or not empty genreID}">
+                            <a href="${pageContext.request.contextPath}/dashboard/product-management"
+                               class="text-sm text-gray-400 hover:text-error transition-colors px-2 py-2.5 whitespace-nowrap">✕ Xóa lọc</a>
                         </c:if>
-                        </tbody>
-                    </table>
+                    </form>
                 </div>
 
-                <%-- PAGINATION --%>
-                <c:if test="${totalPages > 1}">
-                <div class="px-4 py-3 border-t border-outline-variant/30 flex justify-center gap-1.5 flex-wrap">
-                    <c:if test="${page > 1}">
-                        <a href="?page=${page-1}<c:if test="${not empty keyword}">&keyword=${keyword}</c:if><c:if test="${not empty status}">&status=${status}</c:if><c:if test="${not empty genreID}">&genre=${genreID}</c:if>"
-                           class="w-9 h-9 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors text-sm">‹</a>
-                    </c:if>
-                    <c:forEach begin="1" end="${totalPages}" var="i">
-                        <c:choose>
-                            <c:when test="${i == page}">
-                                <span class="w-9 h-9 flex items-center justify-center rounded-lg bg-primary text-white font-bold text-sm">${i}</span>
-                            </c:when>
-                            <c:otherwise>
-                                <a href="?page=${i}<c:if test="${not empty keyword}">&keyword=${keyword}</c:if><c:if test="${not empty status}">&status=${status}</c:if><c:if test="${not empty genreID}">&genre=${genreID}</c:if>"
-                                   class="w-9 h-9 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors text-sm">${i}</a>
-                            </c:otherwise>
-                        </c:choose>
-                    </c:forEach>
-                    <c:if test="${page < totalPages}">
-                        <a href="?page=${page+1}<c:if test="${not empty keyword}">&keyword=${keyword}</c:if><c:if test="${not empty status}">&status=${status}</c:if><c:if test="${not empty genreID}">&genre=${genreID}</c:if>"
-                           class="w-9 h-9 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors text-sm">›</a>
+                <%-- TABLE --%>
+                <div class="bg-surface rounded-2xl border border-outline-variant/30 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-background-alt border-b border-outline-variant/30">
+                                    <th class="px-4 py-3 font-semibold text-on-surface-variant">Sách</th>
+                                    <th class="px-4 py-3 font-semibold text-on-surface-variant">Thể loại</th>
+                                    <th class="px-4 py-3 font-semibold text-on-surface-variant text-right">Giá</th>
+                                    <th class="px-4 py-3 font-semibold text-on-surface-variant text-center">Tồn kho</th>
+                                    <th class="px-4 py-3 font-semibold text-on-surface-variant text-center">Trạng thái</th>
+                                    <th class="px-4 py-3 font-semibold text-on-surface-variant text-center">Ngày tạo</th>
+                                    <th class="px-4 py-3 font-semibold text-on-surface-variant text-right">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-outline-variant/20">
+                                <c:forEach var="book" items="${books}">
+                                    <tr class="hover:bg-surface-container-low transition-colors">
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-10 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center">
+                                                    <c:choose>
+                                                        <c:when test="${not empty book.thumbnailFirst}">
+                                                            <img src="${book.thumbnailFirst}" alt="" class="w-full h-full object-cover">
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="material-symbols-outlined text-gray-300" style="font-size:18px">book</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                                <div>
+                                                    <div class="font-semibold text-on-surface line-clamp-1 max-w-[220px]">${book.title}</div>
+                                                    <div class="text-xs text-on-surface-variant">ID: ${book.bookID}
+                                                        <c:if test="${not empty book.authors}">
+                                                            · <c:forEach var="a" items="${book.authors}" varStatus="s">${a}<c:if test="${!s.last}">, </c:if></c:forEach>
+                                                        </c:if>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <c:if test="${not empty book.genreName}">
+                                                <span class="bg-primary-fixed text-primary text-xs font-semibold px-2.5 py-0.5 rounded-full">${book.genreName}</span>
+                                            </c:if>
+                                        </td>
+                                        <td class="px-4 py-3 text-right font-semibold text-primary">
+                                            <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true"/>đ
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            <c:choose>
+                                                <c:when test="${book.stockQuantity > 10}">
+                                                    <span class="text-success font-semibold">${book.stockQuantity}</span>
+                                                </c:when>
+                                                <c:when test="${book.stockQuantity > 0}">
+                                                    <span class="text-warning font-semibold">${book.stockQuantity}</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="text-error font-semibold">0</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            <c:choose>
+                                                <c:when test="${book.status == 'available'}">
+                                                    <span class="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">Đang bán</span>
+                                                </c:when>
+                                                <c:when test="${book.status == 'out_of_stock'}">
+                                                    <span class="bg-yellow-100 text-yellow-700 text-xs font-bold px-2.5 py-1 rounded-full">Hết hàng</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-1 rounded-full">Ngừng bán</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td class="px-4 py-3 text-center text-xs text-on-surface-variant">
+                                            <c:if test="${not empty book.createdAt}">
+                                                <fmt:formatDate value="${book.createdAt}" pattern="dd/MM/yyyy"/>
+                                            </c:if>
+                                        </td>
+                                        <td class="px-4 py-3 text-right">
+                                            <div class="flex items-center justify-end gap-2">
+                                                <a href="${pageContext.request.contextPath}/dashboard/product-management?action=edit&id=${book.bookID}"
+                                                   class="w-8 h-8 flex items-center justify-center rounded-lg border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
+                                                   title="Chỉnh sửa">
+                                                    <span class="material-symbols-outlined" style="font-size:17px">edit</span>
+                                                </a>
+                                                <c:if test="${book.status != 'discontinued'}">
+                                                    <button type="button"
+                                                            onclick="confirmDelete(${book.bookID}, '${book.title}')"
+                                                            class="w-8 h-8 flex items-center justify-center rounded-lg border border-red-200 text-error hover:bg-red-50 transition-colors"
+                                                            title="Ngừng bán">
+                                                        <span class="material-symbols-outlined" style="font-size:17px">block</span>
+                                                    </button>
+                                                </c:if>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+
+                                <c:if test="${empty books}">
+                                    <tr>
+                                        <td colspan="7" class="px-4 py-16 text-center text-on-surface-variant">
+                                            <span class="material-symbols-outlined text-5xl opacity-30 block mb-2">inventory_2</span>
+                                            Không tìm thấy sách nào
+                                        </td>
+                                    </tr>
+                                </c:if>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <%-- PAGINATION --%>
+                    <c:if test="${totalPages > 1}">
+                        <div class="px-4 py-3 border-t border-outline-variant/30 flex justify-center gap-1.5 flex-wrap">
+                            <c:if test="${page > 1}">
+                                <a href="?page=${page-1}<c:if test="${not empty keyword}">&keyword=${keyword}</c:if><c:if test="${not empty status}">&status=${status}</c:if><c:if test="${not empty genreID}">&genre=${genreID}</c:if>"
+                                   class="w-9 h-9 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors text-sm">‹</a>
+                            </c:if>
+                            <c:forEach begin="1" end="${totalPages}" var="i">
+                                <c:choose>
+                                    <c:when test="${i == page}">
+                                        <span class="w-9 h-9 flex items-center justify-center rounded-lg bg-primary text-white font-bold text-sm">${i}</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a href="?page=${i}<c:if test="${not empty keyword}">&keyword=${keyword}</c:if><c:if test="${not empty status}">&status=${status}</c:if><c:if test="${not empty genreID}">&genre=${genreID}</c:if>"
+                                           class="w-9 h-9 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors text-sm">${i}</a>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:forEach>
+                            <c:if test="${page < totalPages}">
+                                <a href="?page=${page+1}<c:if test="${not empty keyword}">&keyword=${keyword}</c:if><c:if test="${not empty status}">&status=${status}</c:if><c:if test="${not empty genreID}">&genre=${genreID}</c:if>"
+                                   class="w-9 h-9 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors text-sm">›</a>
+                            </c:if>
+                        </div>
                     </c:if>
                 </div>
-                </c:if>
+            </div>
+        </main>
+
+        <%-- DELETE CONFIRM MODAL --%>
+        <div id="deleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 hidden">
+            <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4 animate-[fadeIn_.2s_ease]">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-error">warning</span>
+                    </div>
+                    <h3 class="font-bold text-lg">Ngừng bán sách?</h3>
+                </div>
+                <p class="text-sm text-on-surface-variant mb-5" id="deleteMsg">Xác nhận ngừng bán sách này?</p>
+                <div class="flex gap-3">
+                    <button onclick="closeDeleteModal()" class="flex-1 border border-outline-variant px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors">Hủy</button>
+                    <form method="post" action="${pageContext.request.contextPath}/dashboard/product-management" class="flex-1">
+                        <input type="hidden" name="action"  value="delete">
+                        <input type="hidden" name="bookID"  id="deleteBookID" value="">
+                        <button type="submit" class="w-full bg-error text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity">Ngừng bán</button>
+                    </form>
+                </div>
             </div>
         </div>
-    </main>
 
-    <%-- DELETE CONFIRM MODAL --%>
-    <div id="deleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4 animate-[fadeIn_.2s_ease]">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-error">warning</span>
-                </div>
-                <h3 class="font-bold text-lg">Ngừng bán sách?</h3>
-            </div>
-            <p class="text-sm text-on-surface-variant mb-5" id="deleteMsg">Xác nhận ngừng bán sách này?</p>
-            <div class="flex gap-3">
-                <button onclick="closeDeleteModal()" class="flex-1 border border-outline-variant px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors">Hủy</button>
-                <form method="post" action="${pageContext.request.contextPath}/dashboard/product-management" class="flex-1">
-                    <input type="hidden" name="action"  value="delete">
-                    <input type="hidden" name="bookID"  id="deleteBookID" value="">
-                    <button type="submit" class="w-full bg-error text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity">Ngừng bán</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function confirmDelete(id, title) {
-            document.getElementById('deleteBookID').value = id;
-            document.getElementById('deleteMsg').textContent = `Xác nhận ngừng bán: "${title}"? Sách sẽ không còn hiển thị trên trang khách hàng.`;
-            document.getElementById('deleteModal').classList.remove('hidden');
-        }
-        function closeDeleteModal() {
-            document.getElementById('deleteModal').classList.add('hidden');
-        }
-        document.getElementById('deleteModal').addEventListener('click', function(e) {
-            if (e.target === this) closeDeleteModal();
-        });
-    </script>
-</body>
+        <script>
+            function confirmDelete(id, title) {
+                document.getElementById('deleteBookID').value = id;
+                document.getElementById('deleteMsg').textContent = `Xác nhận ngừng bán: "${title}"? Sách sẽ không còn hiển thị trên trang khách hàng.`;
+                document.getElementById('deleteModal').classList.remove('hidden');
+            }
+            function closeDeleteModal() {
+                document.getElementById('deleteModal').classList.add('hidden');
+            }
+            document.getElementById('deleteModal').addEventListener('click', function (e) {
+                if (e.target === this)
+                    closeDeleteModal();
+            });
+        </script>
+    </body>
 </html>

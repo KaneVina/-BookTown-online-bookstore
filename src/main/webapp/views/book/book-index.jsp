@@ -42,7 +42,7 @@
                 <a href="${pageContext.request.contextPath}/products<c:if test="${not empty keyword}">?keyword=${keyword}</c:if>"
                    class="genre-pill <c:if test="${empty genreID}">active</c:if>">Tất cả</a>
                 <c:forEach var="entry" items="${genreMap}">
-                    <a href="${pageContext.request.contextPath}/products?genre=${entry.key}<c:if test="${not empty keyword}">&keyword=${keyword}</c:if><c:if test="${not empty sort}">&sort=${sort}</c:if><c:if test="${not empty minPrice}">&minPrice=${minPrice}</c:if><c:if test="${not empty maxPrice}">&maxPrice=${maxPrice}</c:if>"
+                    <a href="${pageContext.request.contextPath}/products?genre=${entry.key}<c:if test="${not empty keyword}">&keyword=${keyword}</c:if><c:if test="${not empty sort}">&sort=${sort}</c:if>"
                        class="genre-pill <c:if test="${genreID == entry.key}">active</c:if>">${entry.value}</a>
                 </c:forEach>
             </div>
@@ -76,15 +76,15 @@
         <%-- SORT BAR --%>
         <div class="flex flex-wrap items-center gap-2 mb-5 bg-white border border-gray-100 rounded-xl px-4 py-3">
             <span class="text-sm font-semibold text-gray-500 mr-1">Sắp xếp:</span>
-            <a href="?<c:if test="${not empty keyword}">keyword=${keyword}&</c:if><c:if test="${not empty genreID}">genre=${genreID}&</c:if><c:if test="${not empty minPrice}">minPrice=${minPrice}&</c:if><c:if test="${not empty maxPrice}">maxPrice=${maxPrice}&</c:if>sort=newest"
+            <a href="?<c:if test="${not empty keyword}">keyword=${keyword}&</c:if><c:if test="${not empty genreID}">genre=${genreID}&</c:if>sort=newest"
                class="sort-btn <c:if test="${sort == 'newest' or empty sort}">active</c:if>">🆕 Mới nhất</a>
-            <a href="?<c:if test="${not empty keyword}">keyword=${keyword}&</c:if><c:if test="${not empty genreID}">genre=${genreID}&</c:if><c:if test="${not empty minPrice}">minPrice=${minPrice}&</c:if><c:if test="${not empty maxPrice}">maxPrice=${maxPrice}&</c:if>sort=popular"
+            <a href="?<c:if test="${not empty keyword}">keyword=${keyword}&</c:if><c:if test="${not empty genreID}">genre=${genreID}&</c:if>sort=popular"
                class="sort-btn <c:if test="${sort == 'popular'}">active</c:if>">🔥 Phổ biến</a>
-            <a href="?<c:if test="${not empty keyword}">keyword=${keyword}&</c:if><c:if test="${not empty genreID}">genre=${genreID}&</c:if><c:if test="${not empty minPrice}">minPrice=${minPrice}&</c:if><c:if test="${not empty maxPrice}">maxPrice=${maxPrice}&</c:if>sort=price_asc"
+            <a href="?<c:if test="${not empty keyword}">keyword=${keyword}&</c:if><c:if test="${not empty genreID}">genre=${genreID}&</c:if>sort=price_asc"
                class="sort-btn <c:if test="${sort == 'price_asc'}">active</c:if>">💲 Giá thấp</a>
-            <a href="?<c:if test="${not empty keyword}">keyword=${keyword}&</c:if><c:if test="${not empty genreID}">genre=${genreID}&</c:if><c:if test="${not empty minPrice}">minPrice=${minPrice}&</c:if><c:if test="${not empty maxPrice}">maxPrice=${maxPrice}&</c:if>sort=price_desc"
+            <a href="?<c:if test="${not empty keyword}">keyword=${keyword}&</c:if><c:if test="${not empty genreID}">genre=${genreID}&</c:if>sort=price_desc"
                class="sort-btn <c:if test="${sort == 'price_desc'}">active</c:if>">💰 Giá cao</a>
-            <a href="?<c:if test="${not empty keyword}">keyword=${keyword}&</c:if><c:if test="${not empty genreID}">genre=${genreID}&</c:if><c:if test="${not empty minPrice}">minPrice=${minPrice}&</c:if><c:if test="${not empty maxPrice}">maxPrice=${maxPrice}&</c:if>sort=name"
+            <a href="?<c:if test="${not empty keyword}">keyword=${keyword}&</c:if><c:if test="${not empty genreID}">genre=${genreID}&</c:if>sort=name"
                class="sort-btn <c:if test="${sort == 'name'}">active</c:if>">🔤 A→Z</a>
             <span class="ml-auto text-sm text-gray-400">${totalBooks} sách</span>
         </div>
@@ -97,8 +97,8 @@
                     <div class="prod-card">
                         <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center overflow-hidden">
                             <c:choose>
-                                <c:when test="${not empty book.thumbnail}">
-                                    <img alt="${book.title}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" src="${book.thumbnail}">
+                                <c:when test="${not empty book.thumbnailFirst}">
+                                    <img alt="${book.title}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" src="${book.thumbnailFirst}">
                                 </c:when>
                                 <c:otherwise>
                                     <i data-lucide="book-open" class="w-14 h-14 text-gray-200"></i>
@@ -107,6 +107,12 @@
                             <%-- Badge status --%>
                             <c:if test="${book.featured}">
                                 <div class="absolute top-2.5 left-2.5 bg-[#8E24AA] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">🔥 Hot</div>
+                            </c:if>
+                            <%-- Badge hết hàng --%>
+                            <c:if test="${book.status == 'out_of_stock' or book.stockQuantity == 0}">
+                                <div class="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
+                                    <span class="bg-white text-red-600 font-bold text-[11px] px-3 py-1 rounded-full">Hết hàng</span>
+                                </div>
                             </c:if>
                              <%-- Wishlist button --%>
                              <c:if test="${empty sessionScope.account or sessionScope.account.role == 'customer'}">
@@ -211,20 +217,20 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".wishlist-form").forEach(form => {
         form.addEventListener("submit", async function(e) {
             e.preventDefault();
-
+            
             const btn = this.querySelector(".wish-btn");
             const svg = btn.querySelector("svg");
             const actionInput = this.querySelector("input[name='action']");
             const bookIdInput = this.querySelector("input[name='bookID']");
-
+            
             const action = actionInput.value;
             const bookID = bookIdInput.value;
-
+            
             const formData = new FormData();
             formData.append("action", action);
             formData.append("bookID", bookID);
             formData.append("ajax", "true");
-
+            
             try {
                 const response = await fetch(this.action, {
                     method: "POST",
@@ -233,7 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     },
                     body: formData
                 });
-
+                
                 if (response.status === 401) {
                     const data = await response.json();
                     if (data.redirect) {
@@ -241,7 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                     return;
                 }
-
+                
                 if (response.ok) {
                     const data = await response.json();
                     if (data.success) {
@@ -260,7 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             btn.setAttribute("title", "Thêm vào yêu thích");
                             showToast("success", "Đã xóa khỏi yêu thích!");
                         }
-
+                        
                         const badge = document.querySelector(".wishlist-badge");
                         if (badge) {
                             badge.textContent = data.wishlistCount;
@@ -286,22 +292,22 @@ document.addEventListener("DOMContentLoaded", () => {
     function showToast(type, message) {
         const toast = document.getElementById("toast-container");
         if (!toast) return;
-
+        
         const toastEl = document.createElement("div");
-        toastEl.className = `flex items-center gap-3 p-4 rounded-xl shadow-lg border text-sm font-semibold transition-all duration-300 transform translate-y-2 opacity-0 ` +
+        toastEl.className = `flex items-center gap-3 p-4 rounded-xl shadow-lg border text-sm font-semibold transition-all duration-300 transform translate-y-2 opacity-0 ` + 
             (type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800');
-
-        const icon = type === 'success'
+            
+        const icon = type === 'success' 
             ? `<svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
             : `<svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
-
+            
         toastEl.innerHTML = `${icon} <span>${message}</span>`;
         toast.appendChild(toastEl);
-
+        
         setTimeout(() => {
             toastEl.classList.remove("translate-y-2", "opacity-0");
         }, 10);
-
+        
         setTimeout(() => {
             toastEl.classList.add("opacity-0");
             setTimeout(() => toastEl.remove(), 300);

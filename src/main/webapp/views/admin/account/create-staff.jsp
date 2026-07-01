@@ -129,7 +129,7 @@
                                     <label class="text-sm font-semibold text-on-surface">Số điện thoại</label>
                                     <input id="phone" name="phone"
                                            class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white text-base"
-                                           placeholder="090 000 0000" type="tel"/>
+                                           placeholder="094 4567 234" type="tel"/>
                                 </div>
                             </div>
                         </div>
@@ -140,12 +140,13 @@
                             </h3>
                             <div class="space-y-4">
                                 <div class="flex flex-col gap-2">
-                                    <label class="text-sm font-semibold text-on-surface">Vai trò <span class="text-error">*</span></label>
-                                    <select id="role" name="role"
-                                            class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white text-base appearance-none">
-                                        <option value="staff">Staff</option>
-                                        <!--                                        <option value="admin">Admin</option>-->
-                                    </select>
+                                    <label class="text-sm font-semibold text-on-surface">Vai trò</label>
+                                    <input
+                                        type="text"
+                                        value="Staff"
+                                        readonly
+                                        class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-gray-100 text-base cursor-not-allowed"
+                                        />
                                 </div>
                                 <div class="flex flex-col gap-2">
                                     <label class="text-sm font-semibold text-on-surface">Mật khẩu tạm thời <span class="text-error">*</span></label>
@@ -168,22 +169,14 @@
                                 </div>
                                 <div class="flex flex-col gap-2">
                                     <label class="text-sm font-semibold text-on-surface">Trạng thái</label>
-                                    <select id="status" name="status"
-                                            class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-white text-base appearance-none">
-                                        <option value="active">Hoạt động</option>
-                                        <option value="inactive">Tạm khóa</option>
-                                    </select>
+                                    <input
+                                        type="text"
+                                        value="Hoạt động"
+                                        readonly
+                                        class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-gray-100 text-base cursor-not-allowed"
+                                        />
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="pt-8 border-t border-outline-variant mt-8 space-y-6">
-                        <div class="flex flex-col gap-2">
-                            <label class="text-sm font-semibold text-on-surface">Ghi chú nội bộ</label>
-                            <textarea id="note"
-                                      class="w-full p-4 rounded-lg border border-outline-variant bg-white text-base resize-none"
-                                      placeholder="Nhập ghi chú hoặc thông tin bổ sung về nhân viên này..."
-                                      rows="3"></textarea>
                         </div>
                     </div>
                     <div class="flex flex-col sm:flex-row justify-end gap-4 pt-8">
@@ -257,9 +250,9 @@
                 const fullname = document.getElementById('fullname').value.trim();
                 const email = document.getElementById('email').value.trim();
                 const phone = document.getElementById('phone').value.trim();
-                const role = document.getElementById('role').value;
+                const role = "staff";
                 const password = document.getElementById('temp-password').value.trim();
-                const status = document.getElementById('status').value;
+                const status = "active";
 
                 if (!fullname) {
                     showToast("Vui lòng nhập họ và tên", true);
@@ -267,10 +260,6 @@
                 }
                 if (!email) {
                     showToast("Vui lòng nhập email", true);
-                    return;
-                }
-                if (!role) {
-                    showToast("Vui lòng chọn vai trò", true);
                     return;
                 }
                 if (!password) {

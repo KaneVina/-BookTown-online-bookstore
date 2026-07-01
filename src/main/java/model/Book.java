@@ -233,4 +233,29 @@ public class Book {
     public void setUpdatedAt(Timestamp v) {
         this.updatedAt = v;
     }
+
+    public String getThumbnailFirst() {
+        if (thumbnail == null || thumbnail.isEmpty()) {
+            return "";
+        }
+        int idx = thumbnail.indexOf('|');
+        return idx >= 0 ? thumbnail.substring(0, idx).trim() : thumbnail.trim();
+    }
+
+    /**
+     * Trả về danh sách TẤT CẢ ảnh (tách theo |)
+     */
+    public java.util.List<String> getAllImages() {
+        java.util.List<String> list = new java.util.ArrayList<>();
+        if (thumbnail == null || thumbnail.isEmpty()) {
+            return list;
+        }
+        for (String s : thumbnail.split("\\|")) {
+            String t = s.trim();
+            if (!t.isEmpty()) {
+                list.add(t);
+            }
+        }
+        return list;
+    }
 }

@@ -39,7 +39,7 @@
                                 <c:choose>
                                     <c:when test="${not empty item.thumbnail}">
                                         <img class="w-full h-full object-cover"
-                                             src="${item.thumbnail}"
+                                             src="${item.thumbnailFirst}"
                                              alt="${item.title}"/>
                                     </c:when>
                                     <c:otherwise>

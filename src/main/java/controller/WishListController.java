@@ -13,17 +13,24 @@ import model.WishlistItem;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * WishlistController – xử lý wishlist của customer đã đăng nhập. URL: /wishlist
+ * doGet → hiển thị trang wishlist doPost action=add → thêm sách doPost
+ * action=remove → xóa sách doPost action=moveToCart → chuyển sang giỏ hàng
+ */
 public class WishListController extends HttpServlet {
 
     private final WishListDAO wishlistDAO = new WishListDAO();
-    private final BookDAO     bookDAO     = new BookDAO();
+    private final BookDAO bookDAO = new BookDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
         Account account = requireCustomer(req, resp);
-        if (account == null) return;
+        if (account == null) {
+            return;
+        }
 
         List<WishlistItem> items = wishlistDAO.getWishlistItems(account.getId());
         int wishlistCount = items.size();
@@ -38,24 +45,24 @@ public class WishListController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        // ✅ FIX: setCharacterEncoding TRƯỚC KHI đọc bất kỳ param nào
-        req.setCharacterEncoding("UTF-8");
-
-        // ✅ FIX: isAjax kiểm tra cả header lẫn param, sau khi encoding đã set
         boolean isAjax = "XMLHttpRequest".equalsIgnoreCase(req.getHeader("X-Requested-With"))
                 || "true".equals(req.getParameter("ajax"));
 
-        Account account = requireCustomer(req, resp, isAjax);
-        if (account == null) return;
+        Account account = requireCustomer(req, resp);
+        if (account == null) {
+            return;
+        }
 
-        String action  = req.getParameter("action");
-        int    bookID  = parseIntParam(req.getParameter("bookID"), 0);
+        req.setCharacterEncoding("UTF-8");
+        String action = req.getParameter("action");
+        int bookID = parseIntParam(req.getParameter("bookID"), 0);
         String referer = req.getHeader("Referer");
 
         if (bookID <= 0) {
             if (isAjax) {
-                sendJson(resp, HttpServletResponse.SC_BAD_REQUEST,
-                        "{\"success\":false,\"error\":\"invalid_book_id\"}");
+                resp.setContentType("application/json");
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resp.getWriter().write("{\"success\":false,\"error\":\"invalid_book_id\"}");
             } else {
                 redirect(resp, referer, req.getContextPath() + "/wishlist");
             }
@@ -68,12 +75,14 @@ public class WishListController extends HttpServlet {
                 int wCount = wishlistDAO.countWishlistItems(account.getId());
                 req.getSession().setAttribute("wishlistCount", wCount);
                 if (isAjax) {
-                    sendJson(resp, 200,
-                            String.format("{\"success\":%b,\"action\":\"added\",\"wishlistCount\":%d}", ok, wCount));
+                    resp.setContentType("application/json");
+                    resp.setCharacterEncoding("UTF-8");
+                    resp.getWriter().write(String.format("{\"success\":%b,\"action\":\"added\",\"wishlistCount\":%d}", ok, wCount));
                 } else {
-                    resp.sendRedirect(buildRedirectUrl(referer,
+                    String redirectUrl = buildRedirectUrl(referer,
                             req.getContextPath() + "/products?id=" + bookID,
-                            "wishResult=" + (ok ? "added" : "wishError")));
+                            "wishResult=" + (ok ? "added" : "wishError"));
+                    resp.sendRedirect(redirectUrl);
                 }
                 break;
             }
@@ -82,8 +91,9 @@ public class WishListController extends HttpServlet {
                 int wCount = wishlistDAO.countWishlistItems(account.getId());
                 req.getSession().setAttribute("wishlistCount", wCount);
                 if (isAjax) {
-                    sendJson(resp, 200,
-                            String.format("{\"success\":%b,\"action\":\"removed\",\"wishlistCount\":%d}", ok, wCount));
+                    resp.setContentType("application/json");
+                    resp.setCharacterEncoding("UTF-8");
+                    resp.getWriter().write(String.format("{\"success\":%b,\"action\":\"removed\",\"wishlistCount\":%d}", ok, wCount));
                 } else {
                     String back = (referer != null && referer.contains("/wishlist"))
                             ? req.getContextPath() + "/wishlist?removed=1"
@@ -96,14 +106,16 @@ public class WishListController extends HttpServlet {
             }
             case "moveToCart": {
                 wishlistDAO.moveToCart(account.getId(), bookID);
+                int qty = parseIntParam(req.getParameter("quantity"), 1);
+                wishlistDAO.moveToCart(account.getId(), bookID, qty);
                 int wCount = wishlistDAO.countWishlistItems(account.getId());
                 int cCount = new dao.CartDAO().countCartItems(account.getId());
                 req.getSession().setAttribute("wishlistCount", wCount);
                 req.getSession().setAttribute("cartCount", cCount);
                 if (isAjax) {
-                    sendJson(resp, 200,
-                            String.format("{\"success\":true,\"action\":\"moved_to_cart\",\"wishlistCount\":%d,\"cartCount\":%d}",
-                                    wCount, cCount));
+                    resp.setContentType("application/json");
+                    resp.setCharacterEncoding("UTF-8");
+                    resp.getWriter().write(String.format("{\"success\":true,\"action\":\"moved_to_cart\",\"wishlistCount\":%d,\"cartCount\":%d}", wCount, cCount));
                 } else {
                     resp.sendRedirect(req.getContextPath() + "/wishlist?movedToCart=1");
                 }
@@ -111,25 +123,29 @@ public class WishListController extends HttpServlet {
             }
             default:
                 if (isAjax) {
-                    sendJson(resp, HttpServletResponse.SC_BAD_REQUEST,
-                            "{\"success\":false,\"error\":\"unknown_action\"}");
+                    resp.setContentType("application/json");
+                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    resp.getWriter().write("{\"success\":false,\"error\":\"unknown_action\"}");
                 } else {
                     resp.sendRedirect(req.getContextPath() + "/wishlist");
                 }
         }
     }
 
-    // ── Helper: guard customer (nhận isAjax từ ngoài, tránh đọc param lần 2) ──
-    private Account requireCustomer(HttpServletRequest req, HttpServletResponse resp, boolean isAjax)
+    // ── Helper: guard customer ────────────────────────────────────────
+    private Account requireCustomer(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         HttpSession session = req.getSession(false);
         Account acc = (session != null) ? (Account) session.getAttribute("account") : null;
 
+        boolean isAjax = "XMLHttpRequest".equalsIgnoreCase(req.getHeader("X-Requested-With"))
+                || "true".equals(req.getParameter("ajax"));
+
         if (acc == null) {
             if (isAjax) {
-                sendJson(resp, HttpServletResponse.SC_UNAUTHORIZED,
-                        "{\"success\":false,\"error\":\"unauthorized\",\"redirect\":\""
-                                + req.getContextPath() + "/login\"}");
+                resp.setContentType("application/json");
+                resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                resp.getWriter().write("{\"success\":false,\"error\":\"unauthorized\",\"redirect\":\"" + req.getContextPath() + "/login\"}");
             } else {
                 resp.sendRedirect(req.getContextPath() + "/login");
             }
@@ -137,29 +153,15 @@ public class WishListController extends HttpServlet {
         }
         if (!"customer".equals(acc.getRole())) {
             if (isAjax) {
-                sendJson(resp, HttpServletResponse.SC_FORBIDDEN,
-                        "{\"success\":false,\"error\":\"forbidden\",\"redirect\":\""
-                                + req.getContextPath() + "/home\"}");
+                resp.setContentType("application/json");
+                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                resp.getWriter().write("{\"success\":false,\"error\":\"forbidden\",\"redirect\":\"" + req.getContextPath() + "/home\"}");
             } else {
                 resp.sendRedirect(req.getContextPath() + "/home");
             }
             return null;
         }
         return acc;
-    }
-
-    // ── Overload cho doGet (không cần isAjax) ────────────────────────
-    private Account requireCustomer(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-        return requireCustomer(req, resp, false);
-    }
-
-    // ── Helper: write JSON response ───────────────────────────────────
-    private void sendJson(HttpServletResponse resp, int status, String json) throws IOException {
-        resp.setContentType("application/json");
-        resp.setCharacterEncoding("UTF-8");
-        resp.setStatus(status);
-        resp.getWriter().write(json);
     }
 
     private void redirect(HttpServletResponse resp, String referer, String fallback)
@@ -169,13 +171,20 @@ public class WishListController extends HttpServlet {
 
     private String buildRedirectUrl(String referer, String fallback, String extraParam) {
         String base = (referer != null && !referer.isEmpty()) ? referer : fallback;
+        // Xóa param wishResult cũ nếu có
         base = base.replaceAll("[&?]wishResult=[^&]*", "")
-                   .replaceAll("[&?]addResult=[^&]*", "");
+                .replaceAll("[&?]addResult=[^&]*", "");
         return base + (base.contains("?") ? "&" : "?") + extraParam;
     }
 
     private int parseIntParam(String param, int defaultVal) {
-        if (param == null || param.trim().isEmpty()) return defaultVal;
-        try { return Integer.parseInt(param.trim()); } catch (Exception e) { return defaultVal; }
+        if (param == null || param.trim().isEmpty()) {
+            return defaultVal;
+        }
+        try {
+            return Integer.parseInt(param.trim());
+        } catch (Exception e) {
+            return defaultVal;
+        }
     }
 }

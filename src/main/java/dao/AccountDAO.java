@@ -31,7 +31,7 @@ public class AccountDAO {
 
         // Kiểm tra bảng Customer
         String sqlCustomer = "SELECT customerID, fullname, email, phone, role, status "
-                + "FROM Customer WHERE email = ? AND password = ? AND status = 'active'";
+                + "FROM Customer WHERE email = ? AND password = ?";
         try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sqlCustomer)) {
             ps.setString(1, email);
             ps.setString(2, hashedPassword);
@@ -53,7 +53,7 @@ public class AccountDAO {
 
         // Kiểm tra bảng Account 
         String sqlAccount = "SELECT accountID, fullname, email, phone, role, status "
-                + "FROM Account WHERE email = ? AND password = ? AND status = 'active'";
+                + "FROM Account WHERE email = ? AND password = ?";
         try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sqlAccount)) {
             ps.setString(1, email);
             ps.setString(2, hashedPassword);
@@ -272,5 +272,158 @@ public class AccountDAO {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public boolean resetPasswordByEmail(String email, String newPassword) {
+        String sql = "UPDATE Account SET password = ? WHERE email = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, hashMD5(newPassword));
+            ps.setString(2, email);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean changePassword(
+            int accountId,
+            String currentPassword,
+            String newPassword
+    ) {
+        String sql
+                = "UPDATE Account "
+                + "SET password = ? "
+                + "WHERE accountID = ? "
+                + "AND password = ?";
+
+        try (
+                Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, hashMD5(newPassword));
+            ps.setInt(2, accountId);
+            ps.setString(3, hashMD5(currentPassword));
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public List<Account> searchStaffs(
+            String keyword,
+            String role,
+            String status,
+            int offset,
+            int pageSize) {
+
+        List<Account> list = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT * FROM ("
+                + " SELECT *, ROW_NUMBER() OVER(ORDER BY accountID DESC) rn "
+                + " FROM Account "
+                + " WHERE (fullname LIKE ? OR email LIKE ?) "
+        );
+
+        if (!role.isEmpty()) {
+            sql.append(" AND role = ? ");
+        }
+
+        if (!status.isEmpty()) {
+            sql.append(" AND status = ? ");
+        }
+
+        sql.append(") t WHERE rn > ? AND rn <= ?");
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int i = 1;
+
+            ps.setString(i++, "%" + keyword + "%");
+            ps.setString(i++, "%" + keyword + "%");
+
+            if (!role.isEmpty()) {
+                ps.setString(i++, role);
+            }
+
+            if (!status.isEmpty()) {
+                ps.setString(i++, status);
+            }
+
+            ps.setInt(i++, offset);
+            ps.setInt(i, offset + pageSize);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                list.add(
+                        new Account(
+                                rs.getInt("accountID"),
+                                rs.getString("fullname"),
+                                rs.getString("email"),
+                                rs.getString("phone"),
+                                rs.getString("role"),
+                                rs.getString("status")
+                        )
+                );
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public int countStaffsFiltered(
+            String keyword,
+            String role,
+            String status) {
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT COUNT(*) "
+                + "FROM Account "
+                + "WHERE (fullname LIKE ? OR email LIKE ?)"
+        );
+
+        if (!role.isEmpty()) {
+            sql.append(" AND role = ?");
+        }
+
+        if (!status.isEmpty()) {
+            sql.append(" AND status = ?");
+        }
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int i = 1;
+
+            ps.setString(i++, "%" + keyword + "%");
+            ps.setString(i++, "%" + keyword + "%");
+
+            if (!role.isEmpty()) {
+                ps.setString(i++, role);
+            }
+
+            if (!status.isEmpty()) {
+                ps.setString(i++, status);
+            }
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
     }
 }

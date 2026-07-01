@@ -224,16 +224,9 @@
                     <%-- Filter --%>
                     <div class="p-4 border-b flex flex-col md:flex-row gap-3 justify-between items-center"
                          style="border-color:#c2c6d4; background:#F5F7F9;">
-                        <form method="get" action="${pageContext.request.contextPath}/dashboard/voucher/voucher-management"
+                        <form method="get" action="${pageContext.request.contextPath}/dashboard/voucher-management"
                               class="flex flex-col md:flex-row gap-3 w-full">
-                            <div class="relative w-full md:w-80">
-                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2"
-                                      style="font-size:18px;color:#727783;">search</span>
-                                <input name="keyword" value="${param.keyword}"
-                                       class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 bg-white"
-                                       style="border-color:#c2c6d4;"
-                                       placeholder="Tìm kiếm theo mã code..." type="text"/>
-                            </div>
+                           
                             <div class="flex items-center gap-2">
                                 <span class="text-xs font-medium whitespace-nowrap" style="color:#424752;">Trạng thái:</span>
                                 <select name="status" class="border rounded-lg text-sm py-2 pl-3 pr-8 bg-white appearance-none focus:outline-none focus:ring-2"
@@ -357,7 +350,7 @@
                                                 <%-- Hành động --%>
                                                 <td class="py-3.5 px-5 text-right">
                                                     <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <button onclick="openEditModal(${v.voucherID}, '${v.code}',${v.discountPercent},${v.quantity != null ? v.quantity : 0}, '${v.startDate}', '${v.endDate}', '${v.status}')"
+                                                        <button onclick="openEditModal(${v.voucherID}, '${v.code}', ${v.discountPercent}, ${v.quantity != null ? v.quantity : 0}, '${v.startDate}', '${v.endDate}', '${v.status}', ${v.minOrderValue != null ? v.minOrderValue : 0}, ${v.maxDiscountValue != null ? v.maxDiscountValue : 0})"
                                                                 class="p-1.5 rounded hover:bg-surface-container transition-colors"
                                                                 style="color:#424752;" title="Chỉnh sửa">
                                                             <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
@@ -437,31 +430,53 @@
                 }
             });
 
-            // ---- Modal ----
+            // ---- Helpers ----
+            function todayStr() {
+                return new Date().toISOString().split('T')[0];
+            }
+
+            // ---- Modal: TẠO MỚI ----
             function openModal() {
                 document.getElementById('modalTitle').textContent = 'Thêm Voucher Mới';
                 document.getElementById('formAction').value = 'add';
                 document.getElementById('formVoucherID').value = '';
                 document.getElementById('voucherForm').reset();
-                document.getElementById('toggleBg').style.background = '#2E7D32';
-                document.getElementById('statusLabel').textContent = 'Kích hoạt ngay';
+
+                // Giới hạn startDate không được chọn quá khứ
+                document.getElementById('inputStartDate').min = todayStr();
+                document.getElementById('inputEndDate').min   = todayStr();
+
+                // Ẩn toggle trạng thái — tạo mới luôn active
+                document.getElementById('statusSection').classList.add('hidden');
+
                 updatePreview();
                 document.getElementById('voucherModal').classList.remove('hidden');
             }
 
-            function openEditModal(id, code, discount, quantity, startDate, endDate, status) {
+            // ---- Modal: CHỈNH SỬA ----
+            function openEditModal(id, code, discount, quantity, startDate, endDate, status, minOrder, maxDisc) {
                 document.getElementById('modalTitle').textContent = 'Chỉnh Sửa Voucher';
                 document.getElementById('formAction').value = 'edit';
                 document.getElementById('formVoucherID').value = id;
-                document.getElementById('inputCode').value = code;
+                document.getElementById('inputCode').value     = code;
                 document.getElementById('inputDiscount').value = discount;
                 document.getElementById('inputQuantity').value = quantity > 0 ? quantity : '';
                 document.getElementById('inputStartDate').value = startDate ? startDate.substring(0, 10) : '';
-                document.getElementById('inputEndDate').value = endDate ? endDate.substring(0, 10) : '';
+                document.getElementById('inputEndDate').value   = endDate   ? endDate.substring(0, 10)   : '';
+                document.getElementById('inputMinOrder').value    = minOrder > 0 ? minOrder : '';
+                document.getElementById('inputMaxDiscount').value = maxDisc  > 0 ? maxDisc  : '';
+
+                // Bỏ giới hạn min khi edit
+                document.getElementById('inputStartDate').min = '';
+                document.getElementById('inputEndDate').min   = '';
+
+                // Hiện toggle trạng thái khi edit
+                document.getElementById('statusSection').classList.remove('hidden');
                 const isActive = status === 'active';
                 document.getElementById('inputStatus').checked = isActive;
                 document.getElementById('toggleBg').style.background = isActive ? '#2E7D32' : '#c2c6d4';
-                document.getElementById('statusLabel').textContent = isActive ? 'Kích hoạt ngay' : 'Vô hiệu hóa';
+                document.getElementById('statusLabel').textContent    = isActive ? 'Đang kích hoạt' : 'Vô hiệu hóa';
+
                 updatePreview();
                 document.getElementById('voucherModal').classList.remove('hidden');
             }
@@ -482,14 +497,23 @@
 
             // ---- Preview ----
             function updatePreview() {
-                const code = (document.getElementById('inputCode').value || 'CODE').toUpperCase();
+                const code     = (document.getElementById('inputCode').value    || 'CODE').toUpperCase();
                 const discount = document.getElementById('inputDiscount').value || '?';
-                const endDate = document.getElementById('inputEndDate').value;
-                document.getElementById('previewCode').textContent = code;
+                const endDate  = document.getElementById('inputEndDate').value;
+                const minOrder = document.getElementById('inputMinOrder').value;
+                const maxDisc  = document.getElementById('inputMaxDiscount').value;
+
+                document.getElementById('previewCode').textContent     = code;
                 document.getElementById('previewDiscount').textContent = 'Giảm ' + discount + '%';
-                document.getElementById('previewDate').textContent = endDate
-                        ? 'HSD: ' + new Date(endDate).toLocaleDateString('vi-VN')
-                        : 'HSD: Không giới hạn';
+                document.getElementById('previewDate').textContent     = endDate
+                    ? 'HSD: ' + new Date(endDate).toLocaleDateString('vi-VN')
+                    : 'HSD: Không giới hạn';
+                document.getElementById('previewMinOrder').textContent = minOrder
+                    ? 'Đơn tối thiểu: ' + Number(minOrder).toLocaleString('vi-VN') + '₫'
+                    : '';
+                document.getElementById('previewMaxDiscount').textContent = maxDisc
+                    ? 'Giảm tối đa: ' + Number(maxDisc).toLocaleString('vi-VN') + '₫'
+                    : '';
             }
 
             // ---- Random code ----
@@ -507,11 +531,12 @@
                 navigator.clipboard.writeText(code).then(() => showToast('Đã sao chép mã: ' + code));
             }
 
-            // Toggle style update
+            // ---- Toggle style (chỉ dùng khi edit) ----
             document.getElementById('inputStatus').addEventListener('change', function () {
                 document.getElementById('toggleBg').style.background = this.checked ? '#2E7D32' : '#c2c6d4';
-                document.getElementById('statusLabel').textContent = this.checked ? 'Kích hoạt ngay' : 'Vô hiệu hóa';
+                document.getElementById('statusLabel').textContent    = this.checked ? 'Đang kích hoạt' : 'Vô hiệu hóa';
             });
+
         </script>
     </body>
 </html>

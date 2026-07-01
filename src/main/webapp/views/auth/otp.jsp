@@ -70,36 +70,82 @@
             }
         </script>
         <style>
-            body { font-family: 'Inter', sans-serif; background-color: #f3faff; }
+            body {
+                font-family: 'Inter', sans-serif;
+                background-color: #f3faff;
+            }
             .material-symbols-outlined {
                 font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
                 vertical-align: middle;
             }
             .otp-input {
-                width: 100%; aspect-ratio: 1;
+                width: 100%;
+                aspect-ratio: 1;
                 text-align: center;
-                font-size: 24px; font-weight: 700;
-                border: 2px solid #c2c6d4; border-radius: 12px;
-                outline: none; transition: all 0.2s;
-                background: #fff; color: #071e27;
+                font-size: 24px;
+                font-weight: 700;
+                border: 2px solid #c2c6d4;
+                border-radius: 12px;
+                outline: none;
+                transition: all 0.2s;
+                background: #fff;
+                color: #071e27;
                 -moz-appearance: textfield;
             }
             .otp-input::-webkit-outer-spin-button,
-            .otp-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-            .otp-input:focus { border-color: #004d99; box-shadow: 0 0 0 3px rgba(0,77,153,0.15); }
-            .otp-input.filled { border-color: #004d99; background: #f3faff; }
-            .otp-input.error  { border-color: #D32F2F; background: #ffdad6; }
-            @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-            .animate-fade-in { animation: fadeIn 0.4s ease both; }
-            @keyframes spin { to { transform: rotate(360deg); } }
-            .animate-spin { animation: spin 1s linear infinite; display: inline-block; }
+            .otp-input::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+            .otp-input:focus {
+                border-color: #004d99;
+                box-shadow: 0 0 0 3px rgba(0,77,153,0.15);
+            }
+            .otp-input.filled {
+                border-color: #004d99;
+                background: #f3faff;
+            }
+            .otp-input.error  {
+                border-color: #D32F2F;
+                background: #ffdad6;
+            }
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(16px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            .animate-fade-in {
+                animation: fadeIn 0.4s ease both;
+            }
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+            .animate-spin {
+                animation: spin 1s linear infinite;
+                display: inline-block;
+            }
         </style>
     </head>
 
     <body class="bg-background text-on-background min-h-screen flex flex-col">
 
         <%-- Header --%>
-        <%@ include file="/views/layout/homepage/header.jsp" %>
+        <header class="w-full px-4 md:px-margin-desktop h-16 flex items-center justify-between bg-transparent">
+            <div class="font-bold text-primary">
+                <img src="${pageContext.request.contextPath}/assets/images/logo/logoBT_2.png" alt="BookTown Logo" class="w-[220px] mb-3"/>
+            </div>
+            <div class="flex items-center gap-2 text-on-surface-variant text-sm">
+                <span class="material-symbols-outlined text-primary">help_outline</span>
+                <span class="hidden md:inline">Trợ giúp</span>
+            </div>
+        </header>
 
         <main class="flex-grow flex items-center justify-center px-margin-mobile py-stack-lg">
             <div class="w-full max-w-md animate-fade-in">
@@ -133,7 +179,7 @@
                             <span class="material-symbols-outlined text-[18px]" style="color:#2E7D32">check_circle</span>
                             <span>${sessionScope.otp_success}</span>
                         </div>
-                        <% session.removeAttribute("otp_success"); %>
+                        <% session.removeAttribute("otp_success");%>
                     </c:if>
 
                     <form class="space-y-stack-lg" id="otp-form"
@@ -186,25 +232,33 @@
         </main>
 
         <%-- Footer --%>
-        <%@ include file="/views/layout/homepage/footer.jsp" %>
-
+        <footer class="flex flex-col md:flex-row justify-between items-center w-full px-4 md:px-margin-desktop py-stack-md gap-4 bg-surface-container-low mt-auto">
+            <img src="${pageContext.request.contextPath}/assets/images/logo/logoBT_2.png" alt="BookTown Logo" class="w-[220px] mb-3"/>
+            <div class="flex gap-6 text-on-surface-variant">
+                <a class="font-body-sm text-body-sm hover:text-primary transition-colors" href="#">Điều khoản sử dụng</a>
+                <a class="font-body-sm text-body-sm hover:text-primary transition-colors" href="#">Chính sách bảo mật</a>
+                <a class="font-body-sm text-body-sm hover:text-primary transition-colors" href="#">Liên hệ</a>
+            </div>
+            <div class="font-label-sm text-label-sm text-on-surface-variant">© 2026 BookTown. Tất cả quyền được bảo lưu.</div>
+        </footer>
         <script>
-            const inputs        = document.querySelectorAll('.otp-input');
-            const otpHidden     = document.getElementById('otpHidden');
-            const submitBtn     = document.getElementById('submitBtn');
-            const errorMsg      = document.getElementById('otp-error-msg');
+            const inputs = document.querySelectorAll('.otp-input');
+            const otpHidden = document.getElementById('otpHidden');
+            const submitBtn = document.getElementById('submitBtn');
+            const errorMsg = document.getElementById('otp-error-msg');
             const countdownWrap = document.getElementById('countdown-wrapper');
-            const countdownEl   = document.getElementById('countdown-timer');
-            const resendWrap    = document.getElementById('resend-wrapper');
-            const resendLink    = document.getElementById('resend-link');
-            const resendForm    = document.getElementById('resend-form');
+            const countdownEl = document.getElementById('countdown-timer');
+            const resendWrap = document.getElementById('resend-wrapper');
+            const resendLink = document.getElementById('resend-link');
+            const resendForm = document.getElementById('resend-form');
 
             // ===== OTP BOX =====
             inputs.forEach((input, i) => {
                 input.addEventListener('input', (e) => {
                     const val = e.target.value.replace(/\D/g, '');
                     e.target.value = val ? val[0] : '';
-                    if (val && i < inputs.length - 1) inputs[i + 1].focus();
+                    if (val && i < inputs.length - 1)
+                        inputs[i + 1].focus();
                     updateState();
                 });
                 input.addEventListener('keydown', (e) => {
@@ -215,13 +269,16 @@
                     }
                 });
                 input.addEventListener('keypress', (e) => {
-                    if (!/[0-9]/.test(e.key)) e.preventDefault();
+                    if (!/[0-9]/.test(e.key))
+                        e.preventDefault();
                 });
                 input.addEventListener('paste', (e) => {
                     e.preventDefault();
                     const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
                     if (pasted.length === 6) {
-                        inputs.forEach((b, idx) => { b.value = pasted[idx] || ''; });
+                        inputs.forEach((b, idx) => {
+                            b.value = pasted[idx] || '';
+                        });
                         inputs[5].focus();
                         updateState();
                     }
@@ -245,7 +302,7 @@
                     remaining--;
                     const m = Math.floor(remaining / 60);
                     const s = remaining % 60;
-                    countdownEl.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+                    countdownEl.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
                     if (remaining <= 0) {
                         clearInterval(timerInterval);
                         countdownWrap.classList.add('hidden');

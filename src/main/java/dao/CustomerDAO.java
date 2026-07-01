@@ -264,4 +264,138 @@ public class CustomerDAO {
         }
         return false;
     }
+
+    public boolean resetPasswordByEmail(String email, String newPassword) {
+        String sql = "UPDATE Customer SET password = ? WHERE email = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, hashMD5(newPassword));
+            ps.setString(2, email);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public Account getAccountByEmail(String email) {
+        String sql = "SELECT customerID, fullname, email, phone, role, status "
+                + "FROM Customer WHERE email = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new Account(
+                        rs.getInt("customerID"),
+                        rs.getString("fullname"),
+                        rs.getString("email"),
+                        rs.getString("phone") != null ? rs.getString("phone") : "",
+                        "customer",
+                        rs.getString("status")
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public List<Customer> searchCustomers(
+            String keyword,
+            String status,
+            int offset,
+            int pageSize) {
+
+        List<Customer> list = new ArrayList<>();
+
+        String sql
+                = "SELECT * FROM ("
+                + " SELECT *, ROW_NUMBER() OVER(ORDER BY customerID DESC) rn "
+                + " FROM Customer "
+                + " WHERE fullname LIKE ? "
+                + " OR email LIKE ? "
+                + ") t "
+                + " WHERE rn > ? AND rn <= ?";
+
+        if (!status.isEmpty()) {
+            sql
+                    = "SELECT * FROM ("
+                    + " SELECT *, ROW_NUMBER() OVER(ORDER BY customerID DESC) rn "
+                    + " FROM Customer "
+                    + " WHERE (fullname LIKE ? OR email LIKE ?) "
+                    + " AND status = ? "
+                    + ") t "
+                    + " WHERE rn > ? AND rn <= ?";
+        }
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, "%" + keyword + "%");
+            ps.setString(2, "%" + keyword + "%");
+
+            if (!status.isEmpty()) {
+                ps.setString(3, status);
+                ps.setInt(4, offset);
+                ps.setInt(5, offset + pageSize);
+            } else {
+                ps.setInt(3, offset);
+                ps.setInt(4, offset + pageSize);
+            }
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Customer c = new Customer();
+
+                c.setCustomerID(rs.getInt("customerID"));
+                c.setFullname(rs.getString("fullname"));
+                c.setEmail(rs.getString("email"));
+                c.setPhone(rs.getString("phone"));
+                c.setRole(rs.getString("role"));
+                c.setStatus(rs.getString("status"));
+
+                list.add(c);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public int countCustomersFiltered(
+            String keyword,
+            String status) {
+
+        String sql
+                = "SELECT COUNT(*) "
+                + "FROM Customer "
+                + "WHERE (fullname LIKE ? OR email LIKE ?)";
+
+        if (!status.isEmpty()) {
+            sql += " AND status = ?";
+        }
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, "%" + keyword + "%");
+            ps.setString(2, "%" + keyword + "%");
+
+            if (!status.isEmpty()) {
+                ps.setString(3, status);
+            }
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
 }
