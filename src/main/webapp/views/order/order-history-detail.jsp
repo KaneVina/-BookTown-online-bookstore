@@ -44,40 +44,28 @@
                         <h1 class="text-2xl font-bold text-[#071e27]">Đơn hàng ${order.orderCode}
                         </h1>
 
-                        <span class="px-3 py-1 font-bold text-xs rounded-full flex items-center gap-1
+                        <span class="px-3 py-1 font-bold text-xs rounded-full flex items-center
                               <c:choose>
-                                  <c:when test='${order.status == " pending"}'>bg-amber-100 text-amber-700
+                                  <c:when test='${order.status == "pending"}'>bg-yellow-50 text-[#e65c00]
                                   </c:when>
-                                  <c:when test='${order.status == "confirmed"}'>bg-blue-100
-                                      text-blue-700</c:when>
-                                  <c:when test='${order.status == "shipping"}'>bg-indigo-100
-                                      text-indigo-700</c:when>
-                                  <c:when test='${order.status == "completed"}'>bg-green-100
-                                      text-green-700</c:when>
-                                  <c:otherwise>bg-red-100 text-red-700</c:otherwise>
+                                  <c:when test='${order.status == "confirmed"}'>bg-blue-50 text-[#004d99]
+                                  </c:when>
+                                  <c:when test='${order.status == "shipping"}'>bg-indigo-50
+                                      text-[#134aa4]</c:when>
+                                  <c:when test='${order.status == "completed"}'>bg-green-50
+                                      text-[#2E7D32]</c:when>
+                                  <c:otherwise>bg-red-50 text-[#D32F2F]</c:otherwise>
                               </c:choose>">
-                            <span class="w-1.5 h-1.5 rounded-full
-                                  <c:choose>
-                                      <c:when test='${order.status == " pending"}'>bg-amber-500</c:when>
-                                      <c:when test='${order.status == "confirmed"}'>bg-blue-500
-                                      </c:when>
-                                      <c:when test='${order.status == "shipping"}'>bg-indigo-500
-                                      </c:when>
-                                      <c:when test='${order.status == "completed"}'>bg-green-500
-                                      </c:when>
-                                      <c:otherwise>bg-red-500</c:otherwise>
-                                  </c:choose>">
-                            </span>
                             <c:choose>
                                 <c:when test="${order.status == 'pending'}">Chờ xác nhận
                                 </c:when>
-                                <c:when test="${order.status == 'confirmed'}">Đã xác nhận
+                                <c:when test="${order.status == 'confirmed'}">Xác nhận
                                 </c:when>
                                 <c:when test="${order.status == 'shipping'}">Đang giao
                                 </c:when>
                                 <c:when test="${order.status == 'completed'}">Hoàn thành
                                 </c:when>
-                                <c:when test="${order.status == 'cancelled'}">Đã hủy
+                                <c:when test="${order.status == 'cancelled'}">Hủy đơn
                                 </c:when>
                                 <c:otherwise>${order.status}</c:otherwise>
                             </c:choose>
@@ -175,8 +163,7 @@
                                             </span>
                                         </div>
                                         <span
-                                            class="text-xs font-bold text-[#071e27]">Đã
-                                            xác nhận</span>
+                                            class="text-xs font-bold text-[#071e27]">Xác nhận</span>
                                     </div>
 
                                     <div
@@ -329,7 +316,7 @@
                                     <c:choose>
                                         <c:when test="${order.paymentMethod == 'cod'}">Thanh
                                             toán khi nhận hàng (COD)</c:when>
-                                        <c:otherwise>${order.paymentMethod}</c:otherwise>
+                                        <c:otherwise>Chuyển khoản Ngân hàng (VNPAY)</c:otherwise>
                                     </c:choose>
                                 </p>
                                 <p class="text-[11px] text-[#424752] mt-0.5">
