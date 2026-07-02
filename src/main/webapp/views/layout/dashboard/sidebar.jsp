@@ -146,7 +146,7 @@
         </a>
 
         <a href="${pageContext.request.contextPath}/dashboard/product-management"
-           class="sidebar-link <%= currentPage.contains("products") ? "active" : ""%>">
+           class="sidebar-link <%= currentPage.contains("product-management") ? "active" : ""%>">
             <span class="material-symbols-outlined">inventory_2</span>
             Kho hàng
         </a>
