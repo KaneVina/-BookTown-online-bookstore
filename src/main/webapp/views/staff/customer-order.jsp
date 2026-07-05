@@ -157,6 +157,12 @@
                             <a href="${pageContext.request.contextPath}/dashboard/customer-order?status=cancelled&keyword=${keyword}"
                                class="px-4 py-2 rounded-full text-label-md whitespace-nowrap ${status == 'cancelled' ? 'bg-primary text-white' : 'bg-background-alt hover:bg-surface-container-high transition-colors text-on-surface-variant'}">
                                 Hủy đơn</a>
+                            <a href="${pageContext.request.contextPath}/dashboard/customer-order?status=pending_refund&keyword=${keyword}"
+                               class="px-4 py-2 rounded-full text-label-md whitespace-nowrap ${status == 'pending_refund' ? 'bg-primary text-white' : 'bg-background-alt hover:bg-surface-container-high transition-colors text-on-surface-variant'}">
+                                Chờ hoàn tiền</a>
+                            <a href="${pageContext.request.contextPath}/dashboard/customer-order?status=refunded&keyword=${keyword}"
+                               class="px-4 py-2 rounded-full text-label-md whitespace-nowrap ${status == 'refunded' ? 'bg-primary text-white' : 'bg-background-alt hover:bg-surface-container-high transition-colors text-on-surface-variant'}">
+                                Đã hoàn tiền</a>
                         </div>
 
                     </div>
@@ -231,6 +237,25 @@
                                                         class="inline-flex items-center px-3 py-1 rounded-full bg-success/10 text-success text-label-sm font-bold">
                                                         Hoàn thành
                                                     </span>
+                                                </c:when>
+                                                <c:when test="${order.status == 'cancelled'}">
+                                                    <c:choose>
+                                                        <c:when test="${order.paymentMethod == 'vnpay' && order.paymentStatus == 'pending_refund'}">
+                                                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-label-sm font-bold">
+                                                                Chờ hoàn tiền
+                                                            </span>
+                                                        </c:when>
+                                                        <c:when test="${order.paymentMethod == 'vnpay' && order.paymentStatus == 'refunded'}">
+                                                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-[#134aa4] text-label-sm font-bold">
+                                                                Đã hoàn tiền
+                                                            </span>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-error/10 text-error text-label-sm font-bold">
+                                                                Hủy đơn
+                                                            </span>
+                                                        </c:otherwise>
+                                                    </c:choose>
                                                 </c:when>
                                                 <c:otherwise>
                                                     <span

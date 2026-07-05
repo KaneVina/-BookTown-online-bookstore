@@ -90,6 +90,24 @@
                                     <c:otherwise>Hủy đơn</c:otherwise>
                                 </c:choose>
                             </span>
+
+                            <%-- Tag hoàn tiền: chỉ hiện khi VNPAY đã hủy --%>
+                            <c:if test="${order.status == 'cancelled' && order.paymentMethod == 'vnpay'}">
+                                <c:choose>
+                                    <c:when test="${order.paymentStatus == 'pending_refund'}">
+                                        <span class="px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1 bg-amber-50 text-amber-600 border border-amber-200">
+                                            <span class="material-symbols-outlined text-[14px]">schedule</span>
+                                            Đang hoàn tiền
+                                        </span>
+                                    </c:when>
+                                    <c:when test="${order.paymentStatus == 'refunded'}">
+                                        <span class="px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1 bg-green-50 text-green-700 border border-green-200">
+                                            <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                            Đã hoàn tiền
+                                        </span>
+                                    </c:when>
+                                </c:choose>
+                            </c:if>
                         </div>
                     </div>
 
@@ -257,6 +275,12 @@
                                                     Đã thanh toán
                                                 </span>
                                             </c:when>
+                                            <c:when test="${order.paymentStatus == 'pending_refund'}">
+                                                <span
+                                                    class="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-semibold">
+                                                    Chờ hoàn tiền
+                                                </span>
+                                            </c:when>
                                             <c:when test="${order.paymentStatus == 'refunded'}">
                                                 <span
                                                     class="px-3 py-1 bg-blue-100 text-[#134aa4] rounded-full text-xs font-semibold">
@@ -343,10 +367,49 @@
 
                                 <c:choose>
                                     <c:when test="${order.status == 'cancelled'}">
-                                        <div class="flex items-center gap-3 p-4 bg-red-50 rounded-lg border border-red-200">
-                                            <span class="material-symbols-outlined text-[#D32F2F] text-[22px]">cancel</span>
-                                            <p class="text-sm font-semibold text-[#D32F2F]">Đơn hàng đã bị hủy</p>
-                                        </div>
+                                        <c:choose>
+                                            <%-- VNPAY đang chờ hoàn tiền --%>
+                                            <c:when test="${order.paymentMethod == 'vnpay' && order.paymentStatus == 'pending_refund'}">
+                                                <div class="space-y-3">
+                                                    <div class="flex items-center gap-3 p-4 bg-amber-50 rounded-lg border border-amber-200">
+                                                        <span class="material-symbols-outlined text-amber-500 text-[22px]" style="font-variation-settings: 'FILL' 1;">schedule</span>
+                                                        <div class="flex-1">
+                                                            <p class="text-sm font-semibold text-amber-700">Đơn hàng đã hủy &mdash; Hoàn tiền đang xử lý</p>
+                                                            <p class="text-xs text-amber-600 mt-0.5">VNPAY — Chưa xác nhận chuyển tiền</p>
+                                                        </div>
+                                                    </div>
+                                                    <%-- Nút xác nhận hoàn tiền --%>
+                                                    <form action="${pageContext.request.contextPath}/dashboard/customer-order"
+                                                          method="POST" id="confirmRefundForm">
+                                                        <input type="hidden" name="action" value="confirmRefund">
+                                                        <input type="hidden" name="orderID" value="${order.orderID}">
+                                                        <button type="button"
+                                                                onclick="confirmActionDetail('Xác nhận đã hoàn tiền', 'Bạn xác nhận đã chuyển tiền hoàn cho khách thành công? Hệ thống sẽ gửi email thông báo cho khách.', 'confirmRefundForm')"
+                                                                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 shadow-sm transition-all">
+                                                            <span class="material-symbols-outlined text-[18px]">payments</span>
+                                                            Xác nhận đã hoàn tiền
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </c:when>
+                                            <%-- VNPAY đã hoàn tiền xong --%>
+                                            <c:when test="${order.paymentMethod == 'vnpay' && order.paymentStatus == 'refunded'}">
+                                                <div class="flex items-center gap-3 p-4 bg-green-50 rounded-lg border border-green-200">
+                                                    <span class="material-symbols-outlined text-green-600 text-[22px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                                    <div>
+                                                        <p class="text-sm font-semibold text-green-700">Đơn hàng đã hủy &mdash; Đã hoàn tiền</p>
+                                                        <p class="text-xs text-green-600 mt-0.5">VNPAY — Đã xác nhận chuyển tiền thành công</p>
+                                                    </div>
+                                                </div>
+                                            </c:when>
+                                            <%-- Mặc định (COD hoặc không có tiền hoàn) --%>
+                                            <c:otherwise>
+                                                <div class="flex items-center gap-3 p-4 bg-red-50 rounded-lg border border-red-200">
+                                                    <span class="material-symbols-outlined text-[#D32F2F] text-[22px]">cancel</span>
+                                                    <p class="text-sm font-semibold text-[#D32F2F]">Đơn hàng đã bị hủy</p>
+                                                </div>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </c:when>
                                     <c:otherwise>
                                         <div class="relative pl-8 stepper-line">
