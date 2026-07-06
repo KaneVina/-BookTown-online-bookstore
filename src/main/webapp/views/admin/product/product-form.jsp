@@ -155,6 +155,7 @@
                                             <img id="thumbImg" alt="" class="hidden w-full h-full object-cover">
                                         </c:otherwise>
                                     </c:choose>
+
                                 </div>
                                 <div class="flex-1">
                                     <label class="field-label" for="thumbnail">🖼 URL ảnh bìa <span class="text-error">*</span></label>
@@ -162,6 +163,13 @@
                                            class="field-input" placeholder="https://example.com/cover.jpg"
                                            value="${book.thumbnail}"
                                            oninput="previewThumb(this.value, 'thumbImg', 'thumbPlaceholder')">
+                                    <div class="mt-2">
+                                        <label class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors text-sm font-medium">
+                                            <span class="material-symbols-outlined text-[18px]">upload</span>
+                                            Upload ảnh lên Cloudinary
+                                            <input type="file" id="thumbFile" accept="image/*" class="hidden" onchange="uploadImage(this, 'thumbnail', 'thumbImg', 'thumbPlaceholder')">
+                                        </label>
+                                    </div>
                                     <p class="err-msg" id="thumbnailErr">URL ảnh bìa không được để trống</p>
                                     <p class="text-xs text-on-surface-variant mt-1.5">Ảnh bìa chính hiển thị trong danh sách và trang sản phẩm.</p>
                                 </div>
@@ -179,6 +187,11 @@
                                                class="field-input text-xs py-1.5" placeholder="URL ảnh 2..."
                                                value="${image2}"
                                                oninput="previewThumb(this.value, 'imgThumb2', 'imgPlaceholder2')">
+                                        <label class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded cursor-pointer hover:bg-blue-100 transition-colors text-xs mt-1">
+                                            <span class="material-symbols-outlined text-[14px]">upload</span>
+                                            Upload
+                                            <input type="file" id="imgFile2" accept="image/*" class="hidden" onchange="uploadImage(this, 'image2', 'imgThumb2', 'imgPlaceholder2')">
+                                        </label>
                                     </div>
                                     <div>
                                         <div class="preview-img-sm mb-2" id="imgPreview3">
@@ -189,6 +202,11 @@
                                                class="field-input text-xs py-1.5" placeholder="URL ảnh 3..."
                                                value="${image3}"
                                                oninput="previewThumb(this.value, 'imgThumb3', 'imgPlaceholder3')">
+                                        <label class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded cursor-pointer hover:bg-blue-100 transition-colors text-xs mt-1">
+                                            <span class="material-symbols-outlined text-[14px]">upload</span>
+                                            Upload
+                                            <input type="file" id="imgFile3" accept="image/*" class="hidden" onchange="uploadImage(this, 'image3', 'imgThumb3', 'imgPlaceholder3')">
+                                        </label>
                                     </div>
                                     <div>
                                         <div class="preview-img-sm mb-2" id="imgPreview4">
@@ -199,6 +217,11 @@
                                                class="field-input text-xs py-1.5" placeholder="URL ảnh 4..."
                                                value="${image4}"
                                                oninput="previewThumb(this.value, 'imgThumb4', 'imgPlaceholder4')">
+                                        <label class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded cursor-pointer hover:bg-blue-100 transition-colors text-xs mt-1">
+                                            <span class="material-symbols-outlined text-[14px]">upload</span>
+                                            Upload
+                                            <input type="file" id="imgFile4" accept="image/*" class="hidden" onchange="uploadImage(this, 'image4', 'imgThumb4', 'imgPlaceholder4')">
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -363,6 +386,45 @@
                     if (placeholder)
                         placeholder.style.display = '';
                 }
+            }
+
+            // Upload image to Cloudinary via /upload-image endpoint
+            function uploadImage(input, inputId, imgId, placeholderId) {
+                const file = input.files[0];
+                if (!file)
+                    return;
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const uploadBtn = input.parentElement;
+                const originalText = uploadBtn.innerHTML;
+                uploadBtn.innerHTML = '<span class="material-symbols-outlined text-[14px] animate-spin">refresh</span> Uploading...';
+                uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+                fetch('${pageContext.request.contextPath}/upload-image', {
+                    method: 'POST',
+                    body: formData
+                })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.ok && data.url) {
+                                document.getElementById(inputId).value = data.url;
+                                previewThumb(data.url, imgId, placeholderId);
+                                uploadBtn.innerHTML = originalText;
+                                uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                            } else {
+                                alert('Upload thất bại: ' + (data.message || 'Lỗi không xác định'));
+                                uploadBtn.innerHTML = originalText;
+                                uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('Lỗi kết nối server');
+                            uploadBtn.innerHTML = originalText;
+                            uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        });
             }
 
             // On load: preview all images if editing
