@@ -84,6 +84,11 @@
                         </span>
                         Đổi mật khẩu
                     </a>
+                    <a href="${pageContext.request.contextPath}/address"
+                       class="menu-item">
+                        <i data-lucide="map-pin"></i>
+                        Địa chỉ của tôi
+                    </a>
                     <a href="${pageContext.request.contextPath}/logout"
                        class="menu-item text-red-600">
                         <span class="material-symbols-outlined">
@@ -91,11 +96,7 @@
                         </span>
                         Đăng xuất
                     </a>
-                       <a href="${pageContext.request.contextPath}/address"
-   class="flex items-center gap-3 px-6 py-4 rounded-xl text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-semibold">
-    <i data-lucide="map-pin" class="w-6 h-6"></i>
-    Địa chỉ của tôi
-</a>
+
                 </nav>
             </div>
         </div>
@@ -246,11 +247,11 @@
             saveBtn.disabled = true;
             return;
         }
-        const hasChanges = 
-            currentValues.fullname !== initialValues.fullname ||
-            currentValues.phone !== initialValues.phone ||
-            currentValues.gender !== initialValues.gender ||
-            currentValues.dob !== initialValues.dob;
+        const hasChanges =
+                currentValues.fullname !== initialValues.fullname ||
+                currentValues.phone !== initialValues.phone ||
+                currentValues.gender !== initialValues.gender ||
+                currentValues.dob !== initialValues.dob;
         saveBtn.disabled = !hasChanges;
     }
 
