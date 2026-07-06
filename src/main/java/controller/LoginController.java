@@ -32,6 +32,16 @@ public class LoginController extends HttpServlet {
         Account acc = accountDAO.checkLogin(email, password);
 
         if (acc != null) {
+            if ("inactive".equalsIgnoreCase(acc.getStatus())) {
+                request.setAttribute(
+                        "errorMessage",
+                        "Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên."
+                );
+                request.setAttribute("enteredEmail", email);
+                request.getRequestDispatcher("/views/auth/login.jsp")
+                        .forward(request, response);
+                return;
+            }
             HttpSession session = request.getSession();
             session.setAttribute("account", acc);
             session.setMaxInactiveInterval(30 * 60);

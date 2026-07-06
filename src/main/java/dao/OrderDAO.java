@@ -21,7 +21,6 @@ public class OrderDAO {
             + "FROM [Order] o "
             + "LEFT JOIN Address a ON a.addressID = o.addressID ";
 
-
     public int createOrder(int customerID, int addressID,
             String paymentMethod, BigDecimal totalPrice) {
 
@@ -78,12 +77,12 @@ public class OrderDAO {
 
     public boolean clearCart(int customerID) {
         String sqlDeleteItems = "DELETE CartItem FROM CartItem "
-        + "JOIN Cart ON Cart.cartID = CartItem.cartID "
-        + "WHERE Cart.customerID = ? AND Cart.status = 'active'";
+                + "JOIN Cart ON Cart.cartID = CartItem.cartID "
+                + "WHERE Cart.customerID = ? AND Cart.status = 'active'";
 
-      String sqlCloseCart = "UPDATE Cart SET status = 'checked_out' "
-        + "WHERE customerID = ? AND status = 'active'";
-      
+        String sqlCloseCart = "UPDATE Cart SET status = 'checked_out' "
+                + "WHERE customerID = ? AND status = 'active'";
+
         try (Connection conn = new DBContext().getConnection()) {
 
             try (PreparedStatement ps = conn.prepareStatement(sqlDeleteItems)) {
@@ -135,23 +134,7 @@ public class OrderDAO {
         return null;
     }
 
-    public int countOrdersByCustomer(int customerID) {
-        String sql = "SELECT COUNT(*) FROM [Order] WHERE customerID = ?";
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, customerID);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return 0;
-    }
 
     public int countOrdersByCustomerFiltered(int customerID, String status) {
         boolean filterStatus = status != null && !status.trim().isEmpty() && !"all".equalsIgnoreCase(status);
@@ -173,31 +156,7 @@ public class OrderDAO {
         return 0;
     }
 
-    public List<Order> getOrdersByCustomer(int customerID, int offset, int pageSize) {
-        List<Order> orders = new ArrayList<>();
 
-        String sql = BASE_SELECT_ORDER
-                + "WHERE o.customerID = ? "
-                + "ORDER BY o.created_at DESC "
-                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
-
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, customerID);
-            ps.setInt(2, offset);
-            ps.setInt(3, pageSize);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                orders.add(mapOrder(rs));
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return orders;
-    }
 
     public List<Order> getOrdersByCustomerFiltered(int customerID, String status, int offset, int pageSize) {
         List<Order> orders = new ArrayList<>();
@@ -301,7 +260,6 @@ public class OrderDAO {
         return order;
     }
 
-    // Cập nhật trạng thái thanh toán
     public boolean updatePaymentStatus(int orderID, String paymentStatus) {
         String sql = "UPDATE [Order] SET payment_status = ? WHERE orderID = ?";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -314,7 +272,6 @@ public class OrderDAO {
         return false;
     }
 
-    // Cập nhật trạng thái đơn hàng (dùng cho VNPAY confirm)
     public boolean updateOrderStatus(int orderID, String status) {
         String sql = "UPDATE [Order] SET status = ? WHERE orderID = ?";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -327,57 +284,59 @@ public class OrderDAO {
         return false;
     }
 
-    // Hủy đơn hàng do hệ thống (không cần kiểm tra customerID)
-    public boolean cancelOrderBySystem(int orderID) {
-        String sql = "UPDATE [Order] SET status = 'cancelled' WHERE orderID = ?";
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, orderID);
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
 
-    // Xóa cart dựa vào orderID - dùng cho VNPAY callback
-    public boolean clearCartByOrderID(int orderID) {
-        // Bước 1: lấy customerID từ Order
-        String sqlGetCustomer = "SELECT customerID FROM [Order] WHERE orderID = ?";
-        int customerID = -1;
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sqlGetCustomer)) {
-            ps.setInt(1, orderID);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                customerID = rs.getInt("customerID");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-
-        if (customerID == -1) {
-            return false;
-        }
-
-        // Bước 2: gọi lại clearCart có sẵn
-        return clearCart(customerID);
-    }
 
     public List<Order> getAllOrders(String keyword, String status, int offset, int pageSize) {
         List<Order> list = new ArrayList<>();
+
+        String sqlGetOverdue = "SELECT orderID FROM [Order] "
+                + "WHERE status = 'pending' "
+                + "AND created_at < DATEADD(DAY, -2, GETDATE())";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement psGet = conn.prepareStatement(sqlGetOverdue);
+             ResultSet rsGet = psGet.executeQuery()) {
+            
+            while (rsGet.next()) {
+                int overdueOrderID = rsGet.getInt("orderID");
+                Order overdueOrder = getOrderByID(overdueOrderID);
+                if (overdueOrder != null) {
+                    if ("vnpay".equalsIgnoreCase(overdueOrder.getPaymentMethod()) && "paid".equalsIgnoreCase(overdueOrder.getPaymentStatus())) {
+                        updateOrderStatus(overdueOrderID, "cancelled");
+                        updatePaymentStatus(overdueOrderID, "refunded");
+                        
+                        final Order finalOrder = overdueOrder;
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    utils.EmailUtil.sendRefundEmail(finalOrder.getCustomerEmail(), finalOrder);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }).start();
+                    } else {
+                        updateOrderStatus(overdueOrderID, "cancelled");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         StringBuilder sql = new StringBuilder(
-            "SELECT o.orderID, o.customerID, o.addressID, o.processed_by, o.status, "
-            + "       o.payment_method, o.payment_status, o.total_price, o.created_at, "
-            + "       a.street, a.district, a.city, c.fullname AS customerName, "
-            + "       c.email AS customerEmail, c.phone AS customerPhone "
-            + "FROM [Order] o "
-            + "LEFT JOIN Address a ON a.addressID = o.addressID "
-            + "LEFT JOIN Customer c ON c.customerID = o.customerID "
-            + "WHERE 1=1 "
+                "SELECT o.orderID, o.customerID, o.addressID, o.processed_by, o.status, "
+                + "       o.payment_method, o.payment_status, o.total_price, o.created_at, "
+                + "       a.street, a.district, a.city, c.fullname AS customerName, "
+                + "       c.email AS customerEmail, c.phone AS customerPhone "
+                + "FROM [Order] o "
+                + "LEFT JOIN Address a ON a.addressID = o.addressID "
+                + "LEFT JOIN Customer c ON c.customerID = o.customerID "
+                + "WHERE 1=1 "
         );
-        
+
         List<Object> params = new ArrayList<>();
-        
+
         if (keyword != null && !keyword.trim().isEmpty()) {
             sql.append("AND (c.fullname LIKE ? OR c.phone LIKE ? OR CAST(o.orderID AS VARCHAR) LIKE ?) ");
             String searchPattern = "%" + keyword.trim() + "%";
@@ -385,24 +344,23 @@ public class OrderDAO {
             params.add(searchPattern);
             params.add(searchPattern);
         }
-        
+
         if (status != null && !status.trim().isEmpty() && !"all".equalsIgnoreCase(status)) {
             sql.append("AND o.status = ? ");
             params.add(status.trim());
         }
-        
+
         sql.append("ORDER BY o.created_at DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
-        
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-            
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
             int index = 1;
             for (Object param : params) {
                 ps.setObject(index++, param);
             }
             ps.setInt(index++, offset);
             ps.setInt(index++, pageSize);
-            
+
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Order order = mapOrder(rs);
@@ -420,13 +378,13 @@ public class OrderDAO {
 
     public int countFilteredOrders(String keyword, String status) {
         StringBuilder sql = new StringBuilder(
-            "SELECT COUNT(*) FROM [Order] o "
-            + "LEFT JOIN Customer c ON c.customerID = o.customerID "
-            + "WHERE 1=1 "
+                "SELECT COUNT(*) FROM [Order] o "
+                + "LEFT JOIN Customer c ON c.customerID = o.customerID "
+                + "WHERE 1=1 "
         );
-        
+
         List<Object> params = new ArrayList<>();
-        
+
         if (keyword != null && !keyword.trim().isEmpty()) {
             sql.append("AND (c.fullname LIKE ? OR c.phone LIKE ? OR CAST(o.orderID AS VARCHAR) LIKE ?) ");
             String searchPattern = "%" + keyword.trim() + "%";
@@ -434,20 +392,19 @@ public class OrderDAO {
             params.add(searchPattern);
             params.add(searchPattern);
         }
-        
+
         if (status != null && !status.trim().isEmpty() && !"all".equalsIgnoreCase(status)) {
             sql.append("AND o.status = ? ");
             params.add(status.trim());
         }
-        
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-            
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
             int index = 1;
             for (Object param : params) {
                 ps.setObject(index++, param);
             }
-            
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1);
@@ -461,8 +418,7 @@ public class OrderDAO {
 
     public int countOrdersByStatus(String status) {
         String sql = "SELECT COUNT(*) FROM [Order] WHERE status = ?";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -486,5 +442,84 @@ public class OrderDAO {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public int getTotalOrdersByCustomer(int customerId) {
+        String sql = "SELECT COUNT(*) FROM [Order] WHERE customerID = ?";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, customerId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    public double getTotalSpentByCustomer(int customerId) {
+
+        String sql
+                = "SELECT ISNULL(SUM(total_price),0) "
+                + "FROM [Order] "
+                + "WHERE customerID = ?";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, customerId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    public List<Order> getRecentOrdersByCustomer(int customerId) {
+
+        List<Order> list = new ArrayList<>();
+
+        String sql
+                = "SELECT TOP 5 * "
+                + "FROM [Order] "
+                + "WHERE customerID = ? "
+                + "ORDER BY created_at DESC";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, customerId);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                Order o = new Order();
+
+                o.setOrderID(rs.getInt("orderID"));
+                o.setStatus(rs.getString("status"));
+                o.setTotalPrice(rs.getBigDecimal("total_price"));
+                o.setCreatedAt(rs.getTimestamp("created_at"));
+
+                list.add(o);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
     }
 }

@@ -156,7 +156,7 @@
                             <span class="text-on-surface font-label-md text-label-md">
                                 <c:choose>
                                     <c:when test="${order.paymentMethod == 'cod'}">Thanh toán khi nhận hàng (COD)</c:when>
-                                    <c:otherwise>${order.paymentMethod}</c:otherwise>
+                                    <c:otherwise>Chuyển khoản Ngân hàng (VNPAY)</c:otherwise>
                                 </c:choose>
                             </span>
                         </div>

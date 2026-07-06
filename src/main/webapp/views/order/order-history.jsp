@@ -101,7 +101,7 @@
                         Chờ xác nhận</a>
                     <a href="${pageContext.request.contextPath}/profile/order-history?status=confirmed"
                        class="py-3 text-sm whitespace-nowrap transition-colors ${status == 'confirmed' ? 'font-semibold text-[#17479D] border-b-2 border-[#17479D]' : 'font-medium text-gray-600 hover:text-[#17479D]'}">
-                        Đã xác nhận</a>
+                        Xác nhận</a>
                     <a href="${pageContext.request.contextPath}/profile/order-history?status=shipping"
                        class="py-3 text-sm whitespace-nowrap transition-colors ${status == 'shipping' ? 'font-semibold text-[#17479D] border-b-2 border-[#17479D]' : 'font-medium text-gray-600 hover:text-[#17479D]'}">
                         Đang giao</a>
@@ -110,7 +110,7 @@
                         Hoàn thành</a>
                     <a href="${pageContext.request.contextPath}/profile/order-history?status=cancelled"
                        class="py-3 text-sm whitespace-nowrap transition-colors ${status == 'cancelled' ? 'font-semibold text-[#17479D] border-b-2 border-[#17479D]' : 'font-medium text-gray-600 hover:text-[#17479D]'}">
-                        Đã hủy</a>
+                        Hủy đơn</a>
                 </div>
 
                 <div class="space-y-4">
@@ -148,37 +148,32 @@
                                         class="flex items-center justify-between sm:justify-end gap-4">
                                         <c:choose>
                                             <c:when test="${order.status == 'pending'}">
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold">
-                                                    <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-yellow-50 text-[#e65c00] text-xs font-semibold">
                                                     Chờ xác nhận
                                                 </span>
                                             </c:when>
                                             <c:when test="${order.status == 'confirmed'}">
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-50 text-yellow-600 text-xs font-semibold">
-                                                    <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
-                                                    Đã xác nhận
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-[#004d99] text-xs font-semibold">
+                                                    Xác nhận
                                                 </span>
                                             </c:when>
                                             <c:when test="${order.status == 'shipping'}">
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-xs font-semibold">
-                                                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 text-[#134aa4] text-xs font-semibold">
                                                     Đang giao
                                                 </span>
                                             </c:when>
                                             <c:when test="${order.status == 'completed'}">
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-50 text-green-600 text-xs font-semibold">
-                                                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-50 text-[#2E7D32] text-xs font-semibold">
                                                     Hoàn thành
                                                 </span>
                                             </c:when>
                                             <c:when test="${order.status == 'cancelled'}">
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-500 text-xs font-semibold">
-                                                    <span class="w-2 h-2 rounded-full bg-red-500"></span>
-                                                    Đã hủy
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-50 text-[#D32F2F] text-xs font-semibold">
+                                                    Hủy đơn
                                                 </span>
                                             </c:when>
                                             <c:otherwise>
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-semibold">
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-semibold">
                                                     ${order.status}
                                                 </span>
                                             </c:otherwise>
