@@ -33,6 +33,14 @@
         <servlet-class>controller.CustomerOrderController</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>CustomerOrderDetailController</servlet-name>
+        <servlet-class>controller.CustomerOrderDetailController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>OrderHistoryDetailController</servlet-name>
+        <servlet-class>controller.OrderHistoryDetailController</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>OrderHistoryController</servlet-name>
         <servlet-class>controller.OrderHistoryController</servlet-class>
     </servlet>
@@ -61,55 +69,21 @@
         <servlet-class>controller.AccountDetailController</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>VoucherController</servlet-name>
-        <servlet-class>controller.VoucherController</servlet-class>
+        <servlet-name>CreateStaffController</servlet-name>
+        <servlet-class>controller.CreateStaffController</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>OrderConfirmationController</servlet-name>
-        <servlet-class>controller.OrderConfirmationController</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>WishListController</servlet-name>
-        <servlet-class>controller.WishListController</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>AdminProductController</servlet-name>
-        <servlet-class>controller.AdminProductController</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>DashboardController</servlet-name>
-        <servlet-class>controller.DashboardController</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>VNPayController</servlet-name>
-        <servlet-class>controller.VNPayController</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>VNPayReturnController</servlet-name>
-        <servlet-class>controller.VNPayReturnController</servlet-class>
+        <servlet-name>UpdateAccountController</servlet-name>
+        <servlet-class>controller.UpdateAccountController</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>ReviewManagementController</servlet-name>
         <servlet-class>controller.ReviewManagementController</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>CategoryManagementController</servlet-name>
-        <servlet-class>controller.CategoryManagementController</servlet-class>
+        <servlet-name>VoucherController</servlet-name>
+        <servlet-class>controller.VoucherController</servlet-class>
     </servlet>
-    <servlet>
-        <servlet-name>AddressManagementController</servlet-name>
-        <servlet-class>controller.AddressManagementController</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>CreateStaffController</servlet-name>
-        <servlet-class>controller.CreateStaffController</servlet-class>
-    </servlet>
-
-    <servlet>
-        <servlet-name>ImageUploadController</servlet-name>
-        <servlet-class>controller.ImageUploadController</servlet-class>
-    </servlet>
-
     <servlet-mapping>
         <servlet-name>LoginController</servlet-name>
         <url-pattern>/login</url-pattern>
@@ -146,6 +120,14 @@
         <url-pattern>/dashboard/customer-order</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
+        <servlet-name>CustomerOrderDetailController</servlet-name>
+        <url-pattern>/dashboard/customer-order-detail</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>OrderHistoryDetailController</servlet-name>
+        <url-pattern>/profile/order-history-detail</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>OrderHistoryController</servlet-name>
         <url-pattern>/profile/order-history</url-pattern>
     </servlet-mapping>
@@ -170,53 +152,28 @@
         <url-pattern>/review</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>VoucherController</servlet-name>
-        <url-pattern>/dashboard/voucher-management</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>OrderConfirmationController</servlet-name>
-        <url-pattern>/order-confirmation</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>WishListController</servlet-name>
-        <url-pattern>/wishlist</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>AdminProductController</servlet-name>
-        <url-pattern>/dashboard/product-management</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>DashboardController</servlet-name>
-        <url-pattern>/dashboard</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>VNPayController</servlet-name>
-        <url-pattern>/vnpay-payment</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>VNPayReturnController</servlet-name>
-        <url-pattern>/vnpay-return</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CategoryManagementController</servlet-name>
-        <url-pattern>/category</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>AddressManagementController</servlet-name>
-        <url-pattern>/address</url-pattern>
+        <servlet-name>AccountDetailController</servlet-name>
+        <url-pattern>/dashboard/account-detail</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>CreateStaffController</servlet-name>
         <url-pattern>/dashboard/add-staff</url-pattern>
     </servlet-mapping>
-
-
     <servlet-mapping>
-        <servlet-name>ImageUploadController</servlet-name>
-        <url-pattern>/upload-image</url-pattern>
+        <servlet-name>UpdateAccountController</servlet-name>
+        <url-pattern>/dashboard/update-account</url-pattern>
     </servlet-mapping>
-
+    <servlet-mapping>
+        <servlet-name>ReviewManagementController</servlet-name>
+        <url-pattern>/dashboard/review-management</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>VoucherController</servlet-name>
+        <url-pattern>/dashboard/voucher-management</url-pattern>
+    </servlet-mapping>
     <session-config>
-        <session-timeout> 30 </session-timeout>
+        <session-timeout>
+            30
+        </session-timeout>
     </session-config>
 </web-app>
