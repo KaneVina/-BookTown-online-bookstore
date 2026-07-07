@@ -83,6 +83,18 @@ public class CartController extends HttpServlet {
         Account account = getAccount(request);
         CartDAO cartDAO = new CartDAO();
 
+        // Validate stock trước khi cộng dồn
+        int stock      = cartDAO.getStockByBookID(bookID);
+        int currentQty = cartDAO.getCurrentCartQty(account.getId(), bookID);
+        if (currentQty + quantity > stock) {
+            sendJson(response, "{\"ok\":false"
+                    + ",\"overStock\":true"
+                    + ",\"stock\":"      + stock
+                    + ",\"currentQty\":" + currentQty
+                    + ",\"message\":\"Giỏ hàng đã đạt giới hạn " + stock + " cuốn\"}");
+            return;
+        }
+
         boolean success = cartDAO.addToCart(account.getId(), bookID, quantity);
 
         int cartCount = 0;
@@ -112,6 +124,15 @@ public class CartController extends HttpServlet {
         if (newQty < 1) {
             cartDAO.removeItem(cartItemID, account.getId());
         } else {
+            // Validate stock server-side
+            int stock = cartDAO.getStockByCartItemID(cartItemID);
+            if (newQty > stock) {
+                String msg = stock == 0
+                        ? "Sản phẩm đã hết hàng"
+                        : "Số lượng vượt quá tồn kho (còn " + stock + " cuốn)";
+                sendJson(response, "{\"ok\":false,\"message\":\"" + msg + "\"}");
+                return;
+            }
             cartDAO.updateQuantity(cartItemID, newQty);
         }
 

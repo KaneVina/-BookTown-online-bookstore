@@ -555,4 +555,37 @@ public class OrderDAO {
 
         return list;
     }
+
+    public boolean deductStock(int orderID) {
+        String sql = "UPDATE Book "
+                + "SET Book.stock_quantity = Book.stock_quantity - OrderDetail.quantity "
+                + "FROM Book "
+                + "INNER JOIN OrderDetail ON Book.bookID = OrderDetail.bookID "
+                + "WHERE OrderDetail.orderID = ?";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderID);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean restoreStock(int orderID) {
+        String sql = "UPDATE Book "
+                + "SET Book.stock_quantity = Book.stock_quantity + OrderDetail.quantity "
+                + "FROM Book "
+                + "INNER JOIN OrderDetail ON Book.bookID = OrderDetail.bookID "
+                + "WHERE OrderDetail.orderID = ?";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderID);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
+
