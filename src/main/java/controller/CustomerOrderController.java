@@ -57,6 +57,9 @@ public class CustomerOrderController extends HttpServlet {
             case "updateStatus":
                 handleUpdateStatus(request, response);
                 break;
+            case "confirmRefund":
+                handleConfirmRefund(request, response);
+                break;
             default:
                 response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
                 break;
@@ -105,6 +108,8 @@ public class CustomerOrderController extends HttpServlet {
         request.setAttribute("countConfirmed", orderDAO.countOrdersByStatus("confirmed"));
         request.setAttribute("countShipping", orderDAO.countOrdersByStatus("shipping"));
         request.setAttribute("countCompleted", orderDAO.countOrdersByStatus("completed"));
+        request.setAttribute("countPendingRefund", orderDAO.countOrdersByStatus("pending_refund"));
+        request.setAttribute("countRefunded", orderDAO.countOrdersByStatus("refunded"));
 
         request.getRequestDispatcher("/views/staff/customer-order.jsp").forward(request, response);
     }
@@ -151,14 +156,16 @@ public class CustomerOrderController extends HttpServlet {
             }
             else if ("cancelled".equalsIgnoreCase(status)) {
                 if ("vnpay".equalsIgnoreCase(order.getPaymentMethod()) && "paid".equalsIgnoreCase(order.getPaymentStatus())) {
-                    orderDAO.updatePaymentStatus(orderID, "refunded");
-                    
+                    // Bước 1: đánh dấu đang chờ hoàn tiền thủ công
+                    orderDAO.updatePaymentStatus(orderID, "pending_refund");
+
+                    // Gửi mail thông báo "sẽ hoàn tiền trong 2-5 ngày làm việc"
                     final model.Order finalOrder = order;
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
                             try {
-                                utils.EmailUtil.sendRefundEmail(finalOrder.getCustomerEmail(), finalOrder);
+                                utils.EmailUtil.sendRefundPendingEmail(finalOrder.getCustomerEmail(), finalOrder);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -181,6 +188,50 @@ public class CustomerOrderController extends HttpServlet {
         } else {
             response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
         }
+    }
+
+    /**
+     * Staff xác nhận đã chuyển tiền tay cho khách.
+     * Điều kiện: đơn phải đang ở payment_status = 'pending_refund'.
+     * Kết quả: payment_status → 'refunded' + gửi mail xác nhận đã hoàn tiền.
+     */
+    private void handleConfirmRefund(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        int orderID = parseInt(request.getParameter("orderID"), 0);
+        HttpSession session = request.getSession();
+
+        model.Order order = orderDAO.getOrderByID(orderID);
+        if (order == null) {
+            session.setAttribute("errorMessage", "Không tìm thấy đơn hàng.");
+            response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
+            return;
+        }
+
+        // Gọi confirmRefund — chỉ update nếu đang ở pending_refund (idempotent)
+        boolean ok = orderDAO.confirmRefund(orderID);
+
+        if (ok) {
+            // Reload để lấy trạng thái mới nhất
+            final model.Order updatedOrder = orderDAO.getOrderByID(orderID);
+            if (updatedOrder != null && updatedOrder.getCustomerEmail() != null) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            utils.EmailUtil.sendRefundConfirmedEmail(updatedOrder.getCustomerEmail(), updatedOrder);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
+            }
+            session.setAttribute("successMessage", "Đã xác nhận hoàn tiền và gửi email thông báo cho khách hàng!");
+        } else {
+            session.setAttribute("errorMessage", "Không thể xác nhận hoàn tiền. Đơn hàng không ở trạng thái chờ hoàn tiền.");
+        }
+
+        response.sendRedirect(request.getContextPath() + "/dashboard/customer-order?action=detail&orderID=" + orderID);
     }
 
     private boolean hasAccess(HttpServletRequest request, HttpServletResponse response)

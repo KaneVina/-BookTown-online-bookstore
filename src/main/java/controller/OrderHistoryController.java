@@ -138,14 +138,16 @@ public class OrderHistoryController extends HttpServlet {
         if (ok) {
             if (order != null) {
                 if ("vnpay".equalsIgnoreCase(order.getPaymentMethod()) && "paid".equalsIgnoreCase(order.getPaymentStatus())) {
-                    orderDAO.updatePaymentStatus(orderID, "refunded");
-                    
+                    // Bước 1: đánh dấu đang chờ hoàn tiền (chưa hoàn thực sự)
+                    orderDAO.updatePaymentStatus(orderID, "pending_refund");
+
+                    // Gửi mail thông báo "sẽ hoàn tiền trong 2-5 ngày làm việc"
                     final Order finalOrder = order;
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
                             try {
-                                utils.EmailUtil.sendRefundEmail(finalOrder.getCustomerEmail(), finalOrder);
+                                utils.EmailUtil.sendRefundPendingEmail(finalOrder.getCustomerEmail(), finalOrder);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }

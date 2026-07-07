@@ -137,9 +137,10 @@ public class OrderDAO {
 
 
     public int countOrdersByCustomerFiltered(int customerID, String status) {
+        boolean isRefundStatus = "pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status);
         boolean filterStatus = status != null && !status.trim().isEmpty() && !"all".equalsIgnoreCase(status);
         String sql = "SELECT COUNT(*) FROM [Order] WHERE customerID = ?"
-                + (filterStatus ? " AND status = ?" : "");
+                + (filterStatus ? (isRefundStatus ? " AND payment_status = ?" : " AND status = ?") : "");
 
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, customerID);
@@ -160,11 +161,12 @@ public class OrderDAO {
 
     public List<Order> getOrdersByCustomerFiltered(int customerID, String status, int offset, int pageSize) {
         List<Order> orders = new ArrayList<>();
+        boolean isRefundStatus = "pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status);
         boolean filterStatus = status != null && !status.trim().isEmpty() && !"all".equalsIgnoreCase(status);
 
         String sql = BASE_SELECT_ORDER
                 + "WHERE o.customerID = ? "
-                + (filterStatus ? "AND o.status = ? " : "")
+                + (filterStatus ? (isRefundStatus ? "AND o.payment_status = ? " : "AND o.status = ? ") : "")
                 + "ORDER BY o.created_at DESC "
                 + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
@@ -284,6 +286,23 @@ public class OrderDAO {
         return false;
     }
 
+    /**
+     * Staff xác nhận đã chuyển tiền tay cho khách.
+     * Chỉ update nếu payment_status đang là 'pending_refund' → tránh chạy 2 lần.
+     * Sau khi gọi: payment_status = 'refunded', gửi mail xác nhận.
+     */
+    public boolean confirmRefund(int orderID) {
+        String sql = "UPDATE [Order] SET payment_status = 'refunded' "
+                + "WHERE orderID = ? AND payment_status = 'pending_refund'";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderID);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 
 
     public List<Order> getAllOrders(String keyword, String status, int offset, int pageSize) {
@@ -302,14 +321,15 @@ public class OrderDAO {
                 if (overdueOrder != null) {
                     if ("vnpay".equalsIgnoreCase(overdueOrder.getPaymentMethod()) && "paid".equalsIgnoreCase(overdueOrder.getPaymentStatus())) {
                         updateOrderStatus(overdueOrderID, "cancelled");
-                        updatePaymentStatus(overdueOrderID, "refunded");
-                        
+                        // Đánh dấu chờ hoàn tiền thủ công (chưa hoàn thực sự)
+                        updatePaymentStatus(overdueOrderID, "pending_refund");
+
                         final Order finalOrder = overdueOrder;
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
                                 try {
-                                    utils.EmailUtil.sendRefundEmail(finalOrder.getCustomerEmail(), finalOrder);
+                                    utils.EmailUtil.sendRefundPendingEmail(finalOrder.getCustomerEmail(), finalOrder);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -346,7 +366,11 @@ public class OrderDAO {
         }
 
         if (status != null && !status.trim().isEmpty() && !"all".equalsIgnoreCase(status)) {
-            sql.append("AND o.status = ? ");
+            if ("pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status)) {
+                sql.append("AND o.payment_status = ? ");
+            } else {
+                sql.append("AND o.status = ? ");
+            }
             params.add(status.trim());
         }
 
@@ -394,7 +418,11 @@ public class OrderDAO {
         }
 
         if (status != null && !status.trim().isEmpty() && !"all".equalsIgnoreCase(status)) {
-            sql.append("AND o.status = ? ");
+            if ("pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status)) {
+                sql.append("AND o.payment_status = ? ");
+            } else {
+                sql.append("AND o.status = ? ");
+            }
             params.add(status.trim());
         }
 
@@ -417,7 +445,12 @@ public class OrderDAO {
     }
 
     public int countOrdersByStatus(String status) {
-        String sql = "SELECT COUNT(*) FROM [Order] WHERE status = ?";
+        String sql;
+        if ("pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status)) {
+            sql = "SELECT COUNT(*) FROM [Order] WHERE payment_status = ?";
+        } else {
+            sql = "SELECT COUNT(*) FROM [Order] WHERE status = ?";
+        }
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             try (ResultSet rs = ps.executeQuery()) {
