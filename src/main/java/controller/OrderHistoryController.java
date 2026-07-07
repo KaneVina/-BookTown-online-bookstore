@@ -136,6 +136,7 @@ public class OrderHistoryController extends HttpServlet {
 
         HttpSession session = request.getSession();
         if (ok) {
+            orderDAO.restoreStock(orderID);
             if (order != null) {
                 if ("vnpay".equalsIgnoreCase(order.getPaymentMethod()) && "paid".equalsIgnoreCase(order.getPaymentStatus())) {
                     // Bước 1: đánh dấu đang chờ hoàn tiền (chưa hoàn thực sự)

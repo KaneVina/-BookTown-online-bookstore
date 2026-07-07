@@ -178,6 +178,12 @@ public class CustomerOrderController extends HttpServlet {
         boolean ok = orderDAO.updateOrderStatusAndStaff(orderID, status, staff.getId());
 
         if (ok) {
+            if ("cancelled".equalsIgnoreCase(status)) {
+                // Chỉ hoàn trả sách vào kho nếu trạng thái trước khi hủy là 'pending' hoặc 'confirmed' (chưa giao đi)
+                if (order != null && ("pending".equalsIgnoreCase(order.getStatus()) || "confirmed".equalsIgnoreCase(order.getStatus()))) {
+                    orderDAO.restoreStock(orderID);
+                }
+            }
             session.setAttribute("successMessage", "Cập nhật trạng thái đơn hàng thành công!");
         } else {
             session.setAttribute("errorMessage", "Cập nhật trạng thái đơn hàng thất bại.");

@@ -33,7 +33,7 @@
                                 <div class="w-24 h-36 bg-surface-container-low flex-shrink-0 rounded-lg overflow-hidden border border-outline-variant">
                                     <c:choose>
                                         <c:when test="${not empty item.thumbnail}">
-                                            <img class="w-full h-full object-cover" src="${item.thumbnail}" alt="${item.title}"/>
+                                            <img class="w-full h-full object-cover" src="${item.thumbnailFirst}" alt="${item.title}"/>
                                         </c:when>
                                         <c:otherwise>
                                             <div class="w-full h-full flex items-center justify-center text-on-surface-variant">

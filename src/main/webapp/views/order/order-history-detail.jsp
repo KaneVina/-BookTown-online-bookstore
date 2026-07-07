@@ -210,18 +210,24 @@
                                         <div class="mt-6 pt-4 border-t border-[#c2c6d4]">
                                             <c:choose>
                                                 <c:when test="${order.paymentStatus == 'pending_refund'}">
-                                                    <p class="text-xs text-amber-600 flex items-center gap-1.5">
-                                                        <span class="material-symbols-outlined text-[14px]">info</span>
-                                                        Số tiền <strong><fmt:formatNumber value="${order.totalPrice}" type="number" groupingUsed="true" />đ</strong>
-                                                        sẽ được hoàn vào tài khoản VNPAY của bạn trong vòng <strong>2–5 ngày làm việc</strong>. Bạn sẽ nhận email xác nhận khi hoàn tất.
-                                                    </p>
+                                                    <div class="text-xs text-amber-600 flex items-start gap-2">
+                                                        <span class="material-symbols-outlined text-[16px] mt-0.5 flex-shrink-0">info</span>
+                                                        <div>
+                                                            Số tiền <strong><fmt:formatNumber value="${order.totalPrice}" type="number" groupingUsed="true" />đ</strong>
+                                                            sẽ được hoàn vào tài khoản VNPAY của bạn trong vòng <strong>2–5 ngày làm việc</strong>.<br>
+                                                            Bạn sẽ nhận email xác nhận khi hoàn tất.
+                                                        </div>
+                                                    </div>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <p class="text-xs text-green-700 flex items-center gap-1.5">
-                                                        <span class="material-symbols-outlined text-[14px]">check_circle</span>
-                                                        Số tiền <strong><fmt:formatNumber value="${order.totalPrice}" type="number" groupingUsed="true" />đ</strong>
-                                                        đã được hoàn vào tài khoản của bạn. Vui lòng kiểm tra email xác nhận để biết thêm chi tiết.
-                                                    </p>
+                                                    <div class="text-xs text-green-700 flex items-start gap-2">
+                                                        <span class="material-symbols-outlined text-[16px] mt-0.5 flex-shrink-0">check_circle</span>
+                                                        <div>
+                                                            Số tiền <strong><fmt:formatNumber value="${order.totalPrice}" type="number" groupingUsed="true" />đ</strong>
+                                                            đã được hoàn vào tài khoản của bạn.<br>
+                                                            Vui lòng kiểm tra email xác nhận để biết thêm chi tiết.
+                                                        </div>
+                                                    </div>
                                                 </c:otherwise>
                                             </c:choose>
                                         </div>
@@ -336,7 +342,7 @@
                                                 test="${not empty item.thumbnail}">
                                                 <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                                      alt="${item.title}"
-                                                     src="${item.thumbnail}" />
+                                                     src="${item.thumbnailFirst}" />
                                             </c:when>
                                             <c:otherwise>
                                                 <div
