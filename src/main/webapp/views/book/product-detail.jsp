@@ -6,6 +6,18 @@
 <%@ include file="/views/layout/homepage/header.jsp" %>
 
 <style>
+    /* [FIX] Input số lượng type=number: ẩn mũi tên tăng/giảm mặc định của
+       trình duyệt (Chrome/Safari/Edge), vì nó chiếm không gian bên phải làm
+       số 2 chữ số (10, 11, 12...) bị bó hẹp/che mất, nhìn như chỉ hiện "1". */
+    .no-spinner::-webkit-outer-spin-button,
+    .no-spinner::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    .no-spinner {
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
     .section-title-left {
         border-left: 4px solid #FDD835;
         padding-left: 12px;
@@ -382,7 +394,7 @@
                             <div class="flex items-center border-2 border-gray-200 rounded-full overflow-hidden">
                                 <button type="button" id="qty-minus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">−</button>
                                 <input id="form-qty" name="quantity" type="number" value="1" min="1" max="${book.stockQuantity}"
-                                       class="w-12 text-center text-[15px] font-bold border-none outline-none py-2 bg-transparent" readonly>
+                                       class="w-14 text-center text-[15px] font-bold border-none outline-none py-2 bg-transparent no-spinner" readonly>
                                 <button type="button" id="qty-plus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">+</button>
                             </div>
                         </c:if>
@@ -785,17 +797,44 @@
         var input = document.getElementById('form-qty');
         if (!input)
             return;
-        var max = parseInt(input.getAttribute('max')) || 1;
-        document.getElementById('qty-minus').addEventListener('click', function () {
-            var v = parseInt(input.value) || 1;
-            if (v > 1)
-                input.value = v - 1;
+        // [FIX] Lấy max trực tiếp từ server-side (JSTL) thành số nguyên JS,
+        // không đọc lại từ DOM attribute để tránh sai lệch do trình duyệt
+        // xử lý input[type=number][readonly] không đồng nhất (scroll/phím
+        // mũi tên trên input readonly có thể vẫn đổi giá trị ở 1 số browser
+        // và không được validate lại bằng max attribute).
+        var max = ${book.stockQuantity > 0 ? book.stockQuantity : 1};
+        var minus = document.getElementById('qty-minus');
+        var plus  = document.getElementById('qty-plus');
+
+        function clamp(v) {
+            if (isNaN(v) || v < 1) v = 1;
+            if (v > max) v = max;
+            return v;
+        }
+
+        function render() {
+            var v = clamp(parseInt(input.value, 10));
+            input.value = v;
+            minus.disabled = (v <= 1);
+            plus.disabled  = (v >= max);
+            minus.classList.toggle('opacity-40', v <= 1);
+            plus.classList.toggle('opacity-40', v >= max);
+        }
+
+        minus.addEventListener('click', function () {
+            input.value = clamp(parseInt(input.value, 10) - 1);
+            render();
         });
-        document.getElementById('qty-plus').addEventListener('click', function () {
-            var v = parseInt(input.value) || 1;
-            if (v < max)
-                input.value = v + 1;
+        plus.addEventListener('click', function () {
+            input.value = clamp(parseInt(input.value, 10) + 1);
+            render();
         });
+        // Chặn mọi thay đổi giá trị ngoài ý muốn (scroll wheel, phím mũi tên,
+        // paste...) đều bị clamp lại đúng giới hạn kho.
+        input.addEventListener('input', render);
+        input.addEventListener('change', render);
+
+        render();
     })();
 
     // ── Thumbnail switcher ───────────────────────────────────────────────

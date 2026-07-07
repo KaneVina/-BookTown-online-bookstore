@@ -217,6 +217,16 @@
                                                         <span class="material-symbols-outlined" style="font-size:17px">block</span>
                                                     </button>
                                                 </c:if>
+                                                <c:if test="${book.status == 'discontinued'}">
+                                                    <button type="button"
+                                                            data-book-id="${book.bookID}"
+                                                            data-book-title="${book.title}"
+                                                            onclick="confirmRestore(this)"
+                                                            class="w-8 h-8 flex items-center justify-center rounded-lg border border-green-200 text-success hover:bg-green-50 transition-colors"
+                                                            title="Bán hàng lại">
+                                                        <span class="material-symbols-outlined" style="font-size:17px">restore</span>
+                                                    </button>
+                                                </c:if>
                                             </div>
                                         </td>
                                     </tr>
@@ -282,6 +292,25 @@
                 </div>
             </div>
         </div>
+        <div id="restoreModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 hidden">
+            <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4 animate-[fadeIn_.2s_ease]">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-success">restore</span>
+                    </div>
+                    <h3 class="font-bold text-lg">Bán hàng lại?</h3>
+                </div>
+                <p class="text-sm text-on-surface-variant mb-5" id="restoreMsg">Xác nhận bán hàng lại sách này?</p>
+                <div class="flex gap-3">
+                    <button onclick="closeRestoreModal()" class="flex-1 border border-outline-variant px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors">Hủy</button>
+                    <form method="post" action="${pageContext.request.contextPath}/dashboard/product-management" class="flex-1">
+                        <input type="hidden" name="action" value="restore">
+                        <input type="hidden" name="bookID" id="restoreBookID" value="">
+                        <button type="submit" class="w-full bg-success text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity">Bán hàng lại</button>
+                    </form>
+                </div>
+            </div>
+        </div>            
 
         <script>
             function confirmDelete(id, title) {
@@ -295,6 +324,20 @@
             document.getElementById('deleteModal').addEventListener('click', function (e) {
                 if (e.target === this)
                     closeDeleteModal();
+            });
+            function confirmRestore(button) {
+                var id = button.getAttribute('data-book-id');
+                var title = button.getAttribute('data-book-title');
+                document.getElementById('restoreBookID').value = id;
+                document.getElementById('restoreMsg').textContent = 'Xác nhận bán hàng lại: "' + title + '"? Sách sẽ hiển thị lại trên trang khách hàng.';
+                document.getElementById('restoreModal').classList.remove('hidden');
+            }
+            function closeRestoreModal() {
+                document.getElementById('restoreModal').classList.add('hidden');
+            }
+            document.getElementById('restoreModal').addEventListener('click', function (e) {
+                if (e.target === this)
+                    closeRestoreModal();
             });
         </script>
     </body>
