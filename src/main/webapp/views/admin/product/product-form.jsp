@@ -84,6 +84,22 @@
                 height:100%;
                 object-fit:cover;
             }
+            .preview-img-sm {
+                width:80px;
+                height:100px;
+                border:1.5px dashed #c2c6d4;
+                border-radius:8px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                overflow:hidden;
+                background:#f3faff;
+            }
+            .preview-img-sm img {
+                width:100%;
+                height:100%;
+                object-fit:cover;
+            }
         </style>
     </head>
     <body class="bg-background text-on-surface flex min-h-screen">
@@ -125,26 +141,89 @@
                             <input type="hidden" name="bookID" value="${book.bookID}">
                         </c:if>
 
-                        <%-- THUMBNAIL PREVIEW + URL --%>
-                        <div class="flex gap-4 items-start">
-                            <div class="preview-img flex-shrink-0" id="thumbPreview">
-                                <c:choose>
-                                    <c:when test="${not empty book.thumbnail}">
-                                        <img src="${book.thumbnail}" id="thumbImg" alt="">
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span class="material-symbols-outlined text-gray-300 text-4xl" id="thumbPlaceholder">image</span>
-                                        <img id="thumbImg" alt="" class="hidden w-full h-full object-cover">
-                                    </c:otherwise>
-                                </c:choose>
+                        <%-- THUMBNAIL + EXTRA IMAGES --%>
+                        <div class="flex flex-col gap-4">
+                            <%-- Ảnh bìa chính --%>
+                            <div class="flex gap-4 items-start">
+                                <div class="preview-img flex-shrink-0" id="thumbPreview">
+                                    <c:choose>
+                                        <c:when test="${not empty book.thumbnail}">
+                                            <img src="${book.thumbnail}" id="thumbImg" alt="">
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="material-symbols-outlined text-gray-300 text-4xl" id="thumbPlaceholder">image</span>
+                                            <img id="thumbImg" alt="" class="hidden w-full h-full object-cover">
+                                        </c:otherwise>
+                                    </c:choose>
+
+                                </div>
+                                <div class="flex-1">
+                                    <label class="field-label" for="thumbnail">🖼 URL ảnh bìa <span class="text-error">*</span></label>
+                                    <input type="url" id="thumbnail" name="thumbnail" required
+                                           class="field-input" placeholder="https://example.com/cover.jpg"
+                                           value="${book.thumbnail}"
+                                           oninput="previewThumb(this.value, 'thumbImg', 'thumbPlaceholder')">
+                                    <div class="mt-2">
+                                        <label class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors text-sm font-medium">
+                                            <span class="material-symbols-outlined text-[18px]">upload</span>
+                                            Upload ảnh lên Cloudinary
+                                            <input type="file" id="thumbFile" accept="image/*" class="hidden" onchange="uploadImage(this, 'thumbnail', 'thumbImg', 'thumbPlaceholder')">
+                                        </label>
+                                    </div>
+                                    <p class="err-msg" id="thumbnailErr">URL ảnh bìa không được để trống</p>
+                                    <p class="text-xs text-on-surface-variant mt-1.5">Ảnh bìa chính hiển thị trong danh sách và trang sản phẩm.</p>
+                                </div>
                             </div>
-                            <div class="flex-1">
-                                <label class="field-label" for="thumbnail">🖼 URL ảnh bìa</label>
-                                <input type="url" id="thumbnail" name="thumbnail"
-                                       class="field-input" placeholder="https://example.com/image.jpg"
-                                       value="${book.thumbnail}"
-                                       oninput="previewThumb(this.value)">
-                                <p class="text-xs text-on-surface-variant mt-1.5">Nhập URL ảnh bìa sách. Ảnh sẽ hiển thị preview bên trái.</p>
+                            <%-- 3 ảnh phụ --%>
+                            <div class="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                                <p class="text-[12px] font-bold text-on-surface-variant uppercase tracking-wide mb-3">🖼 Ảnh phụ (gallery trang sản phẩm)</p>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <div>
+                                        <div class="preview-img-sm mb-2" id="imgPreview2">
+                                            <span class="material-symbols-outlined text-gray-300 text-2xl" id="imgPlaceholder2">image</span>
+                                            <img id="imgThumb2" alt="" class="hidden w-full h-full object-cover">
+                                        </div>
+                                        <input type="url" id="image2" name="image2"
+                                               class="field-input text-xs py-1.5" placeholder="URL ảnh 2..."
+                                               value="${image2}"
+                                               oninput="previewThumb(this.value, 'imgThumb2', 'imgPlaceholder2')">
+                                        <label class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded cursor-pointer hover:bg-blue-100 transition-colors text-xs mt-1">
+                                            <span class="material-symbols-outlined text-[14px]">upload</span>
+                                            Upload
+                                            <input type="file" id="imgFile2" accept="image/*" class="hidden" onchange="uploadImage(this, 'image2', 'imgThumb2', 'imgPlaceholder2')">
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <div class="preview-img-sm mb-2" id="imgPreview3">
+                                            <span class="material-symbols-outlined text-gray-300 text-2xl" id="imgPlaceholder3">image</span>
+                                            <img id="imgThumb3" alt="" class="hidden w-full h-full object-cover">
+                                        </div>
+                                        <input type="url" id="image3" name="image3"
+                                               class="field-input text-xs py-1.5" placeholder="URL ảnh 3..."
+                                               value="${image3}"
+                                               oninput="previewThumb(this.value, 'imgThumb3', 'imgPlaceholder3')">
+                                        <label class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded cursor-pointer hover:bg-blue-100 transition-colors text-xs mt-1">
+                                            <span class="material-symbols-outlined text-[14px]">upload</span>
+                                            Upload
+                                            <input type="file" id="imgFile3" accept="image/*" class="hidden" onchange="uploadImage(this, 'image3', 'imgThumb3', 'imgPlaceholder3')">
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <div class="preview-img-sm mb-2" id="imgPreview4">
+                                            <span class="material-symbols-outlined text-gray-300 text-2xl" id="imgPlaceholder4">image</span>
+                                            <img id="imgThumb4" alt="" class="hidden w-full h-full object-cover">
+                                        </div>
+                                        <input type="url" id="image4" name="image4"
+                                               class="field-input text-xs py-1.5" placeholder="URL ảnh 4..."
+                                               value="${image4}"
+                                               oninput="previewThumb(this.value, 'imgThumb4', 'imgPlaceholder4')">
+                                        <label class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded cursor-pointer hover:bg-blue-100 transition-colors text-xs mt-1">
+                                            <span class="material-symbols-outlined text-[14px]">upload</span>
+                                            Upload
+                                            <input type="file" id="imgFile4" accept="image/*" class="hidden" onchange="uploadImage(this, 'image4', 'imgThumb4', 'imgPlaceholder4')">
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -157,12 +236,13 @@
                             <p class="err-msg" id="titleErr">Tên sách không được để trống</p>
                         </div>
 
-                        <%-- AUTHORS --%>
+                        <%-- AUTHORS (bắt buộc) --%>
                         <div>
-                            <label class="field-label" for="authors">✍️ Tác giả</label>
-                            <input type="text" id="authors" name="authors"
+                            <label class="field-label" for="authors">✍️ Tác giả <span class="text-error">*</span></label>
+                            <input type="text" id="authors" name="authors" required
                                    class="field-input" placeholder="Nguyễn Văn A, Trần Thị B (phân cách bằng dấu phẩy)"
                                    value="<c:if test="${not empty book.authors}"><c:forEach var='a' items='${book.authors}' varStatus='s'>${a}<c:if test='${!s.last}'>, </c:if></c:forEach></c:if>">
+                                           <p class="err-msg" id="authorsErr">Tên tác giả không được để trống</p>
                                            <p class="text-xs text-on-surface-variant mt-1">Nhiều tác giả: nhập phân cách bằng dấu phẩy</p>
                                        </div>
 
@@ -184,7 +264,7 @@
                             </div>
                         </div>
 
-                        <%-- DESCRIPTION --%>
+                        <%-- [NEW] DESCRIPTION (tích hợp từ code 2) --%>
                         <div>
                             <label class="field-label" for="description">📝 Mô tả</label>
                             <textarea id="description" name="description" rows="4"
@@ -285,10 +365,12 @@
         </main>
 
         <script>
-            // Preview thumbnail
-            function previewThumb(url) {
-                const img = document.getElementById('thumbImg');
-                const placeholder = document.getElementById('thumbPlaceholder');
+            // Preview image by imgId and placeholderId
+            function previewThumb(url, imgId, placeholderId) {
+                const img = document.getElementById(imgId);
+                const placeholder = document.getElementById(placeholderId);
+                if (!img)
+                    return;
                 if (url && url.trim()) {
                     img.src = url.trim();
                     img.classList.remove('hidden');
@@ -306,6 +388,61 @@
                 }
             }
 
+            // Upload image to Cloudinary via /upload-image endpoint
+            function uploadImage(input, inputId, imgId, placeholderId) {
+                const file = input.files[0];
+                if (!file)
+                    return;
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const uploadBtn = input.parentElement;
+                const originalText = uploadBtn.innerHTML;
+                uploadBtn.innerHTML = '<span class="material-symbols-outlined text-[14px] animate-spin">refresh</span> Uploading...';
+                uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+                fetch('${pageContext.request.contextPath}/upload-image', {
+                    method: 'POST',
+                    body: formData
+                })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.ok && data.url) {
+                                document.getElementById(inputId).value = data.url;
+                                previewThumb(data.url, imgId, placeholderId);
+                                uploadBtn.innerHTML = originalText;
+                                uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                            } else {
+                                alert('Upload thất bại: ' + (data.message || 'Lỗi không xác định'));
+                                uploadBtn.innerHTML = originalText;
+                                uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('Lỗi kết nối server');
+                            uploadBtn.innerHTML = originalText;
+                            uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        });
+            }
+
+            // On load: preview all images if editing
+            document.addEventListener('DOMContentLoaded', function () {
+                // Main thumbnail
+                const mainInput = document.getElementById('thumbnail');
+                if (mainInput && mainInput.value) {
+                    previewThumb(mainInput.value, 'thumbImg', 'thumbPlaceholder');
+                }
+                // Extra images
+                [2, 3, 4].forEach(i => {
+                    const input = document.getElementById('image' + i);
+                    if (input && input.value) {
+                        previewThumb(input.value, 'imgThumb' + i, 'imgPlaceholder' + i);
+                    }
+                });
+            });
+
             // Client-side validation
             document.getElementById('bookForm').addEventListener('submit', function (e) {
                 let valid = true;
@@ -319,6 +456,28 @@
                 } else {
                     title.classList.remove('error');
                     titleErr.classList.remove('show');
+                }
+
+                const thumbnail = document.getElementById('thumbnail');
+                const thumbnailErr = document.getElementById('thumbnailErr');
+                if (!thumbnail.value.trim()) {
+                    thumbnail.classList.add('error');
+                    thumbnailErr.classList.add('show');
+                    valid = false;
+                } else {
+                    thumbnail.classList.remove('error');
+                    thumbnailErr.classList.remove('show');
+                }
+
+                const authors = document.getElementById('authors');
+                const authorsErr = document.getElementById('authorsErr');
+                if (!authors.value.trim()) {
+                    authors.classList.add('error');
+                    authorsErr.classList.add('show');
+                    valid = false;
+                } else {
+                    authors.classList.remove('error');
+                    authorsErr.classList.remove('show');
                 }
 
                 const price = document.getElementById('price');
@@ -345,7 +504,6 @@
 
                 if (!valid) {
                     e.preventDefault();
-                    // Scroll to first error
                     document.querySelector('.field-input.error')?.scrollIntoView({behavior: 'smooth', block: 'center'});
                 } else {
                     document.getElementById('submitBtn').disabled = true;

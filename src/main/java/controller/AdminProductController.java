@@ -78,6 +78,9 @@ public class AdminProductController extends HttpServlet {
             case "delete":
                 handleDelete(req, resp, account);
                 break;
+            case "restore":
+                handleRestore(req, resp, account);
+                break;
             default:
                 resp.sendRedirect(req.getContextPath() + "/dashboard/product-management");
         }
@@ -139,6 +142,18 @@ public class AdminProductController extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/dashboard/product-management");
             return;
         }
+
+        // Parse pipe-separated images: thumbnail|image2|image3|image4
+        String[] imgParts = book.getThumbnail() != null ? book.getThumbnail().split("\\|", -1) : new String[0];
+        String img1 = imgParts.length > 0 ? imgParts[0].trim() : "";
+        String img2 = imgParts.length > 1 ? imgParts[1].trim() : "";
+        String img3 = imgParts.length > 2 ? imgParts[2].trim() : "";
+        String img4 = imgParts.length > 3 ? imgParts[3].trim() : "";
+        book.setThumbnail(img1); // form shows only main image in thumbnail field
+        req.setAttribute("image2", img2);
+        req.setAttribute("image3", img3);
+        req.setAttribute("image4", img4);
+
         req.setAttribute("book", book);
         req.setAttribute("genreMap", bookDAO.getGenreMap());
         req.setAttribute("originMap", bookDAO.getOriginMap());
@@ -199,13 +214,44 @@ public class AdminProductController extends HttpServlet {
         }
         resp.sendRedirect(req.getContextPath() + "/dashboard/product-management");
     }
+    private void handleRestore(HttpServletRequest req, HttpServletResponse resp, Account account)
+        throws IOException {
+    int bookID = parseID(req.getParameter("bookID"));
+    HttpSession session = req.getSession();
+    if (bookID > 0) {
+        boolean ok = bookDAO.restoreBook(bookID, account.getId());
+        if (ok) {
+            session.setAttribute("successMessage", "Đã bán hàng lại!");
+        } else {
+            session.setAttribute("errorMessage", "Bán hàng lại thất bại, vui lòng thử lại!");
+        }
+    }
+    resp.sendRedirect(req.getContextPath() + "/dashboard/product-management");
+}
 
-    // ── Build Book từ request ────────────────────────────────────────
+    // ── Build Book từ request ────────────────────────────────────────────────
     private Book buildBookFromRequest(HttpServletRequest req) {
         Book b = new Book();
         b.setTitle(req.getParameter("title"));
         b.setDescription(req.getParameter("description"));
-        b.setThumbnail(req.getParameter("thumbnail"));
+
+        // Combine thumbnail + image2 + image3 + image4 into pipe-separated string
+        String thumb = clean(req.getParameter("thumbnail"));
+        String img2 = clean(req.getParameter("image2"));
+        String img3 = clean(req.getParameter("image3"));
+        String img4 = clean(req.getParameter("image4"));
+        StringBuilder allImages = new StringBuilder(thumb);
+        if (!img2.isEmpty()) {
+            allImages.append("|").append(img2);
+        }
+        if (!img3.isEmpty()) {
+            allImages.append("|").append(img3);
+        }
+        if (!img4.isEmpty()) {
+            allImages.append("|").append(img4);
+        }
+        b.setThumbnail(allImages.toString());
+
         try {
             b.setPrice(new BigDecimal(req.getParameter("price")));
         } catch (Exception e) {
@@ -229,7 +275,13 @@ public class AdminProductController extends HttpServlet {
             }
         } catch (Exception e) {
         }
-        b.setStatus(req.getParameter("status") != null ? req.getParameter("status") : "available");
+
+        String status = req.getParameter("status") != null ? req.getParameter("status") : "available";
+        if (b.getStockQuantity() == 0) {
+            b.setStatus("discontinued");
+        } else {
+            b.setStatus(status);
+        }
         Integer gid = parseIntParam(req.getParameter("genreID"));
         if (gid != null) {
             b.setGenreID(gid);
@@ -249,6 +301,10 @@ public class AdminProductController extends HttpServlet {
         return b;
     }
 
+    private String clean(String s) {
+        return (s == null) ? "" : s.trim();
+    }
+
     // ── Auth guard ───────────────────────────────────────────────────
     private Account requireStaff(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
@@ -258,8 +314,9 @@ public class AdminProductController extends HttpServlet {
             return null;
         }
         Account acc = (Account) session.getAttribute("account");
-        if (!"admin".equals(acc.getRole()) && !"staff".equals(acc.getRole())) {
-            resp.sendRedirect(req.getContextPath() + "/home");
+        if (!"staff".equals(acc.getRole())) {
+            session.invalidate();
+            resp.sendRedirect(req.getContextPath() + "/login");
             return null;
         }
         return acc;

@@ -100,4 +100,6 @@ public class ResetPasswordController extends HttpServlet {
         boolean hasDigit  = password.chars().anyMatch(Character::isDigit);
         return hasUpper && hasLower && hasDigit;
     }
+    
+    
 }

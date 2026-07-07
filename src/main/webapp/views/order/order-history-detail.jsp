@@ -44,44 +44,50 @@
                         <h1 class="text-2xl font-bold text-[#071e27]">Đơn hàng ${order.orderCode}
                         </h1>
 
-                        <span class="px-3 py-1 font-bold text-xs rounded-full flex items-center gap-1
+                        <span class="px-3 py-1 font-bold text-xs rounded-full flex items-center
                               <c:choose>
-                                  <c:when test='${order.status == " pending"}'>bg-amber-100 text-amber-700
+                                  <c:when test='${order.status == "pending"}'>bg-yellow-50 text-[#e65c00]
                                   </c:when>
-                                  <c:when test='${order.status == "confirmed"}'>bg-blue-100
-                                      text-blue-700</c:when>
-                                  <c:when test='${order.status == "shipping"}'>bg-indigo-100
-                                      text-indigo-700</c:when>
-                                  <c:when test='${order.status == "completed"}'>bg-green-100
-                                      text-green-700</c:when>
-                                  <c:otherwise>bg-red-100 text-red-700</c:otherwise>
+                                  <c:when test='${order.status == "confirmed"}'>bg-blue-50 text-[#004d99]
+                                  </c:when>
+                                  <c:when test='${order.status == "shipping"}'>bg-indigo-50
+                                      text-[#134aa4]</c:when>
+                                  <c:when test='${order.status == "completed"}'>bg-green-50
+                                      text-[#2E7D32]</c:when>
+                                  <c:otherwise>bg-red-50 text-[#D32F2F]</c:otherwise>
                               </c:choose>">
-                            <span class="w-1.5 h-1.5 rounded-full
-                                  <c:choose>
-                                      <c:when test='${order.status == " pending"}'>bg-amber-500</c:when>
-                                      <c:when test='${order.status == "confirmed"}'>bg-blue-500
-                                      </c:when>
-                                      <c:when test='${order.status == "shipping"}'>bg-indigo-500
-                                      </c:when>
-                                      <c:when test='${order.status == "completed"}'>bg-green-500
-                                      </c:when>
-                                      <c:otherwise>bg-red-500</c:otherwise>
-                                  </c:choose>">
-                            </span>
                             <c:choose>
                                 <c:when test="${order.status == 'pending'}">Chờ xác nhận
                                 </c:when>
-                                <c:when test="${order.status == 'confirmed'}">Đã xác nhận
+                                <c:when test="${order.status == 'confirmed'}">Xác nhận
                                 </c:when>
                                 <c:when test="${order.status == 'shipping'}">Đang giao
                                 </c:when>
                                 <c:when test="${order.status == 'completed'}">Hoàn thành
                                 </c:when>
-                                <c:when test="${order.status == 'cancelled'}">Đã hủy
+                                <c:when test="${order.status == 'cancelled'}">Hủy đơn
                                 </c:when>
                                 <c:otherwise>${order.status}</c:otherwise>
                             </c:choose>
                         </span>
+
+                        <%-- Tag hoàn tiền: chỉ hiện khi VNPAY đã hủy --%>
+                        <c:if test="${order.status == 'cancelled' && order.paymentMethod == 'vnpay'}">
+                            <c:choose>
+                                <c:when test="${order.paymentStatus == 'pending_refund'}">
+                                    <span class="px-3 py-1 font-bold text-xs rounded-full flex items-center gap-1 bg-amber-50 text-amber-600 border border-amber-200">
+                                        <span class="material-symbols-outlined text-[12px]">schedule</span>
+                                        Đang hoàn tiền
+                                    </span>
+                                </c:when>
+                                <c:when test="${order.paymentStatus == 'refunded'}">
+                                    <span class="px-3 py-1 font-bold text-xs rounded-full flex items-center gap-1 bg-green-50 text-green-700 border border-green-200">
+                                        <span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                        Đã hoàn tiền
+                                    </span>
+                                </c:when>
+                            </c:choose>
+                        </c:if>
                     </div>
 
                     <p class="text-xs text-[#424752] mt-1.5">
@@ -119,14 +125,119 @@
 
                     <c:choose>
                         <c:when test="${order.status == 'cancelled'}">
-                            <section
-                                class="bg-red-50 border border-red-200 rounded-xl p-6 flex items-center gap-3">
-                                <span
-                                    class="material-symbols-outlined text-red-500">cancel</span>
-                                <p class="text-sm font-semibold text-red-700">
-                                    Đơn hàng này đã bị hủy.</p>
-                            </section>
+                            <c:choose>
+                                <%-- VNPAY đã thanh toán: hiện stepper theo dõi hoàn tiền --%>
+                                <c:when test="${order.paymentMethod == 'vnpay' && (order.paymentStatus == 'pending_refund' || order.paymentStatus == 'refunded')}">
+                                    <%-- refStep: 3 = đang chờ hoàn, 4 = đã hoàn xong --%>
+                                    <c:set var="refStep" value="3" />
+                                    <c:if test="${order.paymentStatus == 'refunded'}">
+                                        <c:set var="refStep" value="4" />
+                                    </c:if>
+
+                                    <section class="bg-white p-6 rounded-xl border border-[#c2c6d4] shadow-sm">
+                                        <h2 class="text-lg font-bold text-[#071e27] mb-6">Trạng thái đơn hàng &amp; Hoàn tiền</h2>
+
+                                        <div class="relative flex justify-between items-start">
+                                            <%-- Đường kẻ nền xám --%>
+                                            <div class="absolute top-5 left-0 w-full h-1 bg-gray-200 z-0 rounded-full">
+                                                <%-- Đường kẻ tiến trình --%>
+                                                <div class="h-full rounded-full transition-all"
+                                                     style="width: ${(refStep - 1) * 100 / 3}%;
+                                                            background: ${refStep >= 4 ? '#2E7D32' : (refStep >= 3 ? '#e65c00' : '#004d99')};">
+                                                </div>
+                                            </div>
+
+                                            <%-- Bước 1: Đã đặt hàng (luôn xanh) --%>
+                                            <div class="relative z-10 flex flex-col items-center text-center">
+                                                <div class="w-10 h-10 rounded-full bg-[#004d99] text-white flex items-center justify-center mb-2 shadow-sm">
+                                                    <span class="material-symbols-outlined text-[22px]"
+                                                          style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                                </div>
+                                                <span class="text-xs font-bold text-[#004d99]">Đã đặt hàng</span>
+                                                <span class="text-[11px] text-[#424752] mt-0.5">
+                                                    <fmt:formatDate value="${order.createdAt}" pattern="dd/MM/yyyy" />
+                                                </span>
+                                            </div>
+
+                                            <%-- Bước 2: Hủy đơn (luôn đỏ khi cancelled) --%>
+                                            <div class="relative z-10 flex flex-col items-center text-center">
+                                                <div class="w-10 h-10 rounded-full bg-red-100 text-[#D32F2F] border-2 border-[#D32F2F] flex items-center justify-center mb-2 shadow-sm">
+                                                    <span class="material-symbols-outlined text-[22px]"
+                                                          style="font-variation-settings: 'FILL' 1;">cancel</span>
+                                                </div>
+                                                <span class="text-xs font-bold text-[#D32F2F]">Hủy đơn</span>
+                                            </div>
+
+                                            <%-- Bước 3: Chờ hoàn tiền --%>
+                                            <div class="relative z-10 flex flex-col items-center text-center ${refStep < 3 ? 'opacity-40' : ''}">
+                                                <div class="w-10 h-10 rounded-full flex items-center justify-center mb-2 shadow-sm
+                                                     ${refStep >= 4 ? 'bg-[#2E7D32] text-white' : (refStep == 3 ? 'bg-amber-50 text-amber-600 border-2 border-amber-500' : 'bg-gray-100 text-gray-400 border border-gray-200')}">
+                                                    <span class="material-symbols-outlined text-[22px]"
+                                                          style="font-variation-settings: 'FILL' ${refStep >= 4 ? '1' : '0'};">
+                                                        <c:choose>
+                                                            <c:when test="${refStep >= 4}">check_circle</c:when>
+                                                            <c:otherwise>schedule</c:otherwise>
+                                                        </c:choose>
+                                                    </span>
+                                                </div>
+                                                <span class="text-xs font-bold ${refStep == 3 ? 'text-amber-600' : (refStep >= 4 ? 'text-[#2E7D32]' : 'text-[#071e27]')}">
+                                                    Chờ hoàn tiền
+                                                </span>
+                                                <c:if test="${refStep == 3}">
+                                                    <span class="text-[10px] text-amber-500 mt-0.5">2–5 ngày làm việc</span>
+                                                </c:if>
+                                            </div>
+
+                                            <%-- Bước 4: Đã hoàn tiền --%>
+                                            <div class="relative z-10 flex flex-col items-center text-center ${refStep < 4 ? 'opacity-40' : ''}">
+                                                <div class="w-10 h-10 rounded-full flex items-center justify-center mb-2 shadow-sm
+                                                     ${refStep >= 4 ? 'bg-[#2E7D32] text-white' : 'bg-gray-100 text-gray-400 border border-gray-200'}">
+                                                    <span class="material-symbols-outlined text-[22px]"
+                                                          style="font-variation-settings: 'FILL' ${refStep >= 4 ? '1' : '0'};">
+                                                        payments
+                                                    </span>
+                                                </div>
+                                                <span class="text-xs font-bold ${refStep >= 4 ? 'text-[#2E7D32]' : 'text-[#071e27]'}">
+                                                    Đã hoàn tiền
+                                                </span>
+                                                <c:if test="${refStep >= 4}">
+                                                    <span class="text-[10px] text-green-600 mt-0.5">Hoàn tất ✓</span>
+                                                </c:if>
+                                            </div>
+                                        </div>
+
+                                        <%-- Ghi chú bên dưới stepper --%>
+                                        <div class="mt-6 pt-4 border-t border-[#c2c6d4]">
+                                            <c:choose>
+                                                <c:when test="${order.paymentStatus == 'pending_refund'}">
+                                                    <p class="text-xs text-amber-600 flex items-center gap-1.5">
+                                                        <span class="material-symbols-outlined text-[14px]">info</span>
+                                                        Số tiền <strong><fmt:formatNumber value="${order.totalPrice}" type="number" groupingUsed="true" />đ</strong>
+                                                        sẽ được hoàn vào tài khoản VNPAY của bạn trong vòng <strong>2–5 ngày làm việc</strong>. Bạn sẽ nhận email xác nhận khi hoàn tất.
+                                                    </p>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <p class="text-xs text-green-700 flex items-center gap-1.5">
+                                                        <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                                        Số tiền <strong><fmt:formatNumber value="${order.totalPrice}" type="number" groupingUsed="true" />đ</strong>
+                                                        đã được hoàn vào tài khoản của bạn. Vui lòng kiểm tra email xác nhận để biết thêm chi tiết.
+                                                    </p>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+                                    </section>
+                                </c:when>
+
+                                <%-- Mặc định: COD hoặc VNPAY chưa thanh toán → banner đỏ --%>
+                                <c:otherwise>
+                                    <section class="bg-red-50 border border-red-200 rounded-xl p-6 flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-red-500">cancel</span>
+                                        <p class="text-sm font-semibold text-red-700">Đơn hàng này đã bị hủy.</p>
+                                    </section>
+                                </c:otherwise>
+                            </c:choose>
                         </c:when>
+
                         <c:otherwise>
                             <section
                                 class="bg-white p-6 rounded-xl border border-[#c2c6d4] shadow-sm">
@@ -175,8 +286,7 @@
                                             </span>
                                         </div>
                                         <span
-                                            class="text-xs font-bold text-[#071e27]">Đã
-                                            xác nhận</span>
+                                            class="text-xs font-bold text-[#071e27]">Xác nhận</span>
                                     </div>
 
                                     <div
@@ -329,15 +439,19 @@
                                     <c:choose>
                                         <c:when test="${order.paymentMethod == 'cod'}">Thanh
                                             toán khi nhận hàng (COD)</c:when>
-                                        <c:otherwise>${order.paymentMethod}</c:otherwise>
+                                        <c:otherwise>Chuyển khoản Ngân hàng (VNPAY)</c:otherwise>
                                     </c:choose>
                                 </p>
                                 <p class="text-[11px] text-[#424752] mt-0.5">
                                     <c:choose>
                                         <c:when test="${order.paymentStatus == 'paid'}">Đã
                                             thanh toán</c:when>
+                                        <c:when test="${order.paymentStatus == 'pending_refund'}">
+                                            <span class="text-amber-600 font-semibold">Đang chờ hoàn tiền</span>
+                                        </c:when>
                                         <c:when test="${order.paymentStatus == 'refunded'}">
-                                            Đã hoàn tiền</c:when>
+                                            <span class="text-green-700 font-semibold">Đã hoàn tiền</span>
+                                        </c:when>
                                         <c:otherwise>Chưa thanh toán</c:otherwise>
                                     </c:choose>
                                 </p>

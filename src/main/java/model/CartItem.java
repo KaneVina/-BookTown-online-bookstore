@@ -81,11 +81,21 @@ public class CartItem {
         this.authorsDisplay = authorsDisplay;
     }
 
-    
     public BigDecimal getSubtotal() {
         if (price == null) {
             return BigDecimal.ZERO;
         }
         return price.multiply(BigDecimal.valueOf(quantity));
+    }
+
+    /**
+     * Trả về URL ảnh đầu tiên trong chuỗi thumbnail ngăn bởi '|'
+     */
+    public String getThumbnailFirst() {
+        if (thumbnail == null || thumbnail.isEmpty()) {
+            return "";
+        }
+        int idx = thumbnail.indexOf('|');
+        return idx >= 0 ? thumbnail.substring(0, idx).trim() : thumbnail.trim();
     }
 }
