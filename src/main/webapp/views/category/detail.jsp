@@ -23,6 +23,18 @@
                     Quay lại danh sách
                 </a>
 
+
+
+                <c:if test="${not empty param.success}">
+                    <div class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
+                        ${param.success}
+                    </div>
+                </c:if>
+                <c:if test="${not empty param.error}">
+                    <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                        ${param.error}
+                    </div>
+                </c:if>
                 <section class="bg-surface rounded-2xl border border-outline-variant shadow-card overflow-hidden">
                     <div class="px-6 py-5 border-b border-outline-variant flex items-center justify-between">
                         <div>
@@ -30,11 +42,11 @@
                             <p class="text-sm text-on-surface-variant mt-1">Thông tin chi tiết của thể loại sách.</p>
                         </div>
                         <c:if test="${canManageCategory}">
-                            <a href="${pageContext.request.contextPath}/category?action=edit&id=${genre.genreID}"
-                               class="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white hover:bg-[#003f7d] transition">
+                            <button type="button" onclick="openUpdateModal()"
+                                    class="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white hover:bg-[#003f7d] transition">
                                 <span class="material-symbols-outlined text-[18px]">edit</span>
                                 Cập nhật
-                            </a>
+                            </button>
                         </c:if>
                     </div>
 
@@ -53,6 +65,59 @@
                         </div>
                     </div>
                 </section>
+
+
+                <div id="updateModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 px-4">
+                    <div class="w-full max-w-lg rounded-2xl bg-white shadow-2xl overflow-hidden">
+                        <div class="px-6 py-5 border-b border-outline-variant flex items-center justify-between">
+                            <div>
+                                <h2 class="text-xl font-bold">Cập nhật thể loại</h2>
+                                <p class="text-sm text-on-surface-variant mt-1">
+                            </div>
+                            <button type="button" onclick="closeUpdateModal()" class="w-9 h-9 rounded-lg hover:bg-surface-container-low flex items-center justify-center">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+
+                        <form action="${pageContext.request.contextPath}/category" method="post" class="p-6 space-y-5">
+                            <input type="hidden" name="action" value="update">
+                            <input type="hidden" name="id" value="${genre.genreID}">
+
+                            <div>
+                                <label class="block text-sm font-bold mb-2">Tên thể loại</label>
+                                <input type="text" name="genre_name" required maxlength="100" value="${genre.genreName}"
+                                       class="w-full rounded-xl border-outline-variant bg-surface-container-low px-4 py-3 text-sm focus:border-primary focus:ring-primary">
+                                <p class="text-xs text-on-surface-variant mt-2">Tên thể loại không được để trống và không được trùng.</p>
+                            </div>
+
+                            <div class="flex justify-end gap-3 pt-2">
+                                <button type="button" onclick="closeUpdateModal()"
+                                        class="inline-flex items-center justify-center rounded-xl border border-outline-variant bg-white px-5 py-3 text-sm font-semibold text-primary hover:bg-surface-container-low transition">
+                                    Cancel
+                                </button>
+                                <button type="submit"
+                                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-[#003f7d] transition">
+                                    <span class="material-symbols-outlined text-[19px]">save</span>
+                                    Lưu
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <script>
+                    function openUpdateModal() {
+                        const modal = document.getElementById('updateModal');
+                        modal.classList.remove('hidden');
+                        modal.classList.add('flex');
+                    }
+
+                    function closeUpdateModal() {
+                        const modal = document.getElementById('updateModal');
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                    }
+                </script>
             </div>
         </main>
     </body>

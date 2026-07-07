@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -198,145 +199,137 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-outline-variant/5">
-                                <!-- Row 1: Pending -->
-                                <tr class="hover:bg-background-alt/50 transition-colors group">
-                                    <td class="px-gutter py-4">
-                                        <span class="font-bold text-primary">#ORD-88291</span>
-                                    </td>
-                                    <td class="px-gutter py-4">
-                                        <div class="flex items-center gap-3">
-                                            <span class="text-body-sm font-medium">Nguyễn Văn Hoàng</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-gutter py-4 text-body-sm text-on-surface-variant">12:30 - 12/04/2024</td>
-                                    <td class="px-gutter py-4 font-bold text-body-sm">450.000đ</td>
-                                    <td class="px-gutter py-4">
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-container/20 text-primary text-label-sm font-bold">
-                                            <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                                            Chờ duyệt
-                                        </span>
-                                    </td>
-                                    <td class="px-gutter py-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button class="p-2 bg-surface border border-outline-variant/30 text-primary rounded-lg hover:bg-surface-container-high transition-all active:scale-90" title="Chỉnh sửa">
-                                                <span class="material-symbols-outlined text-[18px]">edit</span>
-                                            </button>
-                                            <button class="p-2 bg-surface border border-outline-variant/30 text-primary rounded-lg hover:bg-surface-container-high transition-all active:scale-90" title="Xem chi tiết">
-                                                <a href="${pageContext.request.contextPath}/dashboard/customer-order-detail">
-                                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
-                                                </a>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-background-alt/50 transition-colors group">
-                                    <td class="px-gutter py-4">
-                                        <span class="font-bold text-primary">#ORD-88290</span>
-                                    </td>
-                                    <td class="px-gutter py-4">
-                                        <div class="flex items-center gap-3">
-                                            <span class="text-body-sm font-medium">Trần Thị Lan</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-gutter py-4 text-body-sm text-on-surface-variant">11:15 - 12/04/2024</td>
-                                    <td class="px-gutter py-4 font-bold text-body-sm">1.280.000đ</td>
-                                    <td class="px-gutter py-4">
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning/10 text-warning text-label-sm font-bold">
-                                            <span class="w-2 h-2 rounded-full bg-warning"></span>
-                                            Đang đóng gói
-                                        </span>
-                                    </td>
-                                    <td class="px-gutter py-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button class="p-2 bg-surface border border-outline-variant/30 text-primary rounded-lg hover:bg-surface-container-high transition-all active:scale-90" title="Xem chi tiết">
-                                                <span class="material-symbols-outlined text-[18px]">edit</span>
-                                            </button>
-                                            <button class="p-2 bg-surface border border-outline-variant/30 text-primary rounded-lg hover:bg-surface-container-high transition-all active:scale-90" title="Xem chi tiết">
-                                                <a href="${pageContext.request.contextPath}/dashboard/customer-order-detail">
-                                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
-                                                </a>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-background-alt/50 transition-colors group">
-                                    <td class="px-gutter py-4">
-                                        <span class="font-bold text-primary">#ORD-88289</span>
-                                    </td>
-                                    <td class="px-gutter py-4">
-                                        <div class="flex items-center gap-3">
-                                            <span class="text-body-sm font-medium">Lê Anh Quân</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-gutter py-4 text-body-sm text-on-surface-variant">09:45 - 12/04/2024</td>
-                                    <td class="px-gutter py-4 font-bold text-body-sm">320.000đ</td>
-                                    <td class="px-gutter py-4">
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-tertiary/10 text-tertiary text-label-sm font-bold">
-                                            <span class="w-2 h-2 rounded-full bg-tertiary"></span>
-                                            Đang giao
-                                        </span>
-                                    </td>
-                                    <td class="px-gutter py-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button class="p-2 bg-surface border border-outline-variant/30 text-primary rounded-lg hover:bg-surface-container-high transition-all active:scale-90" title="Xem chi tiết">
-                                                <span class="material-symbols-outlined text-[18px]">edit</span>
-                                            </button>
-                                            <button class="p-2 bg-surface border border-outline-variant/30 text-primary rounded-lg hover:bg-surface-container-high transition-all active:scale-90" title="Xem chi tiết">
-                                                <a href="${pageContext.request.contextPath}/dashboard/customer-order-detail">
-                                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
-                                                </a>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-background-alt/50 transition-colors group">
-                                    <td class="px-gutter py-4">
-                                        <span class="font-bold text-primary">#ORD-88288</span>
-                                    </td>
-                                    <td class="px-gutter py-4">
-                                        <div class="flex items-center gap-3">
-                                            <span class="text-body-sm font-medium">Phạm Minh</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-gutter py-4 text-body-sm text-on-surface-variant">08:00 - 12/04/2024</td>
-                                    <td class="px-gutter py-4 font-bold text-body-sm">890.000đ</td>
-                                    <td class="px-gutter py-4">
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-container/20 text-primary text-label-sm font-bold">
-                                            <span class="w-2 h-2 rounded-full bg-primary"></span>
-                                            Chờ duyệt
-                                        </span>
-                                    </td>
-                                    <td class="px-gutter py-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button class="p-2 bg-surface border border-outline-variant/30 text-primary rounded-lg hover:bg-surface-container-high transition-all active:scale-90" title="Xem chi tiết">
-                                                <span class="material-symbols-outlined text-[18px]">edit</span>
-                                            </button>
-                                            <button class="p-2 bg-surface border border-outline-variant/30 text-primary rounded-lg hover:bg-surface-container-high transition-all active:scale-90" title="Xem chi tiết">
-                                                <a href="${pageContext.request.contextPath}/dashboard/customer-order-detail">
-                                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
-                                                </a>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                <c:choose>
+                                    <c:when test="${empty orders}">
+                                        <tr>
+                                            <td colspan="6" class="px-gutter py-10 text-center text-on-surface-variant">
+                                                Chưa có đơn hàng nào.
+                                            </td>
+                                        </tr>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <c:forEach var="order" items="${orders}">
+                                            <tr class="hover:bg-background-alt/50 transition-colors group">
+                                                <td class="px-gutter py-4">
+                                                    <span class="font-bold text-primary">#ORD-${order.orderID}</span>
+                                                </td>
+
+                                                <td class="px-gutter py-4">
+                                                    <div class="flex items-center gap-3">
+                                                        <span class="text-body-sm font-medium">
+                                                            <c:choose>
+                                                                <c:when test="${not empty order.customerName}">${order.customerName}</c:when>
+                                                                <c:otherwise>Khách hàng</c:otherwise>
+                                                            </c:choose>
+                                                        </span>
+                                                    </div>
+                                                </td>
+
+                                                <td class="px-gutter py-4 text-body-sm text-on-surface-variant">
+                                                    <fmt:formatDate value="${order.createdAt}" pattern="HH:mm - dd/MM/yyyy" />
+                                                </td>
+
+                                                <td class="px-gutter py-4 font-bold text-body-sm">
+                                                    <fmt:formatNumber value="${order.totalPrice}" type="number" groupingUsed="true" />đ
+                                                </td>
+
+                                                <td class="px-gutter py-4">
+                                                    <c:choose>
+                                                        <c:when test="${order.status == 'pending' || order.status == 'Chờ duyệt'}">
+                                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-container/20 text-primary text-label-sm font-bold">
+                                                                <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                                                                Chờ duyệt
+                                                            </span>
+                                                        </c:when>
+                                                        <c:when test="${order.status == 'packing' || order.status == 'Đang đóng gói'}">
+                                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning/10 text-warning text-label-sm font-bold">
+                                                                <span class="w-2 h-2 rounded-full bg-warning"></span>
+                                                                Đang đóng gói
+                                                            </span>
+                                                        </c:when>
+                                                        <c:when test="${order.status == 'shipping' || order.status == 'Đang giao'}">
+                                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-tertiary/10 text-tertiary text-label-sm font-bold">
+                                                                <span class="w-2 h-2 rounded-full bg-tertiary"></span>
+                                                                Đang giao
+                                                            </span>
+                                                        </c:when>
+                                                        <c:when test="${order.status == 'completed' || order.status == 'Hoàn thành'}">
+                                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 text-success text-label-sm font-bold">
+                                                                <span class="w-2 h-2 rounded-full bg-success"></span>
+                                                                Hoàn thành
+                                                            </span>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant text-label-sm font-bold">
+                                                                <span class="w-2 h-2 rounded-full bg-on-surface-variant"></span>
+                                                                ${order.status}
+                                                            </span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </td>
+
+                                                <td class="px-gutter py-4 text-right">
+                                                    <div class="flex items-center justify-end gap-2">
+                                                        <a href="${pageContext.request.contextPath}/dashboard/customer-order-detail?orderID=${order.orderID}"
+                                                           class="p-2 bg-surface border border-outline-variant/30 text-primary rounded-lg hover:bg-surface-container-high transition-all active:scale-90"
+                                                           title="Xem chi tiết">
+                                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </c:otherwise>
+                                </c:choose>
                             </tbody>
                         </table>
                     </div>
                     <div class="p-gutter border-t border-outline-variant/10 flex items-center justify-between">
-                        <p class="text-body-sm text-on-surface-variant">Hiển thị <span class="font-bold text-on-surface">1-4</span> trên <span class="font-bold text-on-surface">81</span> đơn hàng</p>
+                        <p class="text-body-sm text-on-surface-variant">
+                            Hiển thị
+                            <span class="font-bold text-on-surface">${startOrder}-${endOrder}</span>
+                            trên
+                            <span class="font-bold text-on-surface">${totalOrders}</span>
+                            đơn hàng
+                        </p>
+
                         <div class="flex items-center gap-2">
-                            <button class="p-2 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container-high disabled:opacity-30 disabled:cursor-not-allowed" disabled="">
-                                <span class="material-symbols-outlined text-[20px]">chevron_left</span>
-                            </button>
-                            <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-white text-label-sm font-bold">1</button>
-                            <button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-high text-on-surface-variant text-label-sm">2</button>
-                            <button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-high text-on-surface-variant text-label-sm">3</button>
-                            <span class="text-on-surface-variant">...</span>
-                            <button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-high text-on-surface-variant text-label-sm">21</button>
-                            <button class="p-2 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container-high active:scale-95 transition-all">
-                                <span class="material-symbols-outlined text-[20px]">chevron_right</span>
-                            </button>
+                            <c:choose>
+                                <c:when test="${currentPage > 1}">
+                                    <a href="${pageContext.request.contextPath}/dashboard/customer-order?page=${currentPage - 1}"
+                                       class="p-2 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container-high active:scale-95 transition-all">
+                                        <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+                                    </a>
+                                </c:when>
+                                <c:otherwise>
+                                    <button class="p-2 rounded-lg border border-outline-variant/30 text-on-surface-variant opacity-30 cursor-not-allowed" disabled>
+                                        <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+                                    </button>
+                                </c:otherwise>
+                            </c:choose>
+
+                            <c:forEach begin="1" end="${totalPages}" var="i">
+                                <a href="${pageContext.request.contextPath}/dashboard/customer-order?page=${i}"
+                                   class="w-8 h-8 flex items-center justify-center rounded-lg text-label-sm font-bold ${i == currentPage ? 'bg-primary text-white' : 'hover:bg-surface-container-high text-on-surface-variant'}">
+                                    ${i}
+                                </a>
+                            </c:forEach>
+
+                            <c:choose>
+                                <c:when test="${currentPage < totalPages}">
+                                    <a href="${pageContext.request.contextPath}/dashboard/customer-order?page=${currentPage + 1}"
+                                       class="p-2 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container-high active:scale-95 transition-all">
+                                        <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+                                    </a>
+                                </c:when>
+                                <c:otherwise>
+                                    <button class="p-2 rounded-lg border border-outline-variant/30 text-on-surface-variant opacity-30 cursor-not-allowed" disabled>
+                                        <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+                                    </button>
+                                </c:otherwise>
+                            </c:choose>
                         </div>
+                    </div>
                     </div>
                 </div>
             </div>

@@ -82,11 +82,11 @@
                             </div>
                             <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-[#003f7d] transition">
                                 <span class="material-symbols-outlined text-[19px]">filter_alt</span>
-                                Lọc
+                                Tìm kiếm
                             </button>
                             <a href="${pageContext.request.contextPath}/category"
                                class="inline-flex items-center justify-center rounded-xl border border-outline-variant bg-white px-5 py-3 text-sm font-semibold text-primary hover:bg-surface-container-low transition">
-                                Xóa
+                                Hủy
                             </a>
                         </form>
                     </div>
@@ -96,7 +96,7 @@
                     <div class="px-6 py-5 border-b border-outline-variant flex items-center justify-between">
                         <div>
                             <h2 class="text-xl font-bold">Danh sách thể loại</h2>
-                            <p class="text-sm text-on-surface-variant mt-1">Phục vụ Task 7.1 đến 7.6: tạo, cập nhật, xóa, xem và lọc thể loại.</p>
+                            <p class="text-sm text-on-surface-variant mt-1">
                         </div>
                     </div>
 
@@ -123,10 +123,6 @@
                                                     <span class="material-symbols-outlined text-[18px]">visibility</span>
                                                 </a>
                                                 <c:if test="${canManageCategory}">
-                                                    <a href="${pageContext.request.contextPath}/category?action=edit&id=${genre.genreID}"
-                                                       class="w-9 h-9 rounded-lg border border-outline-variant flex items-center justify-center text-primary hover:bg-surface-container-low" title="Cập nhật">
-                                                        <span class="material-symbols-outlined text-[18px]">edit</span>
-                                                    </a>
                                                     <form action="${pageContext.request.contextPath}/category" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa thể loại này không?');">
                                                         <input type="hidden" name="action" value="delete">
                                                         <input type="hidden" name="id" value="${genre.genreID}">

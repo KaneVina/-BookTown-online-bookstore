@@ -145,9 +145,13 @@ public class CategoryManagementController extends HttpServlet {
             }
 
             boolean success = genreDAO.updateGenre(id, name);
-            response.sendRedirect(redirectUrl + (success
-                    ? "?success=" + encode("Cập nhật thể loại thành công.")
-                    : "?error=" + encode("Không thể cập nhật thể loại.")));
+            if (success) {
+                response.sendRedirect(redirectUrl + "?action=detail&id=" + id
+                        + "&success=" + encode("Cập nhật thể loại thành công."));
+            } else {
+                response.sendRedirect(redirectUrl + "?action=detail&id=" + id
+                        + "&error=" + encode("Không thể cập nhật thể loại."));
+            }
             return;
         }
 
