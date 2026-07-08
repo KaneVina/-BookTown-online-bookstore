@@ -91,6 +91,7 @@ public class VNPayReturnController extends HttpServlet {
                 return;
             }
             orderDAO.createOrderDetails(orderID, cartItems);
+            orderDAO.deductStock(orderID);
             orderDAO.updatePaymentStatus(orderID, "paid");
             orderDAO.clearCart(account.getId());
 
@@ -132,6 +133,7 @@ public class VNPayReturnController extends HttpServlet {
                         msg = "Thanh toán VNPAY thất bại! Vui lòng thử lại.";
                         break;
                 }
+                session.setAttribute("errorMessage", msg);
             }
             response.sendRedirect(request.getContextPath() + "/checkout");
         }

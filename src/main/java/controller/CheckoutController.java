@@ -58,6 +58,15 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
+        // Lọc bỏ sản phẩm hết hàng trước khi tải trang thanh toán
+        cartItems.removeIf(item -> item.getStockQuantity() == 0);
+
+        if (cartItems.isEmpty()) {
+            request.getSession().setAttribute("errorMessage", "Tất cả sản phẩm trong giỏ hàng đều đã hết hàng!");
+            response.sendRedirect(request.getContextPath() + "/cart");
+            return;
+        }
+
         BigDecimal total = cartDAO.calcSubtotal(cartItems);
 
         int totalQuantity = 0;
@@ -120,6 +129,15 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
+        // Lọc bỏ item hết hàng trước khi tạo đơn
+        cartItems.removeIf(item -> item.getStockQuantity() == 0);
+
+        if (cartItems.isEmpty()) {
+            request.getSession().setAttribute("errorMessage", "Tất cả sản phẩm trong giỏ đã hết hàng!");
+            response.sendRedirect(request.getContextPath() + "/cart");
+            return;
+        }
+
         BigDecimal total = cartDAO.calcSubtotal(cartItems);
 
         String fullname = request.getParameter("fullname");
@@ -156,6 +174,7 @@ public class CheckoutController extends HttpServlet {
         }
 
         orderDAO.createOrderDetails(orderID, cartItems);
+        orderDAO.deductStock(orderID);
         orderDAO.clearCart(account.getId());
 
         request.getSession().setAttribute("cartCount", 0);

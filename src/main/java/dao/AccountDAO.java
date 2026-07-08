@@ -274,6 +274,7 @@ public class AccountDAO {
         return false;
     }
 
+
     public boolean resetPasswordByEmail(String email, String newPassword) {
         String sql = "UPDATE Account SET password = ? WHERE email = ?";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -426,4 +427,5 @@ public class AccountDAO {
 
         return 0;
     }
+
 }

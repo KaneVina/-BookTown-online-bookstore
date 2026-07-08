@@ -89,4 +89,11 @@ public class OrderDetail {
         return unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
 
+    public String getThumbnailFirst() {
+        if (thumbnail == null || thumbnail.isEmpty()) {
+            return "";
+        }
+        int idx = thumbnail.indexOf('|');
+        return idx >= 0 ? thumbnail.substring(0, idx).trim() : thumbnail.trim();
+    }
 }

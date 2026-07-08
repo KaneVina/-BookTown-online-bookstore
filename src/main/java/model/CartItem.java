@@ -8,6 +8,7 @@ public class CartItem {
     private int cartID;
     private int bookID;
     private int quantity;
+    private int stockQuantity;
 
     private String title;
     private String thumbnail;
@@ -47,6 +48,14 @@ public class CartItem {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    public int getStockQuantity() {
+        return stockQuantity;
+    }
+
+    public void setStockQuantity(int stockQuantity) {
+        this.stockQuantity = stockQuantity;
     }
 
     public String getTitle() {

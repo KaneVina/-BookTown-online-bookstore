@@ -12,11 +12,25 @@ import java.util.List;
 
 public class CartDAO {
 
+    public void deleteDiscontinuedCartItems(int customerID) {
+        String sql = "DELETE CartItem FROM CartItem "
+                + "JOIN Cart ON Cart.cartID = CartItem.cartID "
+                + "JOIN Book ON Book.bookID = CartItem.bookID "
+                + "WHERE Cart.customerID = ? AND Cart.status = 'active' AND Book.status = 'discontinued'";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerID);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public List<CartItem> getCartItems(int customerID) {
+        deleteDiscontinuedCartItems(customerID);
         List<CartItem> cartItemList = new ArrayList<>();
 
         String sql = "SELECT CartItem.cartItemID, CartItem.cartID, CartItem.bookID, CartItem.quantity, "
-                + "Book.title, Book.thumbnail, Book.price "
+                + "Book.title, Book.thumbnail, Book.price, Book.stock_quantity "
                 + "FROM Cart "
                 + "JOIN CartItem ON CartItem.cartID = Cart.cartID "
                 + "JOIN Book ON Book.bookID = CartItem.bookID "
@@ -37,6 +51,7 @@ public class CartDAO {
                     item.setTitle(rs.getString("title"));
                     item.setThumbnail(rs.getString("thumbnail"));
                     item.setPrice(rs.getBigDecimal("price"));
+                    item.setStockQuantity(rs.getInt("stock_quantity"));
                     cartItemList.add(item);
                 }
             }
@@ -219,5 +234,52 @@ public class CartDAO {
         }
 
         return false;
+    }
+
+    public int getStockByCartItemID(int cartItemID) {
+        String sql = "SELECT Book.stock_quantity FROM CartItem "
+                + "JOIN Book ON Book.bookID = CartItem.bookID "
+                + "WHERE CartItem.cartItemID = ?";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, cartItemID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt("stock_quantity");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    public int getStockByBookID(int bookID) {
+        String sql = "SELECT stock_quantity FROM Book WHERE bookID = ?";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, bookID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt("stock_quantity");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    public int getCurrentCartQty(int customerID, int bookID) {
+        String sql = "SELECT CartItem.quantity FROM CartItem "
+                + "JOIN Cart ON Cart.cartID = CartItem.cartID "
+                + "WHERE Cart.customerID = ? AND Cart.status = 'active' AND CartItem.bookID = ?";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerID);
+            ps.setInt(2, bookID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt("quantity");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
     }
 }

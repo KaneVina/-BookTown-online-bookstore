@@ -32,6 +32,7 @@
                         <div class="bg-white rounded-xl p-6 flex flex-col md:flex-row items-center gap-6
                                     transition-transform duration-200 ease-out hover:-translate-y-0.5"
                              id="cart-item-${item.cartItemID}"
+                             data-stock="${item.stockQuantity}"
                              style="box-shadow: 0 4px 20px rgba(21,101,192,0.08);">
 
                             <%-- Ảnh bìa sách --%>
@@ -61,14 +62,29 @@
 
                             <div class="flex flex-col items-center md:items-end gap-4">
 
-                                <div class="flex items-center border border-[#c2c6d4] rounded-lg overflow-hidden bg-[#e6f6ff]">
-                                    <button class="px-3 py-1 hover:bg-[#cfe6f2] transition-colors font-bold"
-                                            onclick="updateQty(${item.cartItemID}, ${item.quantity - 1})">−</button>
-                                    <span class="px-4 py-1 text-base border-x border-[#c2c6d4]"
-                                          id="qty-${item.cartItemID}">${item.quantity}</span>
-                                    <button class="px-3 py-1 hover:bg-[#cfe6f2] transition-colors font-bold"
-                                            onclick="updateQty(${item.cartItemID}, ${item.quantity + 1})">+</button>
-                                </div>
+                                <c:choose>
+                                    <c:when test="${item.stockQuantity == 0}">
+                                        <%-- Hết hàng: hiện badge đỏ, disable 2 nút --%>
+                                        <span class="text-xs font-bold text-white bg-red-500 px-3 py-1 rounded-full">Hết hàng</span>
+                                        <div class="flex items-center border border-[#c2c6d4] rounded-lg overflow-hidden bg-[#f5f5f5] opacity-50">
+                                            <button class="px-3 py-1 font-bold cursor-not-allowed" disabled>−</button>
+                                            <span class="px-4 py-1 text-base border-x border-[#c2c6d4]"
+                                                  id="qty-${item.cartItemID}">${item.quantity}</span>
+                                            <button class="px-3 py-1 font-bold cursor-not-allowed" disabled>+</button>
+                                        </div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <%-- Còn hàng: bình thường --%>
+                                        <div class="flex items-center border border-[#c2c6d4] rounded-lg overflow-hidden bg-[#e6f6ff]">
+                                            <button class="px-3 py-1 hover:bg-[#cfe6f2] transition-colors font-bold"
+                                                    onclick="updateQty(${item.cartItemID}, ${item.quantity - 1})">−</button>
+                                            <span class="px-4 py-1 text-base border-x border-[#c2c6d4]"
+                                                  id="qty-${item.cartItemID}">${item.quantity}</span>
+                                            <button class="px-3 py-1 hover:bg-[#cfe6f2] transition-colors font-bold"
+                                                    onclick="updateQty(${item.cartItemID}, ${item.quantity + 1})">+</button>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
 
                                 <div class="text-right">
                                     <p class="text-xs text-[#424752]">Tạm tính</p>
@@ -135,15 +151,32 @@
                         </p>
                     </div>
 
+                    <c:set var="hasInStock" value="false"/>
+                    <c:forEach var="item" items="${cartItems}">
+                        <c:if test="${item.stockQuantity > 0}">
+                            <c:set var="hasInStock" value="true"/>
+                        </c:if>
+                    </c:forEach>
+
                     <div id="checkout-btn-wrap">
                         <c:if test="${not empty cartItems}">
-                            <a href="${pageContext.request.contextPath}/checkout">
-                                <button class="w-full bg-[#fdd835] hover:bg-[#e8c41d] text-[#705e00] py-4 rounded-xl
-                                               font-bold text-xl shadow-md hover:shadow-lg transition-all duration-200
-                                               flex items-center justify-center gap-3 active:scale-95">
-                                   MUA HÀNG
-                                </button>
-                            </a>
+                            <c:choose>
+                                <c:when test="${hasInStock}">
+                                    <a id="checkout-link" href="${pageContext.request.contextPath}/checkout">
+                                        <button id="checkout-btn" class="w-full bg-[#fdd835] hover:bg-[#e8c41d] text-[#705e00] py-4 rounded-xl
+                                                       font-bold text-xl shadow-md hover:shadow-lg transition-all duration-200
+                                                       flex items-center justify-center gap-3 active:scale-95">
+                                           MUA HÀNG
+                                        </button>
+                                    </a>
+                                </c:when>
+                                <c:otherwise>
+                                    <button id="checkout-btn" class="w-full bg-gray-300 text-gray-500 py-4 rounded-xl
+                                                   font-bold text-xl cursor-not-allowed flex items-center justify-center gap-3" disabled>
+                                       MUA HÀNG (HẾT HÀNG)
+                                    </button>
+                                </c:otherwise>
+                            </c:choose>
                         </c:if>
                     </div>
                 </div>
@@ -182,6 +215,14 @@
             return;
         }
 
+        // Chặn phía client nếu vượt stock
+        var card  = document.getElementById('cart-item-' + cartItemID);
+        var stock = parseInt(card.getAttribute('data-stock'), 10);
+        if (newQty > stock) {
+            showToast('Đã đạt giới hạn tồn kho', true);
+            return;
+        }
+
         fetch(CART_URL, {
             method:  'POST',
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -199,13 +240,22 @@
             document.getElementById('subtotal-item-' + cartItemID).textContent
                 = formatPrice(data.itemSubtotal);
 
-            var card       = document.getElementById('cart-item-' + cartItemID);
-            var buttons    = card.querySelectorAll('button');
+            var buttons = card.querySelectorAll('button');
             buttons[0].setAttribute('onclick', 'updateQty(' + cartItemID + ',' + (newQty - 1) + ')');
             buttons[1].setAttribute('onclick', 'updateQty(' + cartItemID + ',' + (newQty + 1) + ')');
 
+            // Cập nhật trạng thái disable nút + và -
+            buttons[1].disabled = (newQty >= stock);
+            buttons[1].classList.toggle('opacity-40', newQty >= stock);
+            buttons[1].classList.toggle('cursor-not-allowed', newQty >= stock);
+            buttons[0].disabled = false;
+
             updateSummary(data);
-            showToast('Đã cập nhật số lượng');
+            if (newQty >= stock) {
+                showToast('Đã đạt giới hạn tồn kho (' + stock + ' cuốn)', true);
+            } else {
+                showToast('Đã cập nhật số lượng');
+            }
         })
         .catch(function(err) {
             console.error(err);
@@ -245,6 +295,8 @@
                 var summaryCol = document.querySelector('.lg\\:col-span-4');
                 if (summaryCol) summaryCol.style.display = 'none';
                 if (typeof lucide !== 'undefined') lucide.createIcons();
+            } else {
+                checkCartStockStatus();
             }
 
             updateSummary(data);
@@ -257,6 +309,56 @@
         }
     );
 }
+
+function checkCartStockStatus() {
+    var hasInStock = false;
+    document.querySelectorAll('[data-stock]').forEach(function (card) {
+        var stock = parseInt(card.getAttribute('data-stock'), 10);
+        if (stock > 0) {
+            hasInStock = true;
+        }
+    });
+
+    var btnWrap = document.getElementById('checkout-btn-wrap');
+    if (btnWrap) {
+        if (hasInStock) {
+            if (!document.getElementById('checkout-link')) {
+                btnWrap.innerHTML = 
+                    '<a id="checkout-link" href="${pageContext.request.contextPath}/checkout">' +
+                    '    <button id="checkout-btn" class="w-full bg-[#fdd835] hover:bg-[#e8c41d] text-[#705e00] py-4 rounded-xl' +
+                    '                   font-bold text-xl shadow-md hover:shadow-lg transition-all duration-200' +
+                    '                   flex items-center justify-center gap-3 active:scale-95">' +
+                    '       MUA HÀNG' +
+                    '    </button>' +
+                    '</a>';
+            }
+        } else {
+            btnWrap.innerHTML = 
+                '<button id="checkout-btn" class="w-full bg-gray-300 text-gray-500 py-4 rounded-xl' +
+                '               font-bold text-xl cursor-not-allowed flex items-center justify-center gap-3" disabled>' +
+                '   MUA HÀNG (HẾT HÀNG)' +
+                '</button>';
+        }
+    }
+}
+
+</script>
+
+<script>
+    // Khởi tạo trạng thái nút + khi load trang
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('[data-stock]').forEach(function (card) {
+            var id    = card.id.replace('cart-item-', '');
+            var stock = parseInt(card.getAttribute('data-stock'), 10);
+            var qty   = parseInt(document.getElementById('qty-' + id).textContent, 10);
+            var buttons = card.querySelectorAll('button');
+            if (buttons.length >= 2) {
+                buttons[1].disabled = (qty >= stock);
+                buttons[1].classList.toggle('opacity-40', qty >= stock);
+                buttons[1].classList.toggle('cursor-not-allowed', qty >= stock);
+            }
+        });
+    });
 </script>
 
 <!-- Confirmation Modal -->

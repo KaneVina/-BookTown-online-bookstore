@@ -200,7 +200,7 @@
                                                             <c:when test="${not empty item.thumbnail}">
                                                                 <img alt="${item.title}"
                                                                      class="w-12 h-16 object-cover rounded-md shadow-sm"
-                                                                     src="${item.thumbnail}">
+                                                                     src="${item.thumbnailFirst}">
                                                             </c:when>
                                                             <c:otherwise>
                                                                 <div
