@@ -283,23 +283,51 @@
                         Tóm tắt đơn hàng
                     </h2>
 
+                    <div class="mb-6">
+                        <label class="text-[13px] font-bold text-on-surface mb-2 block">Mã voucher</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="voucherCodeInput"
+                                   placeholder="Nhập mã voucher"
+                                   value="${appliedVoucherCode}"
+                                   ${not empty appliedVoucherCode ? 'disabled' : ''}
+                                   class="flex-grow border border-outline-variant rounded-lg px-3 py-2 text-[14px] uppercase
+                                          focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:bg-surface-variant/40"/>
+                            <button type="button" id="btnApplyVoucher"
+                                    class="${not empty appliedVoucherCode ? 'hidden' : ''} px-4 py-2 rounded-lg bg-primary text-white text-[13px] font-bold hover:opacity-90 transition">
+                                Áp dụng
+                            </button>
+                            <button type="button" id="btnRemoveVoucher"
+                                    class="${not empty appliedVoucherCode ? '' : 'hidden'} px-4 py-2 rounded-lg border border-red-400 text-red-600 text-[13px] font-bold hover:bg-red-50 transition">
+                                Gỡ mã
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="space-y-3 mb-6">
                         <div class="flex justify-between text-[14px]">
                             <span class="text-on-surface-variant">Tạm tính (${totalQuantity} sản phẩm)</span>
-                            <span class="font-bold">
+                            <span id="subtotalDisplay" class="font-bold" data-value="${total}">
                                 <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/> đ
                             </span>
                         </div>
 
                         <div class="flex justify-between text-[14px] text-green-600">
                             <span>Giảm giá voucher</span>
-                            <span id="discountDisplay" class="font-bold">- 0 đ</span>
+                            <span id="discountDisplay" class="font-bold"
+                                  data-value="${empty appliedDiscount ? 0 : appliedDiscount}">
+                                <c:choose>
+                                    <c:when test="${not empty appliedDiscount}">
+                                        - <fmt:formatNumber value="${appliedDiscount}" type="number" groupingUsed="true"/> đ
+                                    </c:when>
+                                    <c:otherwise>- 0 đ</c:otherwise>
+                                </c:choose>
+                            </span>
                         </div>
 
                         <div class="pt-4 border-t border-surface-container flex justify-between items-end">
                             <span class="text-[15px] font-bold text-primary">Tổng cộng</span>
-                            <span class="text-[22px] font-black text-primary">
-                                <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/> đ
+                            <span id="grandTotalDisplay" class="text-[22px] font-black text-primary">
+                                <fmt:formatNumber value="${total - (empty appliedDiscount ? 0 : appliedDiscount)}" type="number" groupingUsed="true"/> đ
                             </span>
                         </div>
                     </div>
@@ -807,6 +835,86 @@
                 selected.classList.remove('border', 'border-outline-variant');
                 selected.classList.add('border-2', 'border-primary', 'bg-primary/5');
             });
+        });
+
+        function formatMoney(value) {
+            return Math.round(value).toLocaleString('vi-VN') + ' đ';
+        }
+
+        function updateOrderSummary(discountAmount, newTotal) {
+            var subtotal = parseFloat(document.getElementById('subtotalDisplay').dataset.value);
+            document.getElementById('discountDisplay').dataset.value = discountAmount;
+            document.getElementById('discountDisplay').textContent = '- ' + formatMoney(discountAmount);
+            document.getElementById('grandTotalDisplay').textContent = formatMoney(newTotal);
+        }
+
+        document.getElementById('btnApplyVoucher').addEventListener('click', function () {
+            var codeInput = document.getElementById('voucherCodeInput');
+            var code = codeInput.value.trim();
+
+            if (!code) {
+                showToast('Vui lòng nhập mã voucher.', true);
+                return;
+            }
+
+            var btn = this;
+            btn.disabled = true;
+
+            fetch('${pageContext.request.contextPath}/checkout', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+                body: 'action=applyVoucher&code=' + encodeURIComponent(code)
+            })
+                    .then(function (response) { return response.json(); })
+                    .then(function (data) {
+                        btn.disabled = false;
+
+                        if (!data.success) {
+                            showToast(data.message || 'Không thể áp dụng voucher.', true);
+                            return;
+                        }
+
+                        updateOrderSummary(data.discountAmount, data.newTotal);
+                        codeInput.disabled = true;
+                        document.getElementById('btnApplyVoucher').classList.add('hidden');
+                        document.getElementById('btnRemoveVoucher').classList.remove('hidden');
+
+                        showToast(data.message || 'Áp dụng voucher thành công!', false);
+                    })
+                    .catch(function () {
+                        btn.disabled = false;
+                        showToast('Không kết nối được server!', true);
+                    });
+        });
+
+        document.getElementById('btnRemoveVoucher').addEventListener('click', function () {
+            fetch('${pageContext.request.contextPath}/checkout', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+                body: 'action=removeVoucher'
+            })
+                    .then(function (response) { return response.json(); })
+                    .then(function (data) {
+                        if (!data.success) {
+                            showToast('Không thể gỡ voucher.', true);
+                            return;
+                        }
+
+                        var subtotal = parseFloat(document.getElementById('subtotalDisplay').dataset.value);
+                        updateOrderSummary(0, subtotal);
+
+                        var codeInput = document.getElementById('voucherCodeInput');
+                        codeInput.disabled = false;
+                        codeInput.value = '';
+
+                        document.getElementById('btnApplyVoucher').classList.remove('hidden');
+                        document.getElementById('btnRemoveVoucher').classList.add('hidden');
+
+                        showToast('Đã gỡ voucher.', false);
+                    })
+                    .catch(function () {
+                        showToast('Không kết nối được server!', true);
+                    });
         });
 
         document.getElementById('checkout-form').addEventListener('submit', function (e) {
