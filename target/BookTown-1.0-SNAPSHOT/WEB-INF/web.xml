@@ -2,7 +2,7 @@
 <web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
     <servlet>
         <servlet-name>LoginController</servlet-name>
-        <servlet-class>controller.LoginController</servlet-class>
+        <servlet-class>controller.auth.LoginController</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>HomeController</servlet-name>
@@ -38,7 +38,7 @@
     </servlet>
     <servlet>
         <servlet-name>LogoutController</servlet-name>
-        <servlet-class>controller.LogoutController</servlet-class>
+        <servlet-class>controller.auth.LogoutController</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>CheckoutController</servlet-name>
@@ -108,6 +108,15 @@
     <servlet>
         <servlet-name>ImageUploadController</servlet-name>
         <servlet-class>controller.ImageUploadController</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>GoogleLoginController</servlet-name>
+        <servlet-class>controller.GoogleLoginController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>GoogleCallbackController</servlet-name>
+        <servlet-class>controller.GoogleCallbackController</servlet-class>
     </servlet>
 
     <servlet-mapping>
@@ -214,6 +223,15 @@
     <servlet-mapping>
         <servlet-name>ImageUploadController</servlet-name>
         <url-pattern>/upload-image</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>GoogleLoginController</servlet-name>
+        <url-pattern>/auth/google/login</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>GoogleCallbackController</servlet-name>
+        <url-pattern>/auth/google/callback</url-pattern>
     </servlet-mapping>
 
     <session-config>

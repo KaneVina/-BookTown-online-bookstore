@@ -1,4 +1,4 @@
-package controller;
+package controller.auth;
 
 import dao.AccountDAO;
 import dao.CartDAO;
@@ -25,11 +25,22 @@ public class LoginController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
+        // Validate input phía server 
+        String validationError = validateInput(email, password);
+        if (validationError != null) {
+            request.setAttribute("errorMessage", validationError);
+            request.setAttribute("enteredEmail", email);
+            request.getRequestDispatcher("/views/auth/login.jsp").forward(request, response);
+            return;
+        }
+
         AccountDAO accountDAO = new AccountDAO();
-        Account acc = accountDAO.checkLogin(email, password);
+        Account acc = accountDAO.checkLogin(email.trim(), password);
 
         if (acc != null) {
             if ("inactive".equalsIgnoreCase(acc.getStatus())) {
@@ -59,6 +70,7 @@ public class LoginController extends HttpServlet {
             Cookie emailCookie = new Cookie("savedEmail", email);
             emailCookie.setMaxAge(24 * 60 * 60);
             emailCookie.setHttpOnly(true);
+            emailCookie.setPath("/");
             response.addCookie(emailCookie);
 
             if (acc.getRole().equals("admin") || acc.getRole().equals("staff")) {
@@ -71,5 +83,19 @@ public class LoginController extends HttpServlet {
             request.setAttribute("enteredEmail", email);
             request.getRequestDispatcher("/views/auth/login.jsp").forward(request, response);
         }
+    }
+
+    /** Kiểm tra dữ liệu nhập vào, trả về thông báo lỗi cụ thể hoặc null nếu hợp lệ. */
+    private String validateInput(String email, String password) {
+        if (email == null || email.trim().isEmpty()) {
+            return "Vui lòng nhập email.";
+        }
+        if (!email.trim().matches("^[\\w.+-]+@[\\w-]+\\.[a-zA-Z]{2,}$")) {
+            return "Email không đúng định dạng.";
+        }
+        if (password == null || password.isEmpty()) {
+            return "Vui lòng nhập mật khẩu.";
+        }
+        return null;
     }
 }
