@@ -1,12 +1,16 @@
 package controller;
 
 import dao.OrderDAO;
+<<<<<<< HEAD
 import java.io.IOException;
 import java.util.List;
+=======
+>>>>>>> dat
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+<<<<<<< HEAD
 import jakarta.servlet.http.HttpSession;
 import model.Account;
 import model.Order;
@@ -15,11 +19,22 @@ import model.OrderDetail;
 public class CustomerOrderController extends HttpServlet {
 
     private final OrderDAO orderDAO = new OrderDAO();
+=======
+import model.Order;
+
+import java.io.IOException;
+import java.util.List;
+
+public class CustomerOrderController extends HttpServlet {
+
+    private static final int PAGE_SIZE = 4;
+>>>>>>> dat
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+<<<<<<< HEAD
         if (!hasAccess(request, response)) {
             return;
         }
@@ -37,6 +52,48 @@ public class CustomerOrderController extends HttpServlet {
                 showList(request, response);
                 break;
         }
+=======
+        int page = 1;
+
+        try {
+            String pageRaw = req.getParameter("page");
+            if (pageRaw != null && !pageRaw.trim().isEmpty()) {
+                page = Integer.parseInt(pageRaw);
+            }
+        } catch (NumberFormatException e) {
+            page = 1;
+        }
+
+        if (page < 1) {
+            page = 1;
+        }
+
+        OrderDAO orderDAO = new OrderDAO();
+
+        int totalOrders = orderDAO.countAllOrders();
+        int totalPages = (int) Math.ceil((double) totalOrders / PAGE_SIZE);
+
+        if (totalPages == 0) {
+            totalPages = 1;
+        }
+
+        if (page > totalPages) {
+            page = totalPages;
+        }
+
+        int offset = (page - 1) * PAGE_SIZE;
+
+        List<Order> orders = orderDAO.getAllOrdersPaging(offset, PAGE_SIZE);
+
+        req.setAttribute("orders", orders);
+        req.setAttribute("currentPage", page);
+        req.setAttribute("totalPages", totalPages);
+        req.setAttribute("totalOrders", totalOrders);
+        req.setAttribute("startOrder", totalOrders == 0 ? 0 : offset + 1);
+        req.setAttribute("endOrder", Math.min(offset + PAGE_SIZE, totalOrders));
+
+        req.getRequestDispatcher("/views/staff/customer-order.jsp").forward(req, resp);
+>>>>>>> dat
     }
 
     @Override

@@ -67,13 +67,27 @@
                         <span class="material-symbols-outlined">person</span>
                         Thông tin cá nhân
                     </a>
+
                     <a href="${pageContext.request.contextPath}/profile/order-history"
                        class="menu-item menu-active">
                         <span class="material-symbols-outlined">receipt_long</span>
                         Lịch sử đơn hàng
                     </a>
+<<<<<<< HEAD
                     <a href="${pageContext.request.contextPath}/change-password" class="menu-item">
                         <span class="material-symbols-outlined"> lock </span>
+=======
+
+                    <a href="${pageContext.request.contextPath}/profile?id=${sessionScope.account.id}&section=address"
+                       class="menu-item">
+                        <span class="material-symbols-outlined">location_on</span>
+                        Địa chỉ của tôi
+                    </a>
+
+                    <a href="${pageContext.request.contextPath}/change-password"
+                       class="menu-item">
+                        <span class="material-symbols-outlined">lock</span>
+>>>>>>> dat
                         Đổi mật khẩu
                     </a>
 
@@ -137,8 +151,12 @@
                                                 class="material-symbols-outlined text-gray-400 text-3xl">receipt_long</span>
                                         </div>
                                         <div class="space-y-1">
+<<<<<<< HEAD
                                             <p class="text-sm font-semibold text-[#17479D]">
                                                 ${order.orderCode}</p>
+=======
+                                            <p class="text-sm font-semibold text-[#17479D]">${order.orderCode}</p>
+>>>>>>> dat
                                             <p class="text-xs text-gray-500">
                                                 Ngày đặt:
                                                 <fmt:formatDate value="${order.createdAt}"

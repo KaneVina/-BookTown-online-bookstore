@@ -218,6 +218,12 @@
                         Lịch sử đơn hàng
                     </a>
 
+                    <a href="${pageContext.request.contextPath}/profile?id=${sessionScope.account.id}&section=address"
+                       class="menu-item">
+                        <span class="material-symbols-outlined">location_on</span>
+                        Địa chỉ của tôi
+                    </a>
+
                     <a href="${pageContext.request.contextPath}/change-password"
                        class="menu-item menu-active">
                         <span class="material-symbols-outlined">lock</span>
@@ -312,7 +318,15 @@
                                 Cập nhật mật khẩu
                             </button>
                         </div>
+<<<<<<< HEAD
                     </div>
+=======
+                        <button type="submit"
+                                class="bg-primary hover:bg-green-700 text-white px-8 py-3 rounded-xl shadow">
+                            Cập nhật mật khẩu
+                        </button>
+                    </div> 
+>>>>>>> dat
                 </form>
             </div>
         </div>

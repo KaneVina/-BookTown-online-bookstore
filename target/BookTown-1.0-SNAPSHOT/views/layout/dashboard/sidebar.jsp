@@ -124,7 +124,7 @@
 
 <aside class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-white border-r border-outline-variant z-40" style="border-color: #c2c6d4;">
     <div class="px-6 py-5 border-b">
-        <a href="${pageContext.request.contextPath}/admin/dashboard" class="flex items-center gap-3">
+        <a href="${pageContext.request.contextPath}/dashboard" class="flex items-center gap-3">
             <img src="${pageContext.request.contextPath}/assets/images/logo/logoBT_2.png"
                  alt="BookTown Logo"
                  class="h-9 object-contain"/>
@@ -134,7 +134,7 @@
     <nav class="flex-1 py-4 space-y-0.5 overflow-y-auto">
 
         <a href="${pageContext.request.contextPath}/dashboard"
-           class="sidebar-link <%= currentPage.contains("dashboard") ? "active" : ""%>">
+           class="sidebar-link <%= currentPage.endsWith("/dashboard") ? "active" : ""%>">
             <span class="material-symbols-outlined">dashboard</span>
             Bảng điều khiển
         </a>
@@ -146,9 +146,15 @@
         </a>
 
         <a href="${pageContext.request.contextPath}/dashboard/product-management"
-           class="sidebar-link <%= currentPage.contains("products") ? "active" : ""%>">
+           class="sidebar-link <%= currentPage.contains("product-management") ? "active" : ""%>">
             <span class="material-symbols-outlined">inventory_2</span>
             Kho hàng
+        </a>
+
+        <a href="${pageContext.request.contextPath}/category"
+           class="sidebar-link <%= currentPage.contains("/category") ? "active" : ""%>">
+            <span class="material-symbols-outlined">category</span>
+            Thể loại
         </a>
 
         <a href="${pageContext.request.contextPath}/dashboard/account-management"
@@ -175,14 +181,23 @@
     <div class="border-t relative" style="border-color: #c2c6d4;">
         <div class="user-popup" id="userPopup">
             <a href="${pageContext.request.contextPath}/profile">
-                <span class="material-symbols-outlined" style="font-size:18px;">manage_accounts</span>
+                <span class="material-symbols-outlined" style="font-size:18px;">
+                    manage_accounts
+                </span>
                 Quản lý tài khoản
             </a>
-
+            <a href="${pageContext.request.contextPath}/change-password">
+                <span class="material-symbols-outlined" style="font-size:18px;">
+                    lock_reset
+                </span>
+                Đổi mật khẩu
+            </a>
             <div class="divider"></div>
-
             <a href="${pageContext.request.contextPath}/logout" class="danger">
-                <span class="material-symbols-outlined" style="font-size:18px; color:#D32F2F;">logout</span>
+                <span class="material-symbols-outlined"
+                      style="font-size:18px; color:#D32F2F;">
+                    logout
+                </span>
                 Đăng xuất
             </a>
         </div>

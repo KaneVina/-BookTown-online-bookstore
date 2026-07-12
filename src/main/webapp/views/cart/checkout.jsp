@@ -305,6 +305,7 @@
                     </div>
 
                     <form id="checkout-form" action="${pageContext.request.contextPath}/checkout" method="POST">
+                        <input type="hidden" name="addressID" id="checkoutAddressID" value="">
                         <input type="hidden" name="fullname" id="checkoutFullname" value="">
                         <input type="hidden" name="phone" id="checkoutPhone" value="">
                         <input type="hidden" name="street" id="checkoutStreet" value="">
@@ -422,7 +423,8 @@
             return '';
         }
 
-        function setCheckoutAddress(fullname, phone, street, ward, city, isDefault) {
+        function setCheckoutAddress(addressID, fullname, phone, street, ward, city, isDefault) {
+            document.getElementById('checkoutAddressID').value = addressID || '';
             document.getElementById('checkoutFullname').value = fullname || '';
             document.getElementById('checkoutPhone').value = phone || '';
             document.getElementById('checkoutStreet').value = street || '';
@@ -447,7 +449,7 @@
         }
 
         function resetSelectedAddressBox() {
-            setCheckoutAddress('', '', '', '', '', false);
+            setCheckoutAddress('', '', '', '', '', '', false);
         }
 
         function getVisibleAddressOptions() {
@@ -491,10 +493,7 @@
         }
 
         function isSelectedOption(option) {
-            return document.getElementById('checkoutStreet').value === option.dataset.street &&
-                    document.getElementById('checkoutWard').value === option.dataset.ward &&
-                    document.getElementById('checkoutCity').value === option.dataset.city &&
-                    document.getElementById('checkoutPhone').value === option.dataset.phone;
+            return document.getElementById('checkoutAddressID').value === option.dataset.id;
         }
 
         function selectOption(option) {
@@ -502,6 +501,7 @@
                 return;
 
             setCheckoutAddress(
+                    option.dataset.id,
                     option.dataset.fullname,
                     option.dataset.phone,
                     option.dataset.street,
@@ -547,36 +547,53 @@
             if (!option)
                 return;
 
-            var wasSelected = isSelectedOption(option);
-            var wasDefault = option.dataset.default === 'true';
-            var deletedId = option.dataset.id;
+            var addressID = option.dataset.id;
 
-            option.dataset.deleted = 'true';
-            option.dataset.default = 'false';
-            option.classList.add('hidden');
-
-            if (deletedId && deletedId.indexOf('new-') !== 0 && !deletedAddressIds.includes(deletedId)) {
-                deletedAddressIds.push(deletedId);
-                saveDeletedAddressIds();
+            if (!addressID) {
+                showInputError('Không tìm thấy địa chỉ cần xóa!');
+                return;
             }
 
-            syncLocalAddressesFromDom();
+            fetch('${pageContext.request.contextPath}/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                },
+                body:
+                        'action=deleteAddressAjax' +
+                        '&addressID=' + encodeURIComponent(addressID)
+            })
+                    .then(function (response) {
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        if (!data.success) {
+                            showInputError('Xóa địa chỉ thất bại!');
+                            return;
+                        }
 
-            var remainingOptions = getVisibleAddressOptions();
+                        var wasSelected = isSelectedOption(option);
 
-            if (wasDefault && remainingOptions.length > 0) {
-                remainingOptions[0].dataset.default = 'true';
-                syncLocalAddressesFromDom();
-            }
+                        option.remove();
 
-            refreshDefaultBadges();
+                        refreshDefaultBadges();
 
-            if (wasSelected && remainingOptions.length > 0)
-                selectOption(remainingOptions[0]);
-            if (remainingOptions.length === 0)
-                resetSelectedAddressBox();
+                        var remainingOptions = getVisibleAddressOptions();
 
-            showToast('Đã xóa địa chỉ!', false);
+                        if (wasSelected && remainingOptions.length > 0) {
+                            var defaultOption = document.querySelector('.address-option[data-default="true"]:not(.hidden)');
+                            selectOption(defaultOption || remainingOptions[0]);
+                        }
+
+                        if (remainingOptions.length === 0) {
+                            resetSelectedAddressBox();
+                        }
+
+                        showToast('Đã xóa địa chỉ!', false);
+                    })
+                    .catch(function () {
+                        showInputError('Không kết nối được server!');
+                    });
         }
 
         function bindAddressOption(option) {
@@ -595,27 +612,13 @@
         }
 
         function applyDeletedAddressesOnReload() {
-            deletedAddressIds = loadDeletedAddressIds();
-            saveDeletedAddressIds();
-
-            document.querySelectorAll('.address-option').forEach(function (option) {
-                if (deletedAddressIds.includes(option.dataset.id)) {
-                    option.dataset.deleted = 'true';
-                    option.dataset.default = 'false';
-                    option.classList.add('hidden');
-                }
-            });
+            deletedAddressIds = [];
+            document.getElementById('deletedAddressIds').value = '';
         }
 
         function renderLocalAddresses() {
-            var dropdown = document.getElementById('addressDropdown');
-            var localAddresses = loadLocalAddresses();
-
-            localAddresses.forEach(function (address) {
-                if (!document.querySelector('.address-option[data-id="' + address.id + '"]')) {
-                    dropdown.appendChild(createAddressOption(address));
-                }
-            });
+            localStorage.removeItem(ADDRESS_STORAGE_KEY);
+            localStorage.removeItem(DELETED_STORAGE_KEY);
         }
 
         document.querySelectorAll('.address-option').forEach(bindAddressOption);
@@ -789,6 +792,8 @@
                         document.getElementById('newStreet').value = '';
                         document.getElementById('defaultAddress').checked = false;
 
+                        localStorage.removeItem(ADDRESS_STORAGE_KEY);
+                        localStorage.removeItem(DELETED_STORAGE_KEY);
                         showToast('Đã thêm địa chỉ mới!', false);
                     })
                     .catch(function () {
@@ -829,8 +834,7 @@
                 return false;
             }
 
-            syncLocalAddressesFromDom();
-            saveDeletedAddressIds();
+            document.getElementById('deletedAddressIds').value = '';
         });
     </script>
 

@@ -10,26 +10,27 @@ import utils.DBContext;
 
 public class GenreDAO {
 
-    DBContext db = new DBContext();
+    private final DBContext db = new DBContext();
 
     public List<Genre> getAllGenres() {
         List<Genre> list = new ArrayList<>();
-        String sql = "SELECT genreID, genre_name FROM Genre ORDER BY genreID DESC";
+        String sql = "SELECT g.genreID, g.genre_name, COUNT(b.bookID) AS book_count "
+                + "FROM Genre g "
+                + "LEFT JOIN Book b ON b.genreID = g.genreID "
+                + "GROUP BY g.genreID, g.genre_name "
+                + "ORDER BY g.genreID DESC";
 
-        try {
-            Connection conn = db.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                Genre g = new Genre(
+                list.add(new Genre(
                         rs.getInt("genreID"),
-                        rs.getString("genre_name")
-                );
-                list.add(g);
+                        rs.getString("genre_name"),
+                        rs.getInt("book_count")
+                ));
             }
-
-            conn.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -39,24 +40,27 @@ public class GenreDAO {
 
     public List<Genre> searchGenres(String keyword) {
         List<Genre> list = new ArrayList<>();
-        String sql = "SELECT genreID, genre_name FROM Genre WHERE genre_name LIKE ? ORDER BY genreID DESC";
+        String sql = "SELECT g.genreID, g.genre_name, COUNT(b.bookID) AS book_count "
+                + "FROM Genre g "
+                + "LEFT JOIN Book b ON b.genreID = g.genreID "
+                + "WHERE g.genre_name LIKE ? "
+                + "GROUP BY g.genreID, g.genre_name "
+                + "ORDER BY g.genreID DESC";
 
-        try {
-            Connection conn = db.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, "%" + keyword + "%");
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ResultSet rs = ps.executeQuery();
+            ps.setString(1, "%" + keyword.trim() + "%");
 
-            while (rs.next()) {
-                Genre g = new Genre(
-                        rs.getInt("genreID"),
-                        rs.getString("genre_name")
-                );
-                list.add(g);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new Genre(
+                            rs.getInt("genreID"),
+                            rs.getString("genre_name"),
+                            rs.getInt("book_count")
+                    ));
+                }
             }
-
-            conn.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -65,25 +69,26 @@ public class GenreDAO {
     }
 
     public Genre getGenreById(int id) {
-        String sql = "SELECT genreID, genre_name FROM Genre WHERE genreID = ?";
+        String sql = "SELECT g.genreID, g.genre_name, COUNT(b.bookID) AS book_count "
+                + "FROM Genre g "
+                + "LEFT JOIN Book b ON b.genreID = g.genreID "
+                + "WHERE g.genreID = ? "
+                + "GROUP BY g.genreID, g.genre_name";
 
-        try {
-            Connection conn = db.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setInt(1, id);
 
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                Genre g = new Genre(
-                        rs.getInt("genreID"),
-                        rs.getString("genre_name")
-                );
-                conn.close();
-                return g;
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Genre(
+                            rs.getInt("genreID"),
+                            rs.getString("genre_name"),
+                            rs.getInt("book_count")
+                    );
+                }
             }
-
-            conn.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -91,50 +96,99 @@ public class GenreDAO {
         return null;
     }
 
-    public void insertGenre(String name) {
+    public boolean isGenreNameExists(String name) {
+        return isGenreNameExists(name, 0);
+    }
+
+    public boolean isGenreNameExists(String name, int exceptId) {
+        String sql = "SELECT COUNT(*) FROM Genre WHERE LOWER(LTRIM(RTRIM(genre_name))) = LOWER(LTRIM(RTRIM(?)))";
+        if (exceptId > 0) {
+            sql += " AND genreID <> ?";
+        }
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, name);
+            if (exceptId > 0) {
+                ps.setInt(2, exceptId);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean insertGenre(String name) {
         String sql = "INSERT INTO Genre(genre_name) VALUES (?)";
 
-        try {
-            Connection conn = db.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, name);
-            System.out.println("INSERT = " + name);
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.executeUpdate();
-            conn.close();
+            ps.setString(1, name.trim());
+            return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return false;
     }
 
-    public void updateGenre(int id, String name) {
+    public boolean updateGenre(int id, String name) {
         String sql = "UPDATE Genre SET genre_name = ? WHERE genreID = ?";
 
-        try {
-            Connection conn = db.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, name);
-            ps.setInt(2, id);
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.executeUpdate();
-            conn.close();
+            ps.setString(1, name.trim());
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return false;
     }
 
-    public void deleteGenre(int id) {
+    public boolean deleteGenre(int id) {
         String sql = "DELETE FROM Genre WHERE genreID = ?";
 
-        try {
-            Connection conn = db.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, id);
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.executeUpdate();
-            conn.close();
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return false;
+    }
+
+    public int countBooksByGenre(int id) {
+        String sql = "SELECT COUNT(*) FROM Book WHERE genreID = ?";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
     }
 }
