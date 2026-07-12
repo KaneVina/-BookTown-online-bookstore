@@ -9,6 +9,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import model.Account;
@@ -31,6 +34,13 @@ public class DashboardController extends HttpServlet {
         String toDate = trimToNull(request.getParameter("toDate"));
         Integer genreID = parseGenreID(request.getParameter("genreID"));
 
+        String dateError = validateDateRange(fromDate, toDate);
+        if (dateError != null) {
+            request.setAttribute("dateError", dateError);
+            fromDate = null;
+            toDate = null;
+        }
+
         BigDecimal totalRevenue = dashboardDAO.getTotalRevenue(fromDate, toDate, genreID);
         int totalOrders = dashboardDAO.getTotalOrders(fromDate, toDate, genreID);
         int totalCustomers = dashboardDAO.getTotalCustomers(fromDate, toDate, genreID);
@@ -38,6 +48,7 @@ public class DashboardController extends HttpServlet {
         int totalSoldBooks = dashboardDAO.getTotalSoldBooks(fromDate, toDate, genreID);
         Map<String, Integer> statusSummary = dashboardDAO.getOrderStatusSummary(fromDate, toDate, genreID);
         List<Map<String, Object>> revenueByCategory = dashboardDAO.getRevenueByCategory(fromDate, toDate, genreID);
+        addRevenuePercentages(revenueByCategory);
         List<Map<String, Object>> topSellingBooks = dashboardDAO.getTopSellingBooks(fromDate, toDate, genreID);
         List<Map<String, Object>> recentOrders = dashboardDAO.getRecentOrders(fromDate, toDate, genreID);
         List<Genre> genres = genreDAO.getAllGenres();
@@ -57,6 +68,38 @@ public class DashboardController extends HttpServlet {
         request.setAttribute("selectedGenreID", genreID);
 
         request.getRequestDispatcher("/views/admin/dashboard/dashboard.jsp").forward(request, response);
+    }
+
+    private String validateDateRange(String fromDate, String toDate) {
+        try {
+            LocalDate from = fromDate == null ? null : LocalDate.parse(fromDate);
+            LocalDate to = toDate == null ? null : LocalDate.parse(toDate);
+            if (from != null && to != null && from.isAfter(to)) {
+                return "Ngày bắt đầu không được lớn hơn ngày kết thúc.";
+            }
+            return null;
+        } catch (DateTimeParseException e) {
+            return "Định dạng ngày không hợp lệ.";
+        }
+    }
+
+    private void addRevenuePercentages(List<Map<String, Object>> rows) {
+        BigDecimal max = BigDecimal.ZERO;
+        for (Map<String, Object> row : rows) {
+            Object value = row.get("revenue");
+            if (value instanceof BigDecimal && ((BigDecimal) value).compareTo(max) > 0) {
+                max = (BigDecimal) value;
+            }
+        }
+
+        for (Map<String, Object> row : rows) {
+            BigDecimal revenue = row.get("revenue") instanceof BigDecimal
+                    ? (BigDecimal) row.get("revenue") : BigDecimal.ZERO;
+            int percentage = max.signum() == 0 ? 0
+                    : revenue.multiply(BigDecimal.valueOf(100))
+                            .divide(max, 0, RoundingMode.HALF_UP).intValue();
+            row.put("percentage", Math.max(0, Math.min(100, percentage)));
+        }
     }
 
     private boolean isAdminOrStaff(HttpServletRequest request, HttpServletResponse response) throws IOException {

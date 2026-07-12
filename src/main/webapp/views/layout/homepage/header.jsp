@@ -50,13 +50,16 @@
                      alt="BookTown Logo" class="w-[220px] mb-3"/>
             </a>
 
-            <div class="flex-1 flex max-w-[600px] mx-4">
+            <form action="${pageContext.request.contextPath}/products" method="get"
+                  class="flex-1 flex max-w-[600px] mx-4">
                 <input class="flex-1 border-none px-4 py-2.5 text-[15px] rounded-l focus:ring-0 outline-none"
-                       placeholder="Tìm kiếm sách, tác giả..." type="text">
-                <button class="bg-secondary px-4 rounded-r flex items-center justify-center w-[54px] hover:opacity-90">
+                       name="keyword" value="${param.keyword}"
+                       placeholder="Tìm kiếm sách, tác giả..." type="text" autocomplete="off">
+                <button type="submit" aria-label="Tìm kiếm"
+                        class="bg-secondary px-4 rounded-r flex items-center justify-center w-[54px] hover:opacity-90">
                     <i data-lucide="search" class="icon-lg text-primary" style="color:#1565C0;stroke-width:2.5"></i>
                 </button>
-            </div>
+            </form>
 
             <div class="flex items-center gap-6 ml-auto">
                 <div class="hidden lg:block text-right text-white cursor-pointer">
@@ -132,7 +135,6 @@
                             <c:when test="${sessionScope.cartCount > 0}">${sessionScope.cartCount}</c:when>
                             <c:otherwise>0</c:otherwise>
                         </c:choose>
-                    </span>
                     </span>
                 </a>
             </div>

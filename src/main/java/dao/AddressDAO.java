@@ -52,6 +52,29 @@ public class AddressDAO {
         return list;
     }
 
+    public Address getAddressByIdAndCustomer(int addressID, int customerID) {
+        String sql = "SELECT addressID, customerID, street, district, city, country, is_default "
+                + "FROM Address WHERE addressID=? AND customerID=? "
+                + "AND (country IS NULL OR country <> '__DELETED__')";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, addressID);
+            ps.setInt(2, customerID);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapAddress(rs);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     public Address getAddressById(int id) {
         String sql = "SELECT addressID, customerID, street, district, city, country, is_default FROM Address WHERE addressID=?";
 

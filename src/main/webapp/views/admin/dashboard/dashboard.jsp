@@ -171,7 +171,7 @@
                                                 <span class="text-primary font-bold"><fmt:formatNumber value="${row.revenue}" type="number" groupingUsed="true"/>đ</span>
                                             </div>
                                             <div class="h-3 bg-surface-container-low rounded-full overflow-hidden">
-                                                <div class="h-full bg-primary rounded-full" style="width: 70%"></div>
+                                                <div class="h-full bg-primary rounded-full" style="width: ${row.percentage}%"></div>
                                             </div>
                                         </div>
                                     </c:forEach>

@@ -22,12 +22,21 @@ public class DashboardDAO {
     }
 
     public BigDecimal getTotalRevenue(String fromDate, String toDate, Integer genreID) {
-        String sql = "SELECT ISNULL(SUM(o.total_price), 0) AS totalRevenue "
-                + "FROM [Order] o "
-                + buildOrderDetailJoin(genreID)
-                + "WHERE LOWER(o.status) IN ('completed', 'complete', 'delivered', 'success') "
-                + buildDateFilter()
-                + buildGenreFilter(genreID);
+        String sql;
+        if (genreID == null) {
+            sql = "SELECT ISNULL(SUM(o.total_price), 0) AS totalRevenue "
+                    + "FROM [Order] o "
+                    + "WHERE LOWER(o.status) IN ('completed', 'complete', 'delivered', 'success') "
+                    + buildDateFilter();
+        } else {
+            sql = "SELECT ISNULL(SUM(od.quantity * od.unit_price), 0) AS totalRevenue "
+                    + "FROM [Order] o "
+                    + "JOIN OrderDetail od ON od.orderID = o.orderID "
+                    + "JOIN Book b ON b.bookID = od.bookID "
+                    + "WHERE LOWER(o.status) IN ('completed', 'complete', 'delivered', 'success') "
+                    + buildDateFilter()
+                    + buildGenreFilter(genreID);
+        }
 
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             setCommonParams(ps, fromDate, toDate, genreID);
