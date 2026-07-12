@@ -194,6 +194,7 @@
     }
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
 <div class="max-w-7xl mx-auto py-10 px-4">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
@@ -240,92 +241,19 @@
 
         <div class="lg:col-span-3 space-y-6">
             <c:if test="${not empty sessionScope.message}">
-<<<<<<< HEAD
                 <div id="toastMessageData" class="hidden" data-message="${fn:escapeXml(sessionScope.message)}"></div>
-=======
                 <div class="bg-green-100 text-green-700 p-4 rounded-xl">${sessionScope.message}</div>
->>>>>>> dat
                 <c:remove var="message" scope="session"/>
             </c:if>
 
             <c:if test="${not empty sessionScope.error}">
-<<<<<<< HEAD
                 <div id="toastErrorData" class="hidden" data-message="${fn:escapeXml(sessionScope.error)}"></div>
-                <c:remove var="error" scope="session"/>
-            </c:if>
-
-            <div id="profile" class="profile-card p-8">
-                <div class="mb-8">
-                    <h1 class="text-3xl font-bold">
-                        Thông tin cá nhân
-                    </h1>
-                    <p class="text-gray-500 mt-2">
-                        Quản lý thông tin hồ sơ của bạn
-                    </p>
-                </div>
-
-                <form action="${pageContext.request.contextPath}/profile"
-                      method="post" id="profileForm">
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block mb-2 font-medium">
-                                Họ và tên
-                            </label>
-                            <input
-                                type="text"
-                                name="fullname"
-                                id="fullname"
-                                value="${customer.fullname}"
-                                required
-                                class="input-style">
-                        </div>
-                        <div>
-                            <label class="block mb-2 font-medium">
-                                Email
-                            </label>
-                            <input
-                                type="email"
-                                value="${customer.email}"
-                                disabled
-                                class="input-style bg-gray-100">
-                        </div>
-                        <div>
-                            <label class="block mb-2 font-medium">
-                                Số điện thoại
-                            </label>
-                            <input
-                                type="text"
-                                name="phone"
-                                id="phone"
-                                value="${customer.phone}"
-                                class="input-style">
-                        </div>
-                        <div>
-                            <label class="block mb-2 font-medium">
-                                Trạng thái
-                            </label>
-                            <input
-                                type="text"
-                                value="${customer.status}"
-                                disabled
-                                class="input-style bg-gray-100">
-                        </div>
-                        <div>
-                            <label class="block mb-2 font-medium">
-                                Giới tính
-                            </label>
-
-                            <select name="gender" id="gender" class="input-style">
-                                <option value="Male"
-                                        ${customer.gender == 'Male' ? 'selected' : ''}>
-                                    Nam
-                                </option>
-=======
                 <div class="bg-red-100 text-red-700 p-4 rounded-xl">${sessionScope.error}</div>
                 <c:remove var="error" scope="session"/>
             </c:if>
 
             <c:choose>
+                <%-- ================= ĐỊA CHỈ ================= --%>
                 <c:when test="${section == 'address'}">
                     <div class="profile-card p-8">
                         <div class="address-header-row">
@@ -338,8 +266,11 @@
 
                         <c:choose>
                             <c:when test="${empty addresses}">
+                                <div class="empty-address-line">
+                                    <span class="material-symbols-outlined">location_off</span>
+                                    Bạn chưa có địa chỉ nào.
+                                </div>
                             </c:when>
->>>>>>> dat
 
                             <c:otherwise>
                                 <div class="address-list">
@@ -355,25 +286,6 @@
                                                    value="${address.street}, ${address.district}, ${address.city}"
                                                    readonly>
 
-<<<<<<< HEAD
-                            <input
-                                type="date"
-                                name="dob"
-                                id="dob"
-                                value="${customer.dob}"
-                                max="<%= java.time.LocalDate.now()%>"
-                                class="input-style">
-                        </div>
-                    </div>
-                    <div class="mt-8">
-                        <button
-                            type="submit"
-                            id="saveBtn"
-                            class="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-xl shadow disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-60 transition-all"
-                            disabled>
-                            Lưu thay đổi
-                        </button>
-=======
                                             <c:if test="${address['default']}">
                                                 <span class="default-badge">Mặc định</span>
                                             </c:if>
@@ -387,16 +299,13 @@
                                                     </form>
                                                 </c:if>
 
-                                                <button type="button"
-                                                        class="edit-btn"
-                                                        onclick="openAddressModal('${address.addressID}')">
+                                                <button type="button" class="edit-btn" onclick="openAddressModal('${address.addressID}')">
                                                     Sửa
                                                 </button>
 
-                                                <form action="${pageContext.request.contextPath}/profile?action=deleteAddress"
-                                                      method="post"
-                                                      style="display:inline;"
+                                                <form action="${pageContext.request.contextPath}/profile" method="post" style="display:inline;"
                                                       onsubmit="return confirm('Bạn có chắc muốn xóa địa chỉ này?')">
+                                                    <input type="hidden" name="action" value="deleteAddress">
                                                     <input type="hidden" name="deleteAddressID" value="${address.addressID}">
                                                     <button type="submit" class="delete-btn">Xóa</button>
                                                 </form>
@@ -409,6 +318,7 @@
                     </div>
                 </c:when>
 
+                <%-- ================= THÔNG TIN CÁ NHÂN ================= --%>
                 <c:otherwise>
                     <div class="profile-card p-8">
                         <div class="mb-8">
@@ -420,7 +330,7 @@
                             <div class="grid md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block mb-2 font-medium">Họ và tên</label>
-                                    <input type="text" name="fullname" value="${customer.fullname}" required class="input-style">
+                                    <input type="text" name="fullname" id="fullname" value="${customer.fullname}" required class="input-style">
                                 </div>
 
                                 <div>
@@ -430,7 +340,7 @@
 
                                 <div>
                                     <label class="block mb-2 font-medium">Số điện thoại</label>
-                                    <input type="text" name="phone" value="${customer.phone}" class="input-style">
+                                    <input type="text" name="phone" id="phone" value="${customer.phone}" class="input-style">
                                 </div>
 
                                 <div>
@@ -440,7 +350,7 @@
 
                                 <div>
                                     <label class="block mb-2 font-medium">Giới tính</label>
-                                    <select name="gender" class="input-style">
+                                    <select name="gender" id="gender" class="input-style">
                                         <option value="Male" ${customer.gender == 'Male' ? 'selected' : ''}>Nam</option>
                                         <option value="Female" ${customer.gender == 'Female' ? 'selected' : ''}>Nữ</option>
                                         <option value="Other" ${customer.gender == 'Other' ? 'selected' : ''}>Khác</option>
@@ -449,83 +359,27 @@
 
                                 <div>
                                     <label class="block mb-2 font-medium">Ngày sinh</label>
-                                    <input type="date" name="dob" value="${customer.dob}" max="<%= java.time.LocalDate.now()%>" class="input-style">
+                                    <input type="date" name="dob" id="dob" value="${customer.dob}" max="<%= java.time.LocalDate.now()%>" class="input-style">
                                 </div>
                             </div>
 
                             <div class="mt-8">
-                                <button type="submit" class="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-xl shadow">
+                                <button type="submit" id="saveBtn"
+                                        class="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-xl shadow disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-60 transition-all"
+                                        disabled>
                                     Lưu thay đổi
                                 </button>
                             </div>
                         </form>
->>>>>>> dat
                     </div>
                 </c:otherwise>
             </c:choose>
         </div>
+
     </div>
 </div>
 
-<<<<<<< HEAD
-<%@ include file="/views/layout/common/toast.jsp" %>
-<script>
-    const initialValues = {
-        fullname: "${customer.fullname}",
-        phone: "${customer.phone}",
-        gender: "${customer.gender}",
-        dob: "${customer.dob}"
-    };
-
-    const form = document.getElementById('profileForm');
-    const saveBtn = document.getElementById('saveBtn');
-    const fullnameInput = document.getElementById('fullname');
-    const phoneInput = document.getElementById('phone');
-    const genderSelect = document.getElementById('gender');
-    const dobInput = document.getElementById('dob');
-
-    function checkFormChanges() {
-        const currentValues = {
-            fullname: fullnameInput.value.trim(),
-            phone: phoneInput.value.trim(),
-            gender: genderSelect.value,
-            dob: dobInput.value
-        };
-
-        if (!currentValues.fullname) {
-            saveBtn.disabled = true;
-            return;
-        }
-        const hasChanges = 
-            currentValues.fullname !== initialValues.fullname ||
-            currentValues.phone !== initialValues.phone ||
-            currentValues.gender !== initialValues.gender ||
-            currentValues.dob !== initialValues.dob;
-        saveBtn.disabled = !hasChanges;
-    }
-
-    fullnameInput.addEventListener('input', checkFormChanges);
-    fullnameInput.addEventListener('change', checkFormChanges);
-    phoneInput.addEventListener('input', checkFormChanges);
-    phoneInput.addEventListener('change', checkFormChanges);
-    genderSelect.addEventListener('change', checkFormChanges);
-    dobInput.addEventListener('change', checkFormChanges);
-
-    checkFormChanges();
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const msgEl = document.getElementById('toastMessageData');
-        const errEl = document.getElementById('toastErrorData');
-
-        if (msgEl) {
-            showToast(msgEl.dataset.message);
-            setTimeout(() => {
-                location.reload();
-            }, 2000);
-        }
-        if (errEl) {
-            showToast(errEl.dataset.message, true);
-=======
+<%-- ================= MODAL SỬA / THÊM ĐỊA CHỈ ================= --%>
 <div id="editAddressModal" class="modal-overlay hidden">
     <div class="address-modal">
         <h2 class="modal-title" id="addressModalTitle">Sửa địa chỉ</h2>
@@ -561,7 +415,69 @@
     </div>
 </div>
 
+<%@ include file="/views/layout/common/toast.jsp" %>
+
 <script>
+    const initialValues = {
+        fullname: "${customer.fullname}",
+        phone: "${customer.phone}",
+        gender: "${customer.gender}",
+        dob: "${customer.dob}"
+    };
+
+    const form = document.getElementById('profileForm');
+    const saveBtn = document.getElementById('saveBtn');
+    const fullnameInput = document.getElementById('fullname');
+    const phoneInput = document.getElementById('phone');
+    const genderSelect = document.getElementById('gender');
+    const dobInput = document.getElementById('dob');
+
+    function checkFormChanges() {
+        if (!fullnameInput || !saveBtn) {
+            return;
+        }
+        const currentValues = {
+            fullname: fullnameInput.value.trim(),
+            phone: phoneInput.value.trim(),
+            gender: genderSelect.value,
+            dob: dobInput.value
+        };
+        if (!currentValues.fullname) {
+            saveBtn.disabled = true;
+            return;
+        }
+        const hasChanges =
+            currentValues.fullname !== initialValues.fullname ||
+            currentValues.phone !== initialValues.phone ||
+            currentValues.gender !== initialValues.gender ||
+            currentValues.dob !== initialValues.dob;
+        saveBtn.disabled = !hasChanges;
+    }
+
+    if (fullnameInput) {
+        fullnameInput.addEventListener('input', checkFormChanges);
+        fullnameInput.addEventListener('change', checkFormChanges);
+        phoneInput.addEventListener('input', checkFormChanges);
+        phoneInput.addEventListener('change', checkFormChanges);
+        genderSelect.addEventListener('change', checkFormChanges);
+        dobInput.addEventListener('change', checkFormChanges);
+        checkFormChanges();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const msgEl = document.getElementById('toastMessageData');
+        const errEl = document.getElementById('toastErrorData');
+        if (msgEl) {
+            showToast(msgEl.dataset.message);
+            setTimeout(function () {
+                location.reload();
+            }, 2000);
+        }
+        if (errEl) {
+            showToast(errEl.dataset.message, true);
+        }
+    });
+
     var vietnamProvinces = [];
 
     function isValidAddressPart(value) {
@@ -572,16 +488,12 @@
     async function loadVietnamProvincesForProfile() {
         var citySelect = document.getElementById('modalCity');
         var wardSelect = document.getElementById('modalWard');
-
         citySelect.innerHTML = '<option value="">Đang tải...</option>';
         wardSelect.innerHTML = '<option value="">Chọn Phường / Xã</option>';
-
         try {
             var response = await fetch('https://provinces.open-api.vn/api/v2/?depth=2');
             vietnamProvinces = await response.json();
-
             citySelect.innerHTML = '<option value="">Chọn Tỉnh / Thành phố</option>';
-
             vietnamProvinces.forEach(function (province) {
                 var option = document.createElement('option');
                 option.value = province.name;
@@ -598,18 +510,15 @@
     async function loadWardsByCity(cityName, selectedWard) {
         var wardSelect = document.getElementById('modalWard');
         wardSelect.innerHTML = '<option value="">Đang tải Phường / Xã...</option>';
-
         var province = vietnamProvinces.find(function (item) {
             return item.name === cityName;
         });
-
         if (!province) {
             wardSelect.innerHTML = '<option value="">Chọn Phường / Xã</option>';
             return;
         }
 
         var wards = province.wards || province.communes || [];
-
         if (!wards.length && province.code) {
             try {
                 var response = await fetch('https://provinces.open-api.vn/api/v2/p/' + province.code + '?depth=2');
@@ -621,16 +530,13 @@
         }
 
         wardSelect.innerHTML = '<option value="">Chọn Phường / Xã</option>';
-
         wards.forEach(function (ward) {
             var option = document.createElement('option');
             option.value = ward.name;
             option.textContent = ward.name;
-
             if (ward.name === selectedWard) {
                 option.selected = true;
             }
-
             wardSelect.appendChild(option);
         });
     }
@@ -640,13 +546,10 @@
         document.getElementById('modalAddressID').value = '';
         document.getElementById('addressModalTitle').textContent = 'Thêm địa chỉ';
         document.getElementById('modalStreet').value = '';
-
         document.getElementById('editAddressModal').classList.remove('hidden');
-
         if (!vietnamProvinces.length) {
             await loadVietnamProvincesForProfile();
         }
-
         document.getElementById('modalCity').value = '';
         document.getElementById('modalWard').innerHTML = '<option value="">Chọn Phường / Xã</option>';
     }
@@ -655,18 +558,14 @@
         document.getElementById('modalMode').value = 'edit';
         document.getElementById('modalAddressID').value = addressID;
         document.getElementById('addressModalTitle').textContent = 'Sửa địa chỉ';
-
         var street = document.getElementById('street-' + addressID).value;
         var ward = document.getElementById('district-' + addressID).value;
         var city = document.getElementById('city-' + addressID).value;
-
         document.getElementById('modalStreet').value = street;
         document.getElementById('editAddressModal').classList.remove('hidden');
-
         if (!vietnamProvinces.length) {
             await loadVietnamProvincesForProfile();
         }
-
         document.getElementById('modalCity').value = city;
         await loadWardsByCity(city, ward);
     }
@@ -686,24 +585,20 @@
             alert('Địa chỉ cụ thể không hợp lệ!');
             return;
         }
-
         if (!city) {
             alert('Vui lòng chọn Tỉnh / Thành phố!');
             return;
         }
-
         if (!ward) {
             alert('Vui lòng chọn Phường / Xã!');
             return;
         }
 
         var action = mode === 'add' ? 'addAddressAjax' : 'updateAddressAjax';
-
         var body = 'action=' + encodeURIComponent(action)
                 + '&street=' + encodeURIComponent(street)
                 + '&district=' + encodeURIComponent(ward)
                 + '&city=' + encodeURIComponent(city);
-
         if (mode === 'edit') {
             body += '&addressID=' + encodeURIComponent(addressID);
         }
@@ -715,49 +610,43 @@
             },
             body: body
         })
-                .then(function (response) {
-                    return response.json();
-                })
-                .then(function (data) {
-                    if (!data.success) {
-                        alert(mode === 'add' ? 'Thêm địa chỉ thất bại!' : 'Cập nhật địa chỉ thất bại!');
-                        return;
-                    }
-
-                    if (mode === 'add') {
-                        window.location.href = '${pageContext.request.contextPath}/profile?section=address';
-                        return;
-                    }
-
-                    document.getElementById('street-' + addressID).value = street;
-                    document.getElementById('district-' + addressID).value = ward;
-                    document.getElementById('city-' + addressID).value = city;
-                    document.getElementById('address-display-' + addressID).value = street + ', ' + ward + ', ' + city;
-
-                    closeAddressModal();
-                })
-                .catch(function () {
-                    alert('Không kết nối được server!');
-                });
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+                if (!data.success) {
+                    alert(mode === 'add' ? 'Thêm địa chỉ thất bại!' : 'Cập nhật địa chỉ thất bại!');
+                    return;
+                }
+                if (mode === 'add') {
+                    window.location.href = '${pageContext.request.contextPath}/profile?section=address';
+                    return;
+                }
+                document.getElementById('street-' + addressID).value = street;
+                document.getElementById('district-' + addressID).value = ward;
+                document.getElementById('city-' + addressID).value = city;
+                document.getElementById('address-display-' + addressID).value = street + ', ' + ward + ', ' + city;
+                closeAddressModal();
+            })
+            .catch(function () {
+                alert('Không kết nối được server!');
+            });
     }
 
     document.addEventListener('DOMContentLoaded', function () {
         var citySelect = document.getElementById('modalCity');
         var modal = document.getElementById('editAddressModal');
-
         if (citySelect) {
             citySelect.addEventListener('change', function () {
                 loadWardsByCity(this.value, '');
             });
         }
-
         if (modal) {
             modal.addEventListener('click', function (e) {
                 if (e.target === this) {
                     closeAddressModal();
                 }
             });
->>>>>>> dat
         }
     });
 </script>

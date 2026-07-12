@@ -318,15 +318,7 @@
                                 Cập nhật mật khẩu
                             </button>
                         </div>
-<<<<<<< HEAD
                     </div>
-=======
-                        <button type="submit"
-                                class="bg-primary hover:bg-green-700 text-white px-8 py-3 rounded-xl shadow">
-                            Cập nhật mật khẩu
-                        </button>
-                    </div> 
->>>>>>> dat
                 </form>
             </div>
         </div>

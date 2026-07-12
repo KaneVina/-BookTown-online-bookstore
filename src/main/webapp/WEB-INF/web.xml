@@ -73,7 +73,6 @@
         <servlet-class>controller.WishListController</servlet-class>
     </servlet>
     <servlet>
-<<<<<<< HEAD
         <servlet-name>AdminProductController</servlet-name>
         <servlet-class>controller.AdminProductController</servlet-class>
     </servlet>
@@ -82,8 +81,7 @@
         <servlet-class>controller.DashboardController</servlet-class>
     </servlet>
     <servlet>
-=======
->>>>>>> dat
+
         <servlet-name>VNPayController</servlet-name>
         <servlet-class>controller.VNPayController</servlet-class>
     </servlet>
@@ -102,13 +100,8 @@
     <servlet>
         <servlet-name>AddressManagementController</servlet-name>
         <servlet-class>controller.AddressManagementController</servlet-class>
-<<<<<<< HEAD
-=======
-    </servlet>
-    <servlet>
-        <servlet-name>DashboardController</servlet-name>
-        <servlet-class>controller.DashboardController</servlet-class>
->>>>>>> dat
+
+
     </servlet>
     <servlet>
         <servlet-name>CreateStaffController</servlet-name>
@@ -216,7 +209,7 @@
         <url-pattern>/address</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-<<<<<<< HEAD
+
         <servlet-name>CreateStaffController</servlet-name>
         <url-pattern>/dashboard/add-staff</url-pattern>
     </servlet-mapping>
@@ -227,11 +220,7 @@
         <url-pattern>/upload-image</url-pattern>
     </servlet-mapping>
 
-=======
-        <servlet-name>DashboardController</servlet-name>
-        <url-pattern>/dashboard</url-pattern>
-    </servlet-mapping>
->>>>>>> dat
+
     <session-config>
         <session-timeout> 30 </session-timeout>
     </session-config>

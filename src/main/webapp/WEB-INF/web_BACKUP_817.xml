@@ -60,6 +60,10 @@
         <servlet-class>controller.AccountDetailController</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>UpdateAccountController</servlet-name>
+        <servlet-class>controller.UpdateAccountController</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>VoucherController</servlet-name>
         <servlet-class>controller.VoucherController</servlet-class>
     </servlet>
@@ -218,7 +222,7 @@
         <servlet-name>CreateStaffController</servlet-name>
         <url-pattern>/dashboard/add-staff</url-pattern>
     </servlet-mapping>
-<<<<<<< HEAD
+
     <servlet-mapping>
         <servlet-name>UpdateAccountController</servlet-name>
         <url-pattern>/dashboard/update-account</url-pattern>
@@ -226,10 +230,6 @@
     <servlet-mapping>
         <servlet-name>ReviewManagementController</servlet-name>
         <url-pattern>/dashboard/review-management</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>VoucherController</servlet-name>
-        <url-pattern>/dashboard/voucher-management</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ForgotPasswordController</servlet-name>
@@ -247,8 +247,7 @@
         <servlet-name>GoogleCallbackController</servlet-name>
         <url-pattern>/auth/google/callback</url-pattern>
     </servlet-mapping>
-=======
->>>>>>> 6d16796a40c88861290339306fb50dac637ac6b7
+
     <session-config>
         <session-timeout> 30 </session-timeout>
     </session-config>

@@ -73,10 +73,6 @@
                         <span class="material-symbols-outlined">receipt_long</span>
                         Lịch sử đơn hàng
                     </a>
-<<<<<<< HEAD
-                    <a href="${pageContext.request.contextPath}/change-password" class="menu-item">
-                        <span class="material-symbols-outlined"> lock </span>
-=======
 
                     <a href="${pageContext.request.contextPath}/profile?id=${sessionScope.account.id}&section=address"
                        class="menu-item">
@@ -87,7 +83,6 @@
                     <a href="${pageContext.request.contextPath}/change-password"
                        class="menu-item">
                         <span class="material-symbols-outlined">lock</span>
->>>>>>> dat
                         Đổi mật khẩu
                     </a>
 
@@ -151,12 +146,7 @@
                                                 class="material-symbols-outlined text-gray-400 text-3xl">receipt_long</span>
                                         </div>
                                         <div class="space-y-1">
-<<<<<<< HEAD
-                                            <p class="text-sm font-semibold text-[#17479D]">
-                                                ${order.orderCode}</p>
-=======
                                             <p class="text-sm font-semibold text-[#17479D]">${order.orderCode}</p>
->>>>>>> dat
                                             <p class="text-xs text-gray-500">
                                                 Ngày đặt:
                                                 <fmt:formatDate value="${order.createdAt}"
