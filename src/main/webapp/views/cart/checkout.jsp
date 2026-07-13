@@ -305,6 +305,7 @@
                     </div>
 
                     <form id="checkout-form" action="${pageContext.request.contextPath}/checkout" method="POST">
+                        <input type="hidden" name="addressID" id="checkoutAddressID" value="">
                         <input type="hidden" name="fullname" id="checkoutFullname" value="">
                         <input type="hidden" name="phone" id="checkoutPhone" value="">
                         <input type="hidden" name="street" id="checkoutStreet" value="">
@@ -422,7 +423,8 @@
             return '';
         }
 
-        function setCheckoutAddress(fullname, phone, street, ward, city, isDefault) {
+        function setCheckoutAddress(addressID, fullname, phone, street, ward, city, isDefault) {
+            document.getElementById('checkoutAddressID').value = addressID || '';
             document.getElementById('checkoutFullname').value = fullname || '';
             document.getElementById('checkoutPhone').value = phone || '';
             document.getElementById('checkoutStreet').value = street || '';
@@ -447,7 +449,7 @@
         }
 
         function resetSelectedAddressBox() {
-            setCheckoutAddress('', '', '', '', '', false);
+            setCheckoutAddress('', '', '', '', '', '', false);
         }
 
         function getVisibleAddressOptions() {
@@ -502,6 +504,7 @@
                 return;
 
             setCheckoutAddress(
+                    option.dataset.id,
                     option.dataset.fullname,
                     option.dataset.phone,
                     option.dataset.street,

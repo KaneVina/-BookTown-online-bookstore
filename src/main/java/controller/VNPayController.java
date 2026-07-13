@@ -43,6 +43,7 @@ public class VNPayController extends HttpServlet {
         String street    = request.getParameter("street");
         String district  = request.getParameter("district");
         String city      = request.getParameter("city");
+        String addressIDRaw = request.getParameter("addressID");
 
         if (isEmpty(fullname) || isEmpty(phone) || isEmpty(street)
                 || isEmpty(district) || isEmpty(city)) {
@@ -51,22 +52,44 @@ public class VNPayController extends HttpServlet {
             return;
         }
 
+        if (isEmpty(addressIDRaw)) {
+            session.setAttribute("errorMessage", "Vui lòng chọn địa chỉ giao hàng!");
+            response.sendRedirect(request.getContextPath() + "/checkout");
+            return;
+        }
+
+        int addressID;
+        try {
+            addressID = Integer.parseInt(addressIDRaw.trim());
+        } catch (NumberFormatException e) {
+            session.setAttribute("errorMessage", "Địa chỉ giao hàng không hợp lệ!");
+            response.sendRedirect(request.getContextPath() + "/checkout");
+            return;
+        }
+
         CartDAO cartDAO = new CartDAO();
         List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
+
         if (cartItems.isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/cart");
             return;
         }
+
+        // Lọc bỏ sản phẩm hết hàng trước khi chuyển sang VNPay
+        cartItems.removeIf(item -> item.getStockQuantity() == 0);
+
+        if (cartItems.isEmpty()) {
+            session.setAttribute("errorMessage", "Tất cả sản phẩm trong giỏ đã hết hàng!");
+            response.sendRedirect(request.getContextPath() + "/cart");
+            return;
+        }
+
         BigDecimal total = cartDAO.calcSubtotal(cartItems);
 
-        String txnRef = VNPayConfig.getRandomNumber(12); 
-        session.setAttribute("vnpay_txnRef",  txnRef);
-        session.setAttribute("vnpay_fullname", fullname.trim());
-        session.setAttribute("vnpay_phone",    phone.trim());
-        session.setAttribute("vnpay_street",   street.trim());
-        session.setAttribute("vnpay_district", district.trim());
-        session.setAttribute("vnpay_city",     city.trim());
-        session.setAttribute("vnpay_total",    total);
+        String txnRef = VNPayConfig.getRandomNumber(12);
+        session.setAttribute("vnpay_txnRef",     txnRef);
+        session.setAttribute("vnpay_addressID",  addressID);
+        session.setAttribute("vnpay_total",      total);
 
         String vnpayUrl = buildVNPayUrl(request, txnRef, total);
         response.sendRedirect(vnpayUrl);
@@ -75,7 +98,7 @@ public class VNPayController extends HttpServlet {
     private String buildVNPayUrl(HttpServletRequest request, String txnRef, BigDecimal total)
             throws IOException {
 
-        long amount = total.longValue() * 100;
+        long amount = total.setScale(0, java.math.RoundingMode.HALF_UP).longValue() * 100;
 
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");

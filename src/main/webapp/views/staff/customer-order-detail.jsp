@@ -55,9 +55,9 @@
         </style>
     </head>
 
-    <body class="bg-[#f3faff] text-[#071e27] min-h-screen">
+    <body class="bg-[#f3faff] text-[#071e27] flex min-h-screen">
         <%@ include file="/views/layout/dashboard/sidebar.jsp" %>
-        <main class="md:ml-64 min-h-screen">
+        <main class="flex-1 md:ml-64 min-h-screen">
             <div class="p-6 max-w-[1280px] mx-auto space-y-6">
 
                 <div class="mb-4">

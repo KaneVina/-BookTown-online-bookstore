@@ -38,7 +38,7 @@ public class CheckoutController extends HttpServlet {
                         try {
                             int addressID = Integer.parseInt(addressIdRaw);
                             AddressDAO addressDAO = new AddressDAO();
-                            addressDAO.deleteAddress(addressID);
+                            addressDAO.deleteAddressByCustomer(addressID, account.getId());
                         } catch (NumberFormatException e) {
                             e.printStackTrace();
                         }
@@ -58,13 +58,28 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-        // Lọc bỏ sản phẩm hết hàng trước khi tải trang thanh toán
+        // Lọc bỏ sản phẩm hết hàng (stock = 0) trước khi tải trang thanh toán
         cartItems.removeIf(item -> item.getStockQuantity() == 0);
 
         if (cartItems.isEmpty()) {
             request.getSession().setAttribute("errorMessage", "Tất cả sản phẩm trong giỏ hàng đều đã hết hàng!");
             response.sendRedirect(request.getContextPath() + "/cart");
             return;
+        }
+
+        // Điều chỉnh số lượng giỏ về bằng tồn kho nếu vượt quá (Option A)
+        boolean hasAdjusted = false;
+        for (CartItem item : cartItems) {
+            if (item.getQuantity() > item.getStockQuantity()) {
+                cartDAO.updateQuantity(item.getCartItemID(), item.getStockQuantity());
+                item.setQuantity(item.getStockQuantity());
+                hasAdjusted = true;
+            }
+        }
+
+        if (hasAdjusted) {
+            request.getSession().setAttribute("warningMessage",
+                    "Một số sản phẩm đã được điều chỉnh xuống số lượng còn lại trong kho.");
         }
 
         BigDecimal total = cartDAO.calcSubtotal(cartItems);
@@ -103,6 +118,12 @@ public class CheckoutController extends HttpServlet {
 
         String paymentMethod = request.getParameter("payment_method");
 
+        if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
+            request.getSession().setAttribute("errorMessage", "Vui lòng chọn phương thức thanh toán!");
+            response.sendRedirect(request.getContextPath() + "/checkout");
+            return;
+        }
+
         switch (paymentMethod) {
             case "vnpay":
                 request.getRequestDispatcher("/vnpay-payment")
@@ -140,27 +161,36 @@ public class CheckoutController extends HttpServlet {
 
         BigDecimal total = cartDAO.calcSubtotal(cartItems);
 
-        String fullname = request.getParameter("fullname");
-        String phone = request.getParameter("phone");
-        String street = request.getParameter("street");
-        String ward = request.getParameter("ward");
-        String city = request.getParameter("city");
+        String addressIDRaw = request.getParameter("addressID");
 
+        if (isEmpty(addressIDRaw)) {
+            request.getSession().setAttribute("errorMessage", "Vui lòng chọn địa chỉ giao hàng!");
+            response.sendRedirect(request.getContextPath() + "/checkout");
+            return;
+        }
+
+        int addressID;
+        try {
+            addressID = Integer.parseInt(addressIDRaw.trim());
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute("errorMessage", "Địa chỉ giao hàng không hợp lệ!");
+            response.sendRedirect(request.getContextPath() + "/checkout");
+            return;
+        }
+
+        // Kiểm tra bảo mật: địa chỉ phải thuộc sở hữu của khách hàng đang đăng nhập
         AddressDAO addressDAO = new AddressDAO();
         List<Address> addresses = addressDAO.getAddressesByCustomerId(account.getId());
-        int addressID = -1;
+        boolean isOwnedByCustomer = false;
         for (Address addr : addresses) {
-            if (street != null && ward != null && city != null
-                    && street.trim().equals(addr.getStreet())
-                    && ward.trim().equals(addr.getDistrict())
-                    && city.trim().equals(addr.getCity())) {
-                addressID = addr.getAddressID();
+            if (addr.getAddressID() == addressID) {
+                isOwnedByCustomer = true;
                 break;
             }
         }
 
-        if (addressID == -1) {
-            request.getSession().setAttribute("errorMessage", "Vui lòng chọn địa chỉ giao hàng!");
+        if (!isOwnedByCustomer) {
+            request.getSession().setAttribute("errorMessage", "Địa chỉ giao hàng không hợp lệ!");
             response.sendRedirect(request.getContextPath() + "/checkout");
             return;
         }
@@ -246,16 +276,6 @@ public class CheckoutController extends HttpServlet {
 
     private boolean isEmpty(String value) {
         return value == null || value.trim().isEmpty();
-    }
-
-    private boolean isValidFullname(String fullname) {
-        String trimmed = fullname.trim();
-        return trimmed.matches("^[A-Za-zÀ-ỹ\\s]{2,50}$");
-    }
-
-    private boolean isValidPhone(String phone) {
-        String trimmed = phone.trim();
-        return trimmed.matches("^(0|\\+84)(3|5|7|8|9)[0-9]{8}$");
     }
 
     private boolean isValidAddressPart(String value) {
