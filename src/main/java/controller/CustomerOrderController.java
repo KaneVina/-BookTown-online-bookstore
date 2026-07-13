@@ -69,7 +69,6 @@ public class CustomerOrderController extends HttpServlet {
     private void showList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String keyword = request.getParameter("keyword");
         String status = request.getParameter("status");
 
         int pageSize = 10;
@@ -82,7 +81,7 @@ public class CustomerOrderController extends HttpServlet {
         } catch (Exception ignored) {
         }
 
-        int totalRecords = orderDAO.countFilteredOrders(keyword, status);
+        int totalRecords = orderDAO.countFilteredOrders(status);
         int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
         if (totalPages == 0) {
             totalPages = 1;
@@ -92,16 +91,15 @@ public class CustomerOrderController extends HttpServlet {
         }
         int offset = (currentPage - 1) * pageSize;
 
-        request.setAttribute("orderList", orderDAO.getAllOrders(keyword, status, offset, pageSize));
+        request.setAttribute("orderList", orderDAO.getAllOrders(status, offset, pageSize));
         request.setAttribute("currentPage", currentPage);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("totalRecords", totalRecords);
-        request.setAttribute("keyword", keyword);
         request.setAttribute("status", status);
 
         String baseUrl = request.getContextPath()
-                + "/dashboard/customer-order?keyword=" + (keyword != null ? keyword : "")
-                + "&status=" + (status != null ? status : "");
+                + "/dashboard/customer-order?"
+                + "status=" + (status != null ? status : "");
         request.setAttribute("baseUrl", baseUrl);
 
         request.setAttribute("countPending", orderDAO.countOrdersByStatus("pending"));
