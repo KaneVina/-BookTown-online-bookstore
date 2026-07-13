@@ -1,18 +1,12 @@
 package controller;
 
-<<<<<<< HEAD
 import dao.BookDAO;
 import dao.AccountDAO;
-=======
-import dao.DashboardDAO;
-import dao.GenreDAO;
->>>>>>> dat
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-<<<<<<< HEAD
 import model.Account;
 import model.Book;
 
@@ -66,92 +60,5 @@ public class DashboardController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         doGet(req, resp);
-=======
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-import model.Account;
-import model.Genre;
-
-public class DashboardController extends HttpServlet {
-
-    private final DashboardDAO dashboardDAO = new DashboardDAO();
-    private final GenreDAO genreDAO = new GenreDAO();
-
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        if (!isAdminOrStaff(request, response)) {
-            return;
-        }
-
-        String fromDate = trimToNull(request.getParameter("fromDate"));
-        String toDate = trimToNull(request.getParameter("toDate"));
-        Integer genreID = parseGenreID(request.getParameter("genreID"));
-
-        BigDecimal totalRevenue = dashboardDAO.getTotalRevenue(fromDate, toDate, genreID);
-        int totalOrders = dashboardDAO.getTotalOrders(fromDate, toDate, genreID);
-        int totalCustomers = dashboardDAO.getTotalCustomers(fromDate, toDate, genreID);
-        int totalBooks = dashboardDAO.getTotalBooks(genreID);
-        int totalSoldBooks = dashboardDAO.getTotalSoldBooks(fromDate, toDate, genreID);
-        Map<String, Integer> statusSummary = dashboardDAO.getOrderStatusSummary(fromDate, toDate, genreID);
-        List<Map<String, Object>> revenueByCategory = dashboardDAO.getRevenueByCategory(fromDate, toDate, genreID);
-        List<Map<String, Object>> topSellingBooks = dashboardDAO.getTopSellingBooks(fromDate, toDate, genreID);
-        List<Map<String, Object>> recentOrders = dashboardDAO.getRecentOrders(fromDate, toDate, genreID);
-        List<Genre> genres = genreDAO.getAllGenres();
-
-        request.setAttribute("totalRevenue", totalRevenue);
-        request.setAttribute("totalOrders", totalOrders);
-        request.setAttribute("totalCustomers", totalCustomers);
-        request.setAttribute("totalBooks", totalBooks);
-        request.setAttribute("totalSoldBooks", totalSoldBooks);
-        request.setAttribute("statusSummary", statusSummary);
-        request.setAttribute("revenueByCategory", revenueByCategory);
-        request.setAttribute("topSellingBooks", topSellingBooks);
-        request.setAttribute("recentOrders", recentOrders);
-        request.setAttribute("genres", genres);
-        request.setAttribute("fromDate", fromDate);
-        request.setAttribute("toDate", toDate);
-        request.setAttribute("selectedGenreID", genreID);
-
-        request.getRequestDispatcher("/views/admin/dashboard/dashboard.jsp").forward(request, response);
-    }
-
-    private boolean isAdminOrStaff(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        HttpSession session = request.getSession(false);
-        Account account = session == null ? null : (Account) session.getAttribute("account");
-
-        if (account == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return false;
-        }
-
-        String role = account.getRole();
-        if (!"admin".equalsIgnoreCase(role) && !"staff".equalsIgnoreCase(role)) {
-            response.sendRedirect(request.getContextPath() + "/home");
-            return false;
-        }
-        return true;
-    }
-
-    private Integer parseGenreID(String raw) {
-        try {
-            if (raw == null || raw.trim().isEmpty() || "0".equals(raw.trim())) {
-                return null;
-            }
-            return Integer.parseInt(raw.trim());
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    private String trimToNull(String value) {
-        if (value == null || value.trim().isEmpty()) {
-            return null;
-        }
-        return value.trim();
->>>>>>> dat
     }
 }

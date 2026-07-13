@@ -34,7 +34,6 @@ public class CheckoutController extends HttpServlet {
                 case "deleteAddress":
                     String addressIdRaw = request.getParameter("addressID");
 
-<<<<<<< HEAD
                     if (addressIdRaw != null && !addressIdRaw.trim().isEmpty()) {
                         try {
                             int addressID = Integer.parseInt(addressIdRaw);
@@ -47,16 +46,6 @@ public class CheckoutController extends HttpServlet {
 
                     response.sendRedirect(request.getContextPath() + "/checkout");
                     return;
-=======
-            if (addressIdRaw != null && !addressIdRaw.trim().isEmpty()) {
-                try {
-                    int addressID = Integer.parseInt(addressIdRaw);
-                    AddressDAO addressDAO = new AddressDAO();
-                    addressDAO.deleteAddressByCustomer(addressID, account.getId());
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
->>>>>>> dat
             }
         }
 
@@ -112,25 +101,6 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-<<<<<<< HEAD
-=======
-        if ("deleteAddressAjax".equals(action)) {
-            deleteAddressAjax(request, response, account);
-            return;
-        }
-
-        if ("setDefaultAddressAjax".equals(action)) {
-            setDefaultAddressAjax(request, response, account);
-            return;
-        }
-
-        String fullname = request.getParameter("fullname");
-        String phone = request.getParameter("phone");
-        String street = request.getParameter("street");
-        String ward = request.getParameter("ward");
-        String city = request.getParameter("city");
-        String district = request.getParameter("district");
->>>>>>> dat
         String paymentMethod = request.getParameter("payment_method");
 
         switch (paymentMethod) {
@@ -170,7 +140,6 @@ public class CheckoutController extends HttpServlet {
 
         BigDecimal total = cartDAO.calcSubtotal(cartItems);
 
-<<<<<<< HEAD
         String fullname = request.getParameter("fullname");
         String phone = request.getParameter("phone");
         String street = request.getParameter("street");
@@ -189,33 +158,6 @@ public class CheckoutController extends HttpServlet {
                 break;
             }
         }
-=======
-        AddressDAO addressDAO = new AddressDAO();
-
-        int addressID = -1;
-        List<Address> addresses = addressDAO.getAddressesByCustomerId(account.getId());
-
-        for (Address a : addresses) {
-            if (a.getStreet().equalsIgnoreCase(street.trim())
-                    && a.getDistrict().equalsIgnoreCase(ward.trim())
-                    && a.getCity().equalsIgnoreCase(city.trim())) {
-                addressID = a.getAddressID();
-                break;
-            }
-        }
-
-        if (addressID == -1) {
-            Address address = new Address();
-            address.setCustomerID(account.getId());
-            address.setStreet(street.trim());
-            address.setDistrict(ward.trim());
-            address.setCity(city.trim());
-            address.setCountry("Việt Nam");
-            address.setDefault(false);
-
-            addressID = addressDAO.insertAddressAndReturnId(address);
-        }
->>>>>>> dat
 
         if (addressID == -1) {
             request.getSession().setAttribute("errorMessage", "Vui lòng chọn địa chỉ giao hàng!");
@@ -277,52 +219,6 @@ public class CheckoutController extends HttpServlet {
         }
 
         response.getWriter().write("{\"success\":true,\"addressID\":" + addressID + "}");
-    }
-
-    private void deleteAddressAjax(HttpServletRequest request, HttpServletResponse response, Account account)
-            throws IOException {
-
-        response.setContentType("application/json;charset=UTF-8");
-
-        String addressIdRaw = request.getParameter("addressID");
-
-        if (isEmpty(addressIdRaw)) {
-            response.getWriter().write("{\"success\":false}");
-            return;
-        }
-
-        try {
-            int addressID = Integer.parseInt(addressIdRaw);
-            AddressDAO addressDAO = new AddressDAO();
-            boolean ok = addressDAO.deleteAddressByCustomer(addressID, account.getId());
-
-            response.getWriter().write("{\"success\":" + ok + "}");
-        } catch (NumberFormatException e) {
-            response.getWriter().write("{\"success\":false}");
-        }
-    }
-
-    private void setDefaultAddressAjax(HttpServletRequest request, HttpServletResponse response, Account account)
-            throws IOException {
-
-        response.setContentType("application/json;charset=UTF-8");
-
-        String addressIdRaw = request.getParameter("addressID");
-
-        if (isEmpty(addressIdRaw)) {
-            response.getWriter().write("{\"success\":false}");
-            return;
-        }
-
-        try {
-            int addressID = Integer.parseInt(addressIdRaw);
-            AddressDAO addressDAO = new AddressDAO();
-            addressDAO.setDefaultAddress(addressID, account.getId());
-
-            response.getWriter().write("{\"success\":true}");
-        } catch (NumberFormatException e) {
-            response.getWriter().write("{\"success\":false}");
-        }
     }
 
     private boolean isCustomer(HttpServletRequest request, HttpServletResponse response)
