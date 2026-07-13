@@ -57,12 +57,18 @@
                      alt="BookTown Logo" class="w-[220px] mb-3"/>
             </a>
 
+<<<<<<< HEAD
 
             <form action="${pageContext.request.contextPath}/products" method="get" class="flex-1 flex max-w-[600px] mx-4">
+=======
+            <form action="${pageContext.request.contextPath}/products" method="get"
+                  class="flex-1 flex max-w-[600px] mx-4">
+>>>>>>> main
                 <input class="flex-1 border-none px-4 py-2.5 text-[15px] rounded-l focus:ring-0 outline-none"
                        name="keyword"
                        value="${param.keyword}"
                        placeholder="Tìm kiếm sách, tác giả..." type="text" id="header-search" autocomplete="off">
+<<<<<<< HEAD
                 <button type="submit" class="bg-secondary px-4 rounded-r flex items-center justify-center w-[54px] hover:opacity-90">
 
             <form action="${pageContext.request.contextPath}/products" method="get"
@@ -73,6 +79,10 @@
                 <button type="submit" aria-label="Tìm kiếm"
                         class="bg-secondary px-4 rounded-r flex items-center justify-center w-[54px] hover:opacity-90">
 
+=======
+                <button type="submit" aria-label="Tìm kiếm"
+                        class="bg-secondary px-4 rounded-r flex items-center justify-center w-[54px] hover:opacity-90">
+>>>>>>> main
                     <i data-lucide="search" class="icon-lg text-primary" style="color:#1565C0;stroke-width:2.5"></i>
                 </button>
             </form>

@@ -1,23 +1,30 @@
 package controller;
 
 import dao.AccountDAO;
+<<<<<<< HEAD
 import dao.AddressDAO;
 import dao.CustomerDAO;
+=======
+import dao.CustomerDAO;
+import java.io.IOException;
+>>>>>>> main
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+<<<<<<< HEAD
 import java.io.IOException;
+=======
+>>>>>>> main
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.List;
 import model.Account;
-import model.Address;
 import model.Customer;
 
 public class ProfileController extends HttpServlet {
 
+<<<<<<< HEAD
     private void loadCustomerProfile(HttpServletRequest request, HttpServletResponse response, int customerID)
             throws ServletException, IOException {
 
@@ -49,8 +56,11 @@ public class ProfileController extends HttpServlet {
         request.getRequestDispatcher("/views/profile/profile-admin.jsp").forward(request, response);
     }
 
+=======
+>>>>>>> main
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest request,
+            HttpServletResponse response)
             throws ServletException, IOException {
 
         request.setCharacterEncoding("UTF-8");
@@ -96,6 +106,7 @@ public class ProfileController extends HttpServlet {
 
         // Không cho phép xem profile của tài khoản khác.
         if (id != loginUser.getId()) {
+<<<<<<< HEAD
             request.getRequestDispatcher("/views/error/404.jsp").forward(request, response);
             return;
         }
@@ -105,10 +116,28 @@ public class ProfileController extends HttpServlet {
         } else {
             loadStaffProfile(request, response, id);
         }
+=======
+            request.getRequestDispatcher("/views/error/404.jsp")
+                    .forward(request, response);
+            return;
+        }
+        if ("customer".equalsIgnoreCase(loginUser.getRole())) {
+            CustomerDAO customerDao = new CustomerDAO();
+            Customer customer = customerDao.getCustomerById(id);
+            request.setAttribute("customer", customer);
+            request.getRequestDispatcher("/views/profile/profile.jsp").forward(request, response);
+            return;
+        }
+        AccountDAO accountDao = new AccountDAO();
+        Account account = accountDao.getStaffById(id);
+        request.setAttribute("account", account);
+        request.getRequestDispatcher("/views/profile/profile-admin.jsp").forward(request, response);
+>>>>>>> main
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest request,
+            HttpServletResponse response)
             throws ServletException, IOException {
 
         request.setCharacterEncoding("UTF-8");
@@ -121,6 +150,7 @@ public class ProfileController extends HttpServlet {
         }
 
         Account acc = (Account) session.getAttribute("account");
+<<<<<<< HEAD
         int accountID = acc.getId();
         String action = request.getParameter("action");
 
@@ -304,6 +334,87 @@ public class ProfileController extends HttpServlet {
                 session.setAttribute("error", "Bạn phải từ 18 tuổi đến 120 tuổi");
                 response.sendRedirect(redirectUrl);
                 return;
+=======
+
+        String fullname = safeTrim(request.getParameter("fullname"));
+        String phone = safeTrim(request.getParameter("phone"));
+        String gender = request.getParameter("gender"); 
+        String dob = request.getParameter("dob"); 
+        if (fullname.isEmpty()) {
+            session.setAttribute("error", "Họ tên không được để trống");
+            response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
+            return;
+        }
+        if (!fullname.matches("^[\\p{L}\\s]{2,50}$")) {
+            session.setAttribute("error", "Họ tên chỉ được chứa chữ cái và khoảng trắng");
+            response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
+            return;
+        }
+        if (phone == null) phone = "";
+        if (!phone.matches("^0\\d{9}$")) {
+            session.setAttribute("error", "Số điện thoại phải gồm 10 số và bắt đầu bằng 0");
+            response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
+            return;
+        }
+
+        boolean isCustomer = "customer".equalsIgnoreCase(acc.getRole());
+
+        if (isCustomer) {
+            // Validate dob & age for customer
+            if (dob == null || dob.trim().isEmpty()) {
+                session.setAttribute("error", "Vui lòng chọn ngày sinh");
+                response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
+                return;
+            }
+            try {
+                LocalDate birthDate = LocalDate.parse(dob);
+                LocalDate today = LocalDate.now();
+                if (birthDate.isAfter(today)) {
+                    session.setAttribute("error", "Ngày sinh không hợp lệ");
+                    response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
+                    return;
+                }
+                int age = Period.between(birthDate, today).getYears();
+                if (age < 18 || age > 120) {
+                    session.setAttribute("error", "Bạn phải từ 18 tuổi đến dưới 120 tuổi");
+                    response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
+                    return;
+                }
+            } catch (Exception ex) {
+                session.setAttribute("error", "Định dạng ngày sinh không hợp lệ");
+                response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
+                return;
+            }
+
+            // Update customer
+            CustomerDAO dao = new CustomerDAO();
+            boolean success = dao.updateCustomer(
+                    acc.getId(),
+                    fullname,
+                    phone,
+                    gender,
+                    dob
+            );
+
+            if (success) {
+                Customer updated = dao.getCustomerById(acc.getId());
+                if (updated != null) {
+                    Account refreshed = new Account(
+                            updated.getCustomerID(),
+                            updated.getFullname(),
+                            updated.getEmail(),
+                            updated.getPhone(),
+                            updated.getRole(),
+                            updated.getStatus()
+                    );
+                    session.setAttribute("account", refreshed);
+                }
+                session.removeAttribute("error");
+                session.setAttribute("message", "Cập nhật thông tin thành công!");
+            } else {
+                session.removeAttribute("message");
+                session.setAttribute("error", "Cập nhật thất bại!");
+>>>>>>> main
             }
         } catch (Exception e) {
             session.setAttribute("error", "Định dạng ngày sinh không hợp lệ");
@@ -381,6 +492,7 @@ public class ProfileController extends HttpServlet {
             session.setAttribute("message", "Cập nhật thông tin thành công!");
         } else {
             session.removeAttribute("message");
+<<<<<<< HEAD
             session.setAttribute("error", "Cập nhật thông tin thất bại!");
         }
 
@@ -395,6 +507,11 @@ public class ProfileController extends HttpServlet {
         String trimmed = value.trim();
         return trimmed.length() >= 3
                 && trimmed.matches(".*[a-zA-ZÀ-ỹ].*");
+=======
+            session.setAttribute("error", "Cập nhật thất bại!");
+        }
+        response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
+>>>>>>> main
     }
 
     private String safeTrim(String value) {

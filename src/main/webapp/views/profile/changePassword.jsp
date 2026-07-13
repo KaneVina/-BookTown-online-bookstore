@@ -218,12 +218,6 @@
                         Lịch sử đơn hàng
                     </a>
 
-                    <a href="${pageContext.request.contextPath}/profile?id=${sessionScope.account.id}&section=address"
-                       class="menu-item">
-                        <span class="material-symbols-outlined">location_on</span>
-                        Địa chỉ của tôi
-                    </a>
-
                     <a href="${pageContext.request.contextPath}/change-password"
                        class="menu-item menu-active">
                         <span class="material-symbols-outlined">lock</span>

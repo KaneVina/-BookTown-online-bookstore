@@ -1,6 +1,11 @@
 package controller;
 
 import dao.OrderDAO;
+<<<<<<< HEAD
+=======
+import java.io.IOException;
+import java.util.List;
+>>>>>>> main
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,12 +15,17 @@ import model.Account;
 import model.Order;
 import model.OrderDetail;
 
+<<<<<<< HEAD
 import java.io.IOException;
 import java.util.List;
 
 public class CustomerOrderController extends HttpServlet {
 
     private static final int PAGE_SIZE = 4;
+=======
+public class CustomerOrderController extends HttpServlet {
+
+>>>>>>> main
     private final OrderDAO orderDAO = new OrderDAO();
 
     @Override

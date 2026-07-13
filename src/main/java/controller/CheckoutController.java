@@ -32,6 +32,7 @@ public class CheckoutController extends HttpServlet {
         if ("deleteAddress".equals(action)) {
             String addressIdRaw = request.getParameter("addressID");
 
+<<<<<<< HEAD
             if (!isEmpty(addressIdRaw)) {
                 try {
                     int addressID = Integer.parseInt(addressIdRaw.trim());
@@ -40,6 +41,20 @@ public class CheckoutController extends HttpServlet {
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }
+=======
+                    if (addressIdRaw != null && !addressIdRaw.trim().isEmpty()) {
+                        try {
+                            int addressID = Integer.parseInt(addressIdRaw);
+                            AddressDAO addressDAO = new AddressDAO();
+                            addressDAO.deleteAddress(addressID);
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    response.sendRedirect(request.getContextPath() + "/checkout");
+                    return;
+>>>>>>> main
             }
 
             response.sendRedirect(request.getContextPath() + "/checkout");
@@ -98,6 +113,7 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
+<<<<<<< HEAD
         if ("deleteAddressAjax".equals(action)) {
             deleteAddressAjax(request, response, account);
             return;
@@ -114,6 +130,8 @@ public class CheckoutController extends HttpServlet {
         String street = request.getParameter("street");
         String ward = request.getParameter("ward");
         String city = request.getParameter("city");
+=======
+>>>>>>> main
         String paymentMethod = request.getParameter("payment_method");
 
         if (isEmpty(paymentMethod)) {
@@ -167,6 +185,7 @@ public class CheckoutController extends HttpServlet {
         }
 
         BigDecimal total = cartDAO.calcSubtotal(cartItems);
+<<<<<<< HEAD
         int addressID = -1;
 
         // Code mới: ưu tiên lấy đúng địa chỉ đã chọn bằng addressID và customerID.
@@ -199,6 +218,27 @@ public class CheckoutController extends HttpServlet {
 
             addressID = addressDAO.insertAddressAndReturnId(address);
         }
+=======
+
+        String fullname = request.getParameter("fullname");
+        String phone = request.getParameter("phone");
+        String street = request.getParameter("street");
+        String ward = request.getParameter("ward");
+        String city = request.getParameter("city");
+
+        AddressDAO addressDAO = new AddressDAO();
+        List<Address> addresses = addressDAO.getAddressesByCustomerId(account.getId());
+        int addressID = -1;
+        for (Address addr : addresses) {
+            if (street != null && ward != null && city != null
+                    && street.trim().equals(addr.getStreet())
+                    && ward.trim().equals(addr.getDistrict())
+                    && city.trim().equals(addr.getCity())) {
+                addressID = addr.getAddressID();
+                break;
+            }
+        }
+>>>>>>> main
 
         if (addressID == -1) {
             request.getSession().setAttribute("errorMessage", "Vui lòng chọn địa chỉ giao hàng!");
@@ -260,6 +300,7 @@ public class CheckoutController extends HttpServlet {
         response.getWriter().write("{\"success\":true,\"addressID\":" + addressID + "}");
     }
 
+<<<<<<< HEAD
     private void deleteAddressAjax(HttpServletRequest request, HttpServletResponse response,
             Account account) throws IOException {
 
@@ -302,6 +343,8 @@ public class CheckoutController extends HttpServlet {
         }
     }
 
+=======
+>>>>>>> main
     private boolean isCustomer(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
