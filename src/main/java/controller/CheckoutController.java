@@ -124,7 +124,6 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-        String selectedAddressIdRaw = request.getParameter("addressID");
         String fullname = request.getParameter("fullname");
         String phone = request.getParameter("phone");
         String street = request.getParameter("street");
@@ -194,16 +193,14 @@ public class CheckoutController extends HttpServlet {
         AddressDAO addressDAO = new AddressDAO();
 
         int addressID = -1;
+        List<Address> addresses = addressDAO.getAddressesByCustomerId(account.getId());
 
-        if (!isEmpty(selectedAddressIdRaw)) {
-            try {
-                int selectedAddressID = Integer.parseInt(selectedAddressIdRaw.trim());
-                Address selectedAddress = addressDAO.getAddressByIdAndCustomer(selectedAddressID, account.getId());
-                if (selectedAddress != null) {
-                    addressID = selectedAddress.getAddressID();
-                }
-            } catch (NumberFormatException ignored) {
-                addressID = -1;
+        for (Address a : addresses) {
+            if (a.getStreet().equalsIgnoreCase(street.trim())
+                    && a.getDistrict().equalsIgnoreCase(ward.trim())
+                    && a.getCity().equalsIgnoreCase(city.trim())) {
+                addressID = a.getAddressID();
+                break;
             }
         }
 
