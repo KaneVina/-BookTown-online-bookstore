@@ -135,10 +135,7 @@ public class Order {
         String seqPart = String.format("%06d", orderID);
         return "BT-" + datePart + seqPart;
     }
-<<<<<<< HEAD
-=======
 
->>>>>>> main
     private String customerName;
     private String customerEmail;
     private String customerPhone;
@@ -166,8 +163,4 @@ public class Order {
     public void setCustomerPhone(String customerPhone) {
         this.customerPhone = customerPhone;
     }
-<<<<<<< HEAD
-
-=======
->>>>>>> main
 }
