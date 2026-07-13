@@ -124,7 +124,7 @@
 
 <aside class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-white border-r border-outline-variant z-40" style="border-color: #c2c6d4;">
     <div class="px-6 py-5 border-b">
-        <a href="${pageContext.request.contextPath}/admin/dashboard" class="flex items-center gap-3">
+        <a href="${pageContext.request.contextPath}/dashboard" class="flex items-center gap-3">
             <img src="${pageContext.request.contextPath}/assets/images/logo/logoBT_2.png"
                  alt="BookTown Logo"
                  class="h-9 object-contain"/>
@@ -134,7 +134,7 @@
     <nav class="flex-1 py-4 space-y-0.5 overflow-y-auto">
 
         <a href="${pageContext.request.contextPath}/dashboard"
-           class="sidebar-link <%= currentPage.contains("dashboard") ? "active" : ""%>">
+           class="sidebar-link <%= currentPage.endsWith("/dashboard") ? "active" : ""%>">
             <span class="material-symbols-outlined">dashboard</span>
             Bảng điều khiển
         </a>
@@ -149,6 +149,12 @@
            class="sidebar-link <%= currentPage.contains("product-management") ? "active" : ""%>">
             <span class="material-symbols-outlined">inventory_2</span>
             Kho hàng
+        </a>
+
+        <a href="${pageContext.request.contextPath}/category"
+           class="sidebar-link <%= currentPage.contains("/category") ? "active" : ""%>">
+            <span class="material-symbols-outlined">category</span>
+            Thể loại
         </a>
 
         <a href="${pageContext.request.contextPath}/dashboard/account-management"
