@@ -223,6 +223,11 @@
                         <span class="material-symbols-outlined">lock</span>
                         Đổi mật khẩu
                     </a>
+                    <a href="${pageContext.request.contextPath}/address"
+                       class="menu-item">
+                        <span class="material-symbols-outlined">location_on</span>
+                        Địa chỉ của tôi
+                    </a>
 
                     <a href="${pageContext.request.contextPath}/logout"
                        class="menu-item text-red-600">

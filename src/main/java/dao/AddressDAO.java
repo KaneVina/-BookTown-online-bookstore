@@ -11,7 +11,7 @@ public class AddressDAO {
 
     public List<Address> getAllAddresses() {
         List<Address> list = new ArrayList<>();
-        String sql = "SELECT addressID, customerID, street, district, city, country, is_default FROM Address ORDER BY addressID DESC";
+        String sql = "SELECT addressID, customerID, street, district, city, country, is_default, recipient_name, recipient_phone FROM Address ORDER BY addressID DESC";
 
         try (Connection conn = db.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -30,7 +30,7 @@ public class AddressDAO {
     public List<Address> getAddressesByCustomerId(int customerID) {
         List<Address> list = new ArrayList<>();
 
-        String sql = "SELECT addressID, customerID, street, district, city, country, is_default "
+        String sql = "SELECT addressID, customerID, street, district, city, country, is_default, recipient_name, recipient_phone "
                 + "FROM Address "
                 + "WHERE customerID = ? AND (country IS NULL OR country <> '__DELETED__') "
                 + "ORDER BY is_default DESC, addressID DESC";
@@ -53,7 +53,7 @@ public class AddressDAO {
     }
 
     public Address getAddressById(int id) {
-        String sql = "SELECT addressID, customerID, street, district, city, country, is_default FROM Address WHERE addressID=?";
+        String sql = "SELECT addressID, customerID, street, district, city, country, is_default, recipient_name, recipient_phone FROM Address WHERE addressID=?";
 
         try (Connection conn = db.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -78,7 +78,7 @@ public class AddressDAO {
 
     public int insertAddressAndReturnId(Address a) {
         String countSql = "SELECT COUNT(*) FROM Address WHERE customerID=? AND (country IS NULL OR country <> '__DELETED__')";
-        String insertSql = "INSERT INTO Address(customerID, street, district, city, country, is_default) VALUES (?, ?, ?, ?, ?, ?)";
+        String insertSql = "INSERT INTO Address(customerID, street, district, city, country, is_default, recipient_name, recipient_phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = db.getConnection()) {
             boolean isFirstAddress = false;
@@ -105,6 +105,8 @@ public class AddressDAO {
                 ps.setString(4, a.getCity());
                 ps.setString(5, a.getCountry());
                 ps.setBoolean(6, makeDefault);
+                ps.setString(7, emptyToNull(a.getRecipientName()));
+                ps.setString(8, emptyToNull(a.getRecipientPhone()));
                 ps.executeUpdate();
 
                 try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -121,7 +123,7 @@ public class AddressDAO {
     }
 
     public void updateAddress(Address a) {
-        String sql = "UPDATE Address SET customerID=?, street=?, district=?, city=?, country=?, is_default=? WHERE addressID=?";
+        String sql = "UPDATE Address SET customerID=?, street=?, district=?, city=?, country=?, is_default=?, recipient_name=?, recipient_phone=? WHERE addressID=?";
 
         try (Connection conn = db.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -132,7 +134,9 @@ public class AddressDAO {
             ps.setString(4, a.getCity());
             ps.setString(5, a.getCountry());
             ps.setBoolean(6, a.isDefault());
-            ps.setInt(7, a.getAddressID());
+            ps.setString(7, emptyToNull(a.getRecipientName()));
+            ps.setString(8, emptyToNull(a.getRecipientPhone()));
+            ps.setInt(9, a.getAddressID());
             ps.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
@@ -279,7 +283,16 @@ public class AddressDAO {
                 rs.getString("district"),
                 rs.getString("city"),
                 rs.getString("country"),
-                rs.getBoolean("is_default")
+                rs.getBoolean("is_default"),
+                rs.getString("recipient_name"),
+                rs.getString("recipient_phone")
         );
+    }
+
+    private String emptyToNull(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        return value.trim();
     }
 }
