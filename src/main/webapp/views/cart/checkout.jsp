@@ -112,14 +112,19 @@
                             <c:choose>
                                 <c:when test="${not empty addressList}">
                                     <c:forEach var="address" items="${addressList}">
+                                        <c:set var="displayRecipientName"
+                                               value="${not empty address.recipientName ? address.recipientName : sessionScope.account.fullname}"/>
+                                        <c:set var="displayRecipientPhone"
+                                               value="${not empty address.recipientPhone ? address.recipientPhone : sessionScope.account.phone}"/>
+
                                         <div class="address-option p-4 cursor-pointer hover:bg-primary/5 border-b"
                                              data-id="${address.addressID}"
                                              data-deleted="false"
-                                             data-fullname="${sessionScope.account.fullname}"
-                                             data-phone="${sessionScope.account.phone}"
-                                             data-street="${address.street}"
-                                             data-ward="${address.district}"
-                                             data-city="${address.city}"
+                                             data-fullname="${fn:escapeXml(displayRecipientName)}"
+                                             data-phone="${fn:escapeXml(displayRecipientPhone)}"
+                                             data-street="${fn:escapeXml(address.street)}"
+                                             data-ward="${fn:escapeXml(address.district)}"
+                                             data-city="${fn:escapeXml(address.city)}"
                                              data-default="${address['default']}">
                                             <div class="flex justify-between gap-3">
                                                 <div>
@@ -127,7 +132,7 @@
                                                         <span class="default-option-badge ${address['default'] ? '' : 'hidden'} text-[11px] bg-primary text-white px-2 py-1 rounded-full mr-2">
                                                             Mặc định
                                                         </span>
-                                                        ${sessionScope.account.fullname} - ${sessionScope.account.phone}
+                                                        ${displayRecipientName} - ${displayRecipientPhone}
                                                     </p>
                                                     <p class="text-[13px] text-on-surface-variant mt-1">
                                                         ${address.street}, ${address.district}, ${address.city}
@@ -179,7 +184,7 @@
                             </div>
 
                             <div class="p-5 space-y-4">
-                                <div class="grid grid-cols-2 gap-3">
+<div id="newRecipientFields" class="grid grid-cols-2 gap-3">
                                     <div>
                                         <label class="block text-[12px] font-bold mb-1">Họ tên người nhận</label>
                                         <input id="newFullname" type="text" placeholder="Nhập họ và tên"
@@ -650,8 +655,17 @@
         document.getElementById('btnCloseAddressForm').addEventListener('click', closeAddressModal);
         document.getElementById('btnCancelAddress').addEventListener('click', closeAddressModal);
 
+        var accountFullname = '${fn:escapeXml(sessionScope.account.fullname)}';
+        var accountPhone = '${fn:escapeXml(sessionScope.account.phone)}';
+
+        function resetRecipientFields() {
+            document.getElementById('newFullname').value = accountFullname;
+            document.getElementById('newPhone').value = accountPhone;
+        }
+
         function closeAddressModal() {
             document.getElementById('newAddressForm').classList.add('hidden');
+            resetRecipientFields();
         }
 
         async function loadVietnamProvinces() {
@@ -739,6 +753,7 @@
             var isDefault = document.getElementById('defaultAddress').checked;
 
             var error = validateAddressInput(fullname, phone, city, ward, street);
+
             if (error) {
                 showInputError(error);
                 return;
@@ -763,7 +778,9 @@
                         '&street=' + encodeURIComponent(street) +
                         '&ward=' + encodeURIComponent(ward) +
                         '&city=' + encodeURIComponent(city) +
-                        '&isDefault=' + encodeURIComponent(isDefault)
+                        '&isDefault=' + encodeURIComponent(isDefault) +
+                        '&fullname=' + encodeURIComponent(fullname) +
+                        '&phone=' + encodeURIComponent(phone)
             })
                     .then(function (response) {
                         return response.json();
@@ -794,6 +811,7 @@
 
                         document.getElementById('newStreet').value = '';
                         document.getElementById('defaultAddress').checked = false;
+                        resetRecipientFields();
 
                         localStorage.removeItem(ADDRESS_STORAGE_KEY);
                         localStorage.removeItem(DELETED_STORAGE_KEY);
