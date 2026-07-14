@@ -76,6 +76,11 @@
                         <span class="material-symbols-outlined"> lock </span>
                         Đổi mật khẩu
                     </a>
+                    <a href="${pageContext.request.contextPath}/address"
+                       class="menu-item">
+                        <span class="material-symbols-outlined">location_on</span>
+                        Địa chỉ của tôi
+                    </a>
 
                     <a href="${pageContext.request.contextPath}/logout"
                        class="menu-item text-red-600">
@@ -199,19 +204,19 @@
                                             </c:otherwise>
                                         </c:choose>
 
-                                         <c:if test="${order.status == 'pending'}">
-                                             <form method="POST" id="cancelForm_${order.orderID}"
-                                                   action="${pageContext.request.contextPath}/profile/order-history">
-                                                 <input type="hidden" name="action" value="cancel" />
-                                                 <input type="hidden" name="orderID"
-                                                        value="${order.orderID}" />
-                                                 <button type="button"
-                                                         onclick="confirmCancelCustomer('Hủy đơn hàng', 'Bạn có chắc muốn hủy đơn hàng ${order.orderCode}?', 'cancelForm_${order.orderID}')"
-                                                         class="px-5 py-2 border border-red-500 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
-                                                     Hủy đơn
-                                                 </button>
-                                             </form>
-                                         </c:if>
+                                        <c:if test="${order.status == 'pending'}">
+                                            <form method="POST" id="cancelForm_${order.orderID}"
+                                                  action="${pageContext.request.contextPath}/profile/order-history">
+                                                <input type="hidden" name="action" value="cancel" />
+                                                <input type="hidden" name="orderID"
+                                                       value="${order.orderID}" />
+                                                <button type="button"
+                                                        onclick="confirmCancelCustomer('Hủy đơn hàng', 'Bạn có chắc muốn hủy đơn hàng ${order.orderCode}?', 'cancelForm_${order.orderID}')"
+                                                        class="px-5 py-2 border border-red-500 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
+                                                    Hủy đơn
+                                                </button>
+                                            </form>
+                                        </c:if>
 
                                         <a
                                             href="${pageContext.request.contextPath}/profile/order-history?action=detail&orderID=${order.orderID}">
@@ -302,7 +307,7 @@
     }
 
     function confirmCancelCustomer(title, message, formId) {
-        openConfirmModal(title, message, function() {
+        openConfirmModal(title, message, function () {
             document.getElementById(formId).submit();
         });
     }
