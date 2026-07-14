@@ -141,13 +141,12 @@
     </head>
     <body class="text-on-surface">
         <%@ include file="/views/layout/dashboard/sidebar.jsp" %>
+        <header class="bg-white border-b h-14 sticky top-0 z-30 flex items-center px-6 md:ml-64">
+            <h2 class="font-semibold text-base">
+                Quản lý Đánh giá
+            </h2>
+        </header>
         <main class="flex-1 md:ml-64 min-h-screen p-6 bg-background">
-            <section class="mb-stack-lg flex justify-between items-end">
-                <div>
-                    <h2 class="font-headline-lg text-headline-lg text-on-surface">Quản lý Đánh giá</h2>
-                    <p class="font-body-md text-body-md text-on-surface-variant">Theo dõi và phản hồi các nhận xét từ khách hàng trên hệ thống.</p>
-                </div>
-            </section>
             <section class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-stack-lg">
                 <div class="bg-surface p-6 rounded-xl shadow-tonal border border-outline-variant/30 flex items-center justify-between">
                     <div>
