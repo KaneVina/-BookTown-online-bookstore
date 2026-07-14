@@ -146,187 +146,163 @@
                 Quản lý Đánh giá
             </h2>
         </header>
-        <main class="flex-1 md:ml-64 min-h-screen p-6 bg-background">
-            <section class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-stack-lg">
-                <div class="bg-surface p-6 rounded-xl shadow-tonal border border-outline-variant/30 flex items-center justify-between">
-                    <div>
-                        <p class="font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Tổng đánh giá</p>
-                        <span class="font-headline-md text-headline-md">${reviews.size()}</span>
+        <main class="ml-64 flex-1 flex flex-col min-h-screen">
+            <div class="p-6 flex-1 space-y-6 max-w-screen-xl mx-auto w-full">
+                <section class="bg-surface p-stack-sm rounded-xl shadow-sm border border-outline-variant/50 mb-stack-md flex flex-wrap gap-4 items-center">
+                    <div class="flex flex-1 gap-2 min-w-[300px]">
+                        <div class="relative flex-1">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]" data-icon="search">search</span>
+                            <input id="searchInput" class="w-full pl-10 pr-4 py-2 border border-outline-variant rounded-lg focus:ring-1 focus:ring-primary focus:outline-none font-body-sm text-body-sm"
+                                   placeholder="Tìm theo tên khách hàng hoặc tên sách..." type="text"
+                                   value="${fn:escapeXml(searchValue)}"/>
+                        </div>
                     </div>
-                    <div class="w-12 h-12 rounded-full bg-primary-container/10 flex items-center justify-center text-primary">
-                        <span class="material-symbols-outlined text-[32px]" data-icon="forum">forum</span>
+                    <div class="flex items-center gap-3">
+                        <span class="font-label-sm text-label-sm text-on-surface-variant">Xếp hạng:</span>
+                        <select id="ratingSelect" class="border border-outline-variant rounded-lg py-2 pl-3 pr-8 font-body-sm text-body-sm focus:ring-1 focus:ring-primary focus:outline-none appearance-none bg-no-repeat bg-[right_8px_center]">
+                            <option value="" ${empty ratingValue ? 'selected' : ''}>Tất cả sao</option>
+                            <option value="5" ${ratingValue == '5' ? 'selected' : ''}>5 sao</option>
+                            <option value="4" ${ratingValue == '4' ? 'selected' : ''}>4 sao</option>
+                            <option value="3" ${ratingValue == '3' ? 'selected' : ''}>3 sao</option>
+                            <option value="2" ${ratingValue == '2' ? 'selected' : ''}>2 sao</option>
+                            <option value="1" ${ratingValue == '1' ? 'selected' : ''}>1 sao</option>
+                        </select>
                     </div>
-                </div>
-                <div class="bg-surface p-6 rounded-xl shadow-tonal border border-outline-variant/30 flex items-center justify-between">
-                    <div>
-                        <p class="font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Chờ phản hồi</p>
-                        <span class="font-headline-md text-headline-md text-warning">
-                            <c:set var="pendingCount" value="0" />
-                            <c:forEach items="${reviews}" var="review">
-                                <c:if test="${review.status == 'Chờ duyệt' && !review.isHidden}">
-                                    <c:set var="pendingCount" value="${pendingCount + 1}" />
-                                </c:if>
-                            </c:forEach>
-                            ${pendingCount}
-                        </span>
-                        <p class="font-label-sm text-label-sm text-on-surface-variant mt-2 italic">Cần xử lý ngay</p>
+                    <div class="flex items-center gap-3">
+                        <span class="font-label-sm text-label-sm text-on-surface-variant">Trạng thái:</span>
+                        <div id="statusGroup" class="flex bg-background-alt p-1 rounded-lg border border-outline-variant">
+                            <button type="button" data-status="all"
+                                    class="px-4 py-1.5 rounded-md font-label-sm text-label-sm transition-all ${statusValue == 'all' ? 'bg-surface shadow-sm text-primary' : 'text-on-surface-variant hover:text-on-surface'}">Tất cả</button>
+                            <button type="button" data-status="pending"
+                                    class="px-4 py-1.5 rounded-md font-label-sm text-label-sm transition-all ${statusValue == 'pending' ? 'bg-surface shadow-sm text-primary' : 'text-on-surface-variant hover:text-on-surface'}">Chờ</button>
+                            <button type="button" data-status="approved"
+                                    class="px-4 py-1.5 rounded-md font-label-sm text-label-sm transition-all ${statusValue == 'approved' ? 'bg-surface shadow-sm text-primary' : 'text-on-surface-variant hover:text-on-surface'}">Đã duyệt</button>
+                        </div>
                     </div>
-                    <div class="w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center text-warning">
-                        <span class="material-symbols-outlined text-[32px]" data-icon="pending_actions">pending_actions</span>
-                    </div>
-                </div>
-            </section>
-            <section class="bg-surface p-stack-sm rounded-xl shadow-sm border border-outline-variant/50 mb-stack-md flex flex-wrap gap-4 items-center">
-                <div class="flex flex-1 gap-2 min-w-[300px]">
-                    <div class="relative flex-1">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]" data-icon="search">search</span>
-                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 border border-outline-variant rounded-lg focus:ring-1 focus:ring-primary focus:outline-none font-body-sm text-body-sm"
-                               placeholder="Tìm theo tên khách hàng hoặc tên sách..." type="text"
-                               value="${fn:escapeXml(searchValue)}"/>
-                    </div>
-                </div>
-                <div class="flex items-center gap-3">
-                    <span class="font-label-sm text-label-sm text-on-surface-variant">Xếp hạng:</span>
-                    <select id="ratingSelect" class="border border-outline-variant rounded-lg py-2 pl-3 pr-8 font-body-sm text-body-sm focus:ring-1 focus:ring-primary focus:outline-none appearance-none bg-no-repeat bg-[right_8px_center]">
-                        <option value="" ${empty ratingValue ? 'selected' : ''}>Tất cả sao</option>
-                        <option value="5" ${ratingValue == '5' ? 'selected' : ''}>5 sao</option>
-                        <option value="4" ${ratingValue == '4' ? 'selected' : ''}>4 sao</option>
-                        <option value="3" ${ratingValue == '3' ? 'selected' : ''}>3 sao</option>
-                        <option value="2" ${ratingValue == '2' ? 'selected' : ''}>2 sao</option>
-                        <option value="1" ${ratingValue == '1' ? 'selected' : ''}>1 sao</option>
-                    </select>
-                </div>
-                <div class="flex items-center gap-3">
-                    <span class="font-label-sm text-label-sm text-on-surface-variant">Trạng thái:</span>
-                    <div id="statusGroup" class="flex bg-background-alt p-1 rounded-lg border border-outline-variant">
-                        <button type="button" data-status="all"
-                                class="px-4 py-1.5 rounded-md font-label-sm text-label-sm transition-all ${statusValue == 'all' ? 'bg-surface shadow-sm text-primary' : 'text-on-surface-variant hover:text-on-surface'}">Tất cả</button>
-                        <button type="button" data-status="pending"
-                                class="px-4 py-1.5 rounded-md font-label-sm text-label-sm transition-all ${statusValue == 'pending' ? 'bg-surface shadow-sm text-primary' : 'text-on-surface-variant hover:text-on-surface'}">Chờ</button>
-                        <button type="button" data-status="approved"
-                                class="px-4 py-1.5 rounded-md font-label-sm text-label-sm transition-all ${statusValue == 'approved' ? 'bg-surface shadow-sm text-primary' : 'text-on-surface-variant hover:text-on-surface'}">Đã duyệt</button>
-                    </div>
-                </div>
-            </section>
-            <section class="bg-surface rounded-2xl shadow-tonal border border-outline-variant/30 overflow-hidden">
-                <div class="overflow-x-auto custom-scrollbar">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-surface-container-low border-b border-outline-variant">
-                                <th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Khách hàng</th>
-                                <th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Sách</th>
-                                <th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Đánh giá</th>
-                                <th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Nội dung</th>
-                                <th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Ngày</th>
-                                <th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Trạng thái</th>
-                                <th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-right">Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-outline-variant/30">
-                            <c:choose>
-                                <c:when test="${not empty reviews}">
-                                    <c:forEach items="${reviews}" var="review">
-                                        <tr class="hover:bg-surface-container-lowest transition-colors group ${review.isHidden ? 'opacity-50 bg-gray-100' : ''}">
-                                            <td class="px-6 py-5">
-                                                <div class="flex items-center gap-3">
-                                                    <span class="font-label-md text-label-md text-on-surface">${review.customerName}</span>
-                                                    <c:if test="${review.isHidden}">
-                                                        <span class="text-xs px-2 py-1 bg-gray-400 text-white rounded">Đã ẩn</span>
-                                                    </c:if>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-5">
-                                                <div class="flex items-center gap-3">
-                                                    <c:if test="${not empty review.bookCover}">
-                                                        <img alt="Book Cover" class="w-10 h-14 object-cover rounded shadow-sm" src="${review.bookCover}"/>
-                                                    </c:if>
-                                                    <span class="font-body-sm text-body-sm text-on-surface max-w-[120px] line-clamp-2">${review.bookTitle}</span>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-5">
-                                                <div class="flex gap-0.5 text-secondary">
-                                                    <c:forEach begin="1" end="5" var="i">
-                                                        <span class="material-symbols-outlined text-[16px] ${i <= review.rating ? 'stars-fill' : ''}" data-icon="star" style="font-variation-settings: 'FILL' ${i <= review.rating ? '1' : '0'};">star</span>
-                                                    </c:forEach>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-5">
-                                                <p class="font-body-sm text-body-sm text-on-surface-variant max-w-[200px] line-clamp-2">${review.comment}</p>
-                                            </td>
-                                            <td class="px-6 py-5">
-                                                <span class="font-body-sm text-body-sm text-on-surface-variant">
-                                                    <fmt:formatDate value="${review.createdAt}" pattern="dd/MM/yyyy"/>
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-5">
-                                                <c:choose>
-                                                    <c:when test="${review.status == 'Đã duyệt'}">
-                                                        <span class="px-3 py-1 bg-success/10 text-success rounded-full font-label-sm text-label-sm inline-block">Đã duyệt</span>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <span class="px-3 py-1 bg-warning/10 text-warning rounded-full font-label-sm text-label-sm inline-block">Chờ duyệt</span>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </td>
-                                            <td class="px-6 py-5 text-right">
-                                                <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <c:if test="${review.status != 'Đã duyệt' && !review.isHidden && review.customerStatus == 'active'}">
-                                                        <button data-reply-btn 
+                </section>
+                <section class="bg-surface rounded-2xl shadow-tonal border border-outline-variant/30 overflow-hidden">
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-surface-container-low border-b border-outline-variant">
+                                    <th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Khách hàng</th>
+                                    <th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Sách</th>
+                                    <th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Đánh giá</th>
+                                    <th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Nội dung</th>
+                                    <th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Ngày</th>
+                                    <th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Trạng thái</th>
+                                    <th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-right">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-outline-variant/30">
+                                <c:choose>
+                                    <c:when test="${not empty reviews}">
+                                        <c:forEach items="${reviews}" var="review">
+                                            <tr class="hover:bg-surface-container-lowest transition-colors group ${review.isHidden ? 'opacity-50 bg-gray-100' : ''}">
+                                                <td class="px-6 py-5">
+                                                    <div class="flex items-center gap-3">
+                                                        <span class="font-label-md text-label-md text-on-surface">${review.customerName}</span>
+                                                        <c:if test="${review.isHidden}">
+                                                            <span class="text-xs px-2 py-1 bg-gray-400 text-white rounded">Đã ẩn</span>
+                                                        </c:if>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-5">
+                                                    <div class="flex items-center gap-3">
+                                                        <c:if test="${not empty review.bookCover}">
+                                                            <img alt="Book Cover" class="w-10 h-14 object-cover rounded shadow-sm" src="${review.bookCover}"/>
+                                                        </c:if>
+                                                        <span class="font-body-sm text-body-sm text-on-surface max-w-[120px] line-clamp-2">${review.bookTitle}</span>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-5">
+                                                    <div class="flex gap-0.5 text-secondary">
+                                                        <c:forEach begin="1" end="5" var="i">
+                                                            <span class="material-symbols-outlined text-[16px] ${i <= review.rating ? 'stars-fill' : ''}" data-icon="star" style="font-variation-settings: 'FILL' ${i <= review.rating ? '1' : '0'};">star</span>
+                                                        </c:forEach>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-5">
+                                                    <p class="font-body-sm text-body-sm text-on-surface-variant max-w-[200px] line-clamp-2">${review.comment}</p>
+                                                </td>
+                                                <td class="px-6 py-5">
+                                                    <span class="font-body-sm text-body-sm text-on-surface-variant">
+                                                        <fmt:formatDate value="${review.createdAt}" pattern="dd/MM/yyyy"/>
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-5">
+                                                    <c:choose>
+                                                        <c:when test="${review.status == 'Đã duyệt'}">
+                                                            <span class="px-3 py-1 bg-success/10 text-success rounded-full font-label-sm text-label-sm inline-block">Đã duyệt</span>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="px-3 py-1 bg-warning/10 text-warning rounded-full font-label-sm text-label-sm inline-block">Chờ duyệt</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                                <td class="px-6 py-5 text-right">
+                                                    <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <c:if test="${review.status != 'Đã duyệt' && !review.isHidden && review.customerStatus == 'active'}">
+                                                            <button data-reply-btn 
+                                                                    data-review-id="${review.reviewID}"
+                                                                    data-customer-name="${review.customerName}"
+                                                                    data-book-title="${review.bookTitle}"
+                                                                    data-rating="${review.rating}"
+                                                                    data-comment="${review.comment}"
+                                                                    class="p-2 hover:bg-surface-container-low rounded-lg text-primary transition-all border border-transparent hover:border-primary/20" 
+                                                                    title="Phản hồi">
+                                                                <span class="material-symbols-outlined text-[20px]" data-icon="reply">reply</span>
+                                                            </button>
+                                                        </c:if>
+                                                        <button data-hide-btn 
                                                                 data-review-id="${review.reviewID}"
-                                                                data-customer-name="${review.customerName}"
-                                                                data-book-title="${review.bookTitle}"
-                                                                data-rating="${review.rating}"
-                                                                data-comment="${review.comment}"
-                                                                class="p-2 hover:bg-surface-container-low rounded-lg text-primary transition-all border border-transparent hover:border-primary/20" 
-                                                                title="Phản hồi">
-                                                            <span class="material-symbols-outlined text-[20px]" data-icon="reply">reply</span>
+                                                                class="p-2 hover:bg-warning/10 rounded-lg text-warning transition-all border border-transparent hover:border-warning/20" 
+                                                                title="${review.isHidden ? 'Hiện review' : 'Ẩn review'}">
+                                                            <span class="material-symbols-outlined text-[20px]" data-icon="${review.isHidden ? 'visibility' : 'visibility_off'}">
+                                                                ${review.isHidden ? 'visibility' : 'visibility_off'}
+                                                            </span>
                                                         </button>
-                                                    </c:if>
-                                                    <button data-hide-btn 
-                                                            data-review-id="${review.reviewID}"
-                                                            class="p-2 hover:bg-warning/10 rounded-lg text-warning transition-all border border-transparent hover:border-warning/20" 
-                                                            title="${review.isHidden ? 'Hiện review' : 'Ẩn review'}">
-                                                        <span class="material-symbols-outlined text-[20px]" data-icon="${review.isHidden ? 'visibility' : 'visibility_off'}">
-                                                            ${review.isHidden ? 'visibility' : 'visibility_off'}
-                                                        </span>
-                                                    </button>
-                                                    <button data-lock-btn 
-                                                            data-review-id="${review.reviewID}"
-                                                            data-customer-id="${review.customerID}"
-                                                            ${review.customerStatus == 'inactive' ? 'disabled' : ''}
-                                                            class="p-2 hover:bg-error/10 rounded-lg text-error transition-all border border-transparent hover:border-error/20 ${review.customerStatus == 'inactive' ? 'opacity-50 cursor-not-allowed' : ''}" 
-                                                            title="${review.customerStatus == 'inactive' ? 'Tài khoản đã bị khóa' : 'Khóa tài khoản'}">
-                                                        <span class="material-symbols-outlined text-[20px]" data-icon="lock">lock</span>
-                                                    </button>
-                                                </div>
+                                                        <button data-lock-btn 
+                                                                data-review-id="${review.reviewID}"
+                                                                data-customer-id="${review.customerID}"
+                                                                ${review.customerStatus == 'inactive' ? 'disabled' : ''}
+                                                                class="p-2 hover:bg-error/10 rounded-lg text-error transition-all border border-transparent hover:border-error/20 ${review.customerStatus == 'inactive' ? 'opacity-50 cursor-not-allowed' : ''}" 
+                                                                title="${review.customerStatus == 'inactive' ? 'Tài khoản đã bị khóa' : 'Khóa tài khoản'}">
+                                                            <span class="material-symbols-outlined text-[20px]" data-icon="lock">lock</span>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <tr>
+                                            <td colspan="7" class="px-6 py-8 text-center">
+                                                <p class="font-body-md text-on-surface-variant">Không có đánh giá nào</p>
                                             </td>
                                         </tr>
-                                    </c:forEach>
-                                </c:when>
-                                <c:otherwise>
-                                    <tr>
-                                        <td colspan="7" class="px-6 py-8 text-center">
-                                            <p class="font-body-md text-on-surface-variant">Không có đánh giá nào</p>
-                                        </td>
-                                    </tr>
-                                </c:otherwise>
-                            </c:choose>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="px-6 py-4 flex items-center justify-between border-t border-outline-variant bg-surface-container-lowest">
-                    <span class="font-body-sm text-body-sm text-on-surface-variant">Hiển thị ${reviews.size()} đánh giá</span>
-                    <div class="flex gap-2">
-                        <button class="p-2 rounded-lg border border-outline-variant hover:bg-surface-container-low disabled:opacity-50 disabled:cursor-not-allowed transition-all" disabled="">
-                            <span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
-                        </button>
-                        <button class="w-10 h-10 rounded-lg bg-primary text-on-primary font-label-md text-label-md">1</button>
-                        <button class="p-2 rounded-lg border border-outline-variant hover:bg-surface-container-low transition-all">
-                            <span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
-                        </button>
+                                    </c:otherwise>
+                                </c:choose>
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-            </section>
+                    <div class="px-6 py-4 flex items-center justify-between border-t border-outline-variant bg-surface-container-lowest">
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">Hiển thị ${reviews.size()} đánh giá</span>
+                        <div class="flex gap-2">
+                            <button class="p-2 rounded-lg border border-outline-variant hover:bg-surface-container-low disabled:opacity-50 disabled:cursor-not-allowed transition-all" disabled="">
+                                <span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+                            </button>
+                            <button class="w-10 h-10 rounded-lg bg-primary text-on-primary font-label-md text-label-md">1</button>
+                            <button class="p-2 rounded-lg border border-outline-variant hover:bg-surface-container-low transition-all">
+                                <span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <%@ include file="/views/layout/dashboard/footer.jsp" %>
+
         </main>
         <div id="confirmModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
             <div class="bg-white w-[450px] rounded-xl p-6 relative">

@@ -95,7 +95,7 @@
     <body class="bg-background text-on-surface flex min-h-screen">
         <%@ include file="/views/layout/dashboard/sidebar.jsp" %>
 
-        <main class="flex-1 md:ml-64 min-h-screen">
+        <main class="flex-1 md:ml-64 min-h-screen flex flex-col">
             <header class="bg-white border-b h-14 sticky top-0 z-30 flex items-center px-6"
                     style="border-color:#c2c6d4;">
                 <h2 class="font-semibold text-base">
@@ -103,13 +103,9 @@
                 </h2>
             </header>
             <div class="p-6 md:p-8 ">
-                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                    <div>
-                        <h2 class="text-3xl font-bold text-on-surface mb-2">Quản lý Tài khoản</h2>
-                        <p class="text-on-surface-variant">Xem và quản lý tài khoản của BookTown</p>
-                    </div>
+                <div class="flex flex-col md:flex-row justify-end items-end gap-4 mb-6">
                     <a href="${pageContext.request.contextPath}/dashboard/add-staff"
-                       class="bg-primary text-white px-6 py-3 rounded-xl flex items-center gap-2 hover:opacity-90 transition w-fit">
+                       class="bg-primary text-white px-6 py-3 rounded-xl inline-flex items-center gap-2 hover:opacity-90 transition">
                         <span class="material-symbols-outlined">person_add</span>
                         Thêm tài khoản nhân viên
                     </a>
@@ -256,6 +252,8 @@
                     <%@ include file="/views/layout/common/pagination.jsp" %>
                 </div>
             </div>
+            <%@ include file="/views/layout/dashboard/footer.jsp" %>
+
         </main>
 
         <div id="confirmModal" class="modal-hidden fixed inset-0 bg-black/50 z-50 items-center justify-center">
@@ -372,298 +370,298 @@
         <%@ include file="/views/layout/common/toast.jsp" %>
 
         <script>
-        const BASE_URL = '${pageContext.request.contextPath}/dashboard/account-management';
+            const BASE_URL = '${pageContext.request.contextPath}/dashboard/account-management';
 
-        let searchTimeout = null;
+            let searchTimeout = null;
 
-        function applyFilters() {
-            const keyword = document.getElementById('searchInput').value.trim();
-            const role = document.getElementById('roleFilter').value;
-            const status = document.getElementById('statusFilter').value;
-            const params = new URLSearchParams({keyword, role, status, page: 1});
-            window.location.href = BASE_URL + '?' + params.toString();
-        }
-
-        document.getElementById('searchInput').addEventListener('input', function () {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(applyFilters, 400);
-        });
-
-        document.getElementById('roleFilter').addEventListener('change', applyFilters);
-        document.getElementById('statusFilter').addEventListener('change', applyFilters);
-        const confirmModal = document.getElementById('confirmModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalMessage = document.getElementById('modalMessage');
-        const modalCancel = document.getElementById('modalCancel');
-        const modalConfirm = document.getElementById('modalConfirm');
-        let pendingAction = null;
-
-        function showConfirmModal(title, message, callback) {
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
-            pendingAction = callback;
-            confirmModal.classList.replace('modal-hidden', 'modal-visible');
-        }
-
-        function hideConfirmModal() {
-            confirmModal.classList.replace('modal-visible', 'modal-hidden');
-            pendingAction = null;
-        }
-
-        modalCancel.addEventListener('click', hideConfirmModal);
-        confirmModal.addEventListener('click', e => {
-            if (e.target === confirmModal)
-                hideConfirmModal();
-        });
-        modalConfirm.addEventListener('click', async () => {
-            if (pendingAction) {
-                const fn = pendingAction;
-                hideConfirmModal();
-                await fn();
+            function applyFilters() {
+                const keyword = document.getElementById('searchInput').value.trim();
+                const role = document.getElementById('roleFilter').value;
+                const status = document.getElementById('statusFilter').value;
+                const params = new URLSearchParams({keyword, role, status, page: 1});
+                window.location.href = BASE_URL + '?' + params.toString();
             }
-        });
-        document.querySelectorAll('.toggle-status-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const accountId = this.dataset.accountId;
-                const role = this.dataset.role;
-                const currentStatus = this.dataset.currentStatus;
-                const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-                const row = this.closest('tr');
 
-                const title = currentStatus === 'active' ? 'Khóa tài khoản' : 'Mở khóa tài khoản';
-                const message = currentStatus === 'active'
-                        ? 'Bạn có chắc muốn KHÓA tài khoản này?'
-                        : 'Bạn có chắc muốn MỞ KHÓA tài khoản này?';
+            document.getElementById('searchInput').addEventListener('input', function () {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(applyFilters, 400);
+            });
 
-                showConfirmModal(title, message, async () => {
-                    try {
-                        const body = new URLSearchParams({
-                            action: role === 'customer' ? 'toggleCustomer' : 'toggleStaff',
-                            id: accountId,
-                            status: newStatus
-                        });
+            document.getElementById('roleFilter').addEventListener('change', applyFilters);
+            document.getElementById('statusFilter').addEventListener('change', applyFilters);
+            const confirmModal = document.getElementById('confirmModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalCancel = document.getElementById('modalCancel');
+            const modalConfirm = document.getElementById('modalConfirm');
+            let pendingAction = null;
 
-                        const res = await fetch(BASE_URL, {method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body});
-                        const result = await res.json();
+            function showConfirmModal(title, message, callback) {
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                pendingAction = callback;
+                confirmModal.classList.replace('modal-hidden', 'modal-visible');
+            }
 
-                        if (result.success) {
+            function hideConfirmModal() {
+                confirmModal.classList.replace('modal-visible', 'modal-hidden');
+                pendingAction = null;
+            }
+
+            modalCancel.addEventListener('click', hideConfirmModal);
+            confirmModal.addEventListener('click', e => {
+                if (e.target === confirmModal)
+                    hideConfirmModal();
+            });
+            modalConfirm.addEventListener('click', async () => {
+                if (pendingAction) {
+                    const fn = pendingAction;
+                    hideConfirmModal();
+                    await fn();
+                }
+            });
+            document.querySelectorAll('.toggle-status-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const accountId = this.dataset.accountId;
+                    const role = this.dataset.role;
+                    const currentStatus = this.dataset.currentStatus;
+                    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+                    const row = this.closest('tr');
+
+                    const title = currentStatus === 'active' ? 'Khóa tài khoản' : 'Mở khóa tài khoản';
+                    const message = currentStatus === 'active'
+                            ? 'Bạn có chắc muốn KHÓA tài khoản này?'
+                            : 'Bạn có chắc muốn MỞ KHÓA tài khoản này?';
+
+                    showConfirmModal(title, message, async () => {
+                        try {
+                            const body = new URLSearchParams({
+                                action: role === 'customer' ? 'toggleCustomer' : 'toggleStaff',
+                                id: accountId,
+                                status: newStatus
+                            });
+
+                            const res = await fetch(BASE_URL, {method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body});
+                            const result = await res.json();
+
+                            if (result.success) {
+                                const statusBadge = row.querySelector('.status-badge');
+                                const icon = btn.querySelector('.material-symbols-outlined');
+
+                                if (newStatus === 'active') {
+                                    statusBadge.classList.replace('status-badge-inactive', 'status-badge-active');
+                                    statusBadge.textContent = 'Hoạt động';
+                                    icon.textContent = 'lock';
+                                    btn.title = 'Khóa tài khoản';
+                                } else {
+                                    statusBadge.classList.replace('status-badge-active', 'status-badge-inactive');
+                                    statusBadge.textContent = 'Đã khóa';
+                                    icon.textContent = 'lock_open';
+                                    btn.title = 'Mở khóa tài khoản';
+                                }
+
+                                row.dataset.status = newStatus;
+                                btn.dataset.currentStatus = newStatus;
+
+                                const editBtn = row.querySelector('.edit-btn');
+                                if (editBtn)
+                                    editBtn.dataset.status = newStatus;
+
+                                showToast('Cập nhật trạng thái thành công!');
+                            } else {
+                                showToast(result.message || 'Cập nhật thất bại!', true);
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            showToast('Lỗi kết nối, vui lòng thử lại!', true);
+                        }
+                    });
+                });
+            });
+
+            const updateModal = document.getElementById('updateModal');
+            const updateId = document.getElementById('updateId');
+            const updateType = document.getElementById('updateType');
+            const updateFullname = document.getElementById('updateFullname');
+            const updatePhone = document.getElementById('updatePhone');
+            const updateEmail = document.getElementById('updateEmail');
+            const updateStatusToggle = document.getElementById('updateStatusToggle');
+            const updateRole = document.getElementById('updateRole');
+            const updateRoleWrapper = document.getElementById('updateRoleWrapper');
+            const updateError = document.getElementById('updateError');
+            const updateCancel = document.getElementById('updateCancel');
+            const updateCancelX = document.getElementById('updateCancelX');
+            const updateSubmit = document.getElementById('updateSubmit');
+            const updatePreviewName = document.getElementById('updatePreviewName');
+            const updateRoleBadgePreview = document.getElementById('updateRoleBadgePreview');
+            const updateStatusBadgePreview = document.getElementById('updateStatusBadgePreview');
+            const customerStatsSection = document.getElementById('customerStatsSection');
+            const totalOrders = document.getElementById('totalOrders');
+            const totalSpent = document.getElementById('totalSpent');
+
+            function refreshUpdatePreview() {
+                updatePreviewName.textContent = updateFullname.value.trim() || '—';
+
+                let roleLabel, roleClass;
+                if (updateType.value === 'customer') {
+                    roleLabel = 'Khách hàng';
+                    roleClass = 'role-badge-customer';
+                } else if (updateRole.value === 'admin') {
+                    roleLabel = 'Admin';
+                    roleClass = 'role-badge-admin';
+                } else {
+                    roleLabel = 'Staff';
+                    roleClass = 'role-badge-staff';
+                }
+                updateRoleBadgePreview.className = roleClass + ' px-3 py-0.5 rounded-full text-xs font-bold';
+                updateRoleBadgePreview.textContent = roleLabel;
+
+                const isActive = updateStatusToggle.checked;
+                updateStatusBadgePreview.className = (isActive ? 'status-badge-active' : 'status-badge-inactive') + ' px-3 py-0.5 rounded-full text-xs font-bold';
+                updateStatusBadgePreview.textContent = isActive ? 'Hoạt động' : 'Đã khóa';
+            }
+
+            updateFullname.addEventListener('input', refreshUpdatePreview);
+            updateRole.addEventListener('change', refreshUpdatePreview);
+            updateStatusToggle.addEventListener('change', refreshUpdatePreview);
+
+            function showUpdateModal() {
+                updateError.classList.add('hidden');
+                updateModal.classList.replace('modal-hidden', 'modal-visible');
+            }
+
+            function hideUpdateModal() {
+                updateModal.classList.replace('modal-visible', 'modal-hidden');
+            }
+
+            updateCancel.addEventListener('click', hideUpdateModal);
+            updateCancelX.addEventListener('click', hideUpdateModal);
+            updateModal.addEventListener('click', e => {
+                if (e.target === updateModal)
+                    hideUpdateModal();
+            });
+
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const type = this.dataset.type;
+
+                    updateId.value = this.dataset.id;
+                    updateType.value = type;
+                    updateFullname.value = this.dataset.fullname || '';
+                    updatePhone.value = this.dataset.phone || '';
+                    updateEmail.value = this.dataset.email || '';
+                    updateStatusToggle.checked = (this.dataset.status || 'active') === 'active';
+
+                    if (type === 'staff') {
+                        updateRoleWrapper.classList.remove('hidden');
+                        customerStatsSection.classList.add('hidden');
+                        updateRole.value = this.dataset.roleValue || 'staff';
+                    } else {
+                        updateRoleWrapper.classList.add('hidden');
+                        customerStatsSection.classList.remove('hidden');
+                        totalOrders.textContent = '…';
+                        totalSpent.textContent = '…';
+
+                        fetch(BASE_URL, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                            body: 'action=customerStats&id=' + this.dataset.id
+                        })
+                                .then(r => r.json())
+                                .then(data => {
+                                    totalOrders.textContent = data.totalOrders;
+                                    totalSpent.textContent = Number(data.totalSpent).toLocaleString('vi-VN') + ' VNĐ';
+                                })
+                                .catch(err => console.error(err));
+                    }
+
+                    refreshUpdatePreview();
+                    showUpdateModal();
+                });
+            });
+
+            updateSubmit.addEventListener('click', async function () {
+                const fullname = updateFullname.value.trim();
+                if (!fullname) {
+                    updateError.textContent = 'Họ tên không được để trống';
+                    updateError.classList.remove('hidden');
+                    return;
+                }
+
+                updateError.classList.add('hidden');
+
+                const type = updateType.value;
+                const id = updateId.value;
+                const newStatus = updateStatusToggle.checked ? 'active' : 'inactive';
+
+                const body = new URLSearchParams({
+                    action: type === 'customer' ? 'updateCustomer' : 'updateStaff',
+                    id,
+                    fullname,
+                    phone: updatePhone.value.trim(),
+                    status: newStatus
+                });
+
+                if (type === 'staff')
+                    body.append('role', updateRole.value);
+
+                try {
+                    const res = await fetch(BASE_URL, {method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body});
+                    const result = await res.json();
+
+                    if (result.success) {
+                        hideUpdateModal();
+
+                        const row = document.querySelector('tr[data-account-id="' + id + '"][data-type="' + type + '"]');
+                        if (row) {
+                            row.querySelector('td:first-child .font-semibold').textContent = fullname;
+
                             const statusBadge = row.querySelector('.status-badge');
-                            const icon = btn.querySelector('.material-symbols-outlined');
-
                             if (newStatus === 'active') {
                                 statusBadge.classList.replace('status-badge-inactive', 'status-badge-active');
                                 statusBadge.textContent = 'Hoạt động';
-                                icon.textContent = 'lock';
-                                btn.title = 'Khóa tài khoản';
                             } else {
                                 statusBadge.classList.replace('status-badge-active', 'status-badge-inactive');
                                 statusBadge.textContent = 'Đã khóa';
-                                icon.textContent = 'lock_open';
-                                btn.title = 'Mở khóa tài khoản';
                             }
-
                             row.dataset.status = newStatus;
-                            btn.dataset.currentStatus = newStatus;
+
+                            const toggleBtn = row.querySelector('.toggle-status-btn');
+                            if (toggleBtn) {
+                                toggleBtn.dataset.currentStatus = newStatus;
+                                toggleBtn.querySelector('.material-symbols-outlined').textContent = newStatus === 'active' ? 'lock' : 'lock_open';
+                                toggleBtn.title = newStatus === 'active' ? 'Khóa tài khoản' : 'Mở khóa tài khoản';
+                            }
 
                             const editBtn = row.querySelector('.edit-btn');
-                            if (editBtn)
+                            if (editBtn) {
+                                editBtn.dataset.fullname = fullname;
+                                editBtn.dataset.phone = updatePhone.value.trim();
                                 editBtn.dataset.status = newStatus;
 
-                            showToast('Cập nhật trạng thái thành công!');
-                        } else {
-                            showToast(result.message || 'Cập nhật thất bại!', true);
-                        }
-                    } catch (err) {
-                        console.error(err);
-                        showToast('Lỗi kết nối, vui lòng thử lại!', true);
-                    }
-                });
-            });
-        });
+                                if (type === 'staff') {
+                                    const newRole = updateRole.value;
+                                    editBtn.dataset.roleValue = newRole;
+                                    row.dataset.role = newRole;
 
-        const updateModal = document.getElementById('updateModal');
-        const updateId = document.getElementById('updateId');
-        const updateType = document.getElementById('updateType');
-        const updateFullname = document.getElementById('updateFullname');
-        const updatePhone = document.getElementById('updatePhone');
-        const updateEmail = document.getElementById('updateEmail');
-        const updateStatusToggle = document.getElementById('updateStatusToggle');
-        const updateRole = document.getElementById('updateRole');
-        const updateRoleWrapper = document.getElementById('updateRoleWrapper');
-        const updateError = document.getElementById('updateError');
-        const updateCancel = document.getElementById('updateCancel');
-        const updateCancelX = document.getElementById('updateCancelX');
-        const updateSubmit = document.getElementById('updateSubmit');
-        const updatePreviewName = document.getElementById('updatePreviewName');
-        const updateRoleBadgePreview = document.getElementById('updateRoleBadgePreview');
-        const updateStatusBadgePreview = document.getElementById('updateStatusBadgePreview');
-        const customerStatsSection = document.getElementById('customerStatsSection');
-        const totalOrders = document.getElementById('totalOrders');
-        const totalSpent = document.getElementById('totalSpent');
-
-        function refreshUpdatePreview() {
-            updatePreviewName.textContent = updateFullname.value.trim() || '—';
-
-            let roleLabel, roleClass;
-            if (updateType.value === 'customer') {
-                roleLabel = 'Khách hàng';
-                roleClass = 'role-badge-customer';
-            } else if (updateRole.value === 'admin') {
-                roleLabel = 'Admin';
-                roleClass = 'role-badge-admin';
-            } else {
-                roleLabel = 'Staff';
-                roleClass = 'role-badge-staff';
-            }
-            updateRoleBadgePreview.className = roleClass + ' px-3 py-0.5 rounded-full text-xs font-bold';
-            updateRoleBadgePreview.textContent = roleLabel;
-
-            const isActive = updateStatusToggle.checked;
-            updateStatusBadgePreview.className = (isActive ? 'status-badge-active' : 'status-badge-inactive') + ' px-3 py-0.5 rounded-full text-xs font-bold';
-            updateStatusBadgePreview.textContent = isActive ? 'Hoạt động' : 'Đã khóa';
-        }
-
-        updateFullname.addEventListener('input', refreshUpdatePreview);
-        updateRole.addEventListener('change', refreshUpdatePreview);
-        updateStatusToggle.addEventListener('change', refreshUpdatePreview);
-
-        function showUpdateModal() {
-            updateError.classList.add('hidden');
-            updateModal.classList.replace('modal-hidden', 'modal-visible');
-        }
-
-        function hideUpdateModal() {
-            updateModal.classList.replace('modal-visible', 'modal-hidden');
-        }
-
-        updateCancel.addEventListener('click', hideUpdateModal);
-        updateCancelX.addEventListener('click', hideUpdateModal);
-        updateModal.addEventListener('click', e => {
-            if (e.target === updateModal)
-                hideUpdateModal();
-        });
-
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const type = this.dataset.type;
-
-                updateId.value = this.dataset.id;
-                updateType.value = type;
-                updateFullname.value = this.dataset.fullname || '';
-                updatePhone.value = this.dataset.phone || '';
-                updateEmail.value = this.dataset.email || '';
-                updateStatusToggle.checked = (this.dataset.status || 'active') === 'active';
-
-                if (type === 'staff') {
-                    updateRoleWrapper.classList.remove('hidden');
-                    customerStatsSection.classList.add('hidden');
-                    updateRole.value = this.dataset.roleValue || 'staff';
-                } else {
-                    updateRoleWrapper.classList.add('hidden');
-                    customerStatsSection.classList.remove('hidden');
-                    totalOrders.textContent = '…';
-                    totalSpent.textContent = '…';
-
-                    fetch(BASE_URL, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                        body: 'action=customerStats&id=' + this.dataset.id
-                    })
-                            .then(r => r.json())
-                            .then(data => {
-                                totalOrders.textContent = data.totalOrders;
-                                totalSpent.textContent = Number(data.totalSpent).toLocaleString('vi-VN') + ' VNĐ';
-                            })
-                            .catch(err => console.error(err));
-                }
-
-                refreshUpdatePreview();
-                showUpdateModal();
-            });
-        });
-
-        updateSubmit.addEventListener('click', async function () {
-            const fullname = updateFullname.value.trim();
-            if (!fullname) {
-                updateError.textContent = 'Họ tên không được để trống';
-                updateError.classList.remove('hidden');
-                return;
-            }
-
-            updateError.classList.add('hidden');
-
-            const type = updateType.value;
-            const id = updateId.value;
-            const newStatus = updateStatusToggle.checked ? 'active' : 'inactive';
-
-            const body = new URLSearchParams({
-                action: type === 'customer' ? 'updateCustomer' : 'updateStaff',
-                id,
-                fullname,
-                phone: updatePhone.value.trim(),
-                status: newStatus
-            });
-
-            if (type === 'staff')
-                body.append('role', updateRole.value);
-
-            try {
-                const res = await fetch(BASE_URL, {method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body});
-                const result = await res.json();
-
-                if (result.success) {
-                    hideUpdateModal();
-
-                    const row = document.querySelector('tr[data-account-id="' + id + '"][data-type="' + type + '"]');
-                    if (row) {
-                        row.querySelector('td:first-child .font-semibold').textContent = fullname;
-
-                        const statusBadge = row.querySelector('.status-badge');
-                        if (newStatus === 'active') {
-                            statusBadge.classList.replace('status-badge-inactive', 'status-badge-active');
-                            statusBadge.textContent = 'Hoạt động';
-                        } else {
-                            statusBadge.classList.replace('status-badge-active', 'status-badge-inactive');
-                            statusBadge.textContent = 'Đã khóa';
-                        }
-                        row.dataset.status = newStatus;
-
-                        const toggleBtn = row.querySelector('.toggle-status-btn');
-                        if (toggleBtn) {
-                            toggleBtn.dataset.currentStatus = newStatus;
-                            toggleBtn.querySelector('.material-symbols-outlined').textContent = newStatus === 'active' ? 'lock' : 'lock_open';
-                            toggleBtn.title = newStatus === 'active' ? 'Khóa tài khoản' : 'Mở khóa tài khoản';
-                        }
-
-                        const editBtn = row.querySelector('.edit-btn');
-                        if (editBtn) {
-                            editBtn.dataset.fullname = fullname;
-                            editBtn.dataset.phone = updatePhone.value.trim();
-                            editBtn.dataset.status = newStatus;
-
-                            if (type === 'staff') {
-                                const newRole = updateRole.value;
-                                editBtn.dataset.roleValue = newRole;
-                                row.dataset.role = newRole;
-
-                                row.children[1].innerHTML = newRole === 'admin'
-                                        ? '<span class="role-badge-admin px-3 py-1 rounded-full text-xs font-bold">Admin</span>'
-                                        : '<span class="role-badge-staff px-3 py-1 rounded-full text-xs font-bold">Staff</span>';
+                                    row.children[1].innerHTML = newRole === 'admin'
+                                            ? '<span class="role-badge-admin px-3 py-1 rounded-full text-xs font-bold">Admin</span>'
+                                            : '<span class="role-badge-staff px-3 py-1 rounded-full text-xs font-bold">Staff</span>';
+                                }
                             }
                         }
-                    }
 
-                    showToast('Cập nhật thành công!');
-                } else {
-                    updateError.textContent = result.message || 'Cập nhật thất bại!';
+                        showToast('Cập nhật thành công!');
+                    } else {
+                        updateError.textContent = result.message || 'Cập nhật thất bại!';
+                        updateError.classList.remove('hidden');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    updateError.textContent = 'Lỗi kết nối, vui lòng thử lại!';
                     updateError.classList.remove('hidden');
                 }
-            } catch (err) {
-                console.error(err);
-                updateError.textContent = 'Lỗi kết nối, vui lòng thử lại!';
-                updateError.classList.remove('hidden');
-            }
-        });
+            });
         </script>
     </body>
 </html>
