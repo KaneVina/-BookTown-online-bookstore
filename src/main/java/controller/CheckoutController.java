@@ -111,6 +111,11 @@ public class CheckoutController extends HttpServlet {
         Account account = getAccount(request);
         String action = request.getParameter("action");
 
+        if ("deleteAddressAjax".equals(action)) {
+            deleteAddressAjax(request, response, account);
+            return;
+        }
+
         if ("saveAddress".equals(action)) {
             saveAddressAjax(request, response, account);
             return;
@@ -212,6 +217,50 @@ public class CheckoutController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/order-confirmation?orderID=" + orderID);
     }
 
+    private void deleteAddressAjax(HttpServletRequest request,
+                                   HttpServletResponse response,
+                                   Account account) throws IOException {
+
+        response.setContentType("application/json;charset=UTF-8");
+
+        String addressIdRaw = request.getParameter("addressID");
+
+        if (addressIdRaw == null || addressIdRaw.trim().isEmpty()) {
+            response.getWriter().write(
+                    "{\"success\":false,\"message\":\"Thiếu mã địa chỉ\"}"
+            );
+            return;
+        }
+
+        try {
+            int addressID = Integer.parseInt(addressIdRaw.trim());
+
+            AddressDAO addressDAO = new AddressDAO();
+            boolean deleted = addressDAO.deleteAddressByCustomer(
+                    addressID,
+                    account.getId()
+            );
+
+            if (deleted) {
+                response.getWriter().write("{\"success\":true}");
+            } else {
+                response.getWriter().write(
+                        "{\"success\":false,\"message\":\"Không tìm thấy địa chỉ hoặc bạn không có quyền xóa\"}"
+                );
+            }
+        } catch (NumberFormatException e) {
+            response.getWriter().write(
+                    "{\"success\":false,\"message\":\"Mã địa chỉ không hợp lệ\"}"
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write(
+                    "{\"success\":false,\"message\":\"Lỗi server khi xóa địa chỉ\"}"
+            );
+        }
+    }
+
     private void saveAddressAjax(HttpServletRequest request, HttpServletResponse response, Account account)
             throws IOException {
 
@@ -219,6 +268,8 @@ public class CheckoutController extends HttpServlet {
         String ward = request.getParameter("ward");
         String city = request.getParameter("city");
         String isDefaultRaw = request.getParameter("isDefault");
+        String recipientName = request.getParameter("fullname");
+        String recipientPhone = request.getParameter("phone");
 
         response.setContentType("application/json;charset=UTF-8");
 
@@ -228,7 +279,17 @@ public class CheckoutController extends HttpServlet {
         }
 
         if (!isValidAddressPart(street) || !isValidAddressPart(ward) || !isValidAddressPart(city)) {
-            response.getWriter().write("{\"success\":false}");
+            response.getWriter().write("{\"success\":false,\"message\":\"Địa chỉ không hợp lệ\"}");
+            return;
+        }
+
+        if (!isValidRecipientName(recipientName)) {
+            response.getWriter().write("{\"success\":false,\"message\":\"Họ tên người nhận không hợp lệ\"}");
+            return;
+        }
+
+        if (!isValidPhone(recipientPhone)) {
+            response.getWriter().write("{\"success\":false,\"message\":\"Số điện thoại người nhận không hợp lệ\"}");
             return;
         }
 
@@ -239,6 +300,9 @@ public class CheckoutController extends HttpServlet {
         address.setCity(city.trim());
         address.setCountry("Việt Nam");
         address.setDefault("true".equals(isDefaultRaw));
+
+        address.setRecipientName(recipientName.trim());
+        address.setRecipientPhone(recipientPhone.trim());
 
         AddressDAO addressDAO = new AddressDAO();
         int addressID = addressDAO.insertAddressAndReturnId(address);
@@ -290,5 +354,22 @@ public class CheckoutController extends HttpServlet {
         }
 
         return trimmed.matches(".*[a-zA-ZÀ-ỹ].*");
+    }
+
+    private boolean isValidRecipientName(String value) {
+        if (value == null) {
+            return false;
+        }
+
+        String trimmed = value.trim();
+        return trimmed.matches("^[\\p{L}][\\p{L}\\s.'-]{1,49}$");
+    }
+
+    private boolean isValidPhone(String value) {
+        if (value == null) {
+            return false;
+        }
+
+        return value.trim().matches("^0\\d{9}$");
     }
 }
