@@ -122,9 +122,9 @@
         </style>
     </head>
 
-    <body class="bg-background text-on-surface min-h-screen">
+    <body class="bg-background text-on-surface flex min-h-screen">
         <%@ include file="/views/layout/dashboard/sidebar.jsp" %>
-        <main class="md:ml-64 min-h-screen">
+        <main class="flex-1 md:ml-64 min-h-screen">
             <div class="p-gutter max-w-container-max mx-auto">
                 <div class="flex flex-col md:flex-row md:items-end justify-between gap-gutter mb-stack-lg">
                     <div>
