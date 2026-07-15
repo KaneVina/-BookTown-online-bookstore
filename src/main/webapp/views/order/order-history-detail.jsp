@@ -408,8 +408,8 @@
                         </div>
                         <div class="space-y-1 text-sm">
                             <p class="font-bold text-[#071e27]">
-                                ${sessionScope.account.fullname}</p>
-                            <p class="text-xs text-[#424752]">${sessionScope.account.phone}
+                                ${order.recipientName}</p>
+                            <p class="text-xs text-[#424752]">${order.recipientPhone}
                             </p>
                             <p class="text-xs text-[#424752] leading-relaxed">
                                 ${order.street}, ${order.district}, ${order.city}
