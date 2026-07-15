@@ -215,8 +215,8 @@
                                                     </td>
                                                     <td class="px-gutter py-3.5">
                                                         <div class="flex items-center gap-3">
-                                                            <span
-                                                                class="text-sm font-medium">${order.customerName}</span>
+                                                             <span
+                                                                class="text-sm font-medium">${order.recipientName}</span>
                                                         </div>
                                                     </td>
                                                     <td class="px-gutter py-3.5 text-sm text-on-surface-variant">
