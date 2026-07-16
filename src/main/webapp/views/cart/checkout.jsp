@@ -332,6 +332,43 @@
         </div>
     </main>
 
+    <%-- Confirm order modal --%>
+    <div id="confirmOrderModal" class="hidden fixed inset-0 bg-black/50 z-[70] flex items-center justify-center">
+        <div class="bg-white rounded-2xl w-[400px] shadow-2xl overflow-hidden">
+            <div class="bg-primary text-white px-6 py-4 flex items-center gap-3">
+                <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                <h3 class="font-bold text-[16px]">Xác nhận đặt hàng</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-[13px] text-on-surface-variant">Vui lòng kiểm tra lại thông tin trước khi đặt hàng:</p>
+                <div class="bg-surface-container-low rounded-xl p-4 space-y-2 text-[13px]">
+                    <div class="flex gap-2">
+                        <span class="text-on-surface-variant w-[110px] flex-shrink-0">Giao đến:</span>
+                        <span id="confirmAddress" class="font-medium text-on-surface"></span>
+                    </div>
+                    <div class="flex gap-2">
+                        <span class="text-on-surface-variant w-[110px] flex-shrink-0">Thanh toán:</span>
+                        <span id="confirmPayment" class="font-medium text-on-surface"></span>
+                    </div>
+                    <div class="flex gap-2">
+                        <span class="text-on-surface-variant w-[110px] flex-shrink-0">Tổng tiền:</span>
+                        <span id="confirmTotal" class="font-bold text-primary text-[14px]"></span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <button type="button" id="btnCancelOrder"
+                            class="bg-surface-container text-on-surface py-3 rounded-full font-bold text-[13px] hover:bg-surface-container-high transition">
+                        Kiểm tra lại
+                    </button>
+                    <button type="button" id="btnConfirmOrder"
+                            class="bg-secondary text-primary py-3 rounded-full font-bold text-[13px] hover:scale-[1.02] active:scale-[0.98] transition-all">
+                        Xác nhận đặt hàng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         var vietnamProvinces = [];
         var addressIdCounter = Date.now();
@@ -855,7 +892,30 @@
                 return false;
             }
 
+            // Chặn submit, mở confirm modal
+            e.preventDefault();
+
+            // Điền thông tin vào modal
+            document.getElementById('confirmAddress').textContent = fullname + ' - ' + phone + ' | ' + street + ', ' + ward + ', ' + city;
+
+            var selectedPayment = document.querySelector('#paymentGroup input[type="radio"]:checked');
+            var paymentLabel = selectedPayment ? (selectedPayment.value === 'vnpay' ? 'VNPAY (thanh toán điện tử)' : 'COD (thanh toán khi nhận hàng)') : 'Chưa chọn';
+            document.getElementById('confirmPayment').textContent = paymentLabel;
+
+            var totalText = document.querySelector('.text-\\[22px\\]');
+            document.getElementById('confirmTotal').textContent = totalText ? totalText.textContent.trim() : '';
+
+            document.getElementById('confirmOrderModal').classList.remove('hidden');
+        });
+
+        document.getElementById('btnCancelOrder').addEventListener('click', function () {
+            document.getElementById('confirmOrderModal').classList.add('hidden');
+        });
+
+        document.getElementById('btnConfirmOrder').addEventListener('click', function () {
             document.getElementById('deletedAddressIds').value = '';
+            document.getElementById('confirmOrderModal').classList.add('hidden');
+            document.getElementById('checkout-form').submit();
         });
     </script>
 
