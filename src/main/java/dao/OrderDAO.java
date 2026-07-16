@@ -328,6 +328,8 @@ public class OrderDAO {
                         updateOrderStatus(overdueOrderID, "cancelled");
                         // Đánh dấu chờ hoàn tiền thủ công (chưa hoàn thực sự)
                         updatePaymentStatus(overdueOrderID, "pending_refund");
+                        // Hoàn trả tồn kho vì đơn đã bị hủy
+                        restoreStock(overdueOrderID);
 
                         final Order finalOrder = overdueOrder;
                         new Thread(new Runnable() {
@@ -342,6 +344,8 @@ public class OrderDAO {
                         }).start();
                     } else {
                         updateOrderStatus(overdueOrderID, "cancelled");
+                        // Hoàn trả tồn kho vì đơn đã bị hủy
+                        restoreStock(overdueOrderID);
                     }
                 }
             }
