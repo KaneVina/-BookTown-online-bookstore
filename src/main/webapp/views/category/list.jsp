@@ -123,7 +123,7 @@
                                                     <span class="material-symbols-outlined text-[18px]">visibility</span>
                                                 </a>
                                                 <c:if test="${canManageCategory}">
-                                                    <form action="${pageContext.request.contextPath}/category" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa thể loại này không?');">
+                                                    <form action="${pageContext.request.contextPath}/category" method="post" onsubmit="openDeleteCategoryModal(this); return false;">
                                                         <input type="hidden" name="action" value="delete">
                                                         <input type="hidden" name="id" value="${genre.genreID}">
                                                         <button type="submit" class="w-9 h-9 rounded-lg border border-red-200 flex items-center justify-center text-error hover:bg-red-50" title="Xóa">
@@ -146,5 +146,52 @@
                 </section>
             </div>
         </main>
+
+        <div id="deleteCategoryModal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/45 p-5">
+            <div class="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl">
+                <div class="flex items-center justify-between gap-4">
+                    <h2 class="text-xl font-extrabold">Xóa thể loại</h2>
+                    <button type="button" onclick="closeDeleteCategoryModal()" class="text-2xl leading-none text-gray-500">&times;</button>
+                </div>
+                <p class="mt-5 text-sm text-on-surface-variant">Bạn có chắc muốn xóa thể loại này không?</p>
+                <div class="mt-6 grid grid-cols-2 gap-3">
+                    <button type="button" onclick="closeDeleteCategoryModal()"
+                            class="rounded-lg border border-outline-variant bg-white px-4 py-3 font-bold text-on-surface">Hủy</button>
+                    <button type="button" onclick="confirmDeleteCategory()"
+                            class="rounded-lg bg-primary px-4 py-3 font-bold text-white">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+
+        <%@ include file="/views/layout/common/toast.jsp" %>
+        <script>
+            let pendingDeleteCategoryForm = null;
+
+            function openDeleteCategoryModal(form) {
+                pendingDeleteCategoryForm = form;
+                const modal = document.getElementById('deleteCategoryModal');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+
+            function closeDeleteCategoryModal() {
+                const modal = document.getElementById('deleteCategoryModal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                pendingDeleteCategoryForm = null;
+            }
+
+            function confirmDeleteCategory() {
+                if (pendingDeleteCategoryForm) {
+                    pendingDeleteCategoryForm.submit();
+                }
+            }
+
+            document.getElementById('deleteCategoryModal').addEventListener('click', function (event) {
+                if (event.target === this) {
+                    closeDeleteCategoryModal();
+                }
+            });
+        </script>
     </body>
 </html>

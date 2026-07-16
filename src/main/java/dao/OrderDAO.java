@@ -17,7 +17,7 @@ public class OrderDAO {
     private static final String BASE_SELECT_ORDER
             = "SELECT o.orderID, o.customerID, o.addressID, o.processed_by, o.status, "
             + "       o.payment_method, o.payment_status, o.total_price, o.created_at, "
-            + "       a.street, a.district, a.city "
+            + "       a.street, a.district, a.city, a.recipient_name, a.recipient_phone "
             + "FROM [Order] o "
             + "LEFT JOIN Address a ON a.addressID = o.addressID ";
 
@@ -107,7 +107,8 @@ public class OrderDAO {
     public Order getOrderByID(int orderID) {
         String sql = "SELECT o.orderID, o.customerID, o.addressID, o.processed_by, o.status, "
                 + "       o.payment_method, o.payment_status, o.total_price, o.created_at, "
-                + "       a.street, a.district, a.city, c.fullname AS customerName, "
+                + "       a.street, a.district, a.city, a.recipient_name, a.recipient_phone, "
+                + "       c.fullname AS customerName, "
                 + "       c.email AS customerEmail, c.phone AS customerPhone "
                 + "FROM [Order] o "
                 + "LEFT JOIN Address a ON a.addressID = o.addressID "
@@ -123,6 +124,8 @@ public class OrderDAO {
                     order.setCustomerName(rs.getString("customerName"));
                     order.setCustomerEmail(rs.getString("customerEmail"));
                     order.setCustomerPhone(rs.getString("customerPhone"));
+                    order.setRecipientName(rs.getString("recipient_name"));
+                    order.setRecipientPhone(rs.getString("recipient_phone"));
                     return order;
                 }
             }
@@ -253,6 +256,8 @@ public class OrderDAO {
         order.setStreet(rs.getString("street"));
         order.setDistrict(rs.getString("district"));
         order.setCity(rs.getString("city"));
+        order.setRecipientName(rs.getString("recipient_name"));
+        order.setRecipientPhone(rs.getString("recipient_phone"));
         int processedByVal = rs.getInt("processed_by");
         if (!rs.wasNull()) {
             order.setProcessedBy(processedByVal);
@@ -323,6 +328,8 @@ public class OrderDAO {
                         updateOrderStatus(overdueOrderID, "cancelled");
                         // Đánh dấu chờ hoàn tiền thủ công (chưa hoàn thực sự)
                         updatePaymentStatus(overdueOrderID, "pending_refund");
+                        // Hoàn trả tồn kho vì đơn đã bị hủy
+                        restoreStock(overdueOrderID);
 
                         final Order finalOrder = overdueOrder;
                         new Thread(new Runnable() {
@@ -337,6 +344,8 @@ public class OrderDAO {
                         }).start();
                     } else {
                         updateOrderStatus(overdueOrderID, "cancelled");
+                        // Hoàn trả tồn kho vì đơn đã bị hủy
+                        restoreStock(overdueOrderID);
                     }
                 }
             }
@@ -347,7 +356,8 @@ public class OrderDAO {
         StringBuilder sql = new StringBuilder(
                 "SELECT o.orderID, o.customerID, o.addressID, o.processed_by, o.status, "
                 + "       o.payment_method, o.payment_status, o.total_price, o.created_at, "
-                + "       a.street, a.district, a.city, c.fullname AS customerName, "
+                + "       a.street, a.district, a.city, a.recipient_name, a.recipient_phone, "
+                + "       c.fullname AS customerName, "
                 + "       c.email AS customerEmail, c.phone AS customerPhone "
                 + "FROM [Order] o "
                 + "LEFT JOIN Address a ON a.addressID = o.addressID "
@@ -383,6 +393,8 @@ public class OrderDAO {
                     order.setCustomerName(rs.getString("customerName"));
                     order.setCustomerEmail(rs.getString("customerEmail"));
                     order.setCustomerPhone(rs.getString("customerPhone"));
+                    order.setRecipientName(rs.getString("recipient_name"));
+                    order.setRecipientPhone(rs.getString("recipient_phone"));
                     list.add(order);
                 }
             }

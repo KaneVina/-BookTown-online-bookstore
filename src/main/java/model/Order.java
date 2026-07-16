@@ -140,6 +140,10 @@ public class Order {
     private String customerEmail;
     private String customerPhone;
 
+    // Tên và SĐT người nhận lấy từ Address (recipient_name, recipient_phone)
+    private String recipientName;
+    private String recipientPhone;
+
     public String getCustomerName() {
         return customerName;
     }
@@ -162,5 +166,21 @@ public class Order {
 
     public void setCustomerPhone(String customerPhone) {
         this.customerPhone = customerPhone;
+    }
+
+    public String getRecipientName() {
+        return recipientName;
+    }
+
+    public void setRecipientName(String recipientName) {
+        this.recipientName = recipientName;
+    }
+
+    public String getRecipientPhone() {
+        return recipientPhone;
+    }
+
+    public void setRecipientPhone(String recipientPhone) {
+        this.recipientPhone = recipientPhone;
     }
 }
