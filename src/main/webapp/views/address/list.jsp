@@ -281,7 +281,7 @@
                                     <form action="${pageContext.request.contextPath}/address"
                                           method="post"
                                           style="display:inline;"
-                                          onsubmit="return confirm('Bạn có chắc muốn xóa địa chỉ này?')">
+                                          onsubmit="openDeleteAddressModal(this); return false;">
                                         <input type="hidden" name="action" value="deleteAddress">
                                         <input type="hidden" name="addressID" value="${address.addressID}">
                                         <button type="submit" class="delete-btn">Xóa</button>
@@ -344,10 +344,42 @@
     </div>
 </div>
 
+<div id="deleteAddressModal" class="modal-overlay hidden">
+    <div class="address-modal" style="max-width:390px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+            <h2 class="modal-title" style="margin-bottom:0;">Xóa địa chỉ</h2>
+            <button type="button" onclick="closeDeleteAddressModal()"
+                    style="border:0;background:none;font-size:24px;cursor:pointer;line-height:1;">&times;</button>
+        </div>
+        <p style="margin-top:18px;color:#424752;">Bạn có chắc muốn xóa địa chỉ này?</p>
+        <div class="modal-actions">
+            <button type="button" class="btn-cancel-modal" onclick="closeDeleteAddressModal()">Hủy</button>
+            <button type="button" class="btn-save-modal" onclick="confirmDeleteAddress()">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
 <%@ include file="/views/layout/common/toast.jsp" %>
 
 <script>
     var vietnamProvinces = [];
+    var pendingDeleteAddressForm = null;
+
+    function openDeleteAddressModal(form) {
+        pendingDeleteAddressForm = form;
+        document.getElementById('deleteAddressModal').classList.remove('hidden');
+    }
+
+    function closeDeleteAddressModal() {
+        document.getElementById('deleteAddressModal').classList.add('hidden');
+        pendingDeleteAddressForm = null;
+    }
+
+    function confirmDeleteAddress() {
+        if (pendingDeleteAddressForm) {
+            pendingDeleteAddressForm.submit();
+        }
+    }
 
     function isValidAddressPart(value) {
         var trimmed = (value || '').trim();
@@ -376,7 +408,7 @@
             });
         } catch (e) {
             citySelect.innerHTML = '<option value="">Không tải được dữ liệu</option>';
-            alert('Không tải được dữ liệu tỉnh thành!');
+            showToast('Không tải được dữ liệu tỉnh thành!', true);
         }
     }
 
@@ -473,17 +505,17 @@
         var ward = document.getElementById('modalWard').value;
 
         if (!isValidAddressPart(street)) {
-            alert('Địa chỉ cụ thể không hợp lệ!');
+            showToast('Địa chỉ cụ thể không hợp lệ!', true);
             return;
         }
 
         if (!city) {
-            alert('Vui lòng chọn Tỉnh / Thành phố!');
+            showToast('Vui lòng chọn Tỉnh / Thành phố!', true);
             return;
         }
 
         if (!ward) {
-            alert('Vui lòng chọn Phường / Xã!');
+            showToast('Vui lòng chọn Phường / Xã!', true);
             return;
         }
 
@@ -511,9 +543,9 @@
         })
         .then(function (data) {
             if (!data.success) {
-                alert(mode === 'add'
+                showToast(mode === 'add'
                     ? 'Thêm địa chỉ thất bại!'
-                    : 'Cập nhật địa chỉ thất bại!');
+                    : 'Cập nhật địa chỉ thất bại!', true);
                 return;
             }
 
@@ -533,13 +565,14 @@
             closeAddressModal();
         })
         .catch(function () {
-            alert('Không kết nối được server!');
+            showToast('Không kết nối được server!', true);
         });
     }
 
     document.addEventListener('DOMContentLoaded', function () {
         var citySelect = document.getElementById('modalCity');
         var modal = document.getElementById('editAddressModal');
+        var deleteModal = document.getElementById('deleteAddressModal');
         var msgEl = document.getElementById('toastMessageData');
         var errEl = document.getElementById('toastErrorData');
 
@@ -553,6 +586,14 @@
             modal.addEventListener('click', function (event) {
                 if (event.target === this) {
                     closeAddressModal();
+                }
+            });
+        }
+
+        if (deleteModal) {
+            deleteModal.addEventListener('click', function (event) {
+                if (event.target === this) {
+                    closeDeleteAddressModal();
                 }
             });
         }

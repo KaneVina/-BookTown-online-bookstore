@@ -38,7 +38,7 @@ public class CheckoutController extends HttpServlet {
                         try {
                             int addressID = Integer.parseInt(addressIdRaw);
                             AddressDAO addressDAO = new AddressDAO();
-                            addressDAO.deleteAddressByCustomer(addressID, account.getId());
+                            addressDAO.deleteAddress(addressID);
                         } catch (NumberFormatException e) {
                             e.printStackTrace();
                         }
