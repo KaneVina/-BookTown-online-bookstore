@@ -109,6 +109,7 @@ public class ChangePasswordController extends HttpServlet {
 
             if (success) {
 
+                session.invalidate();
                 out.write(
                         "{\"success\":true,\"message\":\"Đổi mật khẩu thành công\"}"
                 );
