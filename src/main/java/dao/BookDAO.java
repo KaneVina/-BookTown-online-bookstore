@@ -39,7 +39,7 @@ public class BookDAO {
     public List<Book> getBooks(int offset, int pageSize, String orderClause) {
         List<Book> books = new ArrayList<>();
         String sql = BASE_SELECT
-                + "WHERE b.status = 'available' "
+                + "WHERE b.status IN ('available', 'out_of_stock') "
                 + GROUP_BY + orderClause
                 + " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         Connection conn = null;
@@ -239,7 +239,7 @@ public class BookDAO {
                 + "LEFT JOIN BookSeries s  ON b.seriesID  = s.seriesID "
                 + "LEFT JOIN BookOrigin o  ON b.originID  = o.originID "
                 + "LEFT JOIN Review     r  ON b.bookID    = r.bookID "
-                + "WHERE b.status = 'available' "
+                + "WHERE b.status IN ('available', 'out_of_stock') "
                 + "GROUP BY b.bookID, b.title, b.description, b.price, b.stock_quantity, "
                 + "         b.thumbnail, b.total_pages, b.dimensions, b.weight, b.status, "
                 + "         g.genreID, g.genre_name, c.contentID, c.content_name, "
@@ -353,14 +353,64 @@ public class BookDAO {
     }
 
     public int countBooksByStatus(String status) {
-        String sql = "SELECT COUNT(*) FROM Book WHERE status = ?";
+        return countBooksByStatus(status, null, null);
+    }
+
+    public int countAllBooks(java.sql.Timestamp from, java.sql.Timestamp to) {
+        String sql = "SELECT COUNT(*) FROM Book WHERE 1=1";
+        if (from != null) {
+            sql += " AND created_at >= ?";
+        }
+        if (to != null) {
+            sql += " AND created_at < ?";
+        }
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
             conn = new DBContext().getConnection();
             ps = conn.prepareStatement(sql);
-            ps.setString(1, status);
+            int idx = 1;
+            if (from != null) {
+                ps.setTimestamp(idx++, from);
+            }
+            if (to != null) {
+                ps.setTimestamp(idx, to);
+            }
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeAll(rs, ps, conn);
+        }
+        return 0;
+    }
+
+    public int countBooksByStatus(String status, java.sql.Timestamp from, java.sql.Timestamp to) {
+        String sql = "SELECT COUNT(*) FROM Book WHERE status = ?";
+        if (from != null) {
+            sql += " AND created_at >= ?";
+        }
+        if (to != null) {
+            sql += " AND created_at < ?";
+        }
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = new DBContext().getConnection();
+            ps = conn.prepareStatement(sql);
+            int idx = 1;
+            ps.setString(idx++, status);
+            if (from != null) {
+                ps.setTimestamp(idx++, from);
+            }
+            if (to != null) {
+                ps.setTimestamp(idx, to);
+            }
             rs = ps.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1);
@@ -374,8 +424,19 @@ public class BookDAO {
     }
 
     public List<Book> getRecentBooksAdmin(int limit) {
+        return getRecentBooksAdmin(limit, null, null);
+    }
+
+    public List<Book> getRecentBooksAdmin(int limit, java.sql.Timestamp from, java.sql.Timestamp to) {
         List<Book> books = new ArrayList<>();
-        String sql = BASE_SELECT + "WHERE 1=1 " + GROUP_BY
+        String sql = BASE_SELECT + "WHERE 1=1 ";
+        if (from != null) {
+            sql += "AND b.created_at >= ? ";
+        }
+        if (to != null) {
+            sql += "AND b.created_at < ? ";
+        }
+        sql += GROUP_BY
                 + " ORDER BY b.created_at DESC OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
         Connection conn = null;
         PreparedStatement ps = null;
@@ -383,7 +444,14 @@ public class BookDAO {
         try {
             conn = new DBContext().getConnection();
             ps = conn.prepareStatement(sql);
-            ps.setInt(1, limit);
+            int idx = 1;
+            if (from != null) {
+                ps.setTimestamp(idx++, from);
+            }
+            if (to != null) {
+                ps.setTimestamp(idx++, to);
+            }
+            ps.setInt(idx, limit);
             rs = ps.executeQuery();
             while (rs.next()) {
                 Book b = mapBook(rs);
@@ -743,6 +811,96 @@ public class BookDAO {
         }
         return -1;
 
+    }
+
+    /**
+     * Kiểm tra sách còn đủ hàng để mua với số lượng yêu cầu.
+     * @return null nếu hợp lệ, hoặc thông báo lỗi tiếng Việt
+     */
+    public String validatePurchaseQuantity(int bookID, int requestedQty) {
+        Book book = getBookByID(bookID);
+        if (book == null) {
+            return "Sách không tồn tại";
+        }
+        if (!"available".equals(book.getStatus()) || book.getStockQuantity() <= 0) {
+            return "Sách đã hết hàng";
+        }
+        if (requestedQty < 1) {
+            return "Số lượng không hợp lệ";
+        }
+        if (requestedQty > book.getStockQuantity()) {
+            return "Chỉ còn " + book.getStockQuantity() + " cuốn trong kho";
+        }
+        return null;
+    }
+
+    public String validateWishlistAdd(int bookID) {
+        Book book = getBookByID(bookID);
+        if (book == null) {
+            return "Sách không tồn tại";
+        }
+        if ("discontinued".equals(book.getStatus())) {
+            return "Sách đã ngừng bán, không thể thêm vào yêu thích";
+        }
+        return null;
+    }
+
+    /**
+     * Trừ tồn kho sau khi đặt hàng thành công. Trả về false nếu không đủ hàng.
+     */
+    public boolean deductStockForOrder(List<model.CartItem> items) {
+        if (items == null || items.isEmpty()) {
+            return true;
+        }
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = new DBContext().getConnection();
+            conn.setAutoCommit(false);
+            String sql = "UPDATE Book SET stock_quantity = stock_quantity - ?, "
+                    + "status = CASE WHEN (stock_quantity - ?) <= 0 THEN 'out_of_stock' ELSE status END, "
+                    + "updated_at = GETDATE() "
+                    + "WHERE bookID = ? AND stock_quantity >= ? AND status = 'available'";
+            ps = conn.prepareStatement(sql);
+            for (model.CartItem item : items) {
+                ps.setInt(1, item.getQuantity());
+                ps.setInt(2, item.getQuantity());
+                ps.setInt(3, item.getBookID());
+                ps.setInt(4, item.getQuantity());
+                if (ps.executeUpdate() <= 0) {
+                    conn.rollback();
+                    return false;
+                }
+            }
+            conn.commit();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return false;
     }
 
     public boolean restoreBook(int bookID, int updatedBy) {

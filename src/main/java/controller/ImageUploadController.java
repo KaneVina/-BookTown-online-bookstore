@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import utils.CloudinaryUtil;
+import utils.RoleGuard;
+import model.Account;
 
 @MultipartConfig
 public class ImageUploadController extends HttpServlet {
@@ -19,6 +21,11 @@ public class ImageUploadController extends HttpServlet {
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
+
+        Account account = RoleGuard.requireStaff(request, response);
+        if (account == null) {
+            return;
+        }
 
         try {
             Part filePart = request.getPart("file");

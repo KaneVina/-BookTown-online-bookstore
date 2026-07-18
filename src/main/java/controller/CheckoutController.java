@@ -3,6 +3,7 @@ package controller;
 import dao.CartDAO;
 import dao.OrderDAO;
 import dao.AddressDAO;
+import dao.BookDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -122,6 +123,17 @@ public class CheckoutController extends HttpServlet {
 
         BigDecimal total = cartDAO.calcSubtotal(cartItems);
 
+        BookDAO bookDAO = new BookDAO();
+        for (CartItem item : cartItems) {
+            String stockError = bookDAO.validatePurchaseQuantity(item.getBookID(), item.getQuantity());
+            if (stockError != null) {
+                request.getSession().setAttribute("errorMessage",
+                        item.getTitle() + ": " + stockError);
+                response.sendRedirect(request.getContextPath() + "/cart");
+                return;
+            }
+        }
+
         String fullname = request.getParameter("fullname");
         String phone = request.getParameter("phone");
         String street = request.getParameter("street");
@@ -144,6 +156,13 @@ public class CheckoutController extends HttpServlet {
         if (addressID == -1) {
             request.getSession().setAttribute("errorMessage", "Vui lòng chọn địa chỉ giao hàng!");
             response.sendRedirect(request.getContextPath() + "/checkout");
+            return;
+        }
+
+        if (!bookDAO.deductStockForOrder(cartItems)) {
+            request.getSession().setAttribute("errorMessage",
+                    "Một số sách trong giỏ đã hết hàng. Vui lòng kiểm tra lại!");
+            response.sendRedirect(request.getContextPath() + "/cart");
             return;
         }
 

@@ -16,7 +16,7 @@ public class CartDAO {
         List<CartItem> cartItemList = new ArrayList<>();
 
         String sql = "SELECT CartItem.cartItemID, CartItem.cartID, CartItem.bookID, CartItem.quantity, "
-                + "Book.title, Book.thumbnail, Book.price "
+                + "Book.title, Book.thumbnail, Book.price, Book.stock_quantity, Book.status "
                 + "FROM Cart "
                 + "JOIN CartItem ON CartItem.cartID = Cart.cartID "
                 + "JOIN Book ON Book.bookID = CartItem.bookID "
@@ -37,6 +37,8 @@ public class CartDAO {
                     item.setTitle(rs.getString("title"));
                     item.setThumbnail(rs.getString("thumbnail"));
                     item.setPrice(rs.getBigDecimal("price"));
+                    item.setStockQuantity(rs.getInt("stock_quantity"));
+                    item.setStatus(rs.getString("status"));
                     cartItemList.add(item);
                 }
             }
@@ -121,6 +123,54 @@ public class CartDAO {
         }
 
         return -1;
+    }
+
+    public int getQuantityInCart(int customerID, int bookID) {
+        String sql = "SELECT COALESCE(SUM(CartItem.quantity), 0) "
+                + "FROM CartItem "
+                + "JOIN Cart ON Cart.cartID = CartItem.cartID "
+                + "WHERE Cart.customerID = ? AND Cart.status = 'active' AND CartItem.bookID = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerID);
+            ps.setInt(2, bookID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public CartItem getCartItem(int cartItemID, int customerID) {
+        String sql = "SELECT CartItem.cartItemID, CartItem.cartID, CartItem.bookID, CartItem.quantity, "
+                + "Book.title, Book.thumbnail, Book.price, Book.stock_quantity, Book.status "
+                + "FROM CartItem "
+                + "JOIN Cart ON Cart.cartID = CartItem.cartID "
+                + "JOIN Book ON Book.bookID = CartItem.bookID "
+                + "WHERE CartItem.cartItemID = ? AND Cart.customerID = ? AND Cart.status = 'active'";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, cartItemID);
+            ps.setInt(2, customerID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                CartItem item = new CartItem();
+                item.setCartItemID(rs.getInt("cartItemID"));
+                item.setCartID(rs.getInt("cartID"));
+                item.setBookID(rs.getInt("bookID"));
+                item.setQuantity(rs.getInt("quantity"));
+                item.setTitle(rs.getString("title"));
+                item.setThumbnail(rs.getString("thumbnail"));
+                item.setPrice(rs.getBigDecimal("price"));
+                item.setStockQuantity(rs.getInt("stock_quantity"));
+                item.setStatus(rs.getString("status"));
+                return item;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public boolean addToCart(int customerID, int bookID, int quantity) {

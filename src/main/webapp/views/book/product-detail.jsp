@@ -247,7 +247,7 @@
 
                 <%-- [FIX] Hợp nhất 2 overlay "Hết hàng" bị lặp ở bản gốc thành 1,
                      kiểm tra cả status và stockQuantity cho đồng bộ với phần bên dưới --%>
-                <c:if test="${book.status == 'out_of_stock' or book.stockQuantity == 0}">
+                <c:if test="${book.status != 'available' or book.stockQuantity == 0}">
                     <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
                         <span class="bg-white text-red-600 font-bold text-sm px-4 py-2 rounded-full">Hết hàng</span>
                     </div>
@@ -369,7 +369,7 @@
                      (trước đây chỉ check stockQuantity > 0, không khớp với overlay) --%>
                 <div class="flex items-center gap-2 text-[14px] font-medium">
                     <c:choose>
-                        <c:when test="${book.status != 'out_of_stock' and book.stockQuantity > 0}">
+                        <c:when test="${book.status == 'available' and book.stockQuantity > 0}">
                             <div class="w-5 h-5 bg-green-700 rounded-full flex items-center justify-center">
                                 <i data-lucide="check" class="w-3 h-3 text-white"></i>
                             </div>
@@ -390,7 +390,7 @@
                         <input type="hidden" name="bookID"   value="${book.bookID}" />
                         <input type="hidden" name="redirect" value="${pageContext.request.contextPath}/products?id=${book.bookID}" />
 
-                        <c:if test="${book.status != 'out_of_stock' and book.stockQuantity > 0}">
+                        <c:if test="${book.status == 'available' and book.stockQuantity > 0}">
                             <div class="flex items-center border-2 border-gray-200 rounded-full overflow-hidden">
                                 <button type="button" id="qty-minus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">−</button>
                                 <input id="form-qty" name="quantity" type="number" value="1" min="1" max="${book.stockQuantity}"
@@ -400,7 +400,7 @@
                         </c:if>
 
                         <c:choose>
-                            <c:when test="${book.status != 'out_of_stock' and book.stockQuantity > 0}">
+                            <c:when test="${book.status == 'available' and book.stockQuantity > 0}">
                                 <c:choose>
                                     <c:when test="${not empty sessionScope.account and sessionScope.account.role == 'customer'}">
                                         <button type="button" id="btn-add-to-cart"
@@ -425,11 +425,12 @@
                     </form>
 
                     <!-- Wishlist -->
+                    <c:if test="${empty sessionScope.account or sessionScope.account.role == 'customer'}">
                     <c:choose>
                         <c:when test="${inWishlist}">
-                            <form action="${pageContext.request.contextPath}/wishlist" method="POST" class="flex-1 min-w-[160px]" id="wishlist-detail-form">
-                                <input type="hidden" name="action"  value="remove" />
-                                <input type="hidden" name="bookID"  value="${book.bookID}" />
+                            <form action="${pageContext.request.contextPath}/wishlist" method="POST" class="flex-1 min-w-[160px]" id="wishlist-detail-form" data-book-id="${book.bookID}">
+                                <input type="hidden" name="wishAction" value="remove" />
+                                <input type="hidden" name="wishBookId" value="${book.bookID}" />
                                 <button type="submit" class="w-full bg-red-50 border-2 border-red-500 text-red-500 font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-red-500 hover:text-white transition-all">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2" class="w-5 h-5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                                     <span class="wishlist-text">Đã thích</span>
@@ -437,9 +438,9 @@
                             </form>
                         </c:when>
                         <c:otherwise>
-                            <form action="${pageContext.request.contextPath}/wishlist" method="POST" class="flex-1 min-w-[160px]" id="wishlist-detail-form">
-                                <input type="hidden" name="action"  value="add" />
-                                <input type="hidden" name="bookID"  value="${book.bookID}" />
+                            <form action="${pageContext.request.contextPath}/wishlist" method="POST" class="flex-1 min-w-[160px]" id="wishlist-detail-form" data-book-id="${book.bookID}">
+                                <input type="hidden" name="wishAction" value="add" />
+                                <input type="hidden" name="wishBookId" value="${book.bookID}" />
                                 <button type="submit" class="w-full border-2 border-primary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                                     <span class="wishlist-text">Yêu thích</span>
@@ -447,25 +448,13 @@
                             </form>
                         </c:otherwise>
                     </c:choose>
+                    </c:if>
                 </div>
             </div>
 
             <!-- Specs grid -->
             <div class="border-y border-gray-200 grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-200 py-6">
                 <div class="flex flex-col gap-1 px-4 first:pl-0">
-                    <span class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Nhà xuất bản</span>
-                    <span class="text-[16px] font-medium text-[#222222]">—</span>
-                </div>
-                <div class="flex flex-col gap-1 px-4">
-                    <span class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Số trang</span>
-                    <span class="text-[16px] font-medium text-[#222222]">
-                        <c:choose>
-                            <c:when test="${book.totalPages > 0}">${book.totalPages} trang</c:when>
-                            <c:otherwise>—</c:otherwise>
-                        </c:choose>
-                    </span>
-                </div>
-                <div class="flex flex-col gap-1 px-4">
                     <span class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Hình thức</span>
                     <span class="text-[16px] font-medium text-[#222222]">
                         <c:choose>
@@ -475,8 +464,31 @@
                     </span>
                 </div>
                 <div class="flex flex-col gap-1 px-4">
-                    <span class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Mã SKU</span>
-                    <span class="text-[16px] font-medium text-[#222222]">BT-${book.bookID}</span>
+                    <span class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Xuất xứ</span>
+                    <span class="text-[16px] font-medium text-[#222222]">
+                        <c:choose>
+                            <c:when test="${not empty book.originName}">${book.originName}</c:when>
+                            <c:otherwise>—</c:otherwise>
+                        </c:choose>
+                    </span>
+                </div>
+                <div class="flex flex-col gap-1 px-4">
+                    <span class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Bộ sách</span>
+                    <span class="text-[16px] font-medium text-[#222222]">
+                        <c:choose>
+                            <c:when test="${not empty book.seriesName}">${book.seriesName}</c:when>
+                            <c:otherwise>—</c:otherwise>
+                        </c:choose>
+                    </span>
+                </div>
+                <div class="flex flex-col gap-1 px-4">
+                    <span class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Số trang</span>
+                    <span class="text-[16px] font-medium text-[#222222]">
+                        <c:choose>
+                            <c:when test="${book.totalPages > 0}">${book.totalPages} trang</c:when>
+                            <c:otherwise>—</c:otherwise>
+                        </c:choose>
+                    </span>
                 </div>
             </div>
         </div>
@@ -513,11 +525,7 @@
             <table class="w-full text-[15px]">
                 <tbody>
                     <tr class="border-b border-gray-100">
-                        <td class="py-3 font-semibold text-gray-500 w-[200px]">Nhà xuất bản</td>
-                        <td class="py-3 text-gray-800">—</td>
-                    </tr>
-                    <tr class="border-b border-gray-100">
-                        <td class="py-3 font-semibold text-gray-500">Số trang</td>
+                        <td class="py-3 font-semibold text-gray-500 w-[200px]">Số trang</td>
                         <td class="py-3 text-gray-800">
                             <c:choose>
                                 <c:when test="${book.totalPages > 0}">${book.totalPages} trang</c:when>
@@ -530,6 +538,24 @@
                         <td class="py-3 text-gray-800">
                             <c:choose>
                                 <c:when test="${not empty book.contentName}">${book.contentName}</c:when>
+                                <c:otherwise>—</c:otherwise>
+                            </c:choose>
+                        </td>
+                    </tr>
+                    <tr class="border-b border-gray-100">
+                        <td class="py-3 font-semibold text-gray-500">Xuất xứ</td>
+                        <td class="py-3 text-gray-800">
+                            <c:choose>
+                                <c:when test="${not empty book.originName}">${book.originName}</c:when>
+                                <c:otherwise>—</c:otherwise>
+                            </c:choose>
+                        </td>
+                    </tr>
+                    <tr class="border-b border-gray-100">
+                        <td class="py-3 font-semibold text-gray-500">Bộ sách</td>
+                        <td class="py-3 text-gray-800">
+                            <c:choose>
+                                <c:when test="${not empty book.seriesName}">${book.seriesName}</c:when>
                                 <c:otherwise>—</c:otherwise>
                             </c:choose>
                         </td>
@@ -720,28 +746,11 @@
                                 </c:choose>
                             </a>
                             <c:if test="${rb.featured}">
-                                <span class="absolute top-2.5 left-2.5 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">🔥 Hot</span>
+                                <span class="absolute top-2.5 right-2.5 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">🔥 Hot</span>
                             </c:if>
-                            <!-- Wishlist heart overlay -->
-                            <c:if test="${empty sessionScope.account or sessionScope.account.role == 'customer'}">
-                                <form method="post" action="${pageContext.request.contextPath}/wishlist" class="wishlist-form absolute top-2.5 right-2.5 z-20">
-                                    <input type="hidden" name="bookID" value="${rb.bookID}">
-                                    <c:choose>
-                                        <c:when test="${not empty wishlistBookIds and wishlistBookIds.contains(rb.bookID)}">
-                                            <input type="hidden" name="action" value="remove">
-                                            <button type="submit" class="wish-btn active" title="Xóa khỏi yêu thích">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                                            </button>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <input type="hidden" name="action" value="add">
-                                            <button type="submit" class="wish-btn" title="Thêm vào yêu thích">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                                            </button>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </form>
-                            </c:if>
+                            <jsp:include page="/views/layout/common/wishlist-heart.jsp">
+                                <jsp:param name="wishBookId" value="${rb.bookID}" />
+                            </jsp:include>
                         </div>
                         <div class="p-3 flex flex-col flex-1 gap-1.5">
                             <a href="${pageContext.request.contextPath}/products?id=${rb.bookID}"
@@ -1043,136 +1052,8 @@
         });
     }
 
-    // ── AJAX Wishlist ────────────────────────────────────────────────────
-    document.addEventListener("DOMContentLoaded", function () {
-
-        // 1. Wishlist nút chính (detail)
-        var detailForm = document.getElementById("wishlist-detail-form");
-        if (detailForm) {
-            detailForm.addEventListener("submit", async function (e) {
-                e.preventDefault();
-                var form = e.currentTarget;
-                var btn = form.querySelector("button[type='submit']");
-                var svg = btn.querySelector("svg");
-                var textSpan = form.querySelector(".wishlist-text");
-                var actionInput = form.querySelector("input[name='action']");
-                var bookID = form.querySelector("input[name='bookID']").value;
-                var action = actionInput.value;
-                var params = new URLSearchParams();
-                params.append("action", action);
-                params.append("bookID", bookID);
-                params.append("ajax", "true");
-                try {
-                    var response = await fetch(form.getAttribute("action"), {
-                        method: "POST",
-                        headers: {"X-Requested-With": "XMLHttpRequest", "Content-Type": "application/x-www-form-urlencoded"},
-                        body: params.toString()
-                    });
-                    if (response.status === 401) {
-                        var data = await response.json();
-                        if (data.redirect)
-                            window.location.href = data.redirect;
-                        return;
-                    }
-                    if (response.ok) {
-                        var data = await response.json();
-                        if (data.success) {
-                            if (data.action === "added") {
-                                btn.className = "w-full bg-red-50 border-2 border-red-500 text-red-500 font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-red-500 hover:text-white transition-all";
-                                svg.setAttribute("fill", "#ef4444");
-                                svg.setAttribute("stroke", "#ef4444");
-                                textSpan.textContent = "Đã thích";
-                                actionInput.value = "remove";
-                                showToast("Đã thêm vào yêu thích!");
-                            } else {
-                                btn.className = "w-full border-2 border-primary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all";
-                                svg.setAttribute("fill", "none");
-                                svg.setAttribute("stroke", "currentColor");
-                                textSpan.textContent = "Yêu thích";
-                                actionInput.value = "add";
-                                showToast("Đã xóa khỏi yêu thích!");
-                            }
-                            var badge = document.querySelector(".wishlist-badge");
-                            if (badge) {
-                                badge.textContent = data.wishlistCount;
-                                data.wishlistCount > 0 ? badge.classList.remove("hidden") : badge.classList.add("hidden");
-                            }
-                        } else {
-                            showToast("Có lỗi xảy ra, vui lòng thử lại.", true);
-                        }
-                    } else {
-                        showToast("Không thể thực hiện yêu cầu.", true);
-                    }
-                } catch (err) {
-                    console.error(err);
-                    showToast("Lỗi kết nối mạng.", true);
-                }
-            });
-        }
-
-        // 2. Wishlist các sách liên quan
-        document.querySelectorAll(".wishlist-form").forEach(function (form) {
-            form.addEventListener("submit", async function (e) {
-                e.preventDefault();
-                var f = e.currentTarget;
-                var btn = f.querySelector(".wish-btn");
-                var svg = btn.querySelector("svg");
-                var actionInput = f.querySelector("input[name='action']");
-                var bookID = f.querySelector("input[name='bookID']").value;
-                var action = actionInput.value;
-                var params = new URLSearchParams();
-                params.append("action", action);
-                params.append("bookID", bookID);
-                params.append("ajax", "true");
-                try {
-                    var response = await fetch(f.getAttribute("action"), {
-                        method: "POST",
-                        headers: {"X-Requested-With": "XMLHttpRequest", "Content-Type": "application/x-www-form-urlencoded"},
-                        body: params.toString()
-                    });
-                    if (response.status === 401) {
-                        var data = await response.json();
-                        if (data.redirect)
-                            window.location.href = data.redirect;
-                        return;
-                    }
-                    if (response.ok) {
-                        var data = await response.json();
-                        if (data.success) {
-                            if (data.action === "added") {
-                                btn.classList.add("active");
-                                svg.setAttribute("fill", "#ef4444");
-                                svg.setAttribute("stroke", "#ef4444");
-                                actionInput.value = "remove";
-                                btn.setAttribute("title", "Xóa khỏi yêu thích");
-                                showToast("Đã thêm vào yêu thích!");
-                            } else if (data.action === "removed") {
-                                btn.classList.remove("active");
-                                svg.setAttribute("fill", "none");
-                                svg.setAttribute("stroke", "#374151");
-                                actionInput.value = "add";
-                                btn.setAttribute("title", "Thêm vào yêu thích");
-                                showToast("Đã xóa khỏi yêu thích!");
-                            }
-                            var badge = document.querySelector(".wishlist-badge");
-                            if (badge) {
-                                badge.textContent = data.wishlistCount;
-                                data.wishlistCount > 0 ? badge.classList.remove("hidden") : badge.classList.add("hidden");
-                            }
-                        } else {
-                            showToast("Có lỗi xảy ra, vui lòng thử lại.", true);
-                        }
-                    } else {
-                        showToast("Không thể thực hiện yêu cầu.", true);
-                    }
-                } catch (err) {
-                    console.error(err);
-                    showToast("Lỗi kết nối mạng.", true);
-                }
-            });
-        });
-    });
 </script>
 
 <%@ include file="/views/layout/common/toast.jsp" %>
+<%@ include file="/views/layout/common/wishlist-heart.js.jsp" %>
 <%@ include file="/views/layout/homepage/footer.jsp" %>

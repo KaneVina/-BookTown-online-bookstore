@@ -163,7 +163,11 @@ public class ProductController extends HttpServlet {
         } else if ("removed".equals(wishResult)) {
             req.setAttribute("successMessage", "Đã xóa khỏi yêu thích!");
         } else if ("wishError".equals(wishResult)) {
-            req.setAttribute("errorMessage", "Vui lòng đăng nhập để dùng tính năng này.");
+            String wishMessage = req.getParameter("wishMessage");
+            req.setAttribute("errorMessage",
+                    wishMessage != null && !wishMessage.isBlank()
+                            ? wishMessage
+                            : "Không thể thêm vào yêu thích.");
         }
 
         req.setAttribute("book",             book);

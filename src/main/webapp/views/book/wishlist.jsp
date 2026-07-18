@@ -11,6 +11,9 @@
 <c:if test="${param.movedToCart == '1'}">
     <script>window.addEventListener('load', () => showToast('Đã chuyển sang giỏ hàng!'));</script>
 </c:if>
+<c:if test="${not empty param.wishError}">
+    <script>window.addEventListener('load', () => showToast('<c:out value="${param.wishError}"/>', true));</script>
+</c:if>
 
 <style>
     .wish-card {
