@@ -170,7 +170,4 @@ public class Review {
     public void setCustomerStatus(String customerStatus) {
         this.customerStatus = customerStatus;
     }
-
-    
-    
 }

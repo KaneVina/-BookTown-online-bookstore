@@ -200,7 +200,7 @@
                             </div>
                             <div class="flex justify-end gap-3">
 
-                                <a href="${pageContext.request.contextPath}/profile" class="px-6 py-3 border border-slate-300 rounded-full font-semibold hover:bg-slate-50">
+                                <a href="${pageContext.request.contextPath}/login" class="px-6 py-3 border border-slate-300 rounded-full font-semibold hover:bg-slate-50">
                                     Quay lại
                                 </a>
                                 <button type="submit" id="changeBtn" class="btn-submit">
@@ -269,8 +269,7 @@
                                         .getElementById("changePasswordForm")
                                         .reset();
                                 setTimeout(() => {
-                                    window.location.href =
-                                            "${pageContext.request.contextPath}/profile";
+                                    window.location.href = "${pageContext.request.contextPath}/login";
                                 }, 1500);
                             } else {
                                 showToast(data.message, true);

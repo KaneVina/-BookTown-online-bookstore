@@ -17,7 +17,7 @@ public class OrderDAO {
     private static final String BASE_SELECT_ORDER
             = "SELECT o.orderID, o.customerID, o.addressID, o.processed_by, o.status, "
             + "       o.payment_method, o.payment_status, o.total_price, o.created_at, "
-            + "       a.street, a.district, a.city "
+            + "       a.street, a.district, a.city, a.recipient_name, a.recipient_phone "
             + "FROM [Order] o "
             + "LEFT JOIN Address a ON a.addressID = o.addressID ";
 
@@ -107,7 +107,8 @@ public class OrderDAO {
     public Order getOrderByID(int orderID) {
         String sql = "SELECT o.orderID, o.customerID, o.addressID, o.processed_by, o.status, "
                 + "       o.payment_method, o.payment_status, o.total_price, o.created_at, "
-                + "       a.street, a.district, a.city, c.fullname AS customerName, "
+                + "       a.street, a.district, a.city, a.recipient_name, a.recipient_phone, "
+                + "       c.fullname AS customerName, "
                 + "       c.email AS customerEmail, c.phone AS customerPhone "
                 + "FROM [Order] o "
                 + "LEFT JOIN Address a ON a.addressID = o.addressID "
@@ -123,6 +124,8 @@ public class OrderDAO {
                     order.setCustomerName(rs.getString("customerName"));
                     order.setCustomerEmail(rs.getString("customerEmail"));
                     order.setCustomerPhone(rs.getString("customerPhone"));
+                    order.setRecipientName(rs.getString("recipient_name"));
+                    order.setRecipientPhone(rs.getString("recipient_phone"));
                     return order;
                 }
             }
@@ -137,9 +140,10 @@ public class OrderDAO {
 
 
     public int countOrdersByCustomerFiltered(int customerID, String status) {
+        boolean isRefundStatus = "pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status);
         boolean filterStatus = status != null && !status.trim().isEmpty() && !"all".equalsIgnoreCase(status);
         String sql = "SELECT COUNT(*) FROM [Order] WHERE customerID = ?"
-                + (filterStatus ? " AND status = ?" : "");
+                + (filterStatus ? (isRefundStatus ? " AND payment_status = ?" : " AND status = ?") : "");
 
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, customerID);
@@ -160,11 +164,12 @@ public class OrderDAO {
 
     public List<Order> getOrdersByCustomerFiltered(int customerID, String status, int offset, int pageSize) {
         List<Order> orders = new ArrayList<>();
+        boolean isRefundStatus = "pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status);
         boolean filterStatus = status != null && !status.trim().isEmpty() && !"all".equalsIgnoreCase(status);
 
         String sql = BASE_SELECT_ORDER
                 + "WHERE o.customerID = ? "
-                + (filterStatus ? "AND o.status = ? " : "")
+                + (filterStatus ? (isRefundStatus ? "AND o.payment_status = ? " : "AND o.status = ? ") : "")
                 + "ORDER BY o.created_at DESC "
                 + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
@@ -251,6 +256,8 @@ public class OrderDAO {
         order.setStreet(rs.getString("street"));
         order.setDistrict(rs.getString("district"));
         order.setCity(rs.getString("city"));
+        order.setRecipientName(rs.getString("recipient_name"));
+        order.setRecipientPhone(rs.getString("recipient_phone"));
         int processedByVal = rs.getInt("processed_by");
         if (!rs.wasNull()) {
             order.setProcessedBy(processedByVal);
@@ -284,9 +291,26 @@ public class OrderDAO {
         return false;
     }
 
+    /**
+     * Staff xác nhận đã chuyển tiền tay cho khách.
+     * Chỉ update nếu payment_status đang là 'pending_refund' → tránh chạy 2 lần.
+     * Sau khi gọi: payment_status = 'refunded', gửi mail xác nhận.
+     */
+    public boolean confirmRefund(int orderID) {
+        String sql = "UPDATE [Order] SET payment_status = 'refunded' "
+                + "WHERE orderID = ? AND payment_status = 'pending_refund'";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderID);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
 
-    public List<Order> getAllOrders(String keyword, String status, int offset, int pageSize) {
+
+    public List<Order> getAllOrders(String status, int offset, int pageSize) {
         List<Order> list = new ArrayList<>();
 
         String sqlGetOverdue = "SELECT orderID FROM [Order] "
@@ -302,14 +326,17 @@ public class OrderDAO {
                 if (overdueOrder != null) {
                     if ("vnpay".equalsIgnoreCase(overdueOrder.getPaymentMethod()) && "paid".equalsIgnoreCase(overdueOrder.getPaymentStatus())) {
                         updateOrderStatus(overdueOrderID, "cancelled");
-                        updatePaymentStatus(overdueOrderID, "refunded");
-                        
+                        // Đánh dấu chờ hoàn tiền thủ công (chưa hoàn thực sự)
+                        updatePaymentStatus(overdueOrderID, "pending_refund");
+                        // Hoàn trả tồn kho vì đơn đã bị hủy
+                        restoreStock(overdueOrderID);
+
                         final Order finalOrder = overdueOrder;
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
                                 try {
-                                    utils.EmailUtil.sendRefundEmail(finalOrder.getCustomerEmail(), finalOrder);
+                                    utils.EmailUtil.sendRefundPendingEmail(finalOrder.getCustomerEmail(), finalOrder);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -317,6 +344,8 @@ public class OrderDAO {
                         }).start();
                     } else {
                         updateOrderStatus(overdueOrderID, "cancelled");
+                        // Hoàn trả tồn kho vì đơn đã bị hủy
+                        restoreStock(overdueOrderID);
                     }
                 }
             }
@@ -327,7 +356,8 @@ public class OrderDAO {
         StringBuilder sql = new StringBuilder(
                 "SELECT o.orderID, o.customerID, o.addressID, o.processed_by, o.status, "
                 + "       o.payment_method, o.payment_status, o.total_price, o.created_at, "
-                + "       a.street, a.district, a.city, c.fullname AS customerName, "
+                + "       a.street, a.district, a.city, a.recipient_name, a.recipient_phone, "
+                + "       c.fullname AS customerName, "
                 + "       c.email AS customerEmail, c.phone AS customerPhone "
                 + "FROM [Order] o "
                 + "LEFT JOIN Address a ON a.addressID = o.addressID "
@@ -337,16 +367,12 @@ public class OrderDAO {
 
         List<Object> params = new ArrayList<>();
 
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            sql.append("AND (c.fullname LIKE ? OR c.phone LIKE ? OR CAST(o.orderID AS VARCHAR) LIKE ?) ");
-            String searchPattern = "%" + keyword.trim() + "%";
-            params.add(searchPattern);
-            params.add(searchPattern);
-            params.add(searchPattern);
-        }
-
         if (status != null && !status.trim().isEmpty() && !"all".equalsIgnoreCase(status)) {
-            sql.append("AND o.status = ? ");
+            if ("pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status)) {
+                sql.append("AND o.payment_status = ? ");
+            } else {
+                sql.append("AND o.status = ? ");
+            }
             params.add(status.trim());
         }
 
@@ -367,6 +393,8 @@ public class OrderDAO {
                     order.setCustomerName(rs.getString("customerName"));
                     order.setCustomerEmail(rs.getString("customerEmail"));
                     order.setCustomerPhone(rs.getString("customerPhone"));
+                    order.setRecipientName(rs.getString("recipient_name"));
+                    order.setRecipientPhone(rs.getString("recipient_phone"));
                     list.add(order);
                 }
             }
@@ -376,7 +404,7 @@ public class OrderDAO {
         return list;
     }
 
-    public int countFilteredOrders(String keyword, String status) {
+    public int countFilteredOrders(String status) {
         StringBuilder sql = new StringBuilder(
                 "SELECT COUNT(*) FROM [Order] o "
                 + "LEFT JOIN Customer c ON c.customerID = o.customerID "
@@ -385,16 +413,12 @@ public class OrderDAO {
 
         List<Object> params = new ArrayList<>();
 
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            sql.append("AND (c.fullname LIKE ? OR c.phone LIKE ? OR CAST(o.orderID AS VARCHAR) LIKE ?) ");
-            String searchPattern = "%" + keyword.trim() + "%";
-            params.add(searchPattern);
-            params.add(searchPattern);
-            params.add(searchPattern);
-        }
-
         if (status != null && !status.trim().isEmpty() && !"all".equalsIgnoreCase(status)) {
-            sql.append("AND o.status = ? ");
+            if ("pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status)) {
+                sql.append("AND o.payment_status = ? ");
+            } else {
+                sql.append("AND o.status = ? ");
+            }
             params.add(status.trim());
         }
 
@@ -417,7 +441,12 @@ public class OrderDAO {
     }
 
     public int countOrdersByStatus(String status) {
-        String sql = "SELECT COUNT(*) FROM [Order] WHERE status = ?";
+        String sql;
+        if ("pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status)) {
+            sql = "SELECT COUNT(*) FROM [Order] WHERE payment_status = ?";
+        } else {
+            sql = "SELECT COUNT(*) FROM [Order] WHERE status = ?";
+        }
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             try (ResultSet rs = ps.executeQuery()) {
@@ -522,4 +551,40 @@ public class OrderDAO {
 
         return list;
     }
+
+    public boolean deductStock(int orderID) {
+        String sql = "UPDATE Book "
+                + "SET Book.stock_quantity = Book.stock_quantity - OrderDetail.quantity "
+                + "FROM Book "
+                + "INNER JOIN OrderDetail ON Book.bookID = OrderDetail.bookID "
+                + "WHERE OrderDetail.orderID = ? "
+                + "AND Book.stock_quantity >= OrderDetail.quantity";
+
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderID);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean restoreStock(int orderID) {
+        String sql = "UPDATE Book "
+                + "SET Book.stock_quantity = Book.stock_quantity + OrderDetail.quantity "
+                + "FROM Book "
+                + "INNER JOIN OrderDetail ON Book.bookID = OrderDetail.bookID "
+                + "WHERE OrderDetail.orderID = ?";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderID);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
+
+

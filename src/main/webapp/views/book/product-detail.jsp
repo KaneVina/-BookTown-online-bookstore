@@ -6,9 +6,7 @@
 <%@ include file="/views/layout/homepage/header.jsp" %>
 
 <style>
-    /* [FIX] Input số lượng type=number: ẩn mũi tên tăng/giảm mặc định của
-       trình duyệt (Chrome/Safari/Edge), vì nó chiếm không gian bên phải làm
-       số 2 chữ số (10, 11, 12...) bị bó hẹp/che mất, nhìn như chỉ hiện "1". */
+
     .no-spinner::-webkit-outer-spin-button,
     .no-spinner::-webkit-inner-spin-button {
         -webkit-appearance: none;
@@ -889,6 +887,13 @@
                             if (badge)
                                 badge.textContent = data.cartCount;
                             showToast('Thêm vào giỏ hàng thành công!');
+                        } else if (data.overStock) {
+                            // Hiện modal giới hạn stock
+                            document.getElementById('stock-limit-msg').textContent =
+                                'Bạn đã có ' + data.currentQty + ' cuốn trong giỏ hàng. ' +
+                                'Tối đa chỉ đặt được ' + data.stock + ' cuốn.';
+                            document.getElementById('stock-limit-modal').classList.remove('hidden');
+                            document.getElementById('stock-limit-modal').classList.add('flex');
                         } else {
                             showToast(data.message || 'Thêm vào giỏ hàng thất bại!', true);
                         }
@@ -1056,4 +1061,24 @@
 
 <%@ include file="/views/layout/common/toast.jsp" %>
 <%@ include file="/views/layout/common/wishlist-heart.js.jsp" %>
+
+<!-- Modal giới hạn stock -->
+<div id="stock-limit-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[9999]">
+    <div class="bg-white w-[420px] rounded-xl p-6 relative">
+        <button type="button" onclick="document.getElementById('stock-limit-modal').classList.add('hidden');document.getElementById('stock-limit-modal').classList.remove('flex');" class="absolute top-3 right-4 text-2xl hover:text-gray-500">&times;</button>
+        <h3 class="text-lg font-bold text-[#D32F2F] mb-3">⚠️ Giới hạn tồn kho</h3>
+        <p id="stock-limit-msg" class="text-gray-700 mb-5"></p>
+        <div class="flex justify-end gap-3">
+            <a href="${pageContext.request.contextPath}/cart"
+               class="px-4 py-2 bg-[#004d99] text-white rounded-lg hover:opacity-90 text-sm font-semibold">
+                Xem giỏ hàng
+            </a>
+            <button type="button" onclick="document.getElementById('stock-limit-modal').classList.add('hidden');document.getElementById('stock-limit-modal').classList.remove('flex');"
+                    class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 text-sm">
+                Đóng
+            </button>
+        </div>
+    </div>
+</div>
+
 <%@ include file="/views/layout/homepage/footer.jsp" %>

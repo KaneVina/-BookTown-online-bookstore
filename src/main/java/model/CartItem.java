@@ -8,12 +8,11 @@ public class CartItem {
     private int cartID;
     private int bookID;
     private int quantity;
-
+    private int stockQuantity;
     private String title;
     private String thumbnail;
     private BigDecimal price;
     private String authorsDisplay;
-    private int stockQuantity;
     private String status;
 
     public CartItem() {
@@ -51,6 +50,14 @@ public class CartItem {
         this.quantity = quantity;
     }
 
+    public int getStockQuantity() {
+        return stockQuantity;
+    }
+
+    public void setStockQuantity(int stockQuantity) {
+        this.stockQuantity = stockQuantity;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -81,14 +88,6 @@ public class CartItem {
 
     public void setAuthorsDisplay(String authorsDisplay) {
         this.authorsDisplay = authorsDisplay;
-    }
-
-    public int getStockQuantity() {
-        return stockQuantity;
-    }
-
-    public void setStockQuantity(int stockQuantity) {
-        this.stockQuantity = stockQuantity;
     }
 
     public String getStatus() {

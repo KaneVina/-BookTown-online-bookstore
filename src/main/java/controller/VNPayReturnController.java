@@ -1,6 +1,5 @@
 package controller;
 
-import dao.AddressDAO;
 import dao.CartDAO;
 import dao.OrderDAO;
 import jakarta.servlet.ServletException;
@@ -9,7 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Account;
-import model.Address;
 import model.CartItem;
 import model.Order;
 import utils.VNPayConfig;
@@ -52,35 +50,30 @@ public class VNPayReturnController extends HttpServlet {
                 return;
             }
 
-            String street = (String) session.getAttribute("vnpay_street");
-            String district = (String) session.getAttribute("vnpay_district");
-            String city = (String) session.getAttribute("vnpay_city");
+            // Đọc addressID đã lưu từ session khi khách chọn VNPay
+            Object addressIDObj = session.getAttribute("vnpay_addressID");
             BigDecimal total = (BigDecimal) session.getAttribute("vnpay_total");
 
-            if (street == null || district == null || city == null || total == null) {
+            if (addressIDObj == null || total == null) {
                 session.setAttribute("errorMessage", "Phiên thanh toán hết hạn, vui lòng thử lại!");
                 response.sendRedirect(request.getContextPath() + "/checkout");
                 return;
             }
 
+            int addressID = (Integer) addressIDObj;
+
             CartDAO cartDAO = new CartDAO();
             List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
 
-            AddressDAO addressDAO = new AddressDAO();
-            List<Address> addresses = addressDAO.getAddressesByCustomerId(account.getId());
-            int addressID = -1;
-            for (Address addr : addresses) {
-                if (street.equals(addr.getStreet())
-                        && district.equals(addr.getDistrict())
-                        && city.equals(addr.getCity())) {
-                    addressID = addr.getAddressID();
-                    break;
-                }
-            }
+            // Lọc bỏ sản phẩm hết hàng trước khi tạo đơn
+            cartItems.removeIf(item -> item.getStockQuantity() == 0);
 
-            if (addressID == -1) {
-                session.setAttribute("errorMessage", "Không tìm thấy địa chỉ giao hàng!");
-                response.sendRedirect(request.getContextPath() + "/checkout");
+            if (cartItems.isEmpty()) {
+                session.setAttribute("errorMessage", "Tất cả sản phẩm trong giỏ đã hết hàng! Vui lòng liên hệ hỗ trợ để được hoàn tiền.");
+                session.removeAttribute("vnpay_txnRef");
+                session.removeAttribute("vnpay_addressID");
+                session.removeAttribute("vnpay_total");
+                response.sendRedirect(request.getContextPath() + "/cart");
                 return;
             }
 
@@ -91,15 +84,12 @@ public class VNPayReturnController extends HttpServlet {
                 return;
             }
             orderDAO.createOrderDetails(orderID, cartItems);
+            orderDAO.deductStock(orderID);
             orderDAO.updatePaymentStatus(orderID, "paid");
             orderDAO.clearCart(account.getId());
 
             session.removeAttribute("vnpay_txnRef");
-            session.removeAttribute("vnpay_fullname");
-            session.removeAttribute("vnpay_phone");
-            session.removeAttribute("vnpay_street");
-            session.removeAttribute("vnpay_district");
-            session.removeAttribute("vnpay_city");
+            session.removeAttribute("vnpay_addressID");
             session.removeAttribute("vnpay_total");
 
             Order order = orderDAO.getOrderByID(orderID);
@@ -114,11 +104,7 @@ public class VNPayReturnController extends HttpServlet {
         } else {
             if (session != null) {
                 session.removeAttribute("vnpay_txnRef");
-                session.removeAttribute("vnpay_fullname");
-                session.removeAttribute("vnpay_phone");
-                session.removeAttribute("vnpay_street");
-                session.removeAttribute("vnpay_district");
-                session.removeAttribute("vnpay_city");
+                session.removeAttribute("vnpay_addressID");
                 session.removeAttribute("vnpay_total");
 
                 String msg;
@@ -132,6 +118,7 @@ public class VNPayReturnController extends HttpServlet {
                         msg = "Thanh toán VNPAY thất bại! Vui lòng thử lại.";
                         break;
                 }
+                session.setAttribute("errorMessage", msg);
             }
             response.sendRedirect(request.getContextPath() + "/checkout");
         }

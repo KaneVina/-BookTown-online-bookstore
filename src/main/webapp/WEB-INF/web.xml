@@ -104,6 +104,7 @@
         <servlet-name>CreateStaffController</servlet-name>
         <servlet-class>controller.CreateStaffController</servlet-class>
     </servlet>
+
     <servlet>
         <servlet-name>ImageUploadController</servlet-name>
         <servlet-class>controller.ImageUploadController</servlet-class>
@@ -211,14 +212,18 @@
         <servlet-name>CreateStaffController</servlet-name>
         <url-pattern>/dashboard/add-staff</url-pattern>
     </servlet-mapping>
+
+
     <servlet-mapping>
         <servlet-name>ImageUploadController</servlet-name>
         <url-pattern>/upload-image</url-pattern>
     </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>LookupController</servlet-name>
         <url-pattern>/api/lookup</url-pattern>
     </servlet-mapping>
+
     <session-config>
         <session-timeout> 30 </session-timeout>
     </session-config>

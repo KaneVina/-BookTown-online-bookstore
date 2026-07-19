@@ -76,6 +76,11 @@
                         <span class="material-symbols-outlined"> lock </span>
                         Đổi mật khẩu
                     </a>
+                    <a href="${pageContext.request.contextPath}/address"
+                       class="menu-item">
+                        <span class="material-symbols-outlined">location_on</span>
+                        Địa chỉ của tôi
+                    </a>
 
                     <a href="${pageContext.request.contextPath}/logout"
                        class="menu-item text-red-600">
@@ -111,6 +116,12 @@
                     <a href="${pageContext.request.contextPath}/profile/order-history?status=cancelled"
                        class="py-3 text-sm whitespace-nowrap transition-colors ${status == 'cancelled' ? 'font-semibold text-[#17479D] border-b-2 border-[#17479D]' : 'font-medium text-gray-600 hover:text-[#17479D]'}">
                         Hủy đơn</a>
+                    <a href="${pageContext.request.contextPath}/profile/order-history?status=pending_refund"
+                       class="py-3 text-sm whitespace-nowrap transition-colors ${status == 'pending_refund' ? 'font-semibold text-[#17479D] border-b-2 border-[#17479D]' : 'font-medium text-gray-600 hover:text-[#17479D]'}">
+                        Chờ hoàn tiền</a>
+                    <a href="${pageContext.request.contextPath}/profile/order-history?status=refunded"
+                       class="py-3 text-sm whitespace-nowrap transition-colors ${status == 'refunded' ? 'font-semibold text-[#17479D] border-b-2 border-[#17479D]' : 'font-medium text-gray-600 hover:text-[#17479D]'}">
+                        Đã hoàn tiền</a>
                 </div>
 
                 <div class="space-y-4">
@@ -168,9 +179,23 @@
                                                 </span>
                                             </c:when>
                                             <c:when test="${order.status == 'cancelled'}">
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-50 text-[#D32F2F] text-xs font-semibold">
-                                                    Hủy đơn
-                                                </span>
+                                                <c:choose>
+                                                    <c:when test="${order.paymentMethod == 'vnpay' && order.paymentStatus == 'pending_refund'}">
+                                                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-xs font-semibold">
+                                                            Chờ hoàn tiền
+                                                        </span>
+                                                    </c:when>
+                                                    <c:when test="${order.paymentMethod == 'vnpay' && order.paymentStatus == 'refunded'}">
+                                                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-50 text-green-700 text-xs font-semibold">
+                                                            Đã hoàn tiền
+                                                        </span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-50 text-[#D32F2F] text-xs font-semibold">
+                                                            Hủy đơn
+                                                        </span>
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </c:when>
                                             <c:otherwise>
                                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-semibold">
@@ -179,19 +204,19 @@
                                             </c:otherwise>
                                         </c:choose>
 
-                                         <c:if test="${order.status == 'pending'}">
-                                             <form method="POST" id="cancelForm_${order.orderID}"
-                                                   action="${pageContext.request.contextPath}/profile/order-history">
-                                                 <input type="hidden" name="action" value="cancel" />
-                                                 <input type="hidden" name="orderID"
-                                                        value="${order.orderID}" />
-                                                 <button type="button"
-                                                         onclick="confirmCancelCustomer('Hủy đơn hàng', 'Bạn có chắc muốn hủy đơn hàng ${order.orderCode}?', 'cancelForm_${order.orderID}')"
-                                                         class="px-5 py-2 border border-red-500 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
-                                                     Hủy đơn
-                                                 </button>
-                                             </form>
-                                         </c:if>
+                                        <c:if test="${order.status == 'pending'}">
+                                            <form method="POST" id="cancelForm_${order.orderID}"
+                                                  action="${pageContext.request.contextPath}/profile/order-history">
+                                                <input type="hidden" name="action" value="cancel" />
+                                                <input type="hidden" name="orderID"
+                                                       value="${order.orderID}" />
+                                                <button type="button"
+                                                        onclick="confirmCancelCustomer('Hủy đơn hàng', 'Bạn có chắc muốn hủy đơn hàng ${order.orderCode}?', 'cancelForm_${order.orderID}')"
+                                                        class="px-5 py-2 border border-red-500 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
+                                                    Hủy đơn
+                                                </button>
+                                            </form>
+                                        </c:if>
 
                                         <a
                                             href="${pageContext.request.contextPath}/profile/order-history?action=detail&orderID=${order.orderID}">
@@ -282,7 +307,7 @@
     }
 
     function confirmCancelCustomer(title, message, formId) {
-        openConfirmModal(title, message, function() {
+        openConfirmModal(title, message, function () {
             document.getElementById(formId).submit();
         });
     }
