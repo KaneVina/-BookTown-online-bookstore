@@ -3,6 +3,7 @@ package controller;
 import dao.CartDAO;
 import dao.OrderDAO;
 import dao.AddressDAO;
+import dao.BookDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -166,6 +167,17 @@ public class CheckoutController extends HttpServlet {
 
         BigDecimal total = cartDAO.calcSubtotal(cartItems);
 
+        BookDAO bookDAO = new BookDAO();
+        for (CartItem item : cartItems) {
+            String stockError = bookDAO.validatePurchaseQuantity(item.getBookID(), item.getQuantity());
+            if (stockError != null) {
+                request.getSession().setAttribute("errorMessage",
+                        item.getTitle() + ": " + stockError);
+                response.sendRedirect(request.getContextPath() + "/cart");
+                return;
+            }
+        }
+
         String addressIDRaw = request.getParameter("addressID");
 
         if (isEmpty(addressIDRaw)) {
@@ -200,6 +212,13 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
+        if (!bookDAO.deductStockForOrder(cartItems)) {
+            request.getSession().setAttribute("errorMessage",
+                    "Một số sách trong giỏ đã hết hàng. Vui lòng kiểm tra lại!");
+            response.sendRedirect(request.getContextPath() + "/cart");
+            return;
+        }
+
         int orderID = orderDAO.createOrder(account.getId(), addressID, paymentMethod, total);
 
         if (orderID == -1) {
@@ -218,8 +237,8 @@ public class CheckoutController extends HttpServlet {
     }
 
     private void deleteAddressAjax(HttpServletRequest request,
-                                   HttpServletResponse response,
-                                   Account account) throws IOException {
+            HttpServletResponse response,
+            Account account) throws IOException {
 
         response.setContentType("application/json;charset=UTF-8");
 

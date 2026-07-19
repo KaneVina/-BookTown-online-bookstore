@@ -68,6 +68,51 @@
             .err-msg.show {
                 display:block;
             }
+            .lookup-row {
+                display:flex;
+                gap:8px;
+                align-items:stretch;
+            }
+            .lookup-row .field-input {
+                flex:1;
+            }
+            .lookup-add-btn {
+                width:42px;
+                min-width:42px;
+                border:1px solid #c2c6d4;
+                border-radius:10px;
+                background:#f3faff;
+                color:#004d99;
+                font-size:22px;
+                font-weight:700;
+                line-height:1;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                transition:background .18s, border-color .18s;
+            }
+            .lookup-add-btn:hover {
+                background:#e6f6ff;
+                border-color:#004d99;
+            }
+            .lookup-modal-backdrop {
+                position:fixed;
+                inset:0;
+                background:rgba(7,30,39,.45);
+                z-index:60;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                padding:16px;
+            }
+            .lookup-modal {
+                width:100%;
+                max-width:420px;
+                background:#fff;
+                border-radius:16px;
+                padding:22px;
+                box-shadow:0 16px 40px rgba(0,77,153,.18);
+            }
             .preview-img {
                 width:120px;
                 height:160px;
@@ -275,21 +320,27 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="field-label" for="genreID">🗂 Thể loại</label>
-                                <select id="genreID" name="genreID" class="field-input">
-                                    <option value="">-- Chọn thể loại --</option>
-                                    <c:forEach var="entry" items="${genreMap}">
-                                        <option value="${entry.key}" <c:if test="${book.genreID == entry.key}">selected</c:if>>${entry.value}</option>
-                                    </c:forEach>
-                                </select>
+                                <div class="lookup-row">
+                                    <select id="genreID" name="genreID" class="field-input">
+                                        <option value="">-- Chọn thể loại --</option>
+                                        <c:forEach var="entry" items="${genreMap}">
+                                            <option value="${entry.key}" <c:if test="${book.genreID == entry.key}">selected</c:if>>${entry.value}</option>
+                                        </c:forEach>
+                                    </select>
+                                    <button type="button" class="lookup-add-btn" data-lookup-type="genre" data-target-select="genreID" title="Thêm thể loại">+</button>
+                                </div>
                             </div>
                             <div>
                                 <label class="field-label" for="contentID">📑 Hình thức</label>
-                                <select id="contentID" name="contentID" class="field-input">
-                                    <option value="">-- Chọn hình thức --</option>
-                                    <c:forEach var="entry" items="${contentMap}">
-                                        <option value="${entry.key}" <c:if test="${book.contentID == entry.key}">selected</c:if>>${entry.value}</option>
-                                    </c:forEach>
-                                </select>
+                                <div class="lookup-row">
+                                    <select id="contentID" name="contentID" class="field-input">
+                                        <option value="">-- Chọn hình thức --</option>
+                                        <c:forEach var="entry" items="${contentMap}">
+                                            <option value="${entry.key}" <c:if test="${book.contentID == entry.key}">selected</c:if>>${entry.value}</option>
+                                        </c:forEach>
+                                    </select>
+                                    <button type="button" class="lookup-add-btn" data-lookup-type="content" data-target-select="contentID" title="Thêm hình thức">+</button>
+                                </div>
                             </div>
                         </div>
 
@@ -297,21 +348,27 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="field-label" for="originID">🌏 Xuất xứ</label>
-                                <select id="originID" name="originID" class="field-input">
-                                    <option value="">-- Chọn xuất xứ --</option>
-                                    <c:forEach var="entry" items="${originMap}">
-                                        <option value="${entry.key}" <c:if test="${book.originID == entry.key}">selected</c:if>>${entry.value}</option>
-                                    </c:forEach>
-                                </select>
+                                <div class="lookup-row">
+                                    <select id="originID" name="originID" class="field-input">
+                                        <option value="">-- Chọn xuất xứ --</option>
+                                        <c:forEach var="entry" items="${originMap}">
+                                            <option value="${entry.key}" <c:if test="${book.originID == entry.key}">selected</c:if>>${entry.value}</option>
+                                        </c:forEach>
+                                    </select>
+                                    <button type="button" class="lookup-add-btn" data-lookup-type="origin" data-target-select="originID" title="Thêm xuất xứ">+</button>
+                                </div>
                             </div>
                             <div>
                                 <label class="field-label" for="seriesID">📚 Bộ sách</label>
-                                <select id="seriesID" name="seriesID" class="field-input">
-                                    <option value="">-- Không có --</option>
-                                    <c:forEach var="entry" items="${seriesMap}">
-                                        <option value="${entry.key}" <c:if test="${book.seriesID == entry.key}">selected</c:if>>${entry.value}</option>
-                                    </c:forEach>
-                                </select>
+                                <div class="lookup-row">
+                                    <select id="seriesID" name="seriesID" class="field-input">
+                                        <option value="">-- Không có --</option>
+                                        <c:forEach var="entry" items="${seriesMap}">
+                                            <option value="${entry.key}" <c:if test="${book.seriesID == entry.key}">selected</c:if>>${entry.value}</option>
+                                        </c:forEach>
+                                    </select>
+                                    <button type="button" class="lookup-add-btn" data-lookup-type="series" data-target-select="seriesID" title="Thêm bộ sách">+</button>
+                                </div>
                             </div>
                         </div>
 
@@ -363,6 +420,19 @@
                 </div>
             </div>
         </main>
+
+        <div id="lookupModal" class="lookup-modal-backdrop hidden">
+            <div class="lookup-modal">
+                <h3 id="lookupModalTitle" class="text-lg font-bold text-on-surface mb-1">Thêm mục mới</h3>
+                <p class="text-sm text-on-surface-variant mb-4">Nhập tên mới nếu chưa có trong danh sách.</p>
+                <input type="text" id="lookupModalInput" class="field-input" placeholder="Nhập tên...">
+                <p id="lookupModalError" class="err-msg mt-2"></p>
+                <div class="flex justify-end gap-2 mt-5">
+                    <button type="button" id="lookupModalCancel" class="px-4 py-2 rounded-lg border border-outline-variant text-sm font-semibold">Hủy</button>
+                    <button type="button" id="lookupModalSave" class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold">Thêm</button>
+                </div>
+            </div>
+        </div>
 
         <script>
             // Preview image by imgId and placeholderId
@@ -520,6 +590,100 @@
                     if (err)
                         err.classList.remove('show');
                 });
+            });
+
+            // ── Thêm nhanh Thể loại / Hình thức / Xuất xứ / Bộ sách ──────────
+            const lookupLabels = {genre: 'thể loại', content: 'hình thức', origin: 'xuất xứ', series: 'bộ sách'};
+            let activeLookupType = '';
+            let activeLookupSelectId = '';
+
+            function openLookupModal(type, selectId) {
+                activeLookupType = type;
+                activeLookupSelectId = selectId;
+                document.getElementById('lookupModalTitle').textContent = 'Thêm ' + (lookupLabels[type] || 'mục mới');
+                document.getElementById('lookupModalInput').value = '';
+                document.getElementById('lookupModalError').classList.remove('show');
+                document.getElementById('lookupModal').classList.remove('hidden');
+                document.getElementById('lookupModalInput').focus();
+            }
+
+            function closeLookupModal() {
+                document.getElementById('lookupModal').classList.add('hidden');
+                activeLookupType = '';
+                activeLookupSelectId = '';
+            }
+
+            function appendLookupOption(selectId, id, name) {
+                const select = document.getElementById(selectId);
+                if (!select)
+                    return;
+                const existing = Array.from(select.options).find(opt => String(opt.value) === String(id));
+                if (existing) {
+                    select.value = String(id);
+                    return;
+                }
+                const option = document.createElement('option');
+                option.value = String(id);
+                option.textContent = name;
+                select.appendChild(option);
+                select.value = String(id);
+            }
+
+            async function saveLookupItem() {
+                const name = document.getElementById('lookupModalInput').value.trim();
+                const errorEl = document.getElementById('lookupModalError');
+                if (!name) {
+                    errorEl.textContent = 'Vui lòng nhập tên.';
+                    errorEl.classList.add('show');
+                    return;
+                }
+                const saveBtn = document.getElementById('lookupModalSave');
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'Đang lưu...';
+                try {
+                    const body = new URLSearchParams();
+                    body.append('type', activeLookupType);
+                    body.append('name', name);
+                    const response = await fetch('${pageContext.request.contextPath}/api/lookup', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+                        body: body.toString()
+                    });
+                    const data = await response.json();
+                    if (!data.ok) {
+                        errorEl.textContent = data.message || 'Không thêm được mục mới.';
+                        errorEl.classList.add('show');
+                        return;
+                    }
+                    appendLookupOption(activeLookupSelectId, data.id, data.name);
+                    closeLookupModal();
+                    if (typeof showToast === 'function') {
+                        showToast('Đã thêm ' + (lookupLabels[activeLookupType] || 'mục') + ' mới!', false);
+                    }
+                } catch (error) {
+                    errorEl.textContent = 'Không kết nối được server.';
+                    errorEl.classList.add('show');
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'Thêm';
+                }
+            }
+
+            document.querySelectorAll('.lookup-add-btn').forEach(btn => {
+                btn.addEventListener('click', () => openLookupModal(btn.dataset.lookupType, btn.dataset.targetSelect));
+            });
+            document.getElementById('lookupModalCancel').addEventListener('click', closeLookupModal);
+            document.getElementById('lookupModalSave').addEventListener('click', saveLookupItem);
+            document.getElementById('lookupModalInput').addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    saveLookupItem();
+                }
+            });
+            document.getElementById('lookupModal').addEventListener('click', function (e) {
+                if (e.target === this) {
+                    closeLookupModal();
+                }
             });
         </script>
     </body>

@@ -1,12 +1,14 @@
 package controller;
 
 import dao.BookDAO;
+import dao.LookupDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Account;
+import utils.RoleGuard;
 import model.Book;
 
 import java.io.IOException;
@@ -25,6 +27,7 @@ public class AdminProductController extends HttpServlet {
 
     private static final int PAGE_SIZE = 10;
     private final BookDAO bookDAO = new BookDAO();
+    private final LookupDAO lookupDAO = new LookupDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -119,6 +122,7 @@ public class AdminProductController extends HttpServlet {
     // ── Form tạo mới ──────────────────────────────────────────────────
     private void showForm(HttpServletRequest req, HttpServletResponse resp, Book book)
             throws ServletException, IOException {
+        lookupDAO.ensureDefaultLookups();
         req.setAttribute("book", book);
         req.setAttribute("genreMap", bookDAO.getGenreMap());
         req.setAttribute("originMap", bookDAO.getOriginMap());
@@ -154,6 +158,7 @@ public class AdminProductController extends HttpServlet {
         req.setAttribute("image3", img3);
         req.setAttribute("image4", img4);
 
+        lookupDAO.ensureDefaultLookups();
         req.setAttribute("book", book);
         req.setAttribute("genreMap", bookDAO.getGenreMap());
         req.setAttribute("originMap", bookDAO.getOriginMap());
@@ -308,18 +313,7 @@ public class AdminProductController extends HttpServlet {
     // ── Auth guard ───────────────────────────────────────────────────
     private Account requireStaff(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        HttpSession session = req.getSession(false);
-        if (session == null || session.getAttribute("account") == null) {
-            resp.sendRedirect(req.getContextPath() + "/login");
-            return null;
-        }
-        Account acc = (Account) session.getAttribute("account");
-        if (!"staff".equals(acc.getRole())) {
-            session.invalidate();
-            resp.sendRedirect(req.getContextPath() + "/login");
-            return null;
-        }
-        return acc;
+        return RoleGuard.requireStaff(req, resp);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────

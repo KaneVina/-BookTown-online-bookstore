@@ -133,6 +133,9 @@ public class WishListDAO {
      * Xóa sách khỏi wishlist.
      */
     public boolean removeFromWishlist(int customerID, int bookID) {
+        if (!isInWishlist(customerID, bookID)) {
+            return true;
+        }
         String sql
                 = "DELETE wi FROM WishList_Item wi "
                 + "JOIN WishList wl ON wl.wishlistID = wi.wishlistID "
@@ -175,11 +178,15 @@ public class WishListDAO {
     }
 
     public boolean moveToCart(int customerID, int bookID, int quantity) {
-        boolean removed = removeFromWishlist(customerID, bookID);
-        if (removed) {
-            CartDAO cartDAO = new CartDAO();
-            cartDAO.addToCart(customerID, bookID, quantity);
+        if (!isInWishlist(customerID, bookID)) {
+            return false;
         }
-        return removed;
+
+        CartDAO cartDAO = new CartDAO();
+        if (!cartDAO.addToCart(customerID, bookID, quantity)) {
+            return false;
+        }
+
+        return removeFromWishlist(customerID, bookID);
     }
 }

@@ -9,11 +9,11 @@ public class CartItem {
     private int bookID;
     private int quantity;
     private int stockQuantity;
-
     private String title;
     private String thumbnail;
     private BigDecimal price;
     private String authorsDisplay;
+    private String status;
 
     public CartItem() {
     }
@@ -88,6 +88,14 @@ public class CartItem {
 
     public void setAuthorsDisplay(String authorsDisplay) {
         this.authorsDisplay = authorsDisplay;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public BigDecimal getSubtotal() {

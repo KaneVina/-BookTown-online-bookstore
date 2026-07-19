@@ -56,7 +56,11 @@ public class HomeController extends HttpServlet {
         } else if ("removed".equals(wishResult)) {
             req.setAttribute("successMessage", "Đã xóa khỏi yêu thích!");
         } else if ("wishError".equals(wishResult)) {
-            req.setAttribute("errorMessage", "Có lỗi xảy ra, vui lòng thử lại.");
+            String wishMessage = req.getParameter("wishMessage");
+            req.setAttribute("errorMessage",
+                    wishMessage != null && !wishMessage.isBlank()
+                            ? wishMessage
+                            : "Có lỗi xảy ra, vui lòng thử lại.");
         }
 
         req.getRequestDispatcher("/views/book/index.jsp").forward(req, resp);
