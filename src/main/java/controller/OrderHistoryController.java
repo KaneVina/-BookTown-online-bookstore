@@ -131,24 +131,61 @@ public class OrderHistoryController extends HttpServlet {
 
         Account account = getAccount(request);
         int orderID = toInt(request.getParameter("orderID"), 0);
+
+        String cancelReason = request.getParameter("cancelReason");
+        if (cancelReason == null) {
+            cancelReason = "";
+        }
+        cancelReason = cancelReason.trim();
+
+        if (cancelReason.isEmpty()) {
+            HttpSession session = request.getSession();
+            session.setAttribute("errorMessage", "Vui lòng nhập lý do hủy đơn.");
+            response.sendRedirect(request.getContextPath() + "/profile/order-history?action=detail&orderID=" + orderID);
+            return;
+        }
+        if (cancelReason.length() < 10 || cancelReason.length() > 50) {
+            HttpSession session = request.getSession();
+            session.setAttribute("errorMessage", "Lý do hủy phải từ 10 đến 50 ký tự.");
+            response.sendRedirect(request.getContextPath() + "/profile/order-history?action=detail&orderID=" + orderID);
+            return;
+        }
+        if (!cancelReason.matches(".*\\p{L}.*")) {
+            HttpSession session = request.getSession();
+            session.setAttribute("errorMessage", "Lý do hủy phải chứa ít nhất 1 chữ cái.");
+            response.sendRedirect(request.getContextPath() + "/profile/order-history?action=detail&orderID=" + orderID);
+            return;
+        }
+
         Order order = orderDAO.getOrderByID(orderID);
-        boolean ok = orderDAO.cancelOrder(orderID, account.getId());
+        boolean ok = orderDAO.cancelOrder(orderID, account.getId(), cancelReason);
 
         HttpSession session = request.getSession();
         if (ok) {
             orderDAO.restoreStock(orderID);
             if (order != null) {
                 if ("vnpay".equalsIgnoreCase(order.getPaymentMethod()) && "paid".equalsIgnoreCase(order.getPaymentStatus())) {
-                    // Bước 1: đánh dấu đang chờ hoàn tiền (chưa hoàn thực sự)
                     orderDAO.updatePaymentStatus(orderID, "pending_refund");
 
-                    // Gửi mail thông báo "sẽ hoàn tiền trong 2-5 ngày làm việc"
                     final Order finalOrder = order;
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
                             try {
                                 utils.EmailUtil.sendRefundPendingEmail(finalOrder.getCustomerEmail(), finalOrder);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
+                } else {
+                    final Order finalOrder = order;
+                    final String finalReason = cancelReason;
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                utils.EmailUtil.sendOrderCancelledEmail(finalOrder.getCustomerEmail(), finalOrder, finalReason);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -163,7 +200,7 @@ public class OrderHistoryController extends HttpServlet {
             session.setAttribute("errorMessage", "Không thể hủy đơn hàng này (đơn đã được xử lý).");
         }
 
-        response.sendRedirect(request.getContextPath() + "/profile/order-history");
+        response.sendRedirect(request.getContextPath() + "/profile/order-history?action=detail&orderID=" + orderID);
     }
 
     private boolean isCustomer(HttpServletRequest request, HttpServletResponse response)
