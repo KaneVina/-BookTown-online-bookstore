@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Account;
 
+
 public class AccountManagementController extends HttpServlet {
 
     private CustomerDAO customerDAO;
@@ -142,6 +143,14 @@ public class AccountManagementController extends HttpServlet {
         int id = Integer.parseInt(request.getParameter("id"));
         String status = request.getParameter("status");
         boolean ok = customerDAO.toggleCustomerStatus(id, status);
+
+        if (ok) {
+            model.Customer customer = customerDAO.getCustomerById(id);
+            if (customer != null && customer.getEmail() != null && !customer.getEmail().trim().isEmpty()) {
+                sendAccountStatusEmailAsync(customer.getEmail(), customer.getFullname(), status);
+            }
+        }
+
         out.write(ok ? "{\"success\":true}" : "{\"success\":false,\"message\":\"Cập nhật thất bại\"}");
     }
 
@@ -153,7 +162,40 @@ public class AccountManagementController extends HttpServlet {
         int id = Integer.parseInt(request.getParameter("id"));
         String status = request.getParameter("status");
         boolean ok = accountDAO.toggleStaffStatus(id, status);
+
+        if (ok) {
+            Account staff = accountDAO.getStaffById(id);
+            if (staff != null && staff.getEmail() != null && !staff.getEmail().trim().isEmpty()) {
+                sendAccountStatusEmailAsync(staff.getEmail(), staff.getFullname(), status);
+            }
+        }
+
         out.write(ok ? "{\"success\":true}" : "{\"success\":false,\"message\":\"Cập nhật thất bại\"}");
+    }
+
+    /**
+     * Gửi email thông báo khóa/mở khóa tài khoản ở luồng riêng (không chặn response
+     * và không làm fail thao tác khóa/mở khóa nếu gửi mail gặp lỗi).
+     */
+    private void sendAccountStatusEmailAsync(String email, String fullname, String newStatus) {
+        final String toEmail = email;
+        final String name = fullname;
+        final boolean locked = "inactive".equals(newStatus);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (locked) {
+                        utils.EmailUtil.sendAccountLockedEmail(toEmail, name);
+                    } else {
+                        utils.EmailUtil.sendAccountUnlockedEmail(toEmail, name);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     private void handleUpdateCustomer(HttpServletRequest request, PrintWriter out) {
