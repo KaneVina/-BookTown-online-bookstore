@@ -139,11 +139,13 @@
             Bảng điều khiển
         </a>
 
+        <c:choose><c:when test="${sessionScope.account.role == 'staff'}">
         <a href="${pageContext.request.contextPath}/dashboard/customer-order"
            class="sidebar-link <%= currentPage.contains("customer-order") ? "active" : ""%>">
             <span class="material-symbols-outlined">shopping_cart</span>
             Đơn hàng
         </a>
+        </c:when></c:choose>
 
         <a href="${pageContext.request.contextPath}/dashboard/product-management"
            class="sidebar-link <%= currentPage.contains("product-management") ? "active" : ""%>">
