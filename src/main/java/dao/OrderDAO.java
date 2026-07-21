@@ -16,7 +16,7 @@ public class OrderDAO {
 
     private static final String BASE_SELECT_ORDER
             = "SELECT o.orderID, o.customerID, o.addressID, o.processed_by, o.status, "
-            + "       o.payment_method, o.payment_status, o.total_price, o.created_at, "
+            + "       o.payment_method, o.payment_status, o.total_price, o.created_at, o.cancel_reason, "
             + "       a.street, a.district, a.city, a.recipient_name, a.recipient_phone "
             + "FROM [Order] o "
             + "LEFT JOIN Address a ON a.addressID = o.addressID ";
@@ -106,7 +106,7 @@ public class OrderDAO {
 
     public Order getOrderByID(int orderID) {
         String sql = "SELECT o.orderID, o.customerID, o.addressID, o.processed_by, o.status, "
-                + "       o.payment_method, o.payment_status, o.total_price, o.created_at, "
+                + "       o.payment_method, o.payment_status, o.total_price, o.created_at, o.cancel_reason, "
                 + "       a.street, a.district, a.city, a.recipient_name, a.recipient_phone, "
                 + "       c.fullname AS customerName, "
                 + "       c.email AS customerEmail, c.phone AS customerPhone "
@@ -382,7 +382,7 @@ public class OrderDAO {
 
         StringBuilder sql = new StringBuilder(
                 "SELECT o.orderID, o.customerID, o.addressID, o.processed_by, o.status, "
-                + "       o.payment_method, o.payment_status, o.total_price, o.created_at, "
+                + "       o.payment_method, o.payment_status, o.total_price, o.created_at, o.cancel_reason, "
                 + "       a.street, a.district, a.city, a.recipient_name, a.recipient_phone, "
                 + "       c.fullname AS customerName, "
                 + "       c.email AS customerEmail, c.phone AS customerPhone "

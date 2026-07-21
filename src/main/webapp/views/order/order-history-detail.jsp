@@ -92,12 +92,6 @@
                     <p class="text-xs text-[#424752] mt-1.5">
                         Ngày đặt: <fmt:formatDate value="${order.createdAt}" pattern="dd/MM/yyyy • HH:mm" />
                     </p>
-                    <c:if test="${order.status == 'cancelled' && not empty order.cancelReason}">
-                        <div class="mt-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-sm text-[#D32F2F] inline-flex items-start gap-2">
-                            <span class="material-symbols-outlined text-[16px] mt-0.5">info</span>
-                            <span><strong>Lý do hủy:</strong> ${order.cancelReason}</span>
-                        </div>
-                    </c:if>
                 </div>
 
                 <div class="flex gap-3 w-full md:w-auto">
@@ -206,7 +200,14 @@
                                             </div>
                                         </div>
 
-                                        <div class="mt-6 pt-4 border-t border-[#c2c6d4]">
+                                        <c:if test="${not empty order.cancelReason}">
+                                             <div class="mt-6 p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-[#D32F2F] flex items-start gap-2">
+                                                 <span class="material-symbols-outlined text-[16px] mt-0.5">info</span>
+                                                 <span><strong>Lý do hủy đơn:</strong> ${order.cancelReason}</span>
+                                             </div>
+                                         </c:if>
+
+                                         <div class="mt-6 pt-4 border-t border-[#c2c6d4]">
                                             <c:choose>
                                                 <c:when test="${order.paymentStatus == 'pending_refund'}">
                                                     <div class="text-xs text-amber-600 flex items-start gap-2">
@@ -234,12 +235,19 @@
                                 </c:when>
 
                            
-                                <c:otherwise>
-                                    <section class="bg-red-50 border border-red-200 rounded-xl p-6 flex items-center gap-3">
-                                        <span class="material-symbols-outlined text-red-500">cancel</span>
-                                        <p class="text-sm font-semibold text-red-700">Đơn hàng này đã bị hủy.</p>
-                                    </section>
-                                </c:otherwise>
+                                 <c:otherwise>
+                                     <section class="bg-red-50 border border-red-200 rounded-xl p-6 flex flex-col gap-2">
+                                         <div class="flex items-center gap-3">
+                                             <span class="material-symbols-outlined text-red-500">cancel</span>
+                                             <p class="text-sm font-semibold text-red-700">Đơn hàng này đã bị hủy.</p>
+                                         </div>
+                                         <c:if test="${not empty order.cancelReason}">
+                                             <p class="text-xs text-red-600 pl-8">
+                                                 <strong>Lý do hủy:</strong> ${order.cancelReason}
+                                             </p>
+                                         </c:if>
+                                     </section>
+                                 </c:otherwise>
                             </c:choose>
                         </c:when>
 
