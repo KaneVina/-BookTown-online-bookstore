@@ -22,12 +22,21 @@ public class DashboardDAO {
     }
 
     public BigDecimal getTotalRevenue(String fromDate, String toDate, Integer genreID) {
-        String sql = "SELECT ISNULL(SUM(o.total_price), 0) AS totalRevenue "
-                + "FROM [Order] o "
-                + buildOrderDetailJoin(genreID)
-                + "WHERE LOWER(o.status) IN ('completed', 'complete', 'delivered', 'success') "
-                + buildDateFilter()
-                + buildGenreFilter(genreID);
+        String sql;
+        if (genreID == null) {
+            sql = "SELECT ISNULL(SUM(o.total_price), 0) AS totalRevenue "
+                    + "FROM [Order] o "
+                    + "WHERE LOWER(o.status) IN ('completed', 'complete', 'delivered', 'success') "
+                    + buildDateFilter();
+        } else {
+            sql = "SELECT ISNULL(SUM(od.quantity * od.unit_price), 0) AS totalRevenue "
+                    + "FROM [Order] o "
+                    + "JOIN OrderDetail od ON od.orderID = o.orderID "
+                    + "JOIN Book b ON b.bookID = od.bookID "
+                    + "WHERE LOWER(o.status) IN ('completed', 'complete', 'delivered', 'success') "
+                    + buildDateFilter()
+                    + buildGenreFilter(genreID);
+        }
 
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             setCommonParams(ps, fromDate, toDate, genreID);
@@ -120,40 +129,46 @@ public class DashboardDAO {
         return 0;
     }
 
-    public Map<String, Integer> getOrderStatusSummary(String fromDate, String toDate, Integer genreID) {
-        Map<String, Integer> result = new LinkedHashMap<>();
-        result.put("pending", 0);
-        result.put("processing", 0);
-        result.put("shipping", 0);
-        result.put("completed", 0);
+    /**
+     * Lấy toàn bộ trạng thái đơn hàng đang tồn tại trong database.
+     * Không hard-code pending, processing, shipping, completed...
+     */
+    public Map<String, Integer> getOrderStatusSummary(
+            String fromDate, String toDate, Integer genreID) {
 
-        String sql = "SELECT LOWER(o.status) AS statusName, COUNT(DISTINCT o.orderID) AS total "
+        Map<String, Integer> result = new LinkedHashMap<>();
+
+        String sql = "SELECT "
+                + "CASE "
+                + "WHEN o.status IS NULL OR LTRIM(RTRIM(o.status)) = '' THEN 'unknown' "
+                + "ELSE LOWER(LTRIM(RTRIM(o.status))) "
+                + "END AS statusName, "
+                + "COUNT(DISTINCT o.orderID) AS total "
                 + "FROM [Order] o "
                 + buildOrderDetailJoin(genreID)
                 + "WHERE 1 = 1 "
                 + buildDateFilter()
                 + buildGenreFilter(genreID)
-                + "GROUP BY LOWER(o.status)";
+                + "GROUP BY CASE "
+                + "WHEN o.status IS NULL OR LTRIM(RTRIM(o.status)) = '' THEN 'unknown' "
+                + "ELSE LOWER(LTRIM(RTRIM(o.status))) "
+                + "END "
+                + "ORDER BY statusName";
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
             setCommonParams(ps, fromDate, toDate, genreID);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                String status = rs.getString("statusName");
-                int total = rs.getInt("total");
-                if ("pending".equals(status) || "chờ duyệt".equals(status)) {
-                    result.put("pending", total);
-                } else if ("processing".equals(status) || "packing".equals(status)) {
-                    result.put("processing", total);
-                } else if ("shipping".equals(status) || "delivering".equals(status)) {
-                    result.put("shipping", total);
-                } else if ("completed".equals(status) || "complete".equals(status) || "delivered".equals(status) || "success".equals(status)) {
-                    result.put("completed", total);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    result.put(rs.getString("statusName"), rs.getInt("total"));
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return result;
     }
 
@@ -217,33 +232,53 @@ public class DashboardDAO {
         return list;
     }
 
-    public List<Map<String, Object>> getRecentOrders(String fromDate, String toDate, Integer genreID) {
+    /**
+     * Lấy toàn bộ đơn hàng theo bộ lọc hiện tại.
+     * Không giới hạn TOP 5 và không loại bỏ trạng thái completed/cancelled.
+     */
+    public List<Map<String, Object>> getAllOrders(String fromDate, String toDate, Integer genreID) {
         List<Map<String, Object>> list = new ArrayList<>();
-        String sql = "SELECT TOP 5 o.orderID, o.created_at, o.total_price, o.status, a.fullname "
+
+        String sql = "SELECT DISTINCT o.orderID, o.created_at, o.total_price, o.status, c.fullname "
                 + "FROM [Order] o "
-                + "LEFT JOIN Customer a ON a.customerID = o.customerID "
+                + "LEFT JOIN Customer c ON c.customerID = o.customerID "
                 + buildOrderDetailJoin(genreID)
                 + "WHERE 1 = 1 "
                 + buildDateFilter()
                 + buildGenreFilter(genreID)
-                + "ORDER BY o.created_at DESC";
+                + "ORDER BY o.created_at DESC, o.orderID DESC";
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
             setCommonParams(ps, fromDate, toDate, genreID);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Map<String, Object> row = new LinkedHashMap<>();
-                row.put("orderID", rs.getInt("orderID"));
-                row.put("createdAt", rs.getTimestamp("created_at"));
-                row.put("totalPrice", rs.getBigDecimal("total_price"));
-                row.put("status", rs.getString("status"));
-                row.put("customerName", rs.getString("fullname") == null ? "Khách hàng" : rs.getString("fullname"));
-                list.add(row);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new LinkedHashMap<>();
+                    row.put("orderID", rs.getInt("orderID"));
+                    row.put("createdAt", rs.getTimestamp("created_at"));
+                    row.put("totalPrice", rs.getBigDecimal("total_price"));
+                    row.put("status", rs.getString("status"));
+                    row.put("customerName",
+                            rs.getString("fullname") == null
+                                    ? "Khách hàng"
+                                    : rs.getString("fullname"));
+                    list.add(row);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return list;
+    }
+
+    /**
+     * Giữ lại để những chỗ code cũ đang gọi không bị lỗi biên dịch.
+     */
+    public List<Map<String, Object>> getRecentOrders(String fromDate, String toDate, Integer genreID) {
+        return getAllOrders(fromDate, toDate, genreID);
     }
 
     private String buildOrderDetailJoin(Integer genreID) {
