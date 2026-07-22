@@ -117,13 +117,6 @@
                                             </c:if>
                                         </div>
 
-                                        <!-- Hiển thị lý do hủy nếu đơn đã bị hủy -->
-                                        <c:if test="${order.status == 'cancelled' && not empty order.cancelReason}">
-                                            <div class="mt-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-sm text-[#D32F2F] inline-flex items-start gap-2">
-                                                <span class="material-symbols-outlined text-[16px] mt-0.5">info</span>
-                                                <span><strong>Lý do hủy:</strong> ${order.cancelReason}</span>
-                                            </div>
-                                        </c:if>
                                 </div>
 
                                 <c:if test="${order.status != 'completed' && order.status != 'cancelled'}">
@@ -400,18 +393,25 @@
                                                                 test="${order.paymentMethod == 'vnpay' && order.paymentStatus == 'pending_refund'}">
                                                                 <div class="space-y-3">
                                                                     <div
-                                                                        class="flex items-center gap-3 p-4 bg-amber-50 rounded-lg border border-amber-200">
-                                                                        <span
-                                                                            class="material-symbols-outlined text-amber-500 text-[22px]"
-                                                                            style="font-variation-settings: 'FILL' 1;">schedule</span>
-                                                                        <div class="flex-1">
-                                                                            <p
-                                                                                class="text-sm font-semibold text-amber-700">
-                                                                                Đơn hàng đã hủy &mdash; Hoàn tiền đang
-                                                                                xử lý</p>
-                                                                            <p class="text-xs text-amber-600 mt-0.5">
-                                                                                VNPAY — Chưa xác nhận chuyển tiền</p>
+                                                                        class="flex flex-col gap-2 p-4 bg-amber-50 rounded-lg border border-amber-200">
+                                                                        <div class="flex items-center gap-3">
+                                                                            <span
+                                                                                class="material-symbols-outlined text-amber-500 text-[22px]"
+                                                                                style="font-variation-settings: 'FILL' 1;">schedule</span>
+                                                                            <div class="flex-1">
+                                                                                <p
+                                                                                    class="text-sm font-semibold text-amber-700">
+                                                                                    Đơn hàng đã hủy &mdash; Hoàn tiền đang
+                                                                                    xử lý</p>
+                                                                                <p class="text-xs text-amber-600 mt-0.5">
+                                                                                    VNPAY — Chưa xác nhận chuyển tiền</p>
+                                                                            </div>
                                                                         </div>
+                                                                        <c:if test="${not empty order.cancelReason}">
+                                                                            <p class="text-xs text-amber-600 pl-8">
+                                                                                <strong>Lý do hủy đơn:</strong> ${order.cancelReason}
+                                                                            </p>
+                                                                        </c:if>
                                                                     </div>
                                                                     <%-- Nút xác nhận hoàn tiền --%>
                                                                         <form
@@ -435,29 +435,43 @@
                                                                 <c:when
                                                                     test="${order.paymentMethod == 'vnpay' && order.paymentStatus == 'refunded'}">
                                                                     <div
-                                                                        class="flex items-center gap-3 p-4 bg-green-50 rounded-lg border border-green-200">
-                                                                        <span
-                                                                            class="material-symbols-outlined text-green-600 text-[22px]"
-                                                                            style="font-variation-settings: 'FILL' 1;">check_circle</span>
-                                                                        <div>
-                                                                            <p
-                                                                                class="text-sm font-semibold text-green-700">
-                                                                                Đơn hàng đã hủy &mdash; Đã hoàn tiền</p>
-                                                                            <p class="text-xs text-green-600 mt-0.5">
-                                                                                VNPAY — Đã xác nhận chuyển tiền thành
-                                                                                công</p>
+                                                                        class="flex flex-col gap-2 p-4 bg-green-50 rounded-lg border border-green-200">
+                                                                        <div class="flex items-center gap-3">
+                                                                            <span
+                                                                                class="material-symbols-outlined text-green-600 text-[22px]"
+                                                                                style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                                                            <div>
+                                                                                <p
+                                                                                    class="text-sm font-semibold text-green-700">
+                                                                                    Đơn hàng đã hủy &mdash; Đã hoàn tiền</p>
+                                                                                <p class="text-xs text-green-600 mt-0.5">
+                                                                                    VNPAY — Đã xác nhận chuyển tiền thành
+                                                                                    công</p>
+                                                                            </div>
                                                                         </div>
+                                                                        <c:if test="${not empty order.cancelReason}">
+                                                                            <p class="text-xs text-green-600 pl-8">
+                                                                                <strong>Lý do hủy:</strong> ${order.cancelReason}
+                                                                            </p>
+                                                                        </c:if>
                                                                     </div>
                                                                 </c:when>
                                                                 <%-- Mặc định (COD hoặc không có tiền hoàn) --%>
                                                                     <c:otherwise>
                                                                         <div
-                                                                            class="flex items-center gap-3 p-4 bg-red-50 rounded-lg border border-red-200">
-                                                                            <span
-                                                                                class="material-symbols-outlined text-[#D32F2F] text-[22px]">cancel</span>
-                                                                            <p
-                                                                                class="text-sm font-semibold text-[#D32F2F]">
-                                                                                Đơn hàng đã bị hủy</p>
+                                                                            class="flex flex-col gap-2 p-4 bg-red-50 rounded-lg border border-red-200">
+                                                                            <div class="flex items-center gap-3">
+                                                                                <span
+                                                                                    class="material-symbols-outlined text-[#D32F2F] text-[22px]">cancel</span>
+                                                                                <p
+                                                                                    class="text-sm font-semibold text-[#D32F2F]">
+                                                                                    Đơn hàng đã bị hủy</p>
+                                                                            </div>
+                                                                            <c:if test="${not empty order.cancelReason}">
+                                                                                <p class="text-xs text-[#D32F2F] pl-8">
+                                                                                    <strong>Lý do hủy:</strong> ${order.cancelReason}
+                                                                                </p>
+                                                                            </c:if>
                                                                         </div>
                                                                     </c:otherwise>
                                                     </c:choose>
