@@ -71,7 +71,6 @@
                             </c:choose>
                         </span>
 
-                        <%-- Tag hoàn tiền: chỉ hiện khi VNPAY đã hủy --%>
                         <c:if test="${order.status == 'cancelled' && order.paymentMethod == 'vnpay'}">
                             <c:choose>
                                 <c:when test="${order.paymentStatus == 'pending_refund'}">
@@ -101,7 +100,8 @@
                               action="${pageContext.request.contextPath}/profile/order-history">
                             <input type="hidden" name="action" value="cancel" />
                             <input type="hidden" name="orderID" value="${order.orderID}" />
-                            <button type="button" onclick="confirmCancelOrder()"
+                            <input type="hidden" name="cancelReason" id="customerCancelReasonInput" value="" />
+                            <button type="button" onclick="openCustomerCancelModal()"
                                     class="flex-1 md:flex-none px-5 py-2 bg-white border border-[#D32F2F] text-[#D32F2F] font-semibold text-sm rounded-lg hover:bg-red-50 transition-colors">
                                 Hủy đơn hàng
                             </button>
@@ -126,9 +126,7 @@
                     <c:choose>
                         <c:when test="${order.status == 'cancelled'}">
                             <c:choose>
-                                <%-- VNPAY đã thanh toán: hiện stepper theo dõi hoàn tiền --%>
                                 <c:when test="${order.paymentMethod == 'vnpay' && (order.paymentStatus == 'pending_refund' || order.paymentStatus == 'refunded')}">
-                                    <%-- refStep: 3 = đang chờ hoàn, 4 = đã hoàn xong --%>
                                     <c:set var="refStep" value="3" />
                                     <c:if test="${order.paymentStatus == 'refunded'}">
                                         <c:set var="refStep" value="4" />
@@ -138,16 +136,13 @@
                                         <h2 class="text-lg font-bold text-[#071e27] mb-6">Trạng thái đơn hàng &amp; Hoàn tiền</h2>
 
                                         <div class="relative flex justify-between items-start">
-                                            <%-- Đường kẻ nền xám --%>
                                             <div class="absolute top-5 left-0 w-full h-1 bg-gray-200 z-0 rounded-full">
-                                                <%-- Đường kẻ tiến trình --%>
                                                 <div class="h-full rounded-full transition-all"
                                                      style="width: ${(refStep - 1) * 100 / 3}%;
                                                             background: ${refStep >= 4 ? '#2E7D32' : (refStep >= 3 ? '#e65c00' : '#004d99')};">
                                                 </div>
                                             </div>
 
-                                            <%-- Bước 1: Đã đặt hàng (luôn xanh) --%>
                                             <div class="relative z-10 flex flex-col items-center text-center">
                                                 <div class="w-10 h-10 rounded-full bg-[#004d99] text-white flex items-center justify-center mb-2 shadow-sm">
                                                     <span class="material-symbols-outlined text-[22px]"
@@ -159,7 +154,6 @@
                                                 </span>
                                             </div>
 
-                                            <%-- Bước 2: Hủy đơn (luôn đỏ khi cancelled) --%>
                                             <div class="relative z-10 flex flex-col items-center text-center">
                                                 <div class="w-10 h-10 rounded-full bg-red-100 text-[#D32F2F] border-2 border-[#D32F2F] flex items-center justify-center mb-2 shadow-sm">
                                                     <span class="material-symbols-outlined text-[22px]"
@@ -168,7 +162,7 @@
                                                 <span class="text-xs font-bold text-[#D32F2F]">Hủy đơn</span>
                                             </div>
 
-                                            <%-- Bước 3: Chờ hoàn tiền --%>
+                                          
                                             <div class="relative z-10 flex flex-col items-center text-center ${refStep < 3 ? 'opacity-40' : ''}">
                                                 <div class="w-10 h-10 rounded-full flex items-center justify-center mb-2 shadow-sm
                                                      ${refStep >= 4 ? 'bg-[#2E7D32] text-white' : (refStep == 3 ? 'bg-amber-50 text-amber-600 border-2 border-amber-500' : 'bg-gray-100 text-gray-400 border border-gray-200')}">
@@ -206,8 +200,14 @@
                                             </div>
                                         </div>
 
-                                        <%-- Ghi chú bên dưới stepper --%>
-                                        <div class="mt-6 pt-4 border-t border-[#c2c6d4]">
+                                        <c:if test="${not empty order.cancelReason}">
+                                             <div class="mt-6 p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-[#D32F2F] flex items-start gap-2">
+                                                 <span class="material-symbols-outlined text-[16px] mt-0.5">info</span>
+                                                 <span><strong>Lý do hủy đơn:</strong> ${order.cancelReason}</span>
+                                             </div>
+                                         </c:if>
+
+                                         <div class="mt-6 pt-4 border-t border-[#c2c6d4]">
                                             <c:choose>
                                                 <c:when test="${order.paymentStatus == 'pending_refund'}">
                                                     <div class="text-xs text-amber-600 flex items-start gap-2">
@@ -234,13 +234,20 @@
                                     </section>
                                 </c:when>
 
-                                <%-- Mặc định: COD hoặc VNPAY chưa thanh toán → banner đỏ --%>
-                                <c:otherwise>
-                                    <section class="bg-red-50 border border-red-200 rounded-xl p-6 flex items-center gap-3">
-                                        <span class="material-symbols-outlined text-red-500">cancel</span>
-                                        <p class="text-sm font-semibold text-red-700">Đơn hàng này đã bị hủy.</p>
-                                    </section>
-                                </c:otherwise>
+                           
+                                 <c:otherwise>
+                                     <section class="bg-red-50 border border-red-200 rounded-xl p-6 flex flex-col gap-2">
+                                         <div class="flex items-center gap-3">
+                                             <span class="material-symbols-outlined text-red-500">cancel</span>
+                                             <p class="text-sm font-semibold text-red-700">Đơn hàng này đã bị hủy.</p>
+                                         </div>
+                                         <c:if test="${not empty order.cancelReason}">
+                                             <p class="text-xs text-red-600 pl-8">
+                                                 <strong>Lý do hủy:</strong> ${order.cancelReason}
+                                             </p>
+                                         </c:if>
+                                     </section>
+                                 </c:otherwise>
                             </c:choose>
                         </c:when>
 
@@ -557,17 +564,77 @@
                 }
             })();
 
-            function confirmCancelOrder() {
-                openConfirmModal(
-                    'Hủy đơn hàng',
-                    'Bạn có chắc chắn muốn hủy đơn hàng này không?',
-                    function() {
-                        document.getElementById('cancelOrderForm').submit();
-                    }
-                );
+          
+            function openCustomerCancelModal() {
+                document.getElementById('customerCancelModal').classList.remove('hidden');
+                document.getElementById('customerCancelModal').classList.add('flex');
+                document.getElementById('customerCancelReasonText').value = '';
+                document.getElementById('customerCancelReasonText').focus();
             }
+
+            function closeCustomerCancelModal() {
+                document.getElementById('customerCancelModal').classList.add('hidden');
+                document.getElementById('customerCancelModal').classList.remove('flex');
+            }
+
+            function submitCustomerCancelForm() {
+                var reason = document.getElementById('customerCancelReasonText').value.trim();
+                if (reason.length === 0) {
+                    showToast('Vui lòng nhập lý do hủy đơn!', true);
+                    return;
+                }
+                if (reason.length < 10) {
+                    showToast('Lý do hủy phải có ít nhất 10 ký tự!', true);
+                    return;
+                }
+                if (reason.length > 50) {
+                    showToast('Lý do hủy không được vượt quá 50 ký tự!', true);
+                    return;
+                }
+              
+                var hasLetter = /[a-zA-ZÀ-ỹ]/.test(reason);
+                if (!hasLetter) {
+                    showToast('Lý do hủy phải chứa ít nhất 1 chữ cái!', true);
+                    return;
+                }
+                document.getElementById('customerCancelReasonInput').value = reason;
+                document.getElementById('cancelOrderForm').submit();
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                var modal = document.getElementById('customerCancelModal');
+                if (modal) {
+                    modal.addEventListener('click', function(e) {
+                        if (e.target === modal) closeCustomerCancelModal();
+                    });
+                }
+            });
         </script>
+
+        <!-- Modal nhập lý do hủy đơn -->
+        <div id="customerCancelModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[200]">
+            <div class="bg-white w-[460px] rounded-xl p-6 relative shadow-xl">
+                <button type="button" onclick="closeCustomerCancelModal()"
+                    class="absolute top-3 right-4 text-2xl text-gray-400 hover:text-gray-600">&times;</button>
+                <h3 class="text-lg font-bold text-[#D32F2F] mb-2">Hủy đơn hàng</h3>
+                <p class="text-sm text-gray-500 mb-4">Vui lòng nhập lý do bạn muốn hủy đơn hàng này.</p>
+                <textarea id="customerCancelReasonText" rows="4" maxlength="50"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+                    placeholder="Nhập lý do hủy... (10-50 ký tự, phải có chữ cái)"></textarea>
+                <div class="flex justify-end gap-3 mt-4">
+                    <button type="button" onclick="closeCustomerCancelModal()"
+                        class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100">
+                        Thoát
+                    </button>
+                    <button type="button" onclick="submitCustomerCancelForm()"
+                        class="px-4 py-2 bg-[#D32F2F] text-white rounded-lg text-sm font-semibold hover:opacity-90">
+                        Xác nhận hủy đơn
+                    </button>
+                </div>
+            </div>
+        </div>
     </body>
+
 
 </html>
 <%@ include file="/views/layout/homepage/footer.jsp" %>

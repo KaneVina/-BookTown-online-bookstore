@@ -30,13 +30,6 @@
         </div>
     </div>
 
-    <div class="hidden md:flex gap-0 items-end relative z-10 h-[300px]">
-        <div class="spine w-12 h-[220px] bg-gradient-to-b from-[#C62828] to-[#B71C1C]"><span class="spine-txt">Đắc Nhân Tâm</span></div>
-        <div class="spine w-12 h-[260px] bg-gradient-to-b from-[#F57F17] to-[#E65100]"><span class="spine-txt">Nhà Giả Kim</span></div>
-        <div class="spine w-12 h-[300px] bg-gradient-to-b from-[#1B5E20] to-[#388E3C]"><span class="spine-txt">Atomic Habits</span></div>
-        <div class="spine w-12 h-[270px] bg-gradient-to-b from-[#4A148C] to-[#7B1FA2]"><span class="spine-txt">Sapiens</span></div>
-        <div class="spine w-12 h-[240px] bg-gradient-to-b from-[#01579B] to-[#0288D1]"><span class="spine-txt">Tôi Tài Giỏi</span></div>
-    </div>
 </section>
 
 <!-- STATS BAR -->

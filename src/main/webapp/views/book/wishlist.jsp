@@ -144,7 +144,7 @@
                                     <input type="hidden" name="action"  value="remove">
                                     <input type="hidden" name="bookID"  value="${item.bookID}">
                                     <button type="submit"
-                                            class="flex items-center gap-1.5 text-[13px] text-gray-400 hover:text-red-500 transition-colors px-2 py-2 rounded-lg hover:bg-red-50"
+                                            class="flex items-center gap-1.5 border border-gray-300 text-[13px] text-gray-400 hover:text-red-500 hover:border-red-300 transition-colors px-4 py-2 rounded-lg hover:bg-red-50"
                                             title="Xóa khỏi yêu thích">
                                         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                         Xóa

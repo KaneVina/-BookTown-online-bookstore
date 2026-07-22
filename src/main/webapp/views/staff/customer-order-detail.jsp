@@ -115,7 +115,8 @@
                                                     </c:when>
                                                 </c:choose>
                                             </c:if>
-                                    </div>
+                                        </div>
+
                                 </div>
 
                                 <c:if test="${order.status != 'completed' && order.status != 'cancelled'}">
@@ -165,8 +166,9 @@
                                             <input type="hidden" name="orderID" value="${order.orderID}">
                                             <input type="hidden" name="redirect" value="detail">
                                             <input type="hidden" name="status" value="cancelled">
+                                            <input type="hidden" name="cancelReason" id="cancelReasonInput" value="">
                                             <button type="button"
-                                                onclick="confirmActionDetail('Hủy đơn hàng', 'Bạn có chắc muốn hủy đơn hàng này không?', 'cancelForm')"
+                                                onclick="openCancelModal()"
                                                 class="flex items-center gap-2 px-4 py-2 bg-[#D32F2F] text-white rounded-lg text-sm font-semibold hover:opacity-90 shadow-sm transition-all">
                                                 <span class="material-symbols-outlined text-[20px]">cancel</span>
                                                 Hủy đơn hàng
@@ -391,18 +393,25 @@
                                                                 test="${order.paymentMethod == 'vnpay' && order.paymentStatus == 'pending_refund'}">
                                                                 <div class="space-y-3">
                                                                     <div
-                                                                        class="flex items-center gap-3 p-4 bg-amber-50 rounded-lg border border-amber-200">
-                                                                        <span
-                                                                            class="material-symbols-outlined text-amber-500 text-[22px]"
-                                                                            style="font-variation-settings: 'FILL' 1;">schedule</span>
-                                                                        <div class="flex-1">
-                                                                            <p
-                                                                                class="text-sm font-semibold text-amber-700">
-                                                                                Đơn hàng đã hủy &mdash; Hoàn tiền đang
-                                                                                xử lý</p>
-                                                                            <p class="text-xs text-amber-600 mt-0.5">
-                                                                                VNPAY — Chưa xác nhận chuyển tiền</p>
+                                                                        class="flex flex-col gap-2 p-4 bg-amber-50 rounded-lg border border-amber-200">
+                                                                        <div class="flex items-center gap-3">
+                                                                            <span
+                                                                                class="material-symbols-outlined text-amber-500 text-[22px]"
+                                                                                style="font-variation-settings: 'FILL' 1;">schedule</span>
+                                                                            <div class="flex-1">
+                                                                                <p
+                                                                                    class="text-sm font-semibold text-amber-700">
+                                                                                    Đơn hàng đã hủy &mdash; Hoàn tiền đang
+                                                                                    xử lý</p>
+                                                                                <p class="text-xs text-amber-600 mt-0.5">
+                                                                                    VNPAY — Chưa xác nhận chuyển tiền</p>
+                                                                            </div>
                                                                         </div>
+                                                                        <c:if test="${not empty order.cancelReason}">
+                                                                            <p class="text-xs text-amber-600 pl-8">
+                                                                                <strong>Lý do hủy đơn:</strong> ${order.cancelReason}
+                                                                            </p>
+                                                                        </c:if>
                                                                     </div>
                                                                     <%-- Nút xác nhận hoàn tiền --%>
                                                                         <form
@@ -426,29 +435,43 @@
                                                                 <c:when
                                                                     test="${order.paymentMethod == 'vnpay' && order.paymentStatus == 'refunded'}">
                                                                     <div
-                                                                        class="flex items-center gap-3 p-4 bg-green-50 rounded-lg border border-green-200">
-                                                                        <span
-                                                                            class="material-symbols-outlined text-green-600 text-[22px]"
-                                                                            style="font-variation-settings: 'FILL' 1;">check_circle</span>
-                                                                        <div>
-                                                                            <p
-                                                                                class="text-sm font-semibold text-green-700">
-                                                                                Đơn hàng đã hủy &mdash; Đã hoàn tiền</p>
-                                                                            <p class="text-xs text-green-600 mt-0.5">
-                                                                                VNPAY — Đã xác nhận chuyển tiền thành
-                                                                                công</p>
+                                                                        class="flex flex-col gap-2 p-4 bg-green-50 rounded-lg border border-green-200">
+                                                                        <div class="flex items-center gap-3">
+                                                                            <span
+                                                                                class="material-symbols-outlined text-green-600 text-[22px]"
+                                                                                style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                                                            <div>
+                                                                                <p
+                                                                                    class="text-sm font-semibold text-green-700">
+                                                                                    Đơn hàng đã hủy &mdash; Đã hoàn tiền</p>
+                                                                                <p class="text-xs text-green-600 mt-0.5">
+                                                                                    VNPAY — Đã xác nhận chuyển tiền thành
+                                                                                    công</p>
+                                                                            </div>
                                                                         </div>
+                                                                        <c:if test="${not empty order.cancelReason}">
+                                                                            <p class="text-xs text-green-600 pl-8">
+                                                                                <strong>Lý do hủy:</strong> ${order.cancelReason}
+                                                                            </p>
+                                                                        </c:if>
                                                                     </div>
                                                                 </c:when>
                                                                 <%-- Mặc định (COD hoặc không có tiền hoàn) --%>
                                                                     <c:otherwise>
                                                                         <div
-                                                                            class="flex items-center gap-3 p-4 bg-red-50 rounded-lg border border-red-200">
-                                                                            <span
-                                                                                class="material-symbols-outlined text-[#D32F2F] text-[22px]">cancel</span>
-                                                                            <p
-                                                                                class="text-sm font-semibold text-[#D32F2F]">
-                                                                                Đơn hàng đã bị hủy</p>
+                                                                            class="flex flex-col gap-2 p-4 bg-red-50 rounded-lg border border-red-200">
+                                                                            <div class="flex items-center gap-3">
+                                                                                <span
+                                                                                    class="material-symbols-outlined text-[#D32F2F] text-[22px]">cancel</span>
+                                                                                <p
+                                                                                    class="text-sm font-semibold text-[#D32F2F]">
+                                                                                    Đơn hàng đã bị hủy</p>
+                                                                            </div>
+                                                                            <c:if test="${not empty order.cancelReason}">
+                                                                                <p class="text-xs text-[#D32F2F] pl-8">
+                                                                                    <strong>Lý do hủy:</strong> ${order.cancelReason}
+                                                                                </p>
+                                                                            </c:if>
                                                                         </div>
                                                                     </c:otherwise>
                                                     </c:choose>
@@ -589,10 +612,86 @@
                                 });
                             }
 
+                            function showCancelError(msg) {
+                                document.getElementById('cancelReasonErrorText').textContent = msg;
+                                document.getElementById('cancelReasonError').classList.remove('hidden');
+                            }
+
+                            // Modal nhập lý do hủy đơn (staff)
+                            function openCancelModal() {
+                                document.getElementById('cancelReasonModal').classList.remove('hidden');
+                                document.getElementById('cancelReasonModal').classList.add('flex');
+                                document.getElementById('cancelReasonText').focus();
+                                document.getElementById('cancelReasonError').classList.add('hidden');
+                            }
+
+                            function closeCancelModal() {
+                                document.getElementById('cancelReasonModal').classList.add('hidden');
+                                document.getElementById('cancelReasonModal').classList.remove('flex');
+                                document.getElementById('cancelReasonText').value = '';
+                                document.getElementById('cancelReasonError').classList.add('hidden');
+                            }
+
+                            function submitCancelForm() {
+                                var reason = document.getElementById('cancelReasonText').value.trim();
+                                if (reason.length === 0) {
+                                    showCancelError('Vui lòng nhập lý do hủy đơn!');
+                                    return;
+                                }
+                                if (reason.length < 10) {
+                                    showCancelError('Lý do hủy phải có ít nhất 10 ký tự!');
+                                    return;
+                                }
+                                if (reason.length > 50) {
+                                    showCancelError('Lý do hủy không được vượt quá 50 ký tự!');
+                                    return;
+                                }
+                                // Phải có ít nhất 1 chữ cái
+                                var hasLetter = /[a-zA-ZÀ-ỹ]/.test(reason);
+                                if (!hasLetter) {
+                                    showCancelError('Lý do hủy phải chứa ít nhất 1 chữ cái!');
+                                    return;
+                                }
+                                document.getElementById('cancelReasonInput').value = reason;
+                                document.getElementById('cancelForm').submit();
+                            }
+
                             document.addEventListener('DOMContentLoaded', function () {
                                 initConfirmModal();
+
+                                // Đóng modal khi click ra ngoài
+                                document.getElementById('cancelReasonModal').addEventListener('click', function(e) {
+                                    if (e.target === this) closeCancelModal();
+                                });
                             });
                         </script>
+
+                        <!-- Modal nhập lý do hủy -->
+                        <div id="cancelReasonModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[200]">
+                            <div class="bg-white w-[460px] rounded-xl p-6 relative shadow-xl">
+                                <button type="button" onclick="closeCancelModal()"
+                                    class="absolute top-3 right-4 text-2xl text-gray-400 hover:text-gray-600">×</button>
+                                <h3 class="text-lg font-bold text-[#D32F2F] mb-2">Hủy đơn hàng</h3>
+                                <p class="text-sm text-gray-500 mb-3">Vui lòng nhập lý do hủy đơn hàng này.</p>
+                                <div id="cancelReasonError" class="hidden mb-3 px-3 py-2 bg-red-50 border border-red-300 rounded-lg text-sm text-[#D32F2F] flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-[16px]">error</span>
+                                    <span id="cancelReasonErrorText"></span>
+                                </div>
+                                <textarea id="cancelReasonText" rows="4" maxlength="50"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+                                    placeholder="Nhập lý do hủy... (10-50 ký tự, phải có chữ cái)"></textarea>
+                                <div class="flex justify-end gap-3 mt-4">
+                                    <button type="button" onclick="closeCancelModal()"
+                                        class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100">
+                                        Thoát
+                                    </button>
+                                    <button type="button" onclick="submitCancelForm()"
+                                        class="px-4 py-2 bg-[#D32F2F] text-white rounded-lg text-sm font-semibold hover:opacity-90">
+                                        Xác nhận hủy đơn
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
             </body>
 
             </html>
