@@ -284,7 +284,15 @@ public class CheckoutController extends HttpServlet {
         }
 
         orderDAO.createOrderDetails(orderID, cartItems);
-        orderDAO.deductStock(orderID);
+
+        boolean stockDeducted = orderDAO.deductStock(orderID);
+        if (!stockDeducted) {
+            orderDAO.cancelOrder(orderID, account.getId(), "Sản phẩm hết hàng do tranh chấp tồn kho");
+            request.getSession().setAttribute("errorMessage", "Sản phẩm trong giỏ vừa hết hàng do có người khác mua trước. Đơn hàng đã bị hủy!");
+            response.sendRedirect(request.getContextPath() + "/cart");
+            return;
+        }
+
         orderDAO.clearCart(account.getId());
 
         // Ghi nhận voucher đã được sử dụng, chỉ sau khi đơn hàng tạo thành công.
