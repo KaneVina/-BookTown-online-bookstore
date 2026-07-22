@@ -16,6 +16,7 @@
             sidebarRole = sidebarUser.getRole();
         }
     }
+    boolean isStaffUser = sidebarUser != null && "staff".equals(sidebarUser.getRole());
 %>
 
 <style>
@@ -145,11 +146,13 @@
             Đơn hàng
         </a>
 
+        <% if (isStaffUser) { %>
         <a href="${pageContext.request.contextPath}/dashboard/product-management"
            class="sidebar-link <%= currentPage.contains("product-management") ? "active" : ""%>">
             <span class="material-symbols-outlined">inventory_2</span>
             Kho hàng
         </a>
+        <% } %>
 
         <a href="${pageContext.request.contextPath}/category"
            class="sidebar-link <%= currentPage.contains("/category") ? "active" : ""%>">

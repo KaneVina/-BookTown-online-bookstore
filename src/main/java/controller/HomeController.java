@@ -32,12 +32,12 @@ public class HomeController extends HttpServlet {
 
         // Wishlist badge cho header (nếu đã đăng nhập) & load list sách yêu thích
         HttpSession session = req.getSession(false);
-        Set<Integer> wishlistBookIds = new HashSet<>();
+        Set<String> wishlistBookIds = new HashSet<>();
         if (session != null) {
             Account account = (Account) session.getAttribute("account");
             if (account != null && "customer".equals(account.getRole())) {
                 WishListDAO wDAO = new WishListDAO();
-                wDAO.getWishlistItems(account.getId()).forEach(wi -> wishlistBookIds.add(wi.getBookID()));
+                wDAO.getWishlistItems(account.getId()).forEach(wi -> wishlistBookIds.add(String.valueOf(wi.getBookID())));
                 session.setAttribute("wishlistCount", wDAO.countWishlistItems(account.getId()));
             }
         }
