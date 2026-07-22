@@ -130,23 +130,24 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-gutter">
-                    <div class="bg-surface p-stack-md rounded-xl shadow-sm border border-outline-variant/10 flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><span class="material-symbols-outlined">pending_actions</span></div>
-                        <div><p class="text-sm text-on-surface-variant">Chờ duyệt</p><p class="text-xl font-bold">${statusSummary.pending}</p></div>
-                    </div>
-                    <div class="bg-surface p-stack-md rounded-xl shadow-sm border border-outline-variant/10 flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-lg bg-warning/10 flex items-center justify-center text-warning"><span class="material-symbols-outlined">inventory_2</span></div>
-                        <div><p class="text-sm text-on-surface-variant">Đang xử lý</p><p class="text-xl font-bold">${statusSummary.processing}</p></div>
-                    </div>
-                    <div class="bg-surface p-stack-md rounded-xl shadow-sm border border-outline-variant/10 flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary"><span class="material-symbols-outlined">local_shipping</span></div>
-                        <div><p class="text-sm text-on-surface-variant">Đang giao</p><p class="text-xl font-bold">${statusSummary.shipping}</p></div>
-                    </div>
-                    <div class="bg-surface p-stack-md rounded-xl shadow-sm border border-outline-variant/10 flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-lg bg-success/10 flex items-center justify-center text-success"><span class="material-symbols-outlined">check_circle</span></div>
-                        <div><p class="text-sm text-on-surface-variant">Hoàn thành</p><p class="text-xl font-bold">${statusSummary.completed}</p></div>
-                    </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+                    <c:forEach var="statusEntry" items="${statusSummary}">
+                        <div class="bg-surface p-stack-md rounded-xl shadow-sm border border-outline-variant/10 flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                <span class="material-symbols-outlined">receipt_long</span>
+                            </div>
+                            <div>
+                                <p class="text-sm text-on-surface-variant">${statusEntry.key}</p>
+                                <p class="text-xl font-bold">${statusEntry.value}</p>
+                            </div>
+                        </div>
+                    </c:forEach>
+
+                    <c:if test="${empty statusSummary}">
+                        <div class="sm:col-span-2 lg:col-span-4 bg-surface p-6 rounded-xl shadow-sm border border-outline-variant/10 text-center text-on-surface-variant">
+                            Chưa có trạng thái đơn hàng trong database.
+                        </div>
+                    </c:if>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
@@ -171,7 +172,7 @@
                                                 <span class="text-primary font-bold"><fmt:formatNumber value="${row.revenue}" type="number" groupingUsed="true"/>đ</span>
                                             </div>
                                             <div class="h-3 bg-surface-container-low rounded-full overflow-hidden">
-                                                <div class="h-full bg-primary rounded-full" style="width: 70%"></div>
+                                                <div class="h-full bg-primary rounded-full" style="width: ${row.percentage}%"></div>
                                             </div>
                                         </div>
                                     </c:forEach>
@@ -215,13 +216,13 @@
                 </div>
 
                 <div class="bg-surface rounded-2xl shadow-[0_4px_20px_rgba(21,101,192,0.08)] overflow-hidden border border-outline-variant/30">
-                    <div class="p-6 border-b border-outline-variant/30 flex items-center justify-between">
-                        <div>
-                            <h3 class="text-xl font-bold">Đơn hàng gần đây</h3>
-                            <p class="text-sm text-on-surface-variant">Danh sách 5 đơn mới nhất theo bộ lọc.</p>
-                        </div>
-                        <a href="${pageContext.request.contextPath}/dashboard/customer-order" class="text-primary font-bold text-sm hover:underline">Xem tất cả</a>
+                    <div class="p-6 border-b border-outline-variant/30">
+                        <h3 class="text-xl font-bold">Tất cả đơn hàng</h3>
+                        <p class="text-sm text-on-surface-variant">
+                            Hiển thị toàn bộ đơn hàng và trạng thái đúng theo dữ liệu trong database.
+                        </p>
                     </div>
+
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
@@ -233,18 +234,34 @@
                                     <th class="px-gutter py-4 text-xs text-on-surface-variant uppercase tracking-wider font-bold">Trạng thái</th>
                                 </tr>
                             </thead>
+
                             <tbody class="divide-y divide-outline-variant/5">
-                                <c:forEach var="order" items="${recentOrders}">
+                                <c:forEach var="order" items="${allOrders}">
                                     <tr class="hover:bg-background-alt/50 transition-colors">
-                                        <td class="px-gutter py-4"><span class="font-bold text-primary">#ORD-${order.orderID}</span></td>
+                                        <td class="px-gutter py-4">
+                                            <span class="font-bold text-primary">#ORD-${order.orderID}</span>
+                                        </td>
                                         <td class="px-gutter py-4 text-sm font-medium">${order.customerName}</td>
-                                        <td class="px-gutter py-4 text-sm text-on-surface-variant"><fmt:formatDate value="${order.createdAt}" pattern="HH:mm - dd/MM/yyyy"/></td>
-                                        <td class="px-gutter py-4 font-bold text-sm"><fmt:formatNumber value="${order.totalPrice}" type="number" groupingUsed="true"/>đ</td>
-                                        <td class="px-gutter py-4"><span class="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold">${order.status}</span></td>
+                                        <td class="px-gutter py-4 text-sm text-on-surface-variant">
+                                            <fmt:formatDate value="${order.createdAt}" pattern="HH:mm - dd/MM/yyyy"/>
+                                        </td>
+                                        <td class="px-gutter py-4 font-bold text-sm">
+                                            <fmt:formatNumber value="${order.totalPrice}" type="number" groupingUsed="true"/>đ
+                                        </td>
+                                        <td class="px-gutter py-4">
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold">
+                                                ${empty order.status ? 'unknown' : order.status}
+                                            </span>
+                                        </td>
                                     </tr>
                                 </c:forEach>
-                                <c:if test="${empty recentOrders}">
-                                    <tr><td colspan="5" class="px-gutter py-10 text-center text-on-surface-variant">Không có đơn hàng phù hợp bộ lọc.</td></tr>
+
+                                <c:if test="${empty allOrders}">
+                                    <tr>
+                                        <td colspan="5" class="px-gutter py-10 text-center text-on-surface-variant">
+                                            Không có đơn hàng phù hợp bộ lọc.
+                                        </td>
+                                    </tr>
                                 </c:if>
                             </tbody>
                         </table>

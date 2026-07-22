@@ -143,21 +143,53 @@ public class CustomerOrderController extends HttpServlet {
         HttpSession session = request.getSession();
         Account staff = (Account) session.getAttribute("account");
 
-        
+        String cancelReason = request.getParameter("cancelReason");
+        if (cancelReason == null) {
+            cancelReason = "";
+        }
+        cancelReason = cancelReason.trim();
+
+        if ("cancelled".equalsIgnoreCase(status) && cancelReason.isEmpty()) {
+            session.setAttribute("errorMessage", "Vui lòng nhập lý do hủy đơn.");
+            if ("detail".equals(redirect)) {
+                response.sendRedirect(request.getContextPath() + "/dashboard/customer-order?action=detail&orderID=" + orderID);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
+            }
+            return;
+        }
+    
+        if ("cancelled".equalsIgnoreCase(status) && (cancelReason.length() < 10 || cancelReason.length() > 50)) {
+            session.setAttribute("errorMessage", "Lý do hủy phải từ 10 đến 50 ký tự.");
+            if ("detail".equals(redirect)) {
+                response.sendRedirect(request.getContextPath() + "/dashboard/customer-order?action=detail&orderID=" + orderID);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
+            }
+            return;
+        }
+      
+        if ("cancelled".equalsIgnoreCase(status) && !cancelReason.matches(".*\\p{L}.*")) {
+            session.setAttribute("errorMessage", "Lý do hủy phải chứa ít nhất 1 chữ cái.");
+            if ("detail".equals(redirect)) {
+                response.sendRedirect(request.getContextPath() + "/dashboard/customer-order?action=detail&orderID=" + orderID);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
+            }
+            return;
+        }
+
         model.Order order = orderDAO.getOrderByID(orderID);
         if (order != null) {
-          
             if ("completed".equalsIgnoreCase(status)) {
                 if ("cod".equalsIgnoreCase(order.getPaymentMethod()) && "unpaid".equalsIgnoreCase(order.getPaymentStatus())) {
                     orderDAO.updatePaymentStatus(orderID, "paid");
                 }
-            }
-            else if ("cancelled".equalsIgnoreCase(status)) {
+            } else if ("cancelled".equalsIgnoreCase(status)) {
                 if ("vnpay".equalsIgnoreCase(order.getPaymentMethod()) && "paid".equalsIgnoreCase(order.getPaymentStatus())) {
-                    // Bước 1: đánh dấu đang chờ hoàn tiền thủ công
+                
                     orderDAO.updatePaymentStatus(orderID, "pending_refund");
 
-                    // Gửi mail thông báo "sẽ hoàn tiền trong 2-5 ngày làm việc"
                     final model.Order finalOrder = order;
                     new Thread(new Runnable() {
                         @Override
@@ -169,15 +201,32 @@ public class CustomerOrderController extends HttpServlet {
                             }
                         }
                     }).start();
+                } else {
+                    final model.Order finalOrder = order;
+                    final String finalReason = cancelReason;
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                utils.EmailUtil.sendOrderCancelledEmail(finalOrder.getCustomerEmail(), finalOrder, finalReason);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
                 }
             }
         }
 
-        boolean ok = orderDAO.updateOrderStatusAndStaff(orderID, status, staff.getId());
+        boolean ok;
+        if ("cancelled".equalsIgnoreCase(status)) {
+            ok = orderDAO.updateOrderStatusAndStaff(orderID, status, staff.getId(), cancelReason);
+        } else {
+            ok = orderDAO.updateOrderStatusAndStaff(orderID, status, staff.getId());
+        }
 
         if (ok) {
             if ("cancelled".equalsIgnoreCase(status)) {
-                // Chỉ hoàn trả sách vào kho nếu trạng thái trước khi hủy là 'pending' hoặc 'confirmed' (chưa giao đi)
                 if (order != null && ("pending".equalsIgnoreCase(order.getStatus()) || "confirmed".equalsIgnoreCase(order.getStatus()))) {
                     orderDAO.restoreStock(orderID);
                 }
@@ -194,11 +243,6 @@ public class CustomerOrderController extends HttpServlet {
         }
     }
 
-    /**
-     * Staff xác nhận đã chuyển tiền tay cho khách.
-     * Điều kiện: đơn phải đang ở payment_status = 'pending_refund'.
-     * Kết quả: payment_status → 'refunded' + gửi mail xác nhận đã hoàn tiền.
-     */
     private void handleConfirmRefund(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
@@ -212,11 +256,10 @@ public class CustomerOrderController extends HttpServlet {
             return;
         }
 
-        // Gọi confirmRefund — chỉ update nếu đang ở pending_refund (idempotent)
+      
         boolean ok = orderDAO.confirmRefund(orderID);
 
         if (ok) {
-            // Reload để lấy trạng thái mới nhất
             final model.Order updatedOrder = orderDAO.getOrderByID(orderID);
             if (updatedOrder != null && updatedOrder.getCustomerEmail() != null) {
                 new Thread(new Runnable() {

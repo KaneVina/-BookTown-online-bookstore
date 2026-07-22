@@ -26,6 +26,7 @@ public class Order {
     private String city;
     private String street;
     private String district;
+    private String cancelReason;
 
     public String getStreet() {
         return street;
@@ -182,5 +183,13 @@ public class Order {
 
     public void setRecipientPhone(String recipientPhone) {
         this.recipientPhone = recipientPhone;
+    }
+
+    public String getCancelReason() {
+        return cancelReason;
+    }
+
+    public void setCancelReason(String cancelReason) {
+        this.cancelReason = cancelReason;
     }
 }

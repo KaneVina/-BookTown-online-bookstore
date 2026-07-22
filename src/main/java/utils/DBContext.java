@@ -16,7 +16,7 @@ public class DBContext {
             String dbURL = "jdbc:sqlserver://localhost:1433;"
                     + "databaseName=BookstoreDB;"
                     + "user=sa;"
-                    + "password=sa;"
+                    + "password=123456;"
                     + "encrypt=true;trustServerCertificate=true;";
             return DriverManager.getConnection(dbURL);
         } catch (Exception e) {

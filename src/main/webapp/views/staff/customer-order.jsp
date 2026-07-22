@@ -189,6 +189,9 @@
                                                     Ngày đặt</th>
                                                 <th
                                                     class="px-gutter py-3.5 text-xs text-on-surface-variant uppercase tracking-wider font-semibold">
+                                                    Thanh toán</th>
+                                                <th
+                                                    class="px-gutter py-3.5 text-xs text-on-surface-variant uppercase tracking-wider font-semibold">
                                                     Tổng tiền</th>
                                                 <th
                                                     class="px-gutter py-3.5 text-xs text-on-surface-variant uppercase tracking-wider font-semibold">
@@ -201,7 +204,7 @@
                                         <tbody class="divide-y divide-outline-variant/5">
                                             <c:if test="${empty orderList}">
                                                 <tr>
-                                                    <td colspan="6"
+                                                    <td colspan="7"
                                                         class="px-gutter py-8 text-center text-on-surface-variant text-sm">
                                                         Không tìm thấy đơn hàng nào.
                                                     </td>
@@ -222,6 +225,20 @@
                                                     <td class="px-gutter py-3.5 text-sm text-on-surface-variant">
                                                         <fmt:formatDate value="${order.createdAt}"
                                                             pattern="HH:mm - dd/MM/yyyy" />
+                                                    </td>
+                                                    <td class="px-gutter py-3.5">
+                                                        <c:choose>
+                                                            <c:when test="${order.paymentMethod == 'vnpay'}">
+                                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold" style="background:#fce4ec; color:#880e4f;">
+                                                                    VNPAY
+                                                                </span>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold" style="background:#fff3e0; color:#e65100;">
+                                                                    COD
+                                                                </span>
+                                                            </c:otherwise>
+                                                        </c:choose>
                                                     </td>
                                                     <td class="px-gutter py-3.5 text-sm font-semibold">
                                                         <fmt:formatNumber value="${order.totalPrice}" pattern="#,###" />
@@ -296,6 +313,7 @@
                                                                             value="updateStatus">
                                                                         <input type="hidden" name="orderID"
                                                                             value="${order.orderID}">
+                                                                        <input type="hidden" name="cancelReason" class="cancelReasonInput" value="">
                                                                         <select name="status"
                                                                             onchange="confirmStatusChange(this)"
                                                                             class="bg-surface border border-outline-variant/30 text-on-surface rounded-lg text-xs focus:ring-primary focus:border-primary px-2 py-1 cursor-pointer">
@@ -422,6 +440,7 @@
                             var confirmModal = null;
                             var pendingAction = null;
                             var activeSelect = null;
+                            var currentSelectElement = null; // Dùng cho modal hủy từ danh sách
 
                             function initConfirmModal() {
                                 confirmModal = document.getElementById('confirmModal');
@@ -477,16 +496,99 @@
                             function confirmStatusChange(selectElement) {
                                 var selectedOption = selectElement.options[selectElement.selectedIndex];
                                 var nextStatusLabel = selectedOption.text.trim();
-                                openConfirmModal(
-                                    'Cập nhật trạng thái',
-                                    'Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng này thành "' + nextStatusLabel + '" không?',
-                                    selectElement,
-                                    function () {
-                                        selectElement.form.submit();
-                                    }
-                                );
+                                var selectedValue = selectedOption.value;
+
+                                if (selectedValue === 'cancelled') {
+                                    // Mở modal nhập lý do hủy
+                                    currentSelectElement = selectElement;
+                                    document.getElementById('listCancelReasonModal').classList.remove('hidden');
+                                    document.getElementById('listCancelReasonModal').classList.add('flex');
+                                    document.getElementById('listCancelReasonText').value = '';
+                                    document.getElementById('listCancelReasonText').focus();
+                                } else {
+                                    // Các trạng thái khác: xác nhận bình thường
+                                    openConfirmModal(
+                                        'Cập nhật trạng thái',
+                                        'Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng này thành "' + nextStatusLabel + '" không?',
+                                        selectElement,
+                                        function () {
+                                            selectElement.form.submit();
+                                        }
+                                    );
+                                }
+                            }
+                            
+                            function showListCancelError(msg) {
+                                document.getElementById('listCancelErrorText').textContent = msg;
+                                document.getElementById('listCancelError').classList.remove('hidden');
+                            }
+
+                            function submitListCancelForm() {
+                                var reason = document.getElementById('listCancelReasonText').value.trim();
+                                if (reason.length === 0) {
+                                    showListCancelError('Vui lòng nhập lý do hủy đơn!');
+                                    return;
+                                }
+                                if (reason.length < 10) {
+                                    showListCancelError('Lý do hủy phải có ít nhất 10 ký tự!');
+                                    return;
+                                }
+                                if (reason.length > 50) {
+                                    showListCancelError('Lý do hủy không được vượt quá 50 ký tự!');
+                                    return;
+                                }
+                                var hasLetter = /[a-zA-ZÀ-ỹ]/.test(reason);
+                                if (!hasLetter) {
+                                    showListCancelError('Lý do hủy phải chứa ít nhất 1 chữ cái!');
+                                    return;
+                                }
+                                var cancelInput = currentSelectElement.form.querySelector('.cancelReasonInput');
+                                if (cancelInput) {
+                                    cancelInput.value = reason;
+                                }
+                                document.getElementById('listCancelReasonModal').classList.add('hidden');
+                                document.getElementById('listCancelReasonModal').classList.remove('flex');
+                                currentSelectElement.form.submit();
+                            }
+
+                            function closeListCancelModal() {
+                                document.getElementById('listCancelReasonModal').classList.add('hidden');
+                                document.getElementById('listCancelReasonModal').classList.remove('flex');
+                                document.getElementById('listCancelError').classList.add('hidden');
+                                if (currentSelectElement) {
+                                    currentSelectElement.value = '';
+                                    currentSelectElement = null;
+                                }
                             }
                         </script>
+
+                        <!-- Modal nhập lý do hủy  -->
+                        <div id="listCancelReasonModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[200]">
+                            <div class="bg-white w-[460px] rounded-xl p-6 relative shadow-xl">
+                                <button type="button" onclick="closeListCancelModal()"
+                                    class="absolute top-3 right-4 text-2xl text-gray-400 hover:text-gray-600">×</button>
+                                <h3 class="text-lg font-bold text-[#D32F2F] mb-2">Hủy đơn hàng</h3>
+                                <p class="text-sm text-gray-500 mb-3">Vui lòng nhập lý do hủy đơn hàng này.</p>
+                             
+                                <div id="listCancelError" class="hidden mb-3 px-3 py-2 bg-red-50 border border-red-300 rounded-lg text-sm text-[#D32F2F] flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-[16px]">error</span>
+                                    <span id="listCancelErrorText"></span>
+                                </div>
+                                <textarea id="listCancelReasonText" rows="4" maxlength="50"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+                                    placeholder="Nhập lý do hủy... (10-50 ký tự, phải có chữ cái)"></textarea>
+                                <div class="flex justify-end gap-3 mt-4">
+                                    <button type="button" onclick="closeListCancelModal()"
+                                        class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100">
+                                        Thoát
+                                    </button>
+                                    <button type="button" onclick="submitListCancelForm()"
+                                        class="px-4 py-2 bg-[#D32F2F] text-white rounded-lg text-sm font-semibold hover:opacity-90">
+                                        Xác nhận hủy đơn
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
 
             </body>
 
