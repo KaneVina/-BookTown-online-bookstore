@@ -270,6 +270,146 @@ public class VoucherDAO {
         );
     }
 
+    // =================================================================
+    // Dữ liệu thuần phục vụ áp voucher ở trang checkout
+    // (KHÔNG chứa business logic — mọi kiểm tra điều kiện nằm ở Controller)
+    // =================================================================
+
+    /** Lấy voucher theo code (chưa bị xoá mềm). Trả về null nếu không tồn tại. */
+    public Voucher getVoucherByCode(String code) {
+        // Thêm "0 AS usedCount" để tái dùng mapRow() chung, tránh lặp lại logic map thủ công (DRY)
+        String sql = "SELECT voucherID, code, discount_percent, quantity, start_date, end_date, "
+                   + "status, is_deleted, min_order_value, max_discount_value, 0 AS usedCount "
+                   + "FROM Voucher WHERE UPPER(code) = ? AND is_deleted = 0";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, code.trim().toUpperCase());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /** Số lượt voucher đã được sử dụng (is_used = 1), dùng để so với quantity giới hạn. */
+    public int getUsedCount(int voucherID) {
+        String sql = "SELECT COUNT(*) FROM CustomerVoucher WHERE voucherID = ? AND is_used = 1";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, voucherID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /** Khách hàng này đã sử dụng voucher này (is_used = 1) hay chưa. */
+    public boolean hasCustomerUsedVoucher(int customerID, int voucherID) {
+        String sql = "SELECT COUNT(*) FROM CustomerVoucher WHERE customerID = ? AND voucherID = ? AND is_used = 1";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerID);
+            ps.setInt(2, voucherID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /** Mã trả về của {@link #insertVoucherUsage}. */
+    public static final int USAGE_OK              = 1;
+    public static final int USAGE_ALREADY_USED    = 0;
+    public static final int USAGE_OUT_OF_QUANTITY = -1;
+    public static final int USAGE_ERROR           = -2;
+
+    /**
+     * Ghi nhận voucher đã được khách hàng sử dụng (gọi sau khi tạo đơn hàng thành công).
+     *
+     * FIX race condition: bước kiểm tra (đã dùng chưa / còn lượt không) và bước ghi nhận
+     * được gộp vào CÙNG MỘT transaction, dùng khóa đọc (UPDLOCK, HOLDLOCK) trên các dòng
+     * liên quan để đảm bảo không có request nào khác chen vào giữa lúc kiểm tra và lúc ghi.
+     * Kết hợp thêm UNIQUE constraint (customerID, voucherID) ở DB làm lưới an toàn thứ 2:
+     * nếu do lý do nào đó 2 transaction vẫn đụng nhau, DB sẽ chặn và ném lỗi vi phạm unique,
+     * được bắt ở catch bên dưới và coi như "đã dùng rồi" thay vì lỗi hệ thống.
+     *
+     * @param quantity giới hạn số lượt của voucher (null = không giới hạn)
+     * @return USAGE_OK / USAGE_ALREADY_USED / USAGE_OUT_OF_QUANTITY / USAGE_ERROR
+     */
+    public int insertVoucherUsage(int customerID, int voucherID, Integer quantity) {
+        String checkCustomerUsed =
+                "SELECT COUNT(*) FROM CustomerVoucher WITH (UPDLOCK, HOLDLOCK) "
+              + "WHERE customerID = ? AND voucherID = ? AND is_used = 1";
+        String checkQuantity =
+                "SELECT COUNT(*) FROM CustomerVoucher WITH (UPDLOCK, HOLDLOCK) "
+              + "WHERE voucherID = ? AND is_used = 1";
+        String insert =
+                "INSERT INTO CustomerVoucher (customerID, voucherID, is_used) VALUES (?, ?, 1)";
+
+        Connection conn = null;
+        try {
+            conn = new DBContext().getConnection();
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+
+            try (PreparedStatement ps = conn.prepareStatement(checkCustomerUsed)) {
+                ps.setInt(1, customerID);
+                ps.setInt(2, voucherID);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        conn.rollback();
+                        return USAGE_ALREADY_USED;
+                    }
+                }
+            }
+
+            if (quantity != null) {
+                try (PreparedStatement ps = conn.prepareStatement(checkQuantity)) {
+                    ps.setInt(1, voucherID);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next() && rs.getInt(1) >= quantity) {
+                            conn.rollback();
+                            return USAGE_OUT_OF_QUANTITY;
+                        }
+                    }
+                }
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement(insert)) {
+                ps.setInt(1, customerID);
+                ps.setInt(2, voucherID);
+                ps.executeUpdate();
+            }
+
+            conn.commit();
+            return USAGE_OK;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+            // SQLState bắt đầu bằng "23" = integrity constraint violation (vi phạm UNIQUE)
+            if (e.getSQLState() != null && e.getSQLState().startsWith("23")) {
+                return USAGE_ALREADY_USED;
+            }
+            return USAGE_ERROR;
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+        }
+    }
+
     private void setQuantityParam(PreparedStatement ps, int idx, Integer quantity)
             throws SQLException {
         if (quantity == null) ps.setNull(idx, Types.INTEGER);
