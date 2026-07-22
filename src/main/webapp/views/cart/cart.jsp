@@ -118,24 +118,11 @@
                                     <fmt:formatNumber value="${subtotal}" type="number" groupingUsed="true"/> đ
                                 </span>
                             </div>
-                            <div class="flex justify-between items-center text-base text-[#2E7D32]">
-                                <span class="font-medium">Giảm giá voucher</span>
-                                <span class="font-semibold" id="voucher-discount">- 0 đ</span>
-                            </div>
                         </div>
 
-                        <div class="mb-6">
-                            <div class="flex rounded-[4px] overflow-hidden border border-outline-variant">
-                                <input id="voucherInput"
-                                       class="flex-1 bg-surface-container-low border-none px-4 py-2 text-[14px] focus:ring-0"
-                                       placeholder="Mã giảm giá" type="text"/>
-                                <button onclick="applyVoucher()"
-                                        class="bg-secondary text-primary px-4 font-bold text-[13px] hover:opacity-90">
-                                    Áp dụng
-                                </button>
-                            </div>
-                            <p id="voucherMsg" class="mt-1 text-[12px] hidden"></p>
-                        </div>
+                        <p class="text-[12px] text-[#424752] -mt-2">
+                            Mã giảm giá voucher sẽ được nhập ở bước thanh toán.
+                        </p>
 
                         <div class="border-t border-[#c2c6d4] pt-6">
                             <div class="flex justify-between items-end mb-8">
@@ -316,7 +303,7 @@ function checkCartStockStatus() {
     if (btnWrap) {
         if (hasInStock) {
             if (!document.getElementById('checkout-link')) {
-                btnWrap.innerHTML = 
+                btnWrap.innerHTML =
                     '<a id="checkout-link" href="${pageContext.request.contextPath}/checkout">' +
                     '    <button id="checkout-btn" class="w-full bg-[#fdd835] hover:bg-[#e8c41d] text-[#705e00] py-4 rounded-xl' +
                     '                   font-bold text-xl shadow-md hover:shadow-lg transition-all duration-200' +
@@ -326,7 +313,7 @@ function checkCartStockStatus() {
                     '</a>';
             }
         } else {
-            btnWrap.innerHTML = 
+            btnWrap.innerHTML =
                 '<button id="checkout-btn" class="w-full bg-gray-300 text-gray-500 py-4 rounded-xl' +
                 '               font-bold text-xl cursor-not-allowed flex items-center justify-center gap-3" disabled>' +
                 '   MUA HÀNG (HẾT HÀNG)' +

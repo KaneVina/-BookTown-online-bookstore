@@ -92,13 +92,13 @@ public class ProductController extends HttpServlet {
 
         // Wishlist check cho user đang đăng nhập
         HttpSession session = req.getSession(false);
-        java.util.Set<Integer> wishlistBookIds = new java.util.HashSet<>();
+        java.util.Set<String> wishlistBookIds = new java.util.HashSet<>();
         if (session != null) {
             Account acc = (Account) session.getAttribute("account");
             if (acc != null && "customer".equals(acc.getRole())) {
                 WishListDAO wDAO = new WishListDAO();
                 wDAO.getWishlistItems(acc.getId())
-                    .forEach(wi -> wishlistBookIds.add(wi.getBookID()));
+                    .forEach(wi -> wishlistBookIds.add(String.valueOf(wi.getBookID())));
                 session.setAttribute("wishlistCount", wDAO.countWishlistItems(acc.getId()));
             }
         }
@@ -137,7 +137,7 @@ public class ProductController extends HttpServlet {
         // canReview: bổ sung từ main
         boolean canReview = false;
         boolean inWishlist = false;
-        java.util.Set<Integer> wishlistBookIds = new java.util.HashSet<>();
+        java.util.Set<String> wishlistBookIds = new java.util.HashSet<>();
 
         HttpSession session = req.getSession(false);
         if (session != null) {
@@ -146,7 +146,7 @@ public class ProductController extends HttpServlet {
                 canReview = reviewDAO.canReview(acc.getId(), bookID);
                 WishListDAO wDAO = new WishListDAO();
                 inWishlist = wDAO.isInWishlist(acc.getId(), bookID);
-                wDAO.getWishlistItems(acc.getId()).forEach(wi -> wishlistBookIds.add(wi.getBookID()));
+                wDAO.getWishlistItems(acc.getId()).forEach(wi -> wishlistBookIds.add(String.valueOf(wi.getBookID())));
             }
         }
 
@@ -197,12 +197,12 @@ public class ProductController extends HttpServlet {
         req.setAttribute("genreMap",      genreMap);
 
         HttpSession session = req.getSession(false);
-        java.util.Set<Integer> wishlistBookIds = new java.util.HashSet<>();
+        java.util.Set<String> wishlistBookIds = new java.util.HashSet<>();
         if (session != null) {
             Account acc = (Account) session.getAttribute("account");
             if (acc != null && "customer".equals(acc.getRole())) {
                 WishListDAO wDAO = new WishListDAO();
-                wDAO.getWishlistItems(acc.getId()).forEach(wi -> wishlistBookIds.add(wi.getBookID()));
+                wDAO.getWishlistItems(acc.getId()).forEach(wi -> wishlistBookIds.add(String.valueOf(wi.getBookID())));
             }
         }
         req.setAttribute("wishlistBookIds", wishlistBookIds);
