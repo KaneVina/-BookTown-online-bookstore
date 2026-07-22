@@ -212,13 +212,6 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-        if (!bookDAO.deductStockForOrder(cartItems)) {
-            request.getSession().setAttribute("errorMessage",
-                    "Một số sách trong giỏ đã hết hàng. Vui lòng kiểm tra lại!");
-            response.sendRedirect(request.getContextPath() + "/cart");
-            return;
-        }
-
         int orderID = orderDAO.createOrder(account.getId(), addressID, paymentMethod, total);
 
         if (orderID == -1) {

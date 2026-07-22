@@ -554,17 +554,26 @@ public class OrderDAO {
 
 
     public boolean deductStock(int orderID) {
-        String sql = "UPDATE Book "
+        String sqlDeduct = "UPDATE Book "
                 + "SET Book.stock_quantity = Book.stock_quantity - OrderDetail.quantity "
                 + "FROM Book "
                 + "INNER JOIN OrderDetail ON Book.bookID = OrderDetail.bookID "
                 + "WHERE OrderDetail.orderID = ? "
                 + "AND Book.stock_quantity >= OrderDetail.quantity";
 
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, orderID);
-            return ps.executeUpdate() > 0;
+        String sqlUpdateStatus = "UPDATE Book SET status = 'out_of_stock' WHERE stock_quantity <= 0 AND (status IS NULL OR status <> 'discontinued')";
+
+        try (Connection conn = new DBContext().getConnection()) {
+            try (PreparedStatement ps1 = conn.prepareStatement(sqlDeduct)) {
+                ps1.setInt(1, orderID);
+                int rows = ps1.executeUpdate();
+                if (rows > 0) {
+                    try (PreparedStatement ps2 = conn.prepareStatement(sqlUpdateStatus)) {
+                        ps2.executeUpdate();
+                    }
+                    return true;
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -572,15 +581,25 @@ public class OrderDAO {
     }
 
     public boolean restoreStock(int orderID) {
-        String sql = "UPDATE Book "
+        String sqlRestore = "UPDATE Book "
                 + "SET Book.stock_quantity = Book.stock_quantity + OrderDetail.quantity "
                 + "FROM Book "
                 + "INNER JOIN OrderDetail ON Book.bookID = OrderDetail.bookID "
                 + "WHERE OrderDetail.orderID = ?";
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, orderID);
-            return ps.executeUpdate() > 0;
+        String sqlUpdateStatus = "UPDATE Book SET status = 'available' WHERE stock_quantity > 0 AND (status IS NULL OR status <> 'discontinued')";
+
+        try (Connection conn = new DBContext().getConnection()) {
+            try (PreparedStatement ps1 = conn.prepareStatement(sqlRestore)) {
+                ps1.setInt(1, orderID);
+                int rows = ps1.executeUpdate();
+                if (rows > 0) {
+                    try (PreparedStatement ps2 = conn.prepareStatement(sqlUpdateStatus)) {
+                        ps2.executeUpdate();
+                    }
+                    return true;
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
