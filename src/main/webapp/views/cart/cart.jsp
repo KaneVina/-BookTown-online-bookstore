@@ -181,9 +181,14 @@
     }
 
     function updateSummary(data) {
-        document.getElementById('summary-subtotal').textContent = formatPrice(data.subtotal);
-        document.getElementById('summary-total').textContent    = formatPrice(data.total);
-        document.getElementById('item-count').textContent       = data.cartCount;
+        var subtotalElem = document.getElementById('summary-subtotal');
+        if (subtotalElem) subtotalElem.textContent = formatPrice(data.subtotal);
+
+        var totalElem = document.getElementById('summary-total');
+        if (totalElem) totalElem.textContent = formatPrice(data.total);
+
+        var countElem = document.getElementById('item-count');
+        if (countElem) countElem.textContent = data.cartCount;
 
         var badge = document.getElementById('cart-count');
         if (badge) badge.textContent = data.cartCount;
@@ -265,15 +270,16 @@
 
             var remaining = document.querySelectorAll('[id^="cart-item-"]').length;
             if (remaining === 0) {
-                document.getElementById('cart-list').innerHTML =
-                    '<div class="flex flex-col items-center justify-center py-20 space-y-6">' +
-                    '<i data-lucide="shopping-cart" class="w-16 h-16 text-[#c2c6d4]"></i>' +
-                    '<p class="text-2xl text-[#424752]">Giỏ hàng của bạn đang trống</p>' +
-                    '<a href="${pageContext.request.contextPath}/home" ' +
-                    'class="bg-[#1565c0] text-white px-8 py-3 rounded-xl font-semibold">Tiếp tục mua sắm</a>' +
-                    '</div>';
-                var summaryCol = document.querySelector('.lg\\:col-span-4');
-                if (summaryCol) summaryCol.style.display = 'none';
+                var gridContainer = document.querySelector('.grid.grid-cols-12');
+                if (gridContainer) {
+                    gridContainer.outerHTML =
+                        '<div class="w-full flex flex-col items-center justify-center py-20 space-y-6 text-center">' +
+                        '<i data-lucide="shopping-cart" class="w-16 h-16 text-[#c2c6d4]"></i>' +
+                        '<p class="text-2xl text-[#424752]">Giỏ hàng của bạn đang trống</p>' +
+                        '<a href="${pageContext.request.contextPath}/home" ' +
+                        'class="bg-[#1565c0] text-white px-8 py-3 rounded-xl font-semibold hover:brightness-95 transition-all">Tiếp tục mua sắm</a>' +
+                        '</div>';
+                }
                 if (typeof lucide !== 'undefined') lucide.createIcons();
             } else {
                 checkCartStockStatus();
