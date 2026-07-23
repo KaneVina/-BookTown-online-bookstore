@@ -375,4 +375,151 @@ public class EmailUtil {
                 + "  </div>"
                 + "</div>";
     }
+
+    public static void sendAccountLockedEmail(String toEmail, String fullName)
+            throws MessagingException, UnsupportedEncodingException {
+
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(FROM_EMAIL, APP_PASSWORD);
+            }
+        });
+
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(FROM_EMAIL, "BookTown Support", "UTF-8"));
+        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+        message.setSubject("BookTown - Tài khoản của bạn đã bị khóa");
+        message.setContent(buildAccountStatusEmailHtml(fullName, true), "text/html; charset=UTF-8");
+
+        Transport.send(message);
+    }
+
+    public static void sendAccountUnlockedEmail(String toEmail, String fullName)
+            throws MessagingException, UnsupportedEncodingException {
+
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(FROM_EMAIL, APP_PASSWORD);
+            }
+        });
+
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(FROM_EMAIL, "BookTown Support", "UTF-8"));
+        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+        message.setSubject("BookTown - Tài khoản của bạn đã được mở khóa");
+        message.setContent(buildAccountStatusEmailHtml(fullName, false), "text/html; charset=UTF-8");
+
+        Transport.send(message);
+    }
+
+    private static String buildAccountStatusEmailHtml(String fullName, boolean locked) {
+        String safeName = (fullName == null || fullName.trim().isEmpty()) ? "Quý khách" : fullName;
+
+        String title = locked ? "Tài khoản đã bị khóa" : "Tài khoản đã được mở khóa";
+        String titleColor = locked ? "#D32F2F" : "#2E7D32";
+
+        String content = locked
+                ? "Tài khoản BookTown của bạn đã bị <strong>khóa</strong> bởi quản trị viên. "
+                + "Trong thời gian này bạn sẽ không thể đăng nhập hoặc sử dụng các chức năng của hệ thống."
+                : "Tài khoản BookTown của bạn đã được <strong>mở khóa</strong>. "
+                + "Bạn có thể đăng nhập và tiếp tục sử dụng hệ thống như bình thường.";
+
+        String note = locked
+                ? "Nếu bạn cho rằng đây là sự nhầm lẫn, vui lòng liên hệ BookTown để được hỗ trợ."
+                : "Nếu bạn không yêu cầu mở khóa tài khoản, vui lòng liên hệ BookTown ngay để được hỗ trợ.";
+
+        return "<div style=\"font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 30px 0;\">"
+                + "  <div style=\"max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e0e0e0;\">"
+                // Header
+                + "    <div style=\"background-color: #134aa4; padding: 20px; text-align: center;\">"
+                + "      <img src=\"https://res.cloudinary.com/dylkbydhg/image/upload/v1780127819/logoBT_1_fyixrl.png\" alt=\"BookTown Logo\" style=\"max-width: 180px; height: auto; display: block; margin: 0 auto;\" />"
+                + "    </div>"
+                // Nội dung
+                + "    <div style=\"padding: 30px 40px;\">"
+                + "      <h2 style=\"color: " + titleColor + "; font-size: 20px; margin-top: 0;\">" + title + "</h2>"
+                + "      <p style=\"color: #555555; font-size: 15px; line-height: 1.6;\">"
+                + "        Xin chào <strong>" + safeName + "</strong>,<br><br>"
+                + content
+                + "      </p>"
+                + "      <div style=\"border-top: 1px solid #eeeeee; margin-top: 30px; padding-top: 20px;\">"
+                + "        <p style=\"color: #888888; font-size: 13px; line-height: 1.5; margin: 0;\">"
+                + note
+                + "        </p>"
+                + "      </div>"
+                + "    </div>"
+                // Footer
+                + "    <div style=\"background-color: #f9f9f9; padding: 20px; text-align: center; border-top: 1px solid #eeeeee;\">"
+                + "      <p style=\"color: #999999; font-size: 13px; margin: 0;\">"
+                + "        &copy; 2026 BookTown. Tất cả quyền được bảo lưu."
+                + "      </p>"
+                + "    </div>"
+                + "  </div>"
+                + "</div>";
+    }
+
+    public static void sendAccountLockedForViolationEmail(String toEmail, String fullName)
+            throws MessagingException, UnsupportedEncodingException {
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(FROM_EMAIL, APP_PASSWORD);
+            }
+        });
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(FROM_EMAIL, "BookTown Support", "UTF-8"));
+        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+        message.setSubject("BookTown - Tài khoản của bạn đã bị khóa do vi phạm");
+        message.setContent(buildAccountViolationLockedHtml(fullName), "text/html; charset=UTF-8");
+        Transport.send(message);
+    }
+
+    private static String buildAccountViolationLockedHtml(String fullName) {
+        String safeName = (fullName == null || fullName.trim().isEmpty()) ? "Quý khách" : fullName;
+        return "<div style=\"font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 30px 0;\">"
+                + "  <div style=\"max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e0e0e0;\">"
+                + "    <div style=\"background-color: #134aa4; padding: 20px; text-align: center;\">"
+                + "      <img src=\"https://res.cloudinary.com/dylkbydhg/image/upload/v1780127819/logoBT_1_fyixrl.png\" alt=\"BookTown Logo\" style=\"max-width: 180px; height: auto; display: block; margin: 0 auto;\" />"
+                + "    </div>"
+                + "    <div style=\"padding: 30px 40px;\">"
+                + "      <h2 style=\"color: #D32F2F; font-size: 20px; margin-top: 0;\">Tài khoản đã bị khóa do vi phạm</h2>"
+                + "      <p style=\"color: #555555; font-size: 15px; line-height: 1.6;\">"
+                + "        Xin chào <strong>" + safeName + "</strong>,<br><br>"
+                + "        Tài khoản BookTown của bạn đã bị <strong>khóa</strong> do có hành vi vi phạm quy định cộng đồng "
+                + "        (ví dụ: nội dung đánh giá sản phẩm không phù hợp). Trong thời gian này bạn sẽ không thể "
+                + "        đăng nhập hoặc sử dụng các chức năng của hệ thống."
+                + "      </p>"
+                + "      <div style=\"border-top: 1px solid #eeeeee; margin-top: 30px; padding-top: 20px;\">"
+                + "        <p style=\"color: #888888; font-size: 13px; line-height: 1.5; margin: 0;\">"
+                + "          Nếu bạn cho rằng đây là sự nhầm lẫn, vui lòng liên hệ BookTown để được hỗ trợ và khiếu nại."
+                + "        </p>"
+                + "      </div>"
+                + "    </div>"
+                + "    <div style=\"background-color: #f9f9f9; padding: 20px; text-align: center; border-top: 1px solid #eeeeee;\">"
+                + "      <p style=\"color: #999999; font-size: 13px; margin: 0;\">"
+                + "        &copy; 2026 BookTown. Tất cả quyền được bảo lưu."
+                + "      </p>"
+                + "    </div>"
+                + "  </div>"
+                + "</div>";
+    }
+
 }

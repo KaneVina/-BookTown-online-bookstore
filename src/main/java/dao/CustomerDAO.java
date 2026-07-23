@@ -66,8 +66,7 @@ public class CustomerDAO {
         return false;
     }
 
-    // cập nhật dữ liệu của customer
-    public boolean updateCustomer(
+      public boolean updateCustomer(
             int id,
             String fullname,
             String phone,
@@ -95,9 +94,7 @@ public class CustomerDAO {
         return false;
     }
 
-    // lấy id của customer ở trang profile
     public Customer getCustomerById(int id) {
-
         String sql = "SELECT customerID, fullname, email, password, " + "phone, role, status, gender, dob " + "FROM Customer " + "WHERE customerID = ?";
 
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -152,7 +149,6 @@ public class CustomerDAO {
         return false;
     }
 
-    // admin và staff quản lý tài khoản người dùng 
     public List<Customer> getAllCustomers() {
         List<Customer> list = new ArrayList<>();
         String sql = "SELECT * FROM Customer";
@@ -173,7 +169,6 @@ public class CustomerDAO {
         return list;
     }
 
-    // cập nhật trạng thái của người dùng
     public boolean toggleCustomerStatus(int customerID, String status) {
 
         String sql = "UPDATE Customer SET status = ? WHERE customerID = ?";
@@ -197,7 +192,6 @@ public class CustomerDAO {
         return false;
     }
 
-    // thêm phân trang 
     public int countCustomers() {
 
         String sql = "SELECT COUNT(*) FROM Customer";
