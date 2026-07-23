@@ -10,24 +10,22 @@
 
     <h1 class="text-3xl font-extrabold mb-12 text-[#071e27]">Giỏ hàng của bạn</h1>
 
-    <div class="grid grid-cols-12 gap-6">
+    <c:choose>
+        <c:when test="${empty cartItems}">
+            <div class="w-full flex flex-col items-center justify-center py-20 space-y-6 text-center">
+                <i data-lucide="shopping-cart" class="w-16 h-16 text-[#c2c6d4]"></i>
+                <p class="text-2xl text-[#424752]">Giỏ hàng của bạn đang trống</p>
+                <a href="${pageContext.request.contextPath}/home"
+                   class="bg-[#1565c0] text-white px-8 py-3 rounded-xl font-semibold hover:brightness-95 transition-all">
+                    Tiếp tục mua sắm
+                </a>
+            </div>
+        </c:when>
 
-        <div class="col-span-12 lg:col-span-8 space-y-6" id="cart-list">
+        <c:otherwise>
+            <div class="grid grid-cols-12 gap-6">
 
-            <c:choose>
-
-                <c:when test="${empty cartItems}">
-                    <div class="flex flex-col items-center justify-center py-20 space-y-6">
-                        <i data-lucide="shopping-cart" class="w-16 h-16 text-[#c2c6d4]"></i>
-                        <p class="text-2xl text-[#424752]">Giỏ hàng của bạn đang trống</p>
-                        <a href="${pageContext.request.contextPath}/home"
-                           class="bg-[#1565c0] text-white px-8 py-3 rounded-xl font-semibold hover:brightness-95 transition-all">
-                            Tiếp tục mua sắm
-                        </a>
-                    </div>
-                </c:when>
-
-                <c:otherwise>
+                <div class="col-span-12 lg:col-span-8 space-y-6" id="cart-list">
                     <c:forEach var="item" items="${cartItems}">
                         <div class="bg-white rounded-xl p-6 flex flex-col md:flex-row items-center gap-6
                                     transition-transform duration-200 ease-out hover:-translate-y-0.5"
@@ -103,81 +101,76 @@
                             </div>
                         </div>
                     </c:forEach>
-                </c:otherwise>
-
-            </c:choose>
-        </div>
-
-        <c:if test="${not empty cartItems}">
-        <div class="col-span-12 lg:col-span-4">
-            <div class="bg-white rounded-xl p-8 sticky top-24 space-y-6"
-                 style="box-shadow: 0 4px 20px rgba(21,101,192,0.08);">
-
-                <h2 class="text-2xl font-bold text-[#071e27] border-b border-[#c2c6d4] pb-4">Tóm tắt đơn hàng</h2>
-
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center text-base">
-                        <span class="text-[#424752]">
-                            Tạm tính (<span id="item-count">${totalQuantity}</span> sản phẩm)
-                        </span>
-                        <span class="font-semibold" id="summary-subtotal">
-                            <fmt:formatNumber value="${subtotal}" type="number" groupingUsed="true"/> đ
-                        </span>
-                    </div>
                 </div>
 
-                <p class="text-[12px] text-[#424752] -mt-2">
-                    Mã giảm giá voucher sẽ được nhập ở bước thanh toán.
-                </p>
+                <div class="col-span-12 lg:col-span-4">
+                    <div class="bg-white rounded-xl p-8 sticky top-24 space-y-6"
+                         style="box-shadow: 0 4px 20px rgba(21,101,192,0.08);">
 
-                <div class="border-t border-[#c2c6d4] pt-6">
-                    <div class="flex justify-between items-end mb-8">
-                        <span class="text-xl font-bold text-[#071e27]">Tổng cộng</span>
-                        <p class="text-[#004d99] font-extrabold text-3xl" id="summary-total">
-                            <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/> đ
+                        <h2 class="text-2xl font-bold text-[#071e27] border-b border-[#c2c6d4] pb-4">Tóm tắt đơn hàng</h2>
+
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center text-base">
+                                <span class="text-[#424752]">
+                                    Tạm tính (<span id="item-count">${totalQuantity}</span> sản phẩm)
+                                </span>
+                                <span class="font-semibold" id="summary-subtotal">
+                                    <fmt:formatNumber value="${subtotal}" type="number" groupingUsed="true"/> đ
+                                </span>
+                            </div>
+                        </div>
+
+                        <p class="text-[12px] text-[#424752] -mt-2">
+                            Mã giảm giá voucher sẽ được nhập ở bước thanh toán.
                         </p>
-                    </div>
 
-                    <c:set var="hasInStock" value="false"/>
-                    <c:forEach var="item" items="${cartItems}">
-                        <c:if test="${item.stockQuantity > 0}">
-                            <c:set var="hasInStock" value="true"/>
-                        </c:if>
-                    </c:forEach>
+                        <div class="border-t border-[#c2c6d4] pt-6">
+                            <div class="flex justify-between items-end mb-8">
+                                <span class="text-xl font-bold text-[#071e27]">Tổng cộng</span>
+                                <p class="text-[#004d99] font-extrabold text-3xl" id="summary-total">
+                                    <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/> đ
+                                </p>
+                            </div>
 
-                    <div id="checkout-btn-wrap">
-                        <c:if test="${not empty cartItems}">
-                            <c:choose>
-                                <c:when test="${hasInStock}">
-                                    <a id="checkout-link" href="${pageContext.request.contextPath}/checkout">
-                                        <button id="checkout-btn" class="w-full bg-[#fdd835] hover:bg-[#e8c41d] text-[#705e00] py-4 rounded-xl
-                                                       font-bold text-xl shadow-md hover:shadow-lg transition-all duration-200
-                                                       flex items-center justify-center gap-3 active:scale-95">
-                                           MUA HÀNG
+                            <c:set var="hasInStock" value="false"/>
+                            <c:forEach var="item" items="${cartItems}">
+                                <c:if test="${item.stockQuantity > 0}">
+                                    <c:set var="hasInStock" value="true"/>
+                                </c:if>
+                            </c:forEach>
+
+                            <div id="checkout-btn-wrap">
+                                <c:choose>
+                                    <c:when test="${hasInStock}">
+                                        <a id="checkout-link" href="${pageContext.request.contextPath}/checkout">
+                                            <button id="checkout-btn" class="w-full bg-[#fdd835] hover:bg-[#e8c41d] text-[#705e00] py-4 rounded-xl
+                                                           font-bold text-xl shadow-md hover:shadow-lg transition-all duration-200
+                                                           flex items-center justify-center gap-3 active:scale-95">
+                                               MUA HÀNG
+                                            </button>
+                                        </a>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <button id="checkout-btn" class="w-full bg-gray-300 text-gray-500 py-4 rounded-xl
+                                                       font-bold text-xl cursor-not-allowed flex items-center justify-center gap-3" disabled>
+                                           MUA HÀNG (HẾT HÀNG)
                                         </button>
-                                    </a>
-                                </c:when>
-                                <c:otherwise>
-                                    <button id="checkout-btn" class="w-full bg-gray-300 text-gray-500 py-4 rounded-xl
-                                                   font-bold text-xl cursor-not-allowed flex items-center justify-center gap-3" disabled>
-                                       MUA HÀNG (HẾT HÀNG)
-                                    </button>
-                                </c:otherwise>
-                            </c:choose>
-                        </c:if>
-                    </div>
-                </div>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                        </div>
 
-                <div class="pt-4 flex items-center gap-2 justify-center text-[#424752] text-xs opacity-60">
-                    <i data-lucide="shield-check" class="w-4 h-4"></i>
-                    Thanh toán an toàn &amp; bảo mật 100%
+                        <div class="pt-4 flex items-center gap-2 justify-center text-[#424752] text-xs opacity-60">
+                            <i data-lucide="shield-check" class="w-4 h-4"></i>
+                            Thanh toán an toàn &amp; bảo mật 100%
+                        </div>
+
+                    </div>
                 </div>
 
             </div>
-        </div>
-        </c:if>
-
-    </div>
+        </c:otherwise>
+    </c:choose>
 </main>
 
 <script>
@@ -188,9 +181,14 @@
     }
 
     function updateSummary(data) {
-        document.getElementById('summary-subtotal').textContent = formatPrice(data.subtotal);
-        document.getElementById('summary-total').textContent    = formatPrice(data.total);
-        document.getElementById('item-count').textContent       = data.cartCount;
+        var subtotalElem = document.getElementById('summary-subtotal');
+        if (subtotalElem) subtotalElem.textContent = formatPrice(data.subtotal);
+
+        var totalElem = document.getElementById('summary-total');
+        if (totalElem) totalElem.textContent = formatPrice(data.total);
+
+        var countElem = document.getElementById('item-count');
+        if (countElem) countElem.textContent = data.cartCount;
 
         var badge = document.getElementById('cart-count');
         if (badge) badge.textContent = data.cartCount;
@@ -272,15 +270,16 @@
 
             var remaining = document.querySelectorAll('[id^="cart-item-"]').length;
             if (remaining === 0) {
-                document.getElementById('cart-list').innerHTML =
-                    '<div class="flex flex-col items-center justify-center py-20 space-y-6">' +
-                    '<i data-lucide="shopping-cart" class="w-16 h-16 text-[#c2c6d4]"></i>' +
-                    '<p class="text-2xl text-[#424752]">Giỏ hàng của bạn đang trống</p>' +
-                    '<a href="${pageContext.request.contextPath}/home" ' +
-                    'class="bg-[#1565c0] text-white px-8 py-3 rounded-xl font-semibold">Tiếp tục mua sắm</a>' +
-                    '</div>';
-                var summaryCol = document.querySelector('.lg\\:col-span-4');
-                if (summaryCol) summaryCol.style.display = 'none';
+                var gridContainer = document.querySelector('.grid.grid-cols-12');
+                if (gridContainer) {
+                    gridContainer.outerHTML =
+                        '<div class="w-full flex flex-col items-center justify-center py-20 space-y-6 text-center">' +
+                        '<i data-lucide="shopping-cart" class="w-16 h-16 text-[#c2c6d4]"></i>' +
+                        '<p class="text-2xl text-[#424752]">Giỏ hàng của bạn đang trống</p>' +
+                        '<a href="${pageContext.request.contextPath}/home" ' +
+                        'class="bg-[#1565c0] text-white px-8 py-3 rounded-xl font-semibold hover:brightness-95 transition-all">Tiếp tục mua sắm</a>' +
+                        '</div>';
+                }
                 if (typeof lucide !== 'undefined') lucide.createIcons();
             } else {
                 checkCartStockStatus();
@@ -310,7 +309,7 @@ function checkCartStockStatus() {
     if (btnWrap) {
         if (hasInStock) {
             if (!document.getElementById('checkout-link')) {
-                btnWrap.innerHTML = 
+                btnWrap.innerHTML =
                     '<a id="checkout-link" href="${pageContext.request.contextPath}/checkout">' +
                     '    <button id="checkout-btn" class="w-full bg-[#fdd835] hover:bg-[#e8c41d] text-[#705e00] py-4 rounded-xl' +
                     '                   font-bold text-xl shadow-md hover:shadow-lg transition-all duration-200' +
@@ -320,7 +319,7 @@ function checkCartStockStatus() {
                     '</a>';
             }
         } else {
-            btnWrap.innerHTML = 
+            btnWrap.innerHTML =
                 '<button id="checkout-btn" class="w-full bg-gray-300 text-gray-500 py-4 rounded-xl' +
                 '               font-bold text-xl cursor-not-allowed flex items-center justify-center gap-3" disabled>' +
                 '   MUA HÀNG (HẾT HÀNG)' +
