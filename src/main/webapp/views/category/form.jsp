@@ -18,7 +18,7 @@
         <%@ include file="/views/layout/dashboard/sidebar.jsp" %>
         <main class="flex-1 md:ml-64 min-h-screen">
             <div class="px-6 py-8 max-w-3xl mx-auto space-y-6">
-                <a href="${pageContext.request.contextPath}/category" class="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
+                <a href="${pageContext.request.contextPath}/dashboard/category-management" class="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
                     <span class="material-symbols-outlined text-[18px]">arrow_back</span>
                     Quay lại danh sách
                 </a>
@@ -29,7 +29,7 @@
                         <p class="text-sm text-on-surface-variant mt-1">Nhập tên thể loại để lưu vào hệ thống BookTown.</p>
                     </div>
 
-                    <form action="${pageContext.request.contextPath}/category" method="post" class="p-6 space-y-5">
+                    <form action="${pageContext.request.contextPath}/dashboard/category-management" method="post" class="p-6 space-y-5">
                         <input type="hidden" name="action" value="${formAction}">
                         <input type="hidden" name="id" value="${genre.genreID}">
 
@@ -42,7 +42,7 @@
                         </div>
 
                         <div class="flex justify-end gap-3 pt-2">
-                            <a href="${pageContext.request.contextPath}/category"
+                            <a href="${pageContext.request.contextPath}/dashboard/category-management"
                                class="inline-flex items-center justify-center rounded-xl border border-outline-variant bg-white px-5 py-3 text-sm font-semibold text-primary hover:bg-surface-container-low transition">
                                 Hủy
                             </a>

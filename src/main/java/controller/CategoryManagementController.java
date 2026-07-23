@@ -30,7 +30,7 @@ public class CategoryManagementController extends HttpServlet {
 
         if ("create".equals(action)) {
             if (!canManageCategory) {
-                response.sendRedirect(request.getContextPath() + "/category?error=" + encode("Bạn không có quyền thêm thể loại."));
+                response.sendRedirect(request.getContextPath() + "/dashboard/category-management?error=" + encode("Bạn không có quyền thêm thể loại."));
                 return;
             }
             request.setAttribute("pageTitle", "Thêm thể loại");
@@ -41,13 +41,13 @@ public class CategoryManagementController extends HttpServlet {
 
         if ("edit".equals(action)) {
             if (!canManageCategory) {
-                response.sendRedirect(request.getContextPath() + "/category?error=" + encode("Bạn không có quyền cập nhật thể loại."));
+                response.sendRedirect(request.getContextPath() + "/dashboard/category-management?error=" + encode("Bạn không có quyền cập nhật thể loại."));
                 return;
             }
             int id = parseInt(request.getParameter("id"));
             Genre genre = genreDAO.getGenreById(id);
             if (genre == null) {
-                response.sendRedirect(request.getContextPath() + "/category?error=" + encode("Không tìm thấy thể loại."));
+                response.sendRedirect(request.getContextPath() + "/dashboard/category-management?error=" + encode("Không tìm thấy thể loại."));
                 return;
             }
             request.setAttribute("genre", genre);
@@ -61,7 +61,7 @@ public class CategoryManagementController extends HttpServlet {
             int id = parseInt(request.getParameter("id"));
             Genre genre = genreDAO.getGenreById(id);
             if (genre == null) {
-                response.sendRedirect(request.getContextPath() + "/category?error=" + encode("Không tìm thấy thể loại."));
+                response.sendRedirect(request.getContextPath() + "/dashboard/category-management?error=" + encode("Không tìm thấy thể loại."));
                 return;
             }
             request.setAttribute("genre", genre);
@@ -88,7 +88,7 @@ public class CategoryManagementController extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         String action = request.getParameter("action");
-        String redirectUrl = request.getContextPath() + "/category";
+        String redirectUrl = request.getContextPath() + "/dashboard/category-management";
 
         if (!canManageCategory(request)) {
             response.sendRedirect(redirectUrl + "?error=" + encode("Bạn không có quyền thực hiện thao tác này."));

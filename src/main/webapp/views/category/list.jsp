@@ -41,7 +41,7 @@
                         <p class="text-sm text-on-surface-variant mt-2">Tạo, cập nhật, xem chi tiết và lọc thể loại sách của BookTown.</p>
                     </div>
                     <c:if test="${canManageCategory}">
-                        <a href="${pageContext.request.contextPath}/category?action=create"
+                        <a href="${pageContext.request.contextPath}/dashboard/category-management?action=create"
                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white shadow-card hover:bg-[#003f7d] transition">
                             <span class="material-symbols-outlined text-[20px]">add</span>
                             Thêm thể loại
@@ -73,7 +73,7 @@
                         </div>
                     </div>
                     <div class="bg-surface rounded-2xl border border-outline-variant p-5 shadow-card md:col-span-2">
-                        <form action="${pageContext.request.contextPath}/category" method="get" class="flex flex-col md:flex-row gap-3">
+                        <form action="${pageContext.request.contextPath}/dashboard/category-management" method="get" class="flex flex-col md:flex-row gap-3">
                             <div class="flex-1 relative">
                                 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
                                 <input type="text" name="keyword" value="${keyword}"
@@ -84,7 +84,7 @@
                                 <span class="material-symbols-outlined text-[19px]">filter_alt</span>
                                 Tìm kiếm
                             </button>
-                            <a href="${pageContext.request.contextPath}/category"
+                            <a href="${pageContext.request.contextPath}/dashboard/category-management"
                                class="inline-flex items-center justify-center rounded-xl border border-outline-variant bg-white px-5 py-3 text-sm font-semibold text-primary hover:bg-surface-container-low transition">
                                 Hủy
                             </a>
@@ -118,12 +118,12 @@
                                         <td class="px-6 py-4 text-sm text-on-surface-variant">${genre.bookCount}</td>
                                         <td class="px-6 py-4">
                                             <div class="flex items-center justify-end gap-2">
-                                                <a href="${pageContext.request.contextPath}/category?action=detail&id=${genre.genreID}"
+                                                <a href="${pageContext.request.contextPath}/dashboard/category-management?action=detail&id=${genre.genreID}"
                                                    class="w-9 h-9 rounded-lg border border-outline-variant flex items-center justify-center text-primary hover:bg-surface-container-low" title="Xem chi tiết">
                                                     <span class="material-symbols-outlined text-[18px]">visibility</span>
                                                 </a>
                                                 <c:if test="${canManageCategory}">
-                                                    <form action="${pageContext.request.contextPath}/category" method="post" onsubmit="openDeleteCategoryModal(this); return false;">
+                                                    <form action="${pageContext.request.contextPath}/dashboard/category-management" method="post" onsubmit="openDeleteCategoryModal(this); return false;">
                                                         <input type="hidden" name="action" value="delete">
                                                         <input type="hidden" name="id" value="${genre.genreID}">
                                                         <button type="submit" class="w-9 h-9 rounded-lg border border-red-200 flex items-center justify-center text-error hover:bg-red-50" title="Xóa">

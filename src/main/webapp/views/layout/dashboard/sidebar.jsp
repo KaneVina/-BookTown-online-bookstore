@@ -156,8 +156,8 @@
         </a>
         <% } %>
 
-        <a href="${pageContext.request.contextPath}/category"
-           class="sidebar-link <%= currentPage.contains("/category") ? "active" : ""%>">
+        <a href="${pageContext.request.contextPath}/dashboard/category-management"
+           class="sidebar-link <%= currentPage.contains("/dashboard/category-management") ? "active" : ""%>">
             <span class="material-symbols-outlined">category</span>
             Thể loại
         </a>

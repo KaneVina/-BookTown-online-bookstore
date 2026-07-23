@@ -69,11 +69,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                         <div>
                             <label class="block text-sm font-semibold text-on-surface-variant mb-2">Từ ngày</label>
-                            <input type="date" name="fromDate" value="${fromDate}" class="w-full rounded-xl border-outline-variant bg-surface-container-low focus:ring-primary focus:border-primary">
+                            <input type="date" name="fromDate" value="${fromDate}" max="${currentDate}" class="w-full rounded-xl border-outline-variant bg-surface-container-low focus:ring-primary focus:border-primary">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-on-surface-variant mb-2">Đến ngày</label>
-                            <input type="date" name="toDate" value="${toDate}" class="w-full rounded-xl border-outline-variant bg-surface-container-low focus:ring-primary focus:border-primary">
+                            <input type="date" name="toDate" value="${toDate}" max="${currentDate}" class="w-full rounded-xl border-outline-variant bg-surface-container-low focus:ring-primary focus:border-primary">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-on-surface-variant mb-2">Thể loại</label>
@@ -85,7 +85,7 @@
                             </select>
                         </div>
                         <div class="flex gap-3">
-                            <button type="submit" class="flex-1 px-5 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary-container transition-colors flex items-center justify-center gap-2">
+                            <button type="submit" name="action" value="filter" class="flex-1 px-5 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary-container transition-colors flex items-center justify-center gap-2">
                                 <span class="material-symbols-outlined text-[18px]">filter_alt</span>
                                 Lọc
                             </button>
@@ -95,6 +95,12 @@
                         </div>
                     </div>
                 </form>
+
+                <c:if test="${not empty dateError}">
+                    <div class="-mt-8 rounded-xl border border-error/30 bg-error/5 px-4 py-3 text-sm font-semibold text-error">
+                        ${dateError}
+                    </div>
+                </c:if>
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div class="bg-surface p-6 rounded-2xl shadow-[0_4px_20px_rgba(21,101,192,0.08)] flex flex-col gap-2">
@@ -216,11 +222,21 @@
                 </div>
 
                 <div class="bg-surface rounded-2xl shadow-[0_4px_20px_rgba(21,101,192,0.08)] overflow-hidden border border-outline-variant/30">
-                    <div class="p-6 border-b border-outline-variant/30">
-                        <h3 class="text-xl font-bold">Tất cả đơn hàng</h3>
-                        <p class="text-sm text-on-surface-variant">
-                            Hiển thị toàn bộ đơn hàng và trạng thái đúng theo dữ liệu trong database.
-                        </p>
+                    <div class="p-6 border-b border-outline-variant/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <h3 class="text-xl font-bold">Đơn hàng</h3>
+                            <p class="text-sm text-on-surface-variant">
+                                <c:choose>
+                                    <c:when test="${showAll}">Đang hiển thị tất cả đơn hàng trong hệ thống.</c:when>
+                                    <c:when test="${filterRequested}">Đang hiển thị đơn hàng theo bộ lọc đã chọn.</c:when>
+                                    <c:otherwise>Chọn bộ lọc hoặc bấm Xem tất cả đơn hàng để hiển thị dữ liệu.</c:otherwise>
+                                </c:choose>
+                            </p>
+                        </div>
+                        <a href="${pageContext.request.contextPath}/dashboard?showAll=true"
+                           class="shrink-0 px-4 py-2.5 rounded-xl bg-white border border-outline-variant/60 text-on-surface font-semibold hover:bg-background-alt transition-colors">
+                            Xem tất cả đơn hàng
+                        </a>
                     </div>
 
                     <div class="overflow-x-auto">
@@ -259,7 +275,11 @@
                                 <c:if test="${empty allOrders}">
                                     <tr>
                                         <td colspan="5" class="px-gutter py-10 text-center text-on-surface-variant">
-                                            Không có đơn hàng phù hợp bộ lọc.
+                                            <c:choose>
+                                                <c:when test="${showAll}">Chưa có đơn hàng trong hệ thống.</c:when>
+                                                <c:when test="${filterRequested}">Không có đơn hàng phù hợp bộ lọc.</c:when>
+                                                <c:otherwise>Khu vực đơn hàng đang để trống.</c:otherwise>
+                                            </c:choose>
                                         </td>
                                     </tr>
                                 </c:if>
