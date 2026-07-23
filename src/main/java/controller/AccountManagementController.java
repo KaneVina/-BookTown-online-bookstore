@@ -155,10 +155,6 @@ public class AccountManagementController extends HttpServlet {
     }
 
     private void handleToggleStaff(HttpServletRequest request, PrintWriter out, Account loginUser) {
-        if (!"admin".equals(loginUser.getRole())) {
-            out.write("{\"success\":false,\"message\":\"Không có quyền\"}");
-            return;
-        }
         int id = Integer.parseInt(request.getParameter("id"));
         String status = request.getParameter("status");
         boolean ok = accountDAO.toggleStaffStatus(id, status);
@@ -173,10 +169,6 @@ public class AccountManagementController extends HttpServlet {
         out.write(ok ? "{\"success\":true}" : "{\"success\":false,\"message\":\"Cập nhật thất bại\"}");
     }
 
-    /**
-     * Gửi email thông báo khóa/mở khóa tài khoản ở luồng riêng (không chặn response
-     * và không làm fail thao tác khóa/mở khóa nếu gửi mail gặp lỗi).
-     */
     private void sendAccountStatusEmailAsync(String email, String fullname, String newStatus) {
         final String toEmail = email;
         final String name = fullname;
@@ -218,10 +210,6 @@ public class AccountManagementController extends HttpServlet {
     }
 
     private void handleUpdateStaff(HttpServletRequest request, PrintWriter out, Account loginUser) {
-        if (!"admin".equals(loginUser.getRole())) {
-            out.write("{\"success\":false,\"message\":\"Không có quyền\"}");
-            return;
-        }
         int id = Integer.parseInt(request.getParameter("id"));
         String fullname = request.getParameter("fullname");
         String phone = request.getParameter("phone");

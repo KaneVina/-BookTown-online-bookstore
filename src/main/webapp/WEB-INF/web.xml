@@ -170,7 +170,7 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ReviewController</servlet-name>
-        <url-pattern>/review</url-pattern>
+        <url-pattern>/dashboard/review-management</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>VoucherController</servlet-name>
