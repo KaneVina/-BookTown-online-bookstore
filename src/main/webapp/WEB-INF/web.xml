@@ -191,6 +191,10 @@
         <url-pattern>/dashboard/review-management</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
+        <servlet-name>ReviewController</servlet-name>
+        <url-pattern>/review</url-pattern>   
+    </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>VoucherController</servlet-name>
         <url-pattern>/dashboard/voucher-management</url-pattern>
     </servlet-mapping>
