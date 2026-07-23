@@ -359,7 +359,7 @@
                                                 <div>
                                                     <p class="text-xs text-[#424752]">Địa chỉ giao hàng</p>
                                                     <p class="text-sm text-[#071e27] leading-relaxed">
-                                                        ${order.street}, ${order.district},<br>${order.city}
+                                                        ${order.street}, ${order.district}, ${order.city}
                                                     </p>
                                                 </div>
                                             </div>
