@@ -208,10 +208,11 @@
                                             <form method="POST" id="cancelForm_${order.orderID}"
                                                   action="${pageContext.request.contextPath}/profile/order-history">
                                                 <input type="hidden" name="action" value="cancel" />
-                                                <input type="hidden" name="orderID"
-                                                       value="${order.orderID}" />
+                                                <input type="hidden" name="orderID" value="${order.orderID}" />
+                                                <input type="hidden" name="redirect" value="list" />
+                                                <input type="hidden" name="cancelReason" id="cancelReasonInput_${order.orderID}" value="" />
                                                 <button type="button"
-                                                        onclick="confirmCancelCustomer('Hủy đơn hàng', 'Bạn có chắc muốn hủy đơn hàng ${order.orderCode}?', 'cancelForm_${order.orderID}')"
+                                                        onclick="openCustomerCancelModalList(${order.orderID}, '${order.orderCode}')"
                                                         class="px-5 py-2 border border-red-500 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
                                                     Hủy đơn
                                                 </button>
@@ -263,9 +264,33 @@
     </div>
 </div>
 
+<!-- Modal nhập lý do hủy đơn hàng (Khách hàng ở danh sách) -->
+<div id="customerCancelModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[200]">
+    <div class="bg-white w-[460px] rounded-xl p-6 relative shadow-xl">
+        <button type="button" onclick="closeCustomerCancelModal()"
+            class="absolute top-3 right-4 text-2xl text-gray-400 hover:text-gray-600">&times;</button>
+        <h3 class="text-lg font-bold text-[#D32F2F] mb-2" id="cancelModalTitle">Hủy đơn hàng</h3>
+        <p class="text-sm text-gray-500 mb-4">Vui lòng nhập lý do bạn muốn hủy đơn hàng này.</p>
+        <textarea id="customerCancelReasonText" rows="4" maxlength="50"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+            placeholder="Nhập lý do hủy... (10-50 ký tự, phải có chữ cái)"></textarea>
+        <div class="flex justify-end gap-3 mt-4">
+            <button type="button" onclick="closeCustomerCancelModal()"
+                class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100">
+                Thoát
+            </button>
+            <button type="button" onclick="submitCustomerCancelFormList()"
+                class="px-4 py-2 bg-[#D32F2F] text-white rounded-lg text-sm font-semibold hover:opacity-90">
+                Xác nhận hủy đơn
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
     var confirmModal = null;
     var pendingAction = null;
+    var currentCancelOrderId = null;
 
     function initConfirmModal() {
         confirmModal = document.getElementById('confirmModal');
@@ -277,6 +302,15 @@
             confirmModal.addEventListener('click', function (e) {
                 if (e.target === confirmModal) {
                     closeConfirmModal();
+                }
+            });
+        }
+
+        var cancelModal = document.getElementById('customerCancelModal');
+        if (cancelModal) {
+            cancelModal.addEventListener('click', function (e) {
+                if (e.target === cancelModal) {
+                    closeCustomerCancelModal();
                 }
             });
         }
@@ -306,10 +340,60 @@
         }
     }
 
-    function confirmCancelCustomer(title, message, formId) {
-        openConfirmModal(title, message, function () {
-            document.getElementById(formId).submit();
-        });
+    function openCustomerCancelModalList(orderId, orderCode) {
+        currentCancelOrderId = orderId;
+        var titleElem = document.getElementById('cancelModalTitle');
+        if (titleElem) titleElem.textContent = 'Hủy đơn hàng #' + orderCode;
+        var textElem = document.getElementById('customerCancelReasonText');
+        if (textElem) {
+            textElem.value = '';
+            textElem.focus();
+        }
+        var modal = document.getElementById('customerCancelModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+    }
+
+    function closeCustomerCancelModal() {
+        var modal = document.getElementById('customerCancelModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+        currentCancelOrderId = null;
+    }
+
+    function submitCustomerCancelFormList() {
+        var reasonElem = document.getElementById('customerCancelReasonText');
+        var reason = reasonElem ? reasonElem.value.trim() : '';
+        if (reason.length === 0) {
+            showToast('Vui lòng nhập lý do hủy đơn!', true);
+            return;
+        }
+        if (reason.length < 10) {
+            showToast('Lý do hủy phải có ít nhất 10 ký tự!', true);
+            return;
+        }
+        if (reason.length > 50) {
+            showToast('Lý do hủy không được vượt quá 50 ký tự!', true);
+            return;
+        }
+        var hasLetter = /[a-zA-ZÀ-ỹ]/.test(reason);
+        if (!hasLetter) {
+            showToast('Lý do hủy phải chứa ít nhất 1 chữ cái!', true);
+            return;
+        }
+
+        if (currentCancelOrderId) {
+            var reasonInput = document.getElementById('cancelReasonInput_' + currentCancelOrderId);
+            var form = document.getElementById('cancelForm_' + currentCancelOrderId);
+            if (reasonInput && form) {
+                reasonInput.value = reason;
+                form.submit();
+            }
+        }
     }
 
     document.addEventListener('DOMContentLoaded', function () {

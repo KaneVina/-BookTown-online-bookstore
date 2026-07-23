@@ -211,7 +211,9 @@
                                                 </a>
                                                 <c:if test="${book.status != 'discontinued'}">
                                                     <button type="button"
-                                                            onclick="confirmDelete(${book.bookID}, '${book.title}')"
+                                                            data-book-id="${book.bookID}"
+                                                            data-book-title="${book.title}"
+                                                            onclick="confirmDelete(this)"
                                                             class="w-8 h-8 flex items-center justify-center rounded-lg border border-red-200 text-error hover:bg-red-50 transition-colors"
                                                             title="Ngừng bán">
                                                         <span class="material-symbols-outlined" style="font-size:17px">block</span>
@@ -313,9 +315,11 @@
         </div>            
 
         <script>
-            function confirmDelete(id, title) {
+            function confirmDelete(button) {
+                var id = button.getAttribute('data-book-id');
+                var title = button.getAttribute('data-book-title');
                 document.getElementById('deleteBookID').value = id;
-                document.getElementById('deleteMsg').textContent = `Xác nhận ngừng bán: "${title}"? Sách sẽ không còn hiển thị trên trang khách hàng.`;
+                document.getElementById('deleteMsg').textContent = 'Xác nhận ngừng bán: "' + title + '"? Sách sẽ không còn hiển thị trên trang khách hàng.';
                 document.getElementById('deleteModal').classList.remove('hidden');
             }
             function closeDeleteModal() {

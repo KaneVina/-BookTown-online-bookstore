@@ -1,31 +1,17 @@
 package dao;
 
 import utils.DBContext;
+import utils.HashMD5;
 import model.Account;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.security.MessageDigest;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import model.Customer;
 
 public class CustomerDAO {
-
-    public static String hashMD5(String input) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] bytes = md.digest(input.getBytes("UTF-8"));
-            StringBuilder sb = new StringBuilder();
-            for (byte b : bytes) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (Exception e) {
-            return input;
-        }
-    }
 
     // Kiểm tra email đã tồn tại trong Customer hoặc Account chưa
     public boolean isEmailExists(String email) {
@@ -57,7 +43,7 @@ public class CustomerDAO {
 //             PreparedStatement ps = conn.prepareStatement(sql)) {
 //            ps.setString(1, fullname);
 //            ps.setString(2, email);
-//            ps.setString(3, hashMD5(password));
+//            ps.setString(3, HashMD5.hash(password));
 //            ps.setString(4, phone);
 //            return ps.executeUpdate() > 0;
 //        } catch (Exception e) {
@@ -70,7 +56,7 @@ public class CustomerDAO {
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, fullname);
             ps.setString(2, email);
-            ps.setString(3, hashMD5(password));
+            ps.setString(3, HashMD5.hash(password));
             ps.setString(4, phone);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
@@ -149,11 +135,11 @@ public class CustomerDAO {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 String oldPassword = rs.getString("password");
-                if (!oldPassword.equals(hashMD5(currentPassword))) {
+                if (!oldPassword.equals(HashMD5.hash(currentPassword))) {
                     return false;
                 }
                 PreparedStatement update = conn.prepareStatement(updateSql);
-                update.setString(1, hashMD5(newPassword));
+                update.setString(1, HashMD5.hash(newPassword));
                 update.setInt(2, customerId);
                 return update.executeUpdate() > 0;
             }
@@ -263,7 +249,7 @@ public class CustomerDAO {
     public boolean resetPasswordByEmail(String email, String newPassword) {
         String sql = "UPDATE Customer SET password = ? WHERE email = ?";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, hashMD5(newPassword));
+            ps.setString(1, HashMD5.hash(newPassword));
             ps.setString(2, email);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {

@@ -16,7 +16,7 @@ public class OrderDAO {
 
     private static final String BASE_SELECT_ORDER
             = "SELECT o.orderID, o.customerID, o.addressID, o.processed_by, o.status, "
-            + "       o.payment_method, o.payment_status, o.total_price, o.created_at, "
+            + "       o.payment_method, o.payment_status, o.total_price, o.created_at, o.cancel_reason, "
             + "       a.street, a.district, a.city, a.recipient_name, a.recipient_phone "
             + "FROM [Order] o "
             + "LEFT JOIN Address a ON a.addressID = o.addressID ";
@@ -106,7 +106,7 @@ public class OrderDAO {
 
     public Order getOrderByID(int orderID) {
         String sql = "SELECT o.orderID, o.customerID, o.addressID, o.processed_by, o.status, "
-                + "       o.payment_method, o.payment_status, o.total_price, o.created_at, "
+                + "       o.payment_method, o.payment_status, o.total_price, o.created_at, o.cancel_reason, "
                 + "       a.street, a.district, a.city, a.recipient_name, a.recipient_phone, "
                 + "       c.fullname AS customerName, "
                 + "       c.email AS customerEmail, c.phone AS customerPhone "
@@ -137,19 +137,22 @@ public class OrderDAO {
         return null;
     }
 
-
-
     public int countOrdersByCustomerFiltered(int customerID, String status) {
         boolean isRefundStatus = "pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status);
-        boolean filterStatus = status != null && !status.trim().isEmpty() && !"all".equalsIgnoreCase(status);
-        String sql = "SELECT COUNT(*) FROM [Order] WHERE customerID = ?"
-                + (filterStatus ? (isRefundStatus ? " AND payment_status = ?" : " AND status = ?") : "");
+        boolean noFilter = status == null || status.trim().isEmpty() || "all".equalsIgnoreCase(status);
+        String normalizedStatus = noFilter ? null : status.trim();
+
+        String sql;
+        if (isRefundStatus) {
+            sql = "SELECT COUNT(*) FROM [Order] WHERE customerID = ? AND (? IS NULL OR payment_status = ?)";
+        } else {
+            sql = "SELECT COUNT(*) FROM [Order] WHERE customerID = ? AND (? IS NULL OR status = ?)";
+        }
 
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, customerID);
-            if (filterStatus) {
-                ps.setString(2, status.trim());
-            }
+            ps.setString(2, normalizedStatus);
+            ps.setString(3, normalizedStatus);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1);
@@ -160,27 +163,33 @@ public class OrderDAO {
         return 0;
     }
 
-
-
     public List<Order> getOrdersByCustomerFiltered(int customerID, String status, int offset, int pageSize) {
         List<Order> orders = new ArrayList<>();
         boolean isRefundStatus = "pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status);
-        boolean filterStatus = status != null && !status.trim().isEmpty() && !"all".equalsIgnoreCase(status);
+        boolean noFilter = status == null || status.trim().isEmpty() || "all".equalsIgnoreCase(status);
+        String normalizedStatus = noFilter ? null : status.trim();
 
-        String sql = BASE_SELECT_ORDER
-                + "WHERE o.customerID = ? "
-                + (filterStatus ? (isRefundStatus ? "AND o.payment_status = ? " : "AND o.status = ? ") : "")
-                + "ORDER BY o.created_at DESC "
-                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        String sql;
+        if (isRefundStatus) {
+            sql = BASE_SELECT_ORDER
+                    + "WHERE o.customerID = ? "
+                    + "AND (? IS NULL OR o.payment_status = ?) "
+                    + "ORDER BY o.created_at DESC "
+                    + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        } else {
+            sql = BASE_SELECT_ORDER
+                    + "WHERE o.customerID = ? "
+                    + "AND (? IS NULL OR o.status = ?) "
+                    + "ORDER BY o.created_at DESC "
+                    + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        }
 
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            int idx = 1;
-            ps.setInt(idx++, customerID);
-            if (filterStatus) {
-                ps.setString(idx++, status.trim());
-            }
-            ps.setInt(idx++, offset);
-            ps.setInt(idx, pageSize);
+            ps.setInt(1, customerID);
+            ps.setString(2, normalizedStatus);
+            ps.setString(3, normalizedStatus);
+            ps.setInt(4, offset);
+            ps.setInt(5, pageSize);
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
@@ -284,17 +293,6 @@ public class OrderDAO {
         return false;
     }
 
-    public boolean updateOrderStatus(int orderID, String status) {
-        String sql = "UPDATE [Order] SET status = ? WHERE orderID = ?";
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, status);
-            ps.setInt(2, orderID);
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
 
     public boolean confirmRefund(int orderID) {
         String sql = "UPDATE [Order] SET payment_status = 'refunded' "
@@ -380,39 +378,40 @@ public class OrderDAO {
             e.printStackTrace();
         }
 
-        StringBuilder sql = new StringBuilder(
-                "SELECT o.orderID, o.customerID, o.addressID, o.processed_by, o.status, "
-                + "       o.payment_method, o.payment_status, o.total_price, o.created_at, "
-                + "       a.street, a.district, a.city, a.recipient_name, a.recipient_phone, "
-                + "       c.fullname AS customerName, "
-                + "       c.email AS customerEmail, c.phone AS customerPhone "
-                + "FROM [Order] o "
-                + "LEFT JOIN Address a ON a.addressID = o.addressID "
-                + "LEFT JOIN Customer c ON c.customerID = o.customerID "
-                + "WHERE 1=1 "
-        );
+        boolean isRefundStatus = "pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status);
+        boolean noFilter = status == null || status.trim().isEmpty() || "all".equalsIgnoreCase(status);
+        String normalizedStatus = noFilter ? null : status.trim();
 
-        List<Object> params = new ArrayList<>();
-
-        if (status != null && !status.trim().isEmpty() && !"all".equalsIgnoreCase(status)) {
-            if ("pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status)) {
-                sql.append("AND o.payment_status = ? ");
-            } else {
-                sql.append("AND o.status = ? ");
-            }
-            params.add(status.trim());
+        String sql;
+        if (isRefundStatus) {
+            sql = "SELECT o.orderID, o.customerID, o.addressID, o.processed_by, o.status, "
+                    + "       o.payment_method, o.payment_status, o.total_price, o.created_at, o.cancel_reason, "
+                    + "       a.street, a.district, a.city, a.recipient_name, a.recipient_phone, "
+                    + "       c.fullname AS customerName, "
+                    + "       c.email AS customerEmail, c.phone AS customerPhone "
+                    + "FROM [Order] o "
+                    + "LEFT JOIN Address a ON a.addressID = o.addressID "
+                    + "LEFT JOIN Customer c ON c.customerID = o.customerID "
+                    + "WHERE (? IS NULL OR o.payment_status = ?) "
+                    + "ORDER BY o.created_at DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        } else {
+            sql = "SELECT o.orderID, o.customerID, o.addressID, o.processed_by, o.status, "
+                    + "       o.payment_method, o.payment_status, o.total_price, o.created_at, o.cancel_reason, "
+                    + "       a.street, a.district, a.city, a.recipient_name, a.recipient_phone, "
+                    + "       c.fullname AS customerName, "
+                    + "       c.email AS customerEmail, c.phone AS customerPhone "
+                    + "FROM [Order] o "
+                    + "LEFT JOIN Address a ON a.addressID = o.addressID "
+                    + "LEFT JOIN Customer c ON c.customerID = o.customerID "
+                    + "WHERE (? IS NULL OR o.status = ?) "
+                    + "ORDER BY o.created_at DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         }
 
-        sql.append("ORDER BY o.created_at DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
-
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-
-            int index = 1;
-            for (Object param : params) {
-                ps.setObject(index++, param);
-            }
-            ps.setInt(index++, offset);
-            ps.setInt(index++, pageSize);
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, normalizedStatus);
+            ps.setString(2, normalizedStatus);
+            ps.setInt(3, offset);
+            ps.setInt(4, pageSize);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -432,29 +431,24 @@ public class OrderDAO {
     }
 
     public int countFilteredOrders(String status) {
-        StringBuilder sql = new StringBuilder(
-                "SELECT COUNT(*) FROM [Order] o "
-                + "LEFT JOIN Customer c ON c.customerID = o.customerID "
-                + "WHERE 1=1 "
-        );
+        boolean isRefundStatus = "pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status);
+        boolean noFilter = status == null || status.trim().isEmpty() || "all".equalsIgnoreCase(status);
+        String normalizedStatus = noFilter ? null : status.trim();
 
-        List<Object> params = new ArrayList<>();
-
-        if (status != null && !status.trim().isEmpty() && !"all".equalsIgnoreCase(status)) {
-            if ("pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status)) {
-                sql.append("AND o.payment_status = ? ");
-            } else {
-                sql.append("AND o.status = ? ");
-            }
-            params.add(status.trim());
+        String sql;
+        if (isRefundStatus) {
+            sql = "SELECT COUNT(*) FROM [Order] o "
+                    + "LEFT JOIN Customer c ON c.customerID = o.customerID "
+                    + "WHERE (? IS NULL OR o.payment_status = ?)";
+        } else {
+            sql = "SELECT COUNT(*) FROM [Order] o "
+                    + "LEFT JOIN Customer c ON c.customerID = o.customerID "
+                    + "WHERE (? IS NULL OR o.status = ?)";
         }
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-
-            int index = 1;
-            for (Object param : params) {
-                ps.setObject(index++, param);
-            }
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, normalizedStatus);
+            ps.setString(2, normalizedStatus);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -558,53 +552,28 @@ public class OrderDAO {
         return 0;
     }
 
-    public List<Order> getRecentOrdersByCustomer(int customerId) {
-
-        List<Order> list = new ArrayList<>();
-
-        String sql
-                = "SELECT TOP 5 * "
-                + "FROM [Order] "
-                + "WHERE customerID = ? "
-                + "ORDER BY created_at DESC";
-
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, customerId);
-
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-
-                Order o = new Order();
-
-                o.setOrderID(rs.getInt("orderID"));
-                o.setStatus(rs.getString("status"));
-                o.setTotalPrice(rs.getBigDecimal("total_price"));
-                o.setCreatedAt(rs.getTimestamp("created_at"));
-
-                list.add(o);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return list;
-    }
 
     public boolean deductStock(int orderID) {
-        String sql = "UPDATE Book "
+        String sqlDeduct = "UPDATE Book "
                 + "SET Book.stock_quantity = Book.stock_quantity - OrderDetail.quantity "
                 + "FROM Book "
                 + "INNER JOIN OrderDetail ON Book.bookID = OrderDetail.bookID "
                 + "WHERE OrderDetail.orderID = ? "
                 + "AND Book.stock_quantity >= OrderDetail.quantity";
 
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, orderID);
-            return ps.executeUpdate() > 0;
+        String sqlUpdateStatus = "UPDATE Book SET status = 'out_of_stock' WHERE stock_quantity <= 0 AND (status IS NULL OR status <> 'discontinued')";
+
+        try (Connection conn = new DBContext().getConnection()) {
+            try (PreparedStatement ps1 = conn.prepareStatement(sqlDeduct)) {
+                ps1.setInt(1, orderID);
+                int rows = ps1.executeUpdate();
+                if (rows > 0) {
+                    try (PreparedStatement ps2 = conn.prepareStatement(sqlUpdateStatus)) {
+                        ps2.executeUpdate();
+                    }
+                    return true;
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -612,15 +581,25 @@ public class OrderDAO {
     }
 
     public boolean restoreStock(int orderID) {
-        String sql = "UPDATE Book "
+        String sqlRestore = "UPDATE Book "
                 + "SET Book.stock_quantity = Book.stock_quantity + OrderDetail.quantity "
                 + "FROM Book "
                 + "INNER JOIN OrderDetail ON Book.bookID = OrderDetail.bookID "
                 + "WHERE OrderDetail.orderID = ?";
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, orderID);
-            return ps.executeUpdate() > 0;
+        String sqlUpdateStatus = "UPDATE Book SET status = 'available' WHERE stock_quantity > 0 AND (status IS NULL OR status <> 'discontinued')";
+
+        try (Connection conn = new DBContext().getConnection()) {
+            try (PreparedStatement ps1 = conn.prepareStatement(sqlRestore)) {
+                ps1.setInt(1, orderID);
+                int rows = ps1.executeUpdate();
+                if (rows > 0) {
+                    try (PreparedStatement ps2 = conn.prepareStatement(sqlUpdateStatus)) {
+                        ps2.executeUpdate();
+                    }
+                    return true;
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

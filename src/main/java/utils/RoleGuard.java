@@ -21,7 +21,7 @@ public final class RoleGuard {
         }
         Account acc = (Account) session.getAttribute("account");
         if (!"staff".equals(acc.getRole())) {
-            resp.sendRedirect(req.getContextPath() + "/home");
+            resp.sendRedirect(req.getContextPath() + "/login");
             return null;
         }
         return acc;
