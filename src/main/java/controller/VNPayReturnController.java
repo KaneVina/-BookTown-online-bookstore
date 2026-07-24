@@ -1,6 +1,5 @@
 package controller;
 
-import dao.CartDAO;
 import dao.OrderDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -62,10 +61,24 @@ public class VNPayReturnController extends HttpServlet {
 
             int addressID = (Integer) addressIDObj;
 
-            CartDAO cartDAO = new CartDAO();
-            List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
+            // Đọc snapshot giỏ hàng đã lưu lúc bấm "Thanh toán VNPay".
+            // KHÔNG đọc lại từ DB để tránh trường hợp user mở tab mới
+            // thêm hàng vào giỏ làm đơn hàng bị sai số lượng.
+            @SuppressWarnings("unchecked")
+            List<CartItem> cartItems = (List<CartItem>) session.getAttribute("vnpay_cartItems");
 
-            // Lọc bỏ sản phẩm hết hàng trước khi tạo đơn
+            if (cartItems == null || cartItems.isEmpty()) {
+                session.setAttribute("errorMessage", "Phiên thanh toán hết hạn, vui lòng thử lại!");
+                session.removeAttribute("vnpay_txnRef");
+                session.removeAttribute("vnpay_addressID");
+                session.removeAttribute("vnpay_total");
+                session.removeAttribute("vnpay_cartItems");
+                response.sendRedirect(request.getContextPath() + "/checkout");
+                return;
+            }
+
+            // Lọc bỏ sản phẩm hết hàng (snapshot vẫn cần lọc phòng trường hợp
+            // sách hết hàng trong thời gian user đang thanh toán trên VNPay)
             cartItems.removeIf(item -> item.getStockQuantity() == 0);
 
             if (cartItems.isEmpty()) {
@@ -73,6 +86,7 @@ public class VNPayReturnController extends HttpServlet {
                 session.removeAttribute("vnpay_txnRef");
                 session.removeAttribute("vnpay_addressID");
                 session.removeAttribute("vnpay_total");
+                session.removeAttribute("vnpay_cartItems");
                 response.sendRedirect(request.getContextPath() + "/cart");
                 return;
             }
@@ -91,6 +105,7 @@ public class VNPayReturnController extends HttpServlet {
             session.removeAttribute("vnpay_txnRef");
             session.removeAttribute("vnpay_addressID");
             session.removeAttribute("vnpay_total");
+            session.removeAttribute("vnpay_cartItems");
 
             Order order = orderDAO.getOrderByID(orderID);
             String orderCode = (order != null) ? order.getOrderCode() : "BT-" + orderID;
@@ -106,6 +121,7 @@ public class VNPayReturnController extends HttpServlet {
                 session.removeAttribute("vnpay_txnRef");
                 session.removeAttribute("vnpay_addressID");
                 session.removeAttribute("vnpay_total");
+                session.removeAttribute("vnpay_cartItems");
 
                 String msg;
 

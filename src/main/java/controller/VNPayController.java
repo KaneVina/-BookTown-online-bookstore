@@ -90,6 +90,10 @@ public class VNPayController extends HttpServlet {
         session.setAttribute("vnpay_txnRef",     txnRef);
         session.setAttribute("vnpay_addressID",  addressID);
         session.setAttribute("vnpay_total",      total);
+        // Lưu snapshot giỏ hàng tại thời điểm bấm VNPay.
+        // Khi VNPay callback về, dùng đúng danh sách này thay vì đọc lại DB,
+        // tránh tình huống user mở tab mới thêm hàng làm sai đơn hàng.
+        session.setAttribute("vnpay_cartItems",  new java.util.ArrayList<>(cartItems));
 
         String vnpayUrl = buildVNPayUrl(request, txnRef, total);
         response.sendRedirect(vnpayUrl);

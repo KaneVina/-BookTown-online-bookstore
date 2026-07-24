@@ -554,6 +554,10 @@ public class OrderDAO {
 
 
     public boolean deductStock(int orderID) {
+        // Đếm số sản phẩm trong đơn hàng
+        String sqlCount = "SELECT COUNT(*) FROM OrderDetail WHERE orderID = ?";
+
+        // Chỉ trừ kho những sản phẩm còn đủ số lượng
         String sqlDeduct = "UPDATE Book "
                 + "SET Book.stock_quantity = Book.stock_quantity - OrderDetail.quantity "
                 + "FROM Book "
@@ -561,18 +565,42 @@ public class OrderDAO {
                 + "WHERE OrderDetail.orderID = ? "
                 + "AND Book.stock_quantity >= OrderDetail.quantity";
 
-        String sqlUpdateStatus = "UPDATE Book SET status = 'out_of_stock' WHERE stock_quantity <= 0 AND (status IS NULL OR status <> 'discontinued')";
+        String sqlUpdateStatus = "UPDATE Book SET status = 'out_of_stock' "
+                + "WHERE stock_quantity <= 0 AND (status IS NULL OR status <> 'discontinued')";
 
         try (Connection conn = new DBContext().getConnection()) {
+            // Bước 1: đếm tổng số dòng OrderDetail của đơn này
+            int totalItems = 0;
+            try (PreparedStatement psCount = conn.prepareStatement(sqlCount)) {
+                psCount.setInt(1, orderID);
+                try (ResultSet rs = psCount.executeQuery()) {
+                    if (rs.next()) {
+                        totalItems = rs.getInt(1);
+                    }
+                }
+            }
+
+            if (totalItems == 0) {
+                // Đơn hàng không có sản phẩm nào
+                return false;
+            }
+
+            // Bước 2: trừ kho — chỉ những sản phẩm đủ số lượng mới được trừ
             try (PreparedStatement ps1 = conn.prepareStatement(sqlDeduct)) {
                 ps1.setInt(1, orderID);
-                int rows = ps1.executeUpdate();
-                if (rows > 0) {
-                    try (PreparedStatement ps2 = conn.prepareStatement(sqlUpdateStatus)) {
-                        ps2.executeUpdate();
-                    }
-                    return true;
+                int rowsUpdated = ps1.executeUpdate();
+
+                // Bước 3: so sánh số dòng được cập nhật với tổng số sản phẩm
+                // Nếu rowsUpdated < totalItems → có ít nhất 1 sản phẩm không đủ tồn kho
+                if (rowsUpdated < totalItems) {
+                    return false;
                 }
+
+                // Bước 4: cập nhật trạng thái sách nếu hết hàng
+                try (PreparedStatement ps2 = conn.prepareStatement(sqlUpdateStatus)) {
+                    ps2.executeUpdate();
+                }
+                return true;
             }
         } catch (Exception e) {
             e.printStackTrace();
