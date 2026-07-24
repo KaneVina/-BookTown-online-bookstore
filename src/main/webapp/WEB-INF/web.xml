@@ -180,7 +180,7 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ChangePasswordController</servlet-name>
-        <url-pattern>/change-password</url-pattern>
+        <url-pattern>/profile/change-password</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>AccountManagementController</servlet-name>

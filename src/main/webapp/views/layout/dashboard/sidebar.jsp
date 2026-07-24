@@ -191,7 +191,7 @@
                 </span>
                 Quản lý tài khoản
             </a>
-            <a href="${pageContext.request.contextPath}/change-password">
+            <a href="${pageContext.request.contextPath}/profile/change-password">
                 <span class="material-symbols-outlined" style="font-size:18px;">
                     lock_reset
                 </span>

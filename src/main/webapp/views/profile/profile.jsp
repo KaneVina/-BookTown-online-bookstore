@@ -4,32 +4,8 @@
 
 <%@ include file="/views/layout/homepage/header.jsp" %>
 
+<%@ include file="/views/layout/profile/sidebar-styles.jsp" %>
 <style>
-    body{
-        background:#f3faff;
-    }
-    .profile-card{
-        background:#fff;
-        border-radius:16px;
-        border:1px solid #dbeafe;
-        box-shadow:0 2px 10px rgba(0,0,0,.05);
-    }
-    .menu-item{
-        display:flex;
-        align-items:center;
-        gap:12px;
-        padding:12px 16px;
-        border-radius:12px;
-        transition:.2s;
-    }
-    .menu-item:hover{
-        background:#eff6ff;
-    }
-    .menu-active{
-        background:#dbeafe;
-        color:#2563eb;
-        font-weight:600;
-    }
     .input-style{
         width:100%;
         padding:12px 16px;
@@ -42,64 +18,11 @@
         box-shadow:0 0 0 3px rgba(37,99,235,.15);
     }
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 <div class="max-w-7xl mx-auto py-10 px-4">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- SIDEBAR -->
-        <div class="lg:col-span-1">
-            <div class="profile-card p-6">
-                <div class="flex flex-col items-center">
-                    <div class="relative">
-                        <img
-                            src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                            class="w-24 h-24 rounded-full border-4 border-blue-200 shadow"
-                            alt="Avatar">
-                    </div>
-                    <h2 class="mt-4 text-xl font-bold text-center">
-                        ${customer.fullname}
-                    </h2>
-
-                    <div class="mt-2 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-sm">
-                        ${customer.role}
-                    </div>
-
-                </div>
-                <hr class="my-6">
-                <nav class="space-y-2">
-                    <a href="${pageContext.request.contextPath}/profile?id=${sessionScope.account.id}"
-                       class="menu-item menu-active">
-                        <span class="material-symbols-outlined">person</span>
-                        Thông tin cá nhân
-                    </a>
-                    <a href="${pageContext.request.contextPath}/profile/order-history"
-                       class="menu-item">
-                        <span class="material-symbols-outlined">receipt_long</span>
-
-                        Lịch sử đơn hàng
-                    </a>
-                    <a href="${pageContext.request.contextPath}/change-password"
-                       class="menu-item">
-                        <span class="material-symbols-outlined">
-                            lock
-                        </span>
-                        Đổi mật khẩu
-                    </a>
-                    <a href="${pageContext.request.contextPath}/address"
-                       class="menu-item">
-                        <i data-lucide="map-pin"></i>
-                        Địa chỉ của tôi
-                    </a>
-                    <a href="${pageContext.request.contextPath}/logout"
-                       class="menu-item text-red-600">
-                        <span class="material-symbols-outlined">
-                            logout
-                        </span>
-                        Đăng xuất
-                    </a>
-
-                </nav>
-            </div>
-        </div>
+        <c:set var="activeMenu" value="profile" scope="request"/>
+        <%@ include file="/views/layout/profile/sidebar.jsp" %>
 
         <div class="lg:col-span-3 space-y-6">
             <c:if test="${not empty sessionScope.message}">
