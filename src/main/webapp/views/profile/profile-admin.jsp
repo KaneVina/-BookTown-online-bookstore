@@ -333,7 +333,15 @@
                                 </div>
                                 <div>
                                     <label class="form-label-modern text-slate-500">Email</label>
-                                    <input type="email" value="${account.email}" disabled class="input-premium bg-slate-100 opacity-80 cursor-not-allowed"/>
+                                    <div class="flex gap-2">
+                                        <input type="email" value="${account.email}" disabled class="input-premium bg-slate-100 opacity-80 cursor-not-allowed"/>
+                                        <button
+                                            type="button"
+                                            id="openChangeEmailBtn"
+                                            class="shrink-0 px-4 rounded-xl border border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-all whitespace-nowrap">
+                                            Đổi email
+                                        </button>
+                                    </div>
                                 </div>
                                 <div>
                                     <label class="form-label-modern text-slate-500">Loại tài khoản</label>
@@ -357,6 +365,56 @@
         </div>
 
         <%@ include file="/views/layout/common/toast.jsp" %>
+
+        <!-- Modal đổi email -->
+        <div id="changeEmailModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-2xl p-6 w-full max-w-md mx-4 card-modern">
+                <h3 class="text-xl font-bold mb-2 text-slate-800">Đổi địa chỉ email</h3>
+                <p class="text-slate-500 text-sm mb-4">
+                    Chúng tôi sẽ gửi mã OTP đến email mới để xác nhận trước khi cập nhật.
+                </p>
+                <form action="${pageContext.request.contextPath}/profile/change-email" method="post">
+                    <label class="form-label-modern" for="newEmail">Email mới</label>
+                    <input
+                        type="email"
+                        name="newEmail"
+                        id="newEmail"
+                        required
+                        placeholder="email-moi@example.com"
+                        class="input-premium mb-4">
+                    <div class="flex justify-end gap-3">
+                        <button type="button" id="closeChangeEmailBtn"
+                                class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50">
+                            Hủy
+                        </button>
+                        <button type="submit" class="btn-submit">
+                            Gửi mã OTP
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            const openChangeEmailBtn = document.getElementById('openChangeEmailBtn');
+            const closeChangeEmailBtn = document.getElementById('closeChangeEmailBtn');
+            const changeEmailModal = document.getElementById('changeEmailModal');
+
+            openChangeEmailBtn.addEventListener('click', () => {
+                changeEmailModal.classList.remove('hidden');
+                changeEmailModal.classList.add('flex');
+            });
+            closeChangeEmailBtn.addEventListener('click', () => {
+                changeEmailModal.classList.add('hidden');
+                changeEmailModal.classList.remove('flex');
+            });
+            changeEmailModal.addEventListener('click', (e) => {
+                if (e.target === changeEmailModal) {
+                    changeEmailModal.classList.add('hidden');
+                    changeEmailModal.classList.remove('flex');
+                }
+            });
+        </script>
 
         <script>
             const initialValues = {

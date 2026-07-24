@@ -225,7 +225,17 @@
                     </form>
 
                     <p class="mt-stack-md text-center font-body-sm text-body-sm text-on-surface-variant">
-                        <a href="${pageContext.request.contextPath}/register" class="text-primary hover:underline">← Quay lại đăng ký</a>
+                        <c:choose>
+                            <c:when test="${sessionScope.otp_flow == 'change_email'}">
+                                <a href="${pageContext.request.contextPath}/profile" class="text-primary hover:underline">← Quay lại hồ sơ</a>
+                            </c:when>
+                            <c:when test="${sessionScope.otp_flow == 'forgot'}">
+                                <a href="${pageContext.request.contextPath}/forgot-password" class="text-primary hover:underline">← Quay lại quên mật khẩu</a>
+                            </c:when>
+                            <c:otherwise>
+                                <a href="${pageContext.request.contextPath}/register" class="text-primary hover:underline">← Quay lại đăng ký</a>
+                            </c:otherwise>
+                        </c:choose>
                     </p>
                 </div>
             </div>
