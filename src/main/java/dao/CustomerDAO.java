@@ -66,7 +66,7 @@ public class CustomerDAO {
         return false;
     }
 
-      public boolean updateCustomer(
+    public boolean updateCustomer(
             int id,
             String fullname,
             String phone,
@@ -88,6 +88,19 @@ public class CustomerDAO {
             int row = ps.executeUpdate();
             System.out.println("Updated rows = " + row);
             return row > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // Cập nhật email sau khi đã xác thực OTP thành công
+    public boolean updateEmail(int id, String newEmail) {
+        String sql = "UPDATE Customer SET email = ? WHERE customerID = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newEmail);
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -253,7 +266,6 @@ public class CustomerDAO {
         return false;
     }
 
-
     public boolean resetPasswordByEmail(String email, String newPassword) {
         String sql = "UPDATE Customer SET password = ? WHERE email = ?";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -386,6 +398,5 @@ public class CustomerDAO {
 
         return 0;
     }
-
 
 }

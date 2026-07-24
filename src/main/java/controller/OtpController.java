@@ -1,6 +1,8 @@
 package controller;
 
+import dao.AccountDAO;
 import dao.CustomerDAO;
+import model.Account;
 import utils.EmailUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -25,6 +27,8 @@ public class OtpController extends HttpServlet {
             String flow = (session != null) ? (String) session.getAttribute("otp_flow") : null;
             if ("forgot".equals(flow)) {
                 response.sendRedirect(request.getContextPath() + "/forgot-password");
+            } else if ("change_email".equals(flow)) {
+                response.sendRedirect(request.getContextPath() + "/profile");
             } else {
                 response.sendRedirect(request.getContextPath() + "/register");
             }
@@ -87,6 +91,12 @@ public class OtpController extends HttpServlet {
             return;
         }
 
+        // đổi email (customer lẫn admin/staff)
+        if ("change_email".equals(flow)) {
+            handleChangeEmailSuccess(request, response, session);
+            return;
+        }
+
         //quên mk
         if ("forgot".equals(flow)) {
             session.setAttribute("fp_verified", true);
@@ -113,6 +123,53 @@ public class OtpController extends HttpServlet {
             request.setAttribute("errorMessage", "Có lỗi xảy ra khi tạo tài khoản. Vui lòng thử lại.");
             request.getRequestDispatcher("/views/auth/register.jsp").forward(request, response);
         }
+    }
+
+    // Cập nhật email trong DB + session sau khi người dùng xác thực OTP đúng
+    private void handleChangeEmailSuccess(HttpServletRequest request, HttpServletResponse response,
+            HttpSession session) throws IOException {
+
+        String newEmail = (String) session.getAttribute("otp_email");
+        Integer targetId = (Integer) session.getAttribute("otp_target_id");
+        String targetRole = (String) session.getAttribute("otp_target_role");
+
+        // Dữ liệu phiên bị thiếu/hỏng thì không thực hiện, tránh NPE hoặc cập nhật sai người
+        if (newEmail == null || targetId == null || targetRole == null) {
+            clearOtpAttributes(session, true);
+            session.setAttribute("otp_error", "Phiên xác thực không hợp lệ. Vui lòng thử lại.");
+            response.sendRedirect(request.getContextPath() + "/profile");
+            return;
+        }
+
+        boolean success;
+        if ("customer".equalsIgnoreCase(targetRole)) {
+            success = new CustomerDAO().updateEmail(targetId, newEmail);
+        } else {
+            success = new AccountDAO().updateEmail(targetId, newEmail);
+        }
+
+        clearOtpAttributes(session, true);
+
+        if (success) {
+            // Đồng bộ lại session để hiển thị email mới ngay, không cần đăng nhập lại
+            Account current = (Account) session.getAttribute("account");
+            if (current != null) {
+                Account refreshed = new Account(
+                        current.getId(),
+                        current.getFullname(),
+                        newEmail,
+                        current.getPhone(),
+                        current.getRole(),
+                        current.getStatus()
+                );
+                session.setAttribute("account", refreshed);
+            }
+            session.setAttribute("message", "Đổi email thành công!");
+        } else {
+            session.setAttribute("error", "Đổi email thất bại. Vui lòng thử lại.");
+        }
+
+        response.sendRedirect(request.getContextPath() + "/profile?id=" + targetId);
     }
 
     // Gửi lại OTP vs chống spam 60s
@@ -165,6 +222,8 @@ public class OtpController extends HttpServlet {
         session.removeAttribute("otp_phone");
         session.removeAttribute("otp_password");
         session.removeAttribute("otp_attempts");
+        session.removeAttribute("otp_target_id");
+        session.removeAttribute("otp_target_role");
         if (keepEmail) {
             session.removeAttribute("otp_email");
         }
