@@ -155,7 +155,7 @@
         <main class="flex-1 md:ml-64 min-h-screen p-6">
             <div class="max-w-[820px] mx-auto">
 
-                <%-- BREADCRUMB --%>
+                
                 <div class="flex items-center gap-2 text-sm text-on-surface-variant mb-5">
                     <a href="${pageContext.request.contextPath}/dashboard/product-management" class="hover:text-primary transition-colors">Kho sách</a>
                     <span class="material-symbols-outlined text-[16px]">chevron_right</span>
@@ -163,13 +163,13 @@
                 </div>
 
                 <div class="bg-surface rounded-2xl border border-outline-variant/30 overflow-hidden">
-                    <%-- CARD HEADER --%>
+                    
                     <div class="px-6 py-4 border-b border-outline-variant/30 flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                             <span class="material-symbols-outlined text-primary">${formAction == 'create' ? 'add_box' : 'edit'}</span>
                         </div>
                         <div>
-                            <h2 class="font-bold text-lg">${formAction == 'create' ? '➕ Thêm sách mới' : '✏️ Chỉnh sửa sách'}</h2>
+                            <h2 class="font-bold text-lg">${formAction == 'create' ? 'Thêm sách mới' : 'Chỉnh sửa sách'}</h2>
                             <p class="text-sm text-on-surface-variant">
                                 <c:if test="${formAction == 'update'}">ID: ${book.bookID} · </c:if>
                                     Điền đầy đủ thông tin bên dưới
@@ -177,7 +177,7 @@
                             </div>
                         </div>
 
-                    <%-- FORM --%>
+          
                     <form method="post" id="bookForm"
                           action="${pageContext.request.contextPath}/dashboard/product-management"
                           class="p-6 space-y-6" novalidate>
@@ -186,9 +186,9 @@
                             <input type="hidden" name="bookID" value="${book.bookID}">
                         </c:if>
 
-                        <%-- THUMBNAIL + EXTRA IMAGES --%>
+                        
                         <div class="flex flex-col gap-4">
-                            <%-- Ảnh bìa chính --%>
+                           
                             <div class="flex gap-4 items-start">
                                 <div class="preview-img flex-shrink-0" id="thumbPreview">
                                     <c:choose>
@@ -203,7 +203,7 @@
 
                                 </div>
                                 <div class="flex-1">
-                                    <label class="field-label" for="thumbnail">🖼 URL ảnh bìa <span class="text-error">*</span></label>
+                                    <label class="field-label" for="thumbnail">URL ảnh bìa <span class="text-error">*</span></label>
                                     <input type="url" id="thumbnail" name="thumbnail" required
                                            class="field-input" placeholder="https://example.com/cover.jpg"
                                            value="${book.thumbnail}"
@@ -221,7 +221,7 @@
                             </div>
                             <%-- 3 ảnh phụ --%>
                             <div class="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
-                                <p class="text-[12px] font-bold text-on-surface-variant uppercase tracking-wide mb-3">🖼 Ảnh phụ (gallery trang sản phẩm)</p>
+                                <p class="text-[12px] font-bold text-on-surface-variant uppercase tracking-wide mb-3">Ảnh phụ (gallery trang sản phẩm)</p>
                                 <div class="grid grid-cols-3 gap-3">
                                     <div>
                                         <div class="preview-img-sm mb-2" id="imgPreview2">
@@ -272,18 +272,18 @@
                             </div>
                         </div>
 
-                        <%-- TITLE --%>
+      
                         <div>
-                            <label class="field-label" for="title">📖 Tên sách <span class="text-error">*</span></label>
+                            <label class="field-label" for="title">Tên sách <span class="text-error">*</span></label>
                             <input type="text" id="title" name="title" required
                                    class="field-input" placeholder="Nhập tên sách..."
                                    value="${book.title}" maxlength="255">
                             <p class="err-msg" id="titleErr">Tên sách không được để trống</p>
                         </div>
 
-                        <%-- AUTHORS (bắt buộc) --%>
+
                         <div>
-                            <label class="field-label" for="authors">✍️ Tác giả <span class="text-error">*</span></label>
+                            <label class="field-label" for="authors"> Tác giả <span class="text-error">*</span></label>
                             <input type="text" id="authors" name="authors" required
                                    class="field-input" placeholder="Nguyễn Văn A, Trần Thị B (phân cách bằng dấu phẩy)"
                                    value="<c:if test="${not empty book.authors}"><c:forEach var='a' items='${book.authors}' varStatus='s'>${a}<c:if test='${!s.last}'>, </c:if></c:forEach></c:if>">
@@ -291,17 +291,19 @@
                                            <p class="text-xs text-on-surface-variant mt-1">Nhiều tác giả: nhập phân cách bằng dấu phẩy</p>
                                        </div>
 
-                        <%-- PRICE + STOCK --%>
+
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="field-label" for="price">💰 Giá bán (VNĐ) <span class="text-error">*</span></label>
-                                <input type="number" id="price" name="price" required min="0" step="1000"
+                                <label class="field-label" for="priceDisplay">Giá bán (VNĐ) <span class="text-error">*</span></label>
+                                <input type="text" id="priceDisplay" inputmode="numeric" autocomplete="off"
                                        class="field-input" placeholder="0"
-                                       value="${book.price}">
+                                       value="<fmt:formatNumber value='${book.price}' maxFractionDigits='0' groupingUsed='false'/>">
+                                <input type="hidden" id="price" name="price"
+                                       value="<fmt:formatNumber value='${book.price}' maxFractionDigits='0' groupingUsed='false'/>">
                                 <p class="err-msg" id="priceErr">Giá bán phải lớn hơn 0</p>
                             </div>
                             <div>
-                                <label class="field-label" for="stockQuantity">📦 Số lượng tồn kho <span class="text-error">*</span></label>
+                                <label class="field-label" for="stockQuantity">Số lượng tồn kho <span class="text-error">*</span></label>
                                 <input type="number" id="stockQuantity" name="stockQuantity" required min="0"
                                        class="field-input" placeholder="0"
                                        value="${book.stockQuantity}">
@@ -309,17 +311,17 @@
                             </div>
                         </div>
 
-                        <%-- [NEW] DESCRIPTION (tích hợp từ code 2) --%>
+
                         <div>
-                            <label class="field-label" for="description">📝 Mô tả</label>
+                            <label class="field-label" for="description">Mô tả</label>
                             <textarea id="description" name="description" rows="4"
                                       class="field-input resize-y" placeholder="Nhập mô tả sách...">${book.description}</textarea>
                         </div>
 
-                        <%-- GENRE + CONTENT --%>
+
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="field-label" for="genreID">🗂 Thể loại</label>
+                                <label class="field-label" for="genreID">Thể loại</label>
                                 <div class="lookup-row">
                                     <select id="genreID" name="genreID" class="field-input">
                                         <option value="">-- Chọn thể loại --</option>
@@ -331,7 +333,7 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="field-label" for="contentID">📑 Hình thức</label>
+                                <label class="field-label" for="contentID">Hình thức</label>
                                 <div class="lookup-row">
                                     <select id="contentID" name="contentID" class="field-input">
                                         <option value="">-- Chọn hình thức --</option>
@@ -344,10 +346,10 @@
                             </div>
                         </div>
 
-                        <%-- ORIGIN + SERIES --%>
+
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="field-label" for="originID">🌏 Xuất xứ</label>
+                                <label class="field-label" for="originID">Xuất xứ</label>
                                 <div class="lookup-row">
                                     <select id="originID" name="originID" class="field-input">
                                         <option value="">-- Chọn xuất xứ --</option>
@@ -359,7 +361,7 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="field-label" for="seriesID">📚 Bộ sách</label>
+                                <label class="field-label" for="seriesID">Bộ sách</label>
                                 <div class="lookup-row">
                                     <select id="seriesID" name="seriesID" class="field-input">
                                         <option value="">-- Không có --</option>
@@ -372,39 +374,40 @@
                             </div>
                         </div>
 
-                        <%-- PHYSICAL INFO --%>
+
                         <div class="grid grid-cols-3 gap-4">
                             <div>
-                                <label class="field-label" for="totalPages">📄 Số trang</label>
+                                <label class="field-label" for="totalPages">Số trang</label>
                                 <input type="number" id="totalPages" name="totalPages" min="0"
                                        class="field-input" placeholder="0"
                                        value="${book.totalPages > 0 ? book.totalPages : ''}">
                             </div>
                             <div>
-                                <label class="field-label" for="weight">⚖️ Khối lượng (g)</label>
+                                <label class="field-label" for="weight">Khối lượng (g)</label>
                                 <input type="number" id="weight" name="weight" min="0" step="0.01"
                                        class="field-input" placeholder="0.00"
                                        value="${book.weight}">
                             </div>
                             <div>
-                                <label class="field-label" for="dimensions">📐 Kích thước</label>
+                                <label class="field-label" for="dimensions">Kích thước</label>
                                 <input type="text" id="dimensions" name="dimensions"
                                        class="field-input" placeholder="13 x 20.5 cm"
                                        value="${book.dimensions}">
                             </div>
                         </div>
 
-                        <%-- STATUS --%>
+
                         <div>
-                            <label class="field-label" for="status">🔖 Trạng thái <span class="text-error">*</span></label>
+                            <label class="field-label" for="status">Trạng thái <span class="text-error">*</span></label>
                             <select id="status" name="status" class="field-input">
-                                <option value="available"    <c:if test="${book.status == 'available' or empty book.status}">selected</c:if>>✅ Đang bán</option>
-                                <option value="out_of_stock" <c:if test="${book.status == 'out_of_stock'}">selected</c:if>>⚠️ Hết hàng</option>
-                                <option value="discontinued" <c:if test="${book.status == 'discontinued'}">selected</c:if>>🚫 Ngừng bán</option>
+                                <option value="available"    <c:if test="${book.status == 'available' or empty book.status}">selected</c:if>>Đang bán</option>
+                                <option value="out_of_stock" <c:if test="${book.status == 'out_of_stock'}">selected</c:if>>Hết hàng</option>
+                                <option value="discontinued" <c:if test="${book.status == 'discontinued'}">selected</c:if>>Ngừng bán</option>
                                 </select>
+                            <p class="err-msg" id="statusErr">Không thể chọn "Đang bán" khi tồn kho = 0.</p>
                             </div>
 
-                        <%-- ACTIONS --%>
+                 
                         <div class="flex gap-3 pt-2 border-t border-outline-variant/30">
                             <button type="submit" id="submitBtn"
                                     class="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-[15px] hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
@@ -435,7 +438,7 @@
         </div>
 
         <script>
-            // Preview image by imgId and placeholderId
+
             function previewThumb(url, imgId, placeholderId) {
                 const img = document.getElementById(imgId);
                 const placeholder = document.getElementById(placeholderId);
@@ -458,7 +461,7 @@
                 }
             }
 
-            // Upload image to Cloudinary via /upload-image endpoint
+  
             function uploadImage(input, inputId, imgId, placeholderId) {
                 const file = input.files[0];
                 if (!file)
@@ -497,14 +500,13 @@
                         });
             }
 
-            // On load: preview all images if editing
             document.addEventListener('DOMContentLoaded', function () {
-                // Main thumbnail
+   
                 const mainInput = document.getElementById('thumbnail');
                 if (mainInput && mainInput.value) {
                     previewThumb(mainInput.value, 'thumbImg', 'thumbPlaceholder');
                 }
-                // Extra images
+              
                 [2, 3, 4].forEach(i => {
                     const input = document.getElementById('image' + i);
                     if (input && input.value) {
@@ -513,7 +515,6 @@
                 });
             });
 
-            // Client-side validation
             document.getElementById('bookForm').addEventListener('submit', function (e) {
                 let valid = true;
 
@@ -551,13 +552,14 @@
                 }
 
                 const price = document.getElementById('price');
+                const priceDisplay = document.getElementById('priceDisplay');
                 const priceErr = document.getElementById('priceErr');
                 if (!price.value || parseFloat(price.value) <= 0) {
-                    price.classList.add('error');
+                    priceDisplay.classList.add('error');
                     priceErr.classList.add('show');
                     valid = false;
                 } else {
-                    price.classList.remove('error');
+                    priceDisplay.classList.remove('error');
                     priceErr.classList.remove('show');
                 }
 
@@ -572,6 +574,18 @@
                     stockErr.classList.remove('show');
                 }
 
+                const statusSelect = document.getElementById('status');
+                const statusErr = document.getElementById('statusErr');
+                const stockQtyForStatus = parseInt(stock.value, 10);
+                if (statusSelect.value === 'available' && !isNaN(stockQtyForStatus) && stockQtyForStatus <= 0) {
+                    statusSelect.classList.add('error');
+                    statusErr.classList.add('show');
+                    valid = false;
+                } else {
+                    statusSelect.classList.remove('error');
+                    statusErr.classList.remove('show');
+                }
+
                 if (!valid) {
                     e.preventDefault();
                     document.querySelector('.field-input.error')?.scrollIntoView({behavior: 'smooth', block: 'center'});
@@ -581,7 +595,7 @@
                 }
             });
 
-            // Remove error styling on input
+
             document.querySelectorAll('.field-input').forEach(el => {
                 el.addEventListener('input', () => {
                     el.classList.remove('error');
@@ -592,7 +606,37 @@
                 });
             });
 
-            // ── Thêm nhanh Thể loại / Hình thức / Xuất xứ / Bộ sách ──────────
+            function checkStatusVsStock() {
+                const stockEl = document.getElementById('stockQuantity');
+                const statusEl = document.getElementById('status');
+                const statusErrEl = document.getElementById('statusErr');
+                const qty = parseInt(stockEl.value, 10);
+                if (statusEl.value === 'available' && !isNaN(qty) && qty <= 0) {
+                    statusEl.classList.add('error');
+                    statusErrEl.classList.add('show');
+                } else {
+                    statusEl.classList.remove('error');
+                    statusErrEl.classList.remove('show');
+                }
+            }
+            document.getElementById('stockQuantity').addEventListener('input', checkStatusVsStock);
+            document.getElementById('status').addEventListener('change', checkStatusVsStock);
+
+
+            function formatVND(el) {
+                const raw = el.value.replace(/\D/g, ''); 
+                document.getElementById('price').value = raw;
+                el.value = raw ? new Intl.NumberFormat('vi-VN').format(Number(raw)) : '';
+            }
+            const priceDisplayEl = document.getElementById('priceDisplay');
+            formatVND(priceDisplayEl);
+            priceDisplayEl.addEventListener('input', () => {
+                formatVND(priceDisplayEl);
+                priceDisplayEl.classList.remove('error');
+                document.getElementById('priceErr').classList.remove('show');
+            });
+
+
             const lookupLabels = {genre: 'thể loại', content: 'hình thức', origin: 'xuất xứ', series: 'bộ sách'};
             let activeLookupType = '';
             let activeLookupSelectId = '';

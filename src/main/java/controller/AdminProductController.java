@@ -16,13 +16,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-/**
- * AdminProductController – quản lý sách cho Admin/Staff. URL pattern:
- * /dashboard/product-management doGet action=null → danh sách doGet
- * action=create → form tạo mới doGet action=edit&id → form sửa doPost
- * action=create → xử lý tạo doPost action=update → xử lý cập nhật doPost
- * action=delete → soft delete
- */
+
 public class AdminProductController extends HttpServlet {
 
     private static final int PAGE_SIZE = 10;
@@ -89,9 +83,10 @@ public class AdminProductController extends HttpServlet {
         }
     }
 
-    // ── Danh sách ─────────────────────────────────────────────────────
     private void showList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+
+        req.setAttribute("activeMenu", "product-management");
 
         int page = parsePage(req.getParameter("page"));
         String keyword = req.getParameter("keyword");
@@ -119,9 +114,10 @@ public class AdminProductController extends HttpServlet {
         req.getRequestDispatcher("/views/admin/product/product-management.jsp").forward(req, resp);
     }
 
-    // ── Form tạo mới ──────────────────────────────────────────────────
+
     private void showForm(HttpServletRequest req, HttpServletResponse resp, Book book)
             throws ServletException, IOException {
+        req.setAttribute("activeMenu", "product-management");
         lookupDAO.ensureDefaultLookups();
         req.setAttribute("book", book);
         req.setAttribute("genreMap", bookDAO.getGenreMap());
@@ -132,9 +128,10 @@ public class AdminProductController extends HttpServlet {
         req.getRequestDispatcher("/views/admin/product/product-form.jsp").forward(req, resp);
     }
 
-    // ── Form chỉnh sửa ────────────────────────────────────────────────
+ 
     private void showEditForm(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        req.setAttribute("activeMenu", "product-management");
         int bookID = parseID(req.getParameter("id"));
         if (bookID <= 0) {
             resp.sendRedirect(req.getContextPath() + "/dashboard/product-management");
@@ -147,13 +144,13 @@ public class AdminProductController extends HttpServlet {
             return;
         }
 
-        // Parse pipe-separated images: thumbnail|image2|image3|image4
+
         String[] imgParts = book.getThumbnail() != null ? book.getThumbnail().split("\\|", -1) : new String[0];
         String img1 = imgParts.length > 0 ? imgParts[0].trim() : "";
         String img2 = imgParts.length > 1 ? imgParts[1].trim() : "";
         String img3 = imgParts.length > 2 ? imgParts[2].trim() : "";
         String img4 = imgParts.length > 3 ? imgParts[3].trim() : "";
-        book.setThumbnail(img1); // form shows only main image in thumbnail field
+        book.setThumbnail(img1); 
         req.setAttribute("image2", img2);
         req.setAttribute("image3", img3);
         req.setAttribute("image4", img4);
@@ -168,13 +165,24 @@ public class AdminProductController extends HttpServlet {
         req.getRequestDispatcher("/views/admin/product/product-form.jsp").forward(req, resp);
     }
 
-    // ── Tạo sách ─────────────────────────────────────────────────────
     private void handleCreate(HttpServletRequest req, HttpServletResponse resp, Account account)
             throws IOException {
+        HttpSession session = req.getSession();
+        String stockError = validateStockQuantity(req.getParameter("stockQuantity"));
+        if (stockError != null) {
+            session.setAttribute("errorMessage", stockError);
+            resp.sendRedirect(req.getContextPath() + "/dashboard/product-management?action=create");
+            return;
+        }
+        String statusError = validateStatusVsStock(req.getParameter("stockQuantity"), req.getParameter("status"));
+        if (statusError != null) {
+            session.setAttribute("errorMessage", statusError);
+            resp.sendRedirect(req.getContextPath() + "/dashboard/product-management?action=create");
+            return;
+        }
         Book b = buildBookFromRequest(req);
         String authors = req.getParameter("authors");
         boolean ok = bookDAO.createBook(b, authors, account.getId());
-        HttpSession session = req.getSession();
         if (ok) {
             session.setAttribute("successMessage", "Thêm sách thành công!");
         } else {
@@ -183,7 +191,6 @@ public class AdminProductController extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/dashboard/product-management");
     }
 
-    // ── Cập nhật sách ────────────────────────────────────────────────
     private void handleUpdate(HttpServletRequest req, HttpServletResponse resp, Account account)
             throws IOException {
         int bookID = parseID(req.getParameter("bookID"));
@@ -191,11 +198,23 @@ public class AdminProductController extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/dashboard/product-management");
             return;
         }
+        HttpSession session = req.getSession();
+        String stockError = validateStockQuantity(req.getParameter("stockQuantity"));
+        if (stockError != null) {
+            session.setAttribute("errorMessage", stockError);
+            resp.sendRedirect(req.getContextPath() + "/dashboard/product-management?action=edit&id=" + bookID);
+            return;
+        }
+        String statusError = validateStatusVsStock(req.getParameter("stockQuantity"), req.getParameter("status"));
+        if (statusError != null) {
+            session.setAttribute("errorMessage", statusError);
+            resp.sendRedirect(req.getContextPath() + "/dashboard/product-management?action=edit&id=" + bookID);
+            return;
+        }
         Book b = buildBookFromRequest(req);
         b.setBookID(bookID);
         String authors = req.getParameter("authors");
         boolean ok = bookDAO.updateBook(b, authors, account.getId());
-        HttpSession session = req.getSession();
         if (ok) {
             session.setAttribute("successMessage", "Cập nhật sách thành công!");
         } else {
@@ -204,7 +223,6 @@ public class AdminProductController extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/dashboard/product-management");
     }
 
-    // ── Soft delete ──────────────────────────────────────────────────
     private void handleDelete(HttpServletRequest req, HttpServletResponse resp, Account account)
             throws IOException {
         int bookID = parseID(req.getParameter("bookID"));
@@ -234,13 +252,40 @@ public class AdminProductController extends HttpServlet {
     resp.sendRedirect(req.getContextPath() + "/dashboard/product-management");
 }
 
-    // ── Build Book từ request ────────────────────────────────────────────────
+
+    private String validateStockQuantity(String raw) {
+        if (raw == null || raw.trim().isEmpty()) {
+            return "Vui lòng nhập số lượng tồn kho!";
+        }
+ 
+        if (!raw.trim().matches("\\d+")) {
+            return "Số lượng tồn kho phải là số nguyên, không được là phân số hoặc số âm (ví dụ: 1.5 không hợp lệ)!";
+        }
+        try {
+            Integer.parseInt(raw.trim());
+        } catch (NumberFormatException e) {
+            return "Số lượng tồn kho không hợp lệ!";
+        }
+        return null;
+    }
+
+
+    private String validateStatusVsStock(String stockRaw, String statusRaw) {
+        int stockQuantity = Integer.parseInt(stockRaw.trim());
+        String status = (statusRaw == null || statusRaw.trim().isEmpty()) ? "available" : statusRaw.trim();
+        if (stockQuantity <= 0 && "available".equals(status)) {
+            return "Không thể đặt trạng thái 'Đang bán' khi số lượng tồn kho = 0. "
+                    + "Vui lòng chọn 'Hết hàng' (hoặc 'Ngừng bán'), hoặc nhập số lượng tồn kho lớn hơn 0.";
+        }
+        return null;
+    }
+
     private Book buildBookFromRequest(HttpServletRequest req) {
         Book b = new Book();
         b.setTitle(req.getParameter("title"));
         b.setDescription(req.getParameter("description"));
 
-        // Combine thumbnail + image2 + image3 + image4 into pipe-separated string
+
         String thumb = clean(req.getParameter("thumbnail"));
         String img2 = clean(req.getParameter("image2"));
         String img3 = clean(req.getParameter("image3"));
@@ -281,13 +326,18 @@ public class AdminProductController extends HttpServlet {
         } catch (Exception e) {
         }
 
-        // BR-63: Product status must be one of 'available', 'out_of_stock',
-        // or 'discontinued', and ONLY Staff can change it. Do not auto-override
-        // Staff's chosen status based on stock quantity (e.g. stock = 0 must NOT
-        // be silently forced to 'discontinued' — that value is reserved for an
-        // explicit soft-delete action, see UC2.7 Delete Product).
-        String status = req.getParameter("status");
-        b.setStatus(status != null && !status.trim().isEmpty() ? status.trim() : "available");
+        String requestedStatus = req.getParameter("status");
+        requestedStatus = requestedStatus != null ? requestedStatus.trim() : "";
+
+        String status;
+        if ("discontinued".equals(requestedStatus)) {
+            status = "discontinued";
+        } else if (b.getStockQuantity() <= 0) {
+            status = "out_of_stock";
+        } else {
+            status = !requestedStatus.isEmpty() ? requestedStatus : "available";
+        }
+        b.setStatus(status);
         Integer gid = parseIntParam(req.getParameter("genreID"));
         if (gid != null) {
             b.setGenreID(gid);
@@ -311,13 +361,13 @@ public class AdminProductController extends HttpServlet {
         return (s == null) ? "" : s.trim();
     }
 
-    // ── Auth guard ───────────────────────────────────────────────────
+
     private Account requireStaff(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         return RoleGuard.requireStaff(req, resp);
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────
+
     private int parsePage(String param) {
         if (param == null) {
             return 1;

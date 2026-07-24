@@ -46,10 +46,10 @@
         <main class="flex-1 md:ml-64 min-h-screen p-6">
             <div class="max-w-[1200px] mx-auto space-y-6">
 
-                <%-- HEADER --%>
+
                 <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div>
-                        <h2 class="text-2xl font-bold text-on-surface">📦 Quản lý Kho sách</h2>
+                        <h2 class="text-2xl font-bold text-on-surface">Quản lý Kho sách</h2>
                         <p class="text-sm text-on-surface-variant mt-1">Thêm, sửa, ngừng bán sách trong hệ thống BookTown</p>
                     </div>
                     <a href="${pageContext.request.contextPath}/dashboard/product-management?action=create"
@@ -59,7 +59,7 @@
                     </a>
                 </div>
 
-                <%-- STATS --%>
+
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="bg-surface p-4 rounded-2xl border border-outline-variant/30 flex flex-col gap-1">
                         <span class="text-xs font-semibold text-on-surface-variant uppercase">Tổng sách</span>
@@ -79,7 +79,7 @@
                     </div>
                 </div>
 
-                <%-- FILTER & SEARCH BAR --%>
+
                 <div class="bg-surface rounded-2xl border border-outline-variant/30 p-5">
                     <form method="get" action="${pageContext.request.contextPath}/dashboard/product-management"
                           class="flex flex-wrap gap-3 items-end">
@@ -91,7 +91,7 @@
                                    class="w-full pl-10 pr-4 py-2.5 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-sm outline-none">
                         </div>
 
-                        <!-- Thể loại -->
+
                         <div class="relative min-w-[150px]">
                             <select name="genre" onchange="this.form.submit()"
                                     class="appearance-none w-full pl-3 pr-9 py-2.5 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary text-sm outline-none cursor-pointer bg-white">
@@ -103,7 +103,7 @@
                             <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px] pointer-events-none">expand_more</span>
                         </div>
 
-                        <!-- Trạng thái -->
+
                         <div class="relative min-w-[150px]">
                             <select name="status" onchange="this.form.submit()"
                                     class="appearance-none w-full pl-3 pr-9 py-2.5 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary text-sm outline-none cursor-pointer bg-white">
@@ -123,7 +123,7 @@
                     </form>
                 </div>
 
-                <%-- TABLE --%>
+
                 <div class="bg-surface rounded-2xl border border-outline-variant/30 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse text-sm">
@@ -246,7 +246,7 @@
                         </table>
                     </div>
 
-                    <%-- PAGINATION --%>
+
                     <c:if test="${totalPages > 1}">
                         <div class="px-4 py-3 border-t border-outline-variant/30 flex justify-center gap-1.5 flex-wrap">
                             <c:if test="${page > 1}">
@@ -274,7 +274,7 @@
             </div>
         </main>
 
-        <%-- DELETE CONFIRM MODAL --%>
+
         <div id="deleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 hidden">
             <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4 animate-[fadeIn_.2s_ease]">
                 <div class="flex items-center gap-3 mb-4">

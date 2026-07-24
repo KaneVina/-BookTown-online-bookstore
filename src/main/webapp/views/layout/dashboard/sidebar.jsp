@@ -49,7 +49,7 @@
         font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
 
-    /* User popup menu */
+
     .user-popup {
         display: none;
         position: absolute;
@@ -148,21 +148,22 @@
         </a>
         </c:when></c:choose>
 
-        <% if (isStaffUser) { %>
+        <% if (isStaffUser) {
+                boolean khoHangActive = "product-management".equals(request.getAttribute("activeMenu"))
+                        || currentPage.contains("product-management");
+        %>
         <a href="${pageContext.request.contextPath}/dashboard/product-management"
-           class="sidebar-link <%= currentPage.contains("product-management") ? "active" : ""%>">
+           class="sidebar-link <%= khoHangActive ? "active" : ""%>">
             <span class="material-symbols-outlined">inventory_2</span>
             Kho hàng
         </a>
         <% } %>
 
-        <% if (isStaffUser) { %>
         <a href="${pageContext.request.contextPath}/category"
            class="sidebar-link <%= currentPage.contains("/category") ? "active" : ""%>">
             <span class="material-symbols-outlined">category</span>
             Thể loại
         </a>
-        <% } %>
 
         <a href="${pageContext.request.contextPath}/dashboard/account-management"
            class="sidebar-link <%= currentPage.contains("account-management") ? "active" : ""%>">
@@ -170,23 +171,21 @@
             Tài khoản
         </a>
 
-        <a href="${pageContext.request.contextPath}/dashboard/review-management"
+        <a href="${pageContext.request.contextPath}/review"
            class="sidebar-link <%= currentPage.contains("review") ? "active" : ""%>">
             <span class="material-symbols-outlined">rate_review</span>
             Đánh giá
         </a>
 
-        <% if (isStaffUser) { %>
         <a href="${pageContext.request.contextPath}/dashboard/voucher-management"
            class="sidebar-link <%= currentPage.contains("voucher") ? "active" : ""%>">
             <span class="material-symbols-outlined">sell</span>
             Voucher
         </a>
-        <% } %>
 
     </nav>
 
-    <%-- User section với popup menu --%>
+
     <div class="border-t relative" style="border-color: #c2c6d4;">
         <div class="user-popup" id="userPopup">
             <a href="${pageContext.request.contextPath}/profile">
