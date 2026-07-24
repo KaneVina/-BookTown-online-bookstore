@@ -167,8 +167,9 @@
                     </button>
                 </div>
 
-                <c:if test="${not empty addresses}">
-                    <div class="address-list">
+                <c:choose>
+                    <c:when test="${not empty addresses}">
+                        <div class="address-list">
                         <c:forEach var="address" items="${addresses}">
                             <div class="address-item" id="address-row-${address.addressID}">
                                 <input type="hidden"
@@ -194,7 +195,7 @@
 
                                 <div class="address-actions">
                                     <c:if test="${!address['default']}">
-                                        <form action="${pageContext.request.contextPath}/address"
+                                        <form action="${pageContext.request.contextPath}/profile/address"
                                               method="post"
                                               style="display:inline;">
                                             <input type="hidden" name="action" value="setDefaultAddress">
@@ -211,7 +212,7 @@
                                         Sửa
                                     </button>
 
-                                    <form action="${pageContext.request.contextPath}/address"
+                                    <form action="${pageContext.request.contextPath}/profile/address"
                                           method="post"
                                           style="display:inline;"
                                           onsubmit="openDeleteAddressModal(this); return false;">
@@ -222,8 +223,14 @@
                                 </div>
                             </div>
                         </c:forEach>
-                    </div>
-                </c:if>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-500">
+                            Bạn chưa có địa chỉ nào.
+                        </div>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
 
@@ -464,7 +471,7 @@
             body += '&addressID=' + encodeURIComponent(addressID);
         }
 
-        fetch('${pageContext.request.contextPath}/address', {
+        fetch('${pageContext.request.contextPath}/profile/address', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
@@ -484,7 +491,7 @@
 
             if (mode === 'add') {
                 window.location.href =
-                    '${pageContext.request.contextPath}/address';
+                    '${pageContext.request.contextPath}/profile/address';
                 return;
             }
 

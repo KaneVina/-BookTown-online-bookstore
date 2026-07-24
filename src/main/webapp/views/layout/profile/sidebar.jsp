@@ -62,7 +62,7 @@
                 <span class="material-symbols-outlined">lock</span>
                 Đổi mật khẩu
             </a>
-            <a href="${pageContext.request.contextPath}/address"
+            <a href="${pageContext.request.contextPath}/profile/address"
                class="menu-item ${activeMenu == 'address' ? 'menu-active' : ''}">
                 <span class="material-symbols-outlined">location_on</span>
                 Địa chỉ của tôi

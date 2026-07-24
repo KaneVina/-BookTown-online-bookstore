@@ -728,9 +728,9 @@
             });
         }
 
+        // Danh sách địa chỉ luôn lấy từ database do server render.
+        // Không khôi phục địa chỉ từ localStorage để tránh dữ liệu giả hoặc dữ liệu đã xóa xuất hiện lại.
         document.querySelectorAll('.address-option').forEach(bindAddressOption);
-        applyDeletedAddressesOnReload();
-        renderLocalAddresses();
 
         document.getElementById('btnCancelDeleteAddress').addEventListener('click', function () {
             deleteTargetOption = null;
@@ -738,9 +738,45 @@
         });
 
         document.getElementById('btnConfirmDeleteAddress').addEventListener('click', function () {
-            softDeleteAddress(deleteTargetOption);
-            deleteTargetOption = null;
-            document.getElementById('deleteAddressConfirm').classList.add('hidden');
+            if (!deleteTargetOption) {
+                document.getElementById('deleteAddressConfirm').classList.add('hidden');
+                return;
+            }
+
+            var addressID = deleteTargetOption.dataset.id;
+            var targetOption = deleteTargetOption;
+            var confirmButton = this;
+            confirmButton.disabled = true;
+
+            fetch('${pageContext.request.contextPath}/checkout', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+                body: 'action=deleteAddressAjax&addressID=' + encodeURIComponent(addressID)
+            })
+                    .then(function (response) {
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        confirmButton.disabled = false;
+
+                        if (!data.success) {
+                            showInputError(data.message || 'Không thể xóa địa chỉ.');
+                            return;
+                        }
+
+                        softDeleteAddress(targetOption);
+                        // Xóa dấu vết localStorage cũ; database mới là nguồn dữ liệu duy nhất.
+                        localStorage.removeItem(ADDRESS_STORAGE_KEY);
+                        localStorage.removeItem(DELETED_STORAGE_KEY);
+                    })
+                    .catch(function () {
+                        confirmButton.disabled = false;
+                        showInputError('Không kết nối được server!');
+                    })
+                    .finally(function () {
+                        deleteTargetOption = null;
+                        document.getElementById('deleteAddressConfirm').classList.add('hidden');
+                    });
         });
 
         document.getElementById('selectedAddressBox').addEventListener('click', function () {
@@ -885,7 +921,7 @@
                     })
                     .then(function (data) {
                         if (!data.success) {
-                            showInputError('Lỗi khi lưu địa chỉ vào database!');
+                            showInputError(data.message || 'Lỗi khi lưu địa chỉ vào database!');
                             return;
                         }
 
@@ -910,6 +946,8 @@
                         document.getElementById('newStreet').value = '';
                         document.getElementById('defaultAddress').checked = false;
 
+                        localStorage.removeItem(ADDRESS_STORAGE_KEY);
+                        localStorage.removeItem(DELETED_STORAGE_KEY);
                         showToast('Đã thêm địa chỉ mới!', false);
                     })
                     .catch(function () {
