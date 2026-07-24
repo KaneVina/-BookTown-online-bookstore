@@ -205,15 +205,12 @@
 
 <main class="max-w-[1400px] mx-auto px-8 py-8 flex flex-col gap-8">
 
-    <!-- ══ PRODUCT HERO ══════════════════════════════════════════════════ -->
+
     <section class="flex flex-col lg:flex-row gap-10">
 
-        <!-- LEFT: Image Gallery -->
+
         <div class="flex-shrink-0 w-full lg:w-[499px] flex flex-col gap-4">
 
-            <%-- [FIX] book.thumbnail lưu dạng "url1|url2|url3|url4" nhưng JSP gốc
-                 dùng thẳng ${img1}..${img4} mà không hề tách chuỗi -> ảnh luôn trống.
-                 Bổ sung đoạn tách chuỗi này (lấy từ code 2) để gallery hoạt động đúng. --%>
             <%
                 String rawThumb = (request.getAttribute("book") != null)
                         ? ((model.Book) request.getAttribute("book")).getThumbnail() : "";
@@ -243,8 +240,6 @@
                     <div class="absolute top-3 left-3 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">🔥 Nổi bật</div>
                 </c:if>
 
-                <%-- [FIX] Hợp nhất 2 overlay "Hết hàng" bị lặp ở bản gốc thành 1,
-                     kiểm tra cả status và stockQuantity cho đồng bộ với phần bên dưới --%>
                 <c:if test="${book.status != 'available' or book.stockQuantity == 0}">
                     <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
                         <span class="bg-white text-red-600 font-bold text-sm px-4 py-2 rounded-full">Hết hàng</span>
@@ -252,8 +247,7 @@
                 </c:if>
             </div>
 
-            <%-- [FIX] Bỏ khối thumbnail-strip thứ 2 (dùng nhầm chuỗi thô book.thumbnail
-                 làm src ảnh) — chỉ giữ lại 1 thumbnail-strip dùng img1..img4 đã tách đúng --%>
+
             <c:if test="${not empty img1}">
                 <div class="grid grid-cols-4 gap-3">
                     <%-- Ảnh 1: bìa chính --%>
@@ -363,8 +357,7 @@
                 </div>
 
                 <!-- Stock status -->
-                <%-- [FIX] kiểm tra thêm book.status để đồng bộ với overlay "Hết hàng" ở ảnh
-                     (trước đây chỉ check stockQuantity > 0, không khớp với overlay) --%>
+
                 <div class="flex items-center gap-2 text-[14px] font-medium">
                     <c:choose>
                         <c:when test="${book.status == 'available' and book.stockQuantity > 0}">
@@ -491,11 +484,9 @@
             </div>
         </div>
     </section>
-    <%-- [FIX] Bản gốc có 1 thẻ </section> dư ở đây (đóng nhầm 2 lần) khiến phần
-         Tabs/Modal/Related books bị lồng sai cấp. Đã bỏ thẻ dư và để các section
-         dưới đây làm anh em (sibling) trực tiếp của <main>, giống cấu trúc sạch của code 2. --%>
 
-    <!-- ══ TABS: Mô tả / Thông tin / Đánh giá ══════════════════════════ -->
+
+    <!-- ══ TABS: Mô tả / Thông tin / Đánh giá  -->
     <section class="pt-2">
         <!-- Tab Navigation -->
         <div class="tab-nav">
@@ -678,7 +669,7 @@
         </div>
     </section>
 
-    <!-- ══ REVIEW MODAL ══════════════════════════════════════════════════ -->
+
     <div id="reviewModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
         <div class="bg-white w-[600px] rounded-xl p-6 relative">
             <button id="closeReviewModal" class="absolute top-3 right-4 text-2xl">×</button>
@@ -710,7 +701,7 @@
         </div>
     </div>
 
-    <!-- ══ RELATED BOOKS ══════════════════════════════════════════════════ -->
+
     <c:if test="${not empty relatedBooks}">
         <section class="pt-2">
             <div class="flex items-center justify-between mb-5">
@@ -787,7 +778,7 @@
 </main>
 
 <script>
-    // ── Tab switching ────────────────────────────────────────────────────
+
     function switchTab(panelId, btn) {
         document.querySelectorAll('.tab-panel').forEach(function (p) {
             p.classList.remove('active');
@@ -799,16 +790,12 @@
         btn.classList.add('active');
     }
 
-    // ── Qty +/- ──────────────────────────────────────────────────────────
+
     (function () {
         var input = document.getElementById('form-qty');
         if (!input)
             return;
-        // [FIX] Lấy max trực tiếp từ server-side (JSTL) thành số nguyên JS,
-        // không đọc lại từ DOM attribute để tránh sai lệch do trình duyệt
-        // xử lý input[type=number][readonly] không đồng nhất (scroll/phím
-        // mũi tên trên input readonly có thể vẫn đổi giá trị ở 1 số browser
-        // và không được validate lại bằng max attribute).
+
         var max = ${book.stockQuantity > 0 ? book.stockQuantity : 1};
         var minus = document.getElementById('qty-minus');
         var plus  = document.getElementById('qty-plus');
@@ -836,19 +823,14 @@
             input.value = clamp(parseInt(input.value, 10) + 1);
             render();
         });
-        // Chặn mọi thay đổi giá trị ngoài ý muốn (scroll wheel, phím mũi tên,
-        // paste...) đều bị clamp lại đúng giới hạn kho.
+
         input.addEventListener('input', render);
         input.addEventListener('change', render);
 
         render();
     })();
 
-    // ── Thumbnail switcher ───────────────────────────────────────────────
-    // [FIX] Bản gốc khai báo switchImg 2 lần (1 lần gán window.switchImg dùng
-    // className.replace, 1 lần function switchImg dùng classList) khiến bản
-    // gán sau cùng đè bản kia một cách khó kiểm soát. Giờ chỉ giữ 1 bản dùng
-    // classList (an toàn hơn vì không phụ thuộc thứ tự class trong className).
+
     window.switchImg = function (btn, src) {
         var main = document.getElementById('mainImage');
         if (main && src)
@@ -863,7 +845,7 @@
         }
     };
 
-    // ── Add to cart (AJAX) ───────────────────────────────────────────────
+
     var btnAdd = document.getElementById('btn-add-to-cart');
     if (btnAdd) {
         btnAdd.addEventListener('click', function () {
@@ -904,7 +886,7 @@
         });
     }
 
-    // ── Related slider ───────────────────────────────────────────────────
+
     var slider = document.getElementById('relatedSlider');
     var prev = document.getElementById('sliderPrev');
     var next = document.getElementById('sliderNext');
@@ -918,7 +900,7 @@
         });
     }
 
-    // ── Star rating ──────────────────────────────────────────────────────
+
     var stars = document.querySelectorAll('.star');
     var ratingInput = document.getElementById('ratingValue');
     var ratingText = document.getElementById('ratingText');
@@ -955,7 +937,7 @@
         });
     }
 
-    // ── Review modal ─────────────────────────────────────────────────────
+
     var reviewModal = document.getElementById('reviewModal');
     var openReviewBtn = document.getElementById('openReviewModal');
     var closeReviewBtn = document.getElementById('closeReviewModal');

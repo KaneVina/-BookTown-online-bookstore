@@ -58,7 +58,6 @@ public class WishlistItem {
     public int getReviewCount() { return reviewCount; }
     public void setReviewCount(int v) { this.reviewCount = v; }
 
-    /** Trả về URL ảnh đầu tiên */
     public String getThumbnailFirst() {
         if (thumbnail == null || thumbnail.isEmpty()) return "";
         int idx = thumbnail.indexOf('|');

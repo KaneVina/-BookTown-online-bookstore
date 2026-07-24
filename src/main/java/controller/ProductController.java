@@ -16,9 +16,7 @@ import java.util.List;
 import java.util.Map;
 import model.Review;
 
-/**
- * ProductController – xử lý trang sản phẩm công khai (danh sách, chi tiết, featured).
- */
+
 public class ProductController extends HttpServlet {
 
     private static final int DEFAULT_PAGE_SIZE = 12;
@@ -54,7 +52,7 @@ public class ProductController extends HttpServlet {
         resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }
 
-    // ── Danh sách sách với filter + search + sort ────────────────────
+
     private void showList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
@@ -64,7 +62,7 @@ public class ProductController extends HttpServlet {
         String keyword = req.getParameter("keyword");
         String order   = buildOrderClause(sort);
 
-        // Filter params
+  
         Integer    genreID  = parseIntParam(req.getParameter("genre"));
         BigDecimal minPrice = parsePriceParam(req.getParameter("minPrice"));
         BigDecimal maxPrice = parsePriceParam(req.getParameter("maxPrice"));
@@ -73,7 +71,7 @@ public class ProductController extends HttpServlet {
         int totalPages = (int) Math.ceil((double) totalBooks / pageSize);
         if (totalPages == 0) totalPages = 1;
 
-        // Clamp page
+
         if (page > totalPages) {
             resp.sendRedirect(req.getContextPath() + "/products?page=" + totalPages
                     + "&size=" + pageSize
@@ -87,10 +85,9 @@ public class ProductController extends HttpServlet {
         List<Book> books = bookDAO.getBooksFiltered(offset, pageSize, order,
                                                      keyword, genreID, minPrice, maxPrice);
 
-        // Genres cho sidebar filter
+ 
         Map<Integer, String> genreMap = bookDAO.getGenreMap();
 
-        // Wishlist check cho user đang đăng nhập
         HttpSession session = req.getSession(false);
         java.util.Set<String> wishlistBookIds = new java.util.HashSet<>();
         if (session != null) {
@@ -119,7 +116,7 @@ public class ProductController extends HttpServlet {
         req.getRequestDispatcher("/views/book/book-index.jsp").forward(req, resp);
     }
 
-    // ── Chi tiết 1 cuốn sách ────────────────────────────────────────
+ 
     private void showDetail(HttpServletRequest req, HttpServletResponse resp, String idParam)
             throws ServletException, IOException {
 
@@ -134,7 +131,7 @@ public class ProductController extends HttpServlet {
         ReviewDAO reviewDAO = new ReviewDAO();
         List<Review> reviews = reviewDAO.getReviewsByBook(bookID);
 
-        // canReview: bổ sung từ main
+ 
         boolean canReview = false;
         boolean inWishlist = false;
         java.util.Set<String> wishlistBookIds = new java.util.HashSet<>();
@@ -150,7 +147,6 @@ public class ProductController extends HttpServlet {
             }
         }
 
-        // addResult toast từ CartController redirect
         String addResult = req.getParameter("addResult");
         if ("success".equals(addResult)) {
             req.setAttribute("successMessage", "Đã thêm vào giỏ hàng!");
@@ -180,7 +176,7 @@ public class ProductController extends HttpServlet {
         req.getRequestDispatcher("/views/book/product-detail.jsp").forward(req, resp);
     }
 
-    // ── Featured page ────────────────────────────────────────────────
+
     private void showFeatured(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
@@ -210,7 +206,7 @@ public class ProductController extends HttpServlet {
         req.getRequestDispatcher("/views/book/book-index.jsp").forward(req, resp);
     }
 
-    // ── 404 ──────────────────────────────────────────────────────────
+ 
     private void show404(HttpServletRequest req, HttpServletResponse resp, String message)
             throws ServletException, IOException {
         resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -219,7 +215,7 @@ public class ProductController extends HttpServlet {
         req.getRequestDispatcher("/views/error/404.jsp").forward(req, resp);
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────
+
     private int parsePage(String param) {
         if (param == null || param.trim().isEmpty()) return 1;
         try { int p = Integer.parseInt(param.trim()); return p < 1 ? 1 : p; }

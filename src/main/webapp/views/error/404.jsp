@@ -4,8 +4,8 @@
 <main class="max-w-[1400px] mx-auto px-8 py-12 min-h-[65vh]">
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 px-8 py-14 flex flex-col items-center text-center mb-10">
         <div class="relative mb-6 select-none">
-            <div class="text-[96px] leading-none drop-shadow">📦</div>
-            <div class="absolute -top-1 -right-3 text-[44px] animate-bounce">🔍</div>
+            <div class="text-[96px] leading-none drop-shadow"></div>
+            <div class="absolute -top-1 -right-3 text-[44px] animate-bounce"></div>
         </div>
         <div class="flex items-baseline gap-2 mb-2">
             <span class="text-[72px] font-black text-primary leading-none tracking-tighter"

@@ -20,7 +20,7 @@
 <section class="hero-gradient px-8 py-7 relative overflow-hidden">
     <div class="absolute right-[200px] bottom-[-60px] w-[200px] h-[200px] rounded-full border-[40px] border-white/5 pointer-events-none"></div>
     <div class="relative z-10">
-        <div class="bg-secondary text-primary font-bold text-xs px-3 py-1 rounded-full inline-block mb-2 tracking-wide uppercase">📚 Kho sách BookTown</div>
+        <div class="bg-secondary text-primary font-bold text-xs px-3 py-1 rounded-full inline-block mb-2 tracking-wide uppercase">Kho sách BookTown</div>
         <h1 class="text-white text-[28px] font-black leading-tight">
             <c:choose>
                 <c:when test="${not empty keyword}">Kết quả tìm kiếm: "<em class="text-secondary not-italic">${keyword}</em>"</c:when>
@@ -34,10 +34,10 @@
 
 <main class="max-w-[1400px] mx-auto px-6 py-7 flex gap-6">
 
-    <%-- SIDEBAR FILTER --%>
+
     <aside class="hidden lg:block w-[240px] flex-shrink-0 space-y-4">
         <div class="filter-card">
-            <h3 class="text-[14px] font-bold text-gray-700 mb-3 uppercase tracking-wide">🗂 Thể loại</h3>
+            <h3 class="text-[14px] font-bold text-gray-700 mb-3 uppercase tracking-wide">Thể loại</h3>
             <div class="flex flex-col gap-1.5">
                 <a href="${pageContext.request.contextPath}/products<c:if test="${not empty keyword}">?keyword=${keyword}</c:if>"
                    class="genre-pill <c:if test="${empty genreID}">active</c:if>">Tất cả</a>
@@ -49,7 +49,7 @@
         </div>
 
         <div class="filter-card">
-            <h3 class="text-[14px] font-bold text-gray-700 mb-3 uppercase tracking-wide">💰 Khoảng giá</h3>
+            <h3 class="text-[14px] font-bold text-gray-700 mb-3 uppercase tracking-wide">Khoảng giá</h3>
             <form method="get" action="${pageContext.request.contextPath}/products" id="priceForm">
                 <input type="hidden" name="genre"   value="${genreID}">
                 <input type="hidden" name="keyword" value="${keyword}">
@@ -71,28 +71,28 @@
         </div>
     </aside>
 
-    <%-- MAIN CONTENT --%>
+  
     <div class="flex-1 min-w-0">
-        <%-- SORT BAR --%>
+        
         <div class="flex flex-wrap items-center gap-2 mb-5 bg-white border border-gray-100 rounded-xl px-4 py-3">
             <span class="text-sm font-semibold text-gray-500 mr-1">Sắp xếp:</span>
             <a href="?<c:if test="${not empty keyword}">keyword=${keyword}&</c:if><c:if test="${not empty genreID}">genre=${genreID}&</c:if>sort=newest"
-               class="sort-btn <c:if test="${sort == 'newest' or empty sort}">active</c:if>">🆕 Mới nhất</a>
+               class="sort-btn <c:if test="${sort == 'newest' or empty sort}">active</c:if>">Mới nhất</a>
             <a href="?<c:if test="${not empty keyword}">keyword=${keyword}&</c:if><c:if test="${not empty genreID}">genre=${genreID}&</c:if>sort=popular"
-               class="sort-btn <c:if test="${sort == 'popular'}">active</c:if>">🔥 Phổ biến</a>
+               class="sort-btn <c:if test="${sort == 'popular'}">active</c:if>">Phổ biến</a>
             <a href="?<c:if test="${not empty keyword}">keyword=${keyword}&</c:if><c:if test="${not empty genreID}">genre=${genreID}&</c:if>sort=price_asc"
-               class="sort-btn <c:if test="${sort == 'price_asc'}">active</c:if>">💲 Giá thấp</a>
+               class="sort-btn <c:if test="${sort == 'price_asc'}">active</c:if>">Giá thấp</a>
             <a href="?<c:if test="${not empty keyword}">keyword=${keyword}&</c:if><c:if test="${not empty genreID}">genre=${genreID}&</c:if>sort=price_desc"
-               class="sort-btn <c:if test="${sort == 'price_desc'}">active</c:if>">💰 Giá cao</a>
+               class="sort-btn <c:if test="${sort == 'price_desc'}">active</c:if>">Giá cao</a>
             <a href="?<c:if test="${not empty keyword}">keyword=${keyword}&</c:if><c:if test="${not empty genreID}">genre=${genreID}&</c:if>sort=name"
-               class="sort-btn <c:if test="${sort == 'name'}">active</c:if>">🔤 A→Z</a>
+               class="sort-btn <c:if test="${sort == 'name'}">active</c:if>"> A→Z</a>
             <span class="ml-auto text-sm text-gray-400">${totalBooks} sách</span>
         </div>
 
-        <%-- BOOK GRID --%>
+      
         <c:choose>
             <c:when test="${not empty books}">
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4 mb-8" id="book-grid">
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mb-8" id="book-grid">
                     <c:forEach var="book" items="${books}">
                     <div class="prod-card">
                         <div class="relative aspect-[3/4] bg-[#f0f4ff] flex items-center justify-center overflow-hidden">
@@ -105,9 +105,9 @@
                                 </c:otherwise>
                             </c:choose>
                             <c:if test="${book.featured}">
-                                <div class="absolute top-2.5 right-2.5 bg-[#8E24AA] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">🔥 Hot</div>
+                                <div class="absolute top-2.5 right-2.5 bg-[#8E24AA] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Hot</div>
                             </c:if>
-                            <%-- Badge hết hàng --%>
+                  
                             <c:if test="${book.status == 'out_of_stock' or book.stockQuantity == 0}">
                                 <div class="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
                                     <span class="bg-white text-red-600 font-bold text-[11px] px-3 py-1 rounded-full">Hết hàng</span>
@@ -150,7 +150,7 @@
                     </c:forEach>
                 </div>
 
-                <%-- PAGINATION --%>
+             
                 <c:if test="${totalPages > 1}">
                 <nav class="flex justify-center items-center gap-1.5 flex-wrap">
                     <c:if test="${page > 1}">
