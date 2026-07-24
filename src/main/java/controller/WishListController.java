@@ -16,9 +16,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-/**
- * WishlistController – xử lý wishlist của customer đã đăng nhập. URL: /wishlist
- */
+
 public class WishListController extends HttpServlet {
 
     private final WishListDAO wishlistDAO = new WishListDAO();
@@ -169,6 +167,15 @@ public class WishListController extends HttpServlet {
             respondError(req, resp, isAjax, referer,
                     req.getContextPath() + "/wishlist",
                     "out_of_stock", stockError);
+            return;
+        }
+
+        int stock = cartDAO.getStockByBookID(bookID);
+        int currentCartQty = cartDAO.getCurrentCartQty(account.getId(), bookID);
+        if (currentCartQty + qty > stock) {
+            respondError(req, resp, isAjax, referer,
+                    req.getContextPath() + "/wishlist",
+                    "out_of_stock", "Giỏ hàng đã đạt giới hạn " + stock + " cuốn");
             return;
         }
 

@@ -63,7 +63,7 @@
 
 <section class="hero-gradient px-8 py-7 relative overflow-hidden">
     <div class="relative z-10">
-        <div class="bg-secondary text-primary font-bold text-xs px-3 py-1 rounded-full inline-block mb-2 tracking-wide uppercase">❤️ Yêu thích</div>
+        <div class="bg-secondary text-primary font-bold text-xs px-3 py-1 rounded-full inline-block mb-2 tracking-wide uppercase">Yêu thích</div>
         <h1 class="text-white text-[28px] font-black">Danh sách yêu thích của tôi</h1>
         <p class="text-white/70 text-sm mt-1">${wishlistCount} sách trong danh sách</p>
     </div>
@@ -120,7 +120,7 @@
                             </div>
 
                             <div class="flex items-center gap-2 mt-3 flex-wrap">
-                                <%-- Move to cart --%>
+                     
                                 <c:if test="${item.stockQuantity > 0 and item.status == 'available'}">
                                     <form method="post" action="${pageContext.request.contextPath}/wishlist">
                                         <input type="hidden" name="action"  value="moveToCart">
@@ -139,7 +139,7 @@
                                     Xem chi tiết
                                 </a>
 
-                                <%-- Remove --%>
+                              
                                 <form method="post" action="${pageContext.request.contextPath}/wishlist">
                                     <input type="hidden" name="action"  value="remove">
                                     <input type="hidden" name="bookID"  value="${item.bookID}">
@@ -163,7 +163,7 @@
                 </a>
                 <a href="${pageContext.request.contextPath}/cart"
                    class="bg-secondary text-primary font-bold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity">
-                    🛒 Xem giỏ hàng
+                    Xem giỏ hàng
                 </a>
             </div>
         </c:when>

@@ -35,7 +35,7 @@ public class BookDAO {
             + "          s.seriesID, s.series_name, o.originID, o.origin_name, "
             + "          b.created_at, b.updated_at ";
 
-    // ── Danh sách sách phân trang (legacy) ───────────────────────────
+
     public List<Book> getBooks(int offset, int pageSize, String orderClause) {
         List<Book> books = new ArrayList<>();
         String sql = BASE_SELECT
@@ -64,13 +64,12 @@ public class BookDAO {
         return books;
     }
 
-    // ── Danh sách sách với filter + search + paging ──────────────────
+
     public List<Book> getBooksFiltered(int offset, int pageSize, String orderClause,
             String keyword, Integer genreID,
             BigDecimal minPrice, BigDecimal maxPrice) {
         List<Book> books = new ArrayList<>();
-        // BR-63: 'out_of_stock' must remain visible to customers (just not purchasable),
-        // only 'discontinued' is hidden from the storefront.
+
         StringBuilder where = new StringBuilder("WHERE b.status IN ('available', 'out_of_stock') ");
         if (keyword != null && !keyword.trim().isEmpty()) {
             where.append("AND (b.title LIKE ? OR EXISTS ("
@@ -126,10 +125,8 @@ public class BookDAO {
         return books;
     }
 
-    // ── Đếm sách với filter ──────────────────────────────────────────
     public int countBooksFiltered(String keyword, Integer genreID,
             BigDecimal minPrice, BigDecimal maxPrice) {
-        // BR-63: keep 'out_of_stock' visible, consistent with getBooksFiltered() above.
         StringBuilder where = new StringBuilder("WHERE b.status IN ('available', 'out_of_stock') ");
         if (keyword != null && !keyword.trim().isEmpty()) {
             where.append("AND (b.title LIKE ? OR EXISTS ("
@@ -180,7 +177,6 @@ public class BookDAO {
         return 0;
     }
 
-    // ── Đếm tổng sách hiển thị cho khách (available + out_of_stock) ──
     public int countBooks() {
         String sql = "SELECT COUNT(*) FROM Book WHERE status IN ('available', 'out_of_stock')";
         Connection conn = null;
@@ -201,7 +197,7 @@ public class BookDAO {
         return 0;
     }
 
-    // ── Lấy 1 sách theo ID ──────────────────────────────────────────
+
     public Book getBookByID(int bookID) {
         String sql = BASE_SELECT + "WHERE b.bookID = ? " + GROUP_BY;
         Connection conn = null;
@@ -225,7 +221,7 @@ public class BookDAO {
         return null;
     }
 
-    // ── Sách nổi bật theo số lượng đơn hàng ─────────────────────────
+
     public List<Book> getFeaturedByOrders(int limit) {
         List<Book> books = new ArrayList<>();
         String sql
@@ -273,7 +269,7 @@ public class BookDAO {
         return books;
     }
 
-    // ── Sách mới nhất theo ngày ──────────────────────────────────────
+
     public List<Book> getNewBooks(int limit) {
         List<Book> books = new ArrayList<>();
         String sql = BASE_SELECT + "WHERE b.status IN ('available', 'out_of_stock') " + GROUP_BY
@@ -299,12 +295,11 @@ public class BookDAO {
         return books;
     }
 
-    // ── Sách nổi bật (legacy – giữ để không break code cũ) ──────────
     public List<Book> getFeaturedBooks(int limit) {
         return getFeaturedByOrders(limit);
     }
 
-    // ── Sách liên quan ──────────────────────────────────────────────
+
     public List<Book> getRelatedBooks(int bookID, int genreID, int limit) {
         List<Book> books = new ArrayList<>();
         String sql = BASE_SELECT
@@ -334,7 +329,7 @@ public class BookDAO {
         return books;
     }
 
-    // ── Admin dashboard stats ──────────────────────────────────────
+
     public int countAllBooks() {
         String sql = "SELECT COUNT(*) FROM Book";
         Connection conn = null;
@@ -469,7 +464,7 @@ public class BookDAO {
         return books;
     }
 
-    // ── Admin: danh sách tất cả sách (kể cả discontinued) ──────────
+
     public List<Book> getBooksAdmin(int offset, int pageSize, String keyword,
             String status, Integer genreID) {
         List<Book> books = new ArrayList<>();
@@ -569,7 +564,7 @@ public class BookDAO {
         return 0;
     }
 
-    // ── Lookup tables ────────────────────────────────────────────────
+
     public Map<Integer, String> getGenreMap() {
         Map<Integer, String> map = new LinkedHashMap<>();
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement("SELECT genreID, genre_name FROM Genre ORDER BY genre_name"); ResultSet rs = ps.executeQuery()) {
@@ -618,7 +613,7 @@ public class BookDAO {
         return map;
     }
 
-    // ── Tạo sách mới ────────────────────────────────────────────────
+   
     public boolean createBook(Book b, String authorsStr, int createdBy) {
         String sql
                 = "INSERT INTO Book (title, description, price, stock_quantity, thumbnail, "
@@ -684,7 +679,7 @@ public class BookDAO {
         return false;
     }
 
-    // ── Cập nhật sách ───────────────────────────────────────────────
+
     public boolean updateBook(Book b, String authorsStr, int updatedBy) {
         String sql
                 = "UPDATE Book SET title=?, description=?, price=?, stock_quantity=?, thumbnail=?, "
@@ -747,7 +742,6 @@ public class BookDAO {
         return false;
     }
 
-    // ── Soft delete ─────────────────────────────────────────────────
     public boolean deleteBook(int bookID, int updatedBy) {
         String sql = "UPDATE Book SET status='discontinued', updated_by=?, updated_at=GETDATE() WHERE bookID=?";
         Connection conn = null;
@@ -766,7 +760,6 @@ public class BookDAO {
         return false;
     }
 
-    // ── Sync tác giả: xóa cũ, thêm mới ────────────────────────────
     private void syncAuthors(Connection conn, int bookID, String authorsStr) throws SQLException {
         if (authorsStr == null || authorsStr.trim().isEmpty()) {
             return;
@@ -816,10 +809,7 @@ public class BookDAO {
 
     }
 
-    /**
-     * Kiểm tra sách còn đủ hàng để mua với số lượng yêu cầu.
-     * @return null nếu hợp lệ, hoặc thông báo lỗi tiếng Việt
-     */
+
     public String validatePurchaseQuantity(int bookID, int requestedQty) {
         Book book = getBookByID(bookID);
         if (book == null) {
@@ -848,9 +838,7 @@ public class BookDAO {
         return null;
     }
 
-    /**
-     * Trừ tồn kho sau khi đặt hàng thành công. Trả về false nếu không đủ hàng.
-     */
+
     public boolean deductStockForOrder(List<model.CartItem> items) {
         if (items == null || items.isEmpty()) {
             return true;
@@ -907,9 +895,7 @@ public class BookDAO {
     }
 
     public boolean restoreBook(int bookID, int updatedBy) {
-        // BR-63: status must reflect actual stock — a restored book with 0 stock
-        // must become 'out_of_stock' (visible, not purchasable), not 'available'
-        // (visible, purchasable), otherwise it would show as in-stock with nothing to sell.
+
         String sql = "UPDATE Book SET status = CASE WHEN stock_quantity > 0 THEN 'available' ELSE 'out_of_stock' END, "
                 + "updated_by=?, updated_at=GETDATE() WHERE bookID=?";
         Connection conn = null;
@@ -928,7 +914,6 @@ public class BookDAO {
         return false;
     }
 
-    // ── Private helpers ──────────────────────────────────────────────
     private Book mapBook(ResultSet rs) throws SQLException {
         Book b = new Book();
         b.setBookID(rs.getInt("bookID"));
