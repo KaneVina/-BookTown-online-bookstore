@@ -185,11 +185,7 @@
 
         <% if (isStaffUser) { %>
         <a href="${pageContext.request.contextPath}/dashboard/category-management"
-           class="sidebar-link <%= currentPage.contains("/dashboard/category-management") ? "active" : ""%>">
-=
-        <a href="${pageContext.request.contextPath}/category"
-           class="sidebar-link <%= currentPage.contains("/category") ? "active" : ""%>">
-
+           class="sidebar-link <%= sidebarCurrentPath.startsWith("/dashboard/category-management") ? "active" : ""%>">
             <span class="material-symbols-outlined">category</span>
             Thể loại
         </a>
@@ -211,6 +207,7 @@
             <span class="material-symbols-outlined">sell</span>
             Voucher
         </a>
+        <% } %>
 
     </nav>
 

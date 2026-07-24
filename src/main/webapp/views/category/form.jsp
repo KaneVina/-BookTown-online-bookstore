@@ -57,15 +57,7 @@
             </div>
         </main>
             <script>
-            const allowedGenres = null; /* removed suggestions */
-/*
-                'Văn học','Tiểu thuyết','Truyện ngắn','Thơ','Trinh thám','Kinh dị','Phiêu lưu',
-                'Khoa học viễn tưởng','Ngôn tình','Thiếu nhi','Truyện tranh','Giáo dục','Tham khảo',
-                'Ngoại ngữ','Kinh tế','Kinh doanh','Tài chính','Marketing','Quản trị','Công nghệ',
-                'Tin học','Khoa học','Lịch sử','Địa lý','Chính trị','Pháp luật','Tâm lý',
-                'Kỹ năng sống','Phát triển bản thân','Sức khỏe','Y học','Ẩm thực','Du lịch',
-                'Nghệ thuật','Âm nhạc','Tôn giáo','Triết học'
-*/
+            const allowedGenres = null;
 
             document.querySelector('form').addEventListener('submit', function (event) {
                 const input = document.getElementById('genreName');
