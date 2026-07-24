@@ -86,6 +86,16 @@ public class VNPayController extends HttpServlet {
 
         BigDecimal total = cartDAO.calcSubtotal(cartItems);
 
+        // Áp dụng số tiền giảm giá từ voucher (nếu khách hàng đã áp dụng ở trang checkout)
+        Double discountObj = (Double) session.getAttribute("appliedVoucherDiscount");
+        if (discountObj != null && discountObj > 0) {
+            BigDecimal discount = BigDecimal.valueOf(discountObj);
+            total = total.subtract(discount);
+            if (total.compareTo(BigDecimal.ZERO) < 0) {
+                total = BigDecimal.ZERO;
+            }
+        }
+
         String txnRef = VNPayConfig.getRandomNumber(12);
         session.setAttribute("vnpay_txnRef",     txnRef);
         session.setAttribute("vnpay_addressID",  addressID);

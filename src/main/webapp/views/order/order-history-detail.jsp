@@ -471,7 +471,30 @@
                             </div>
                         </div>
 
+                        <c:set var="bookSubtotal" value="0" />
+                        <c:set var="totalBookCount" value="0" />
+                        <c:forEach var="item" items="${orderDetails}">
+                            <c:set var="bookSubtotal" value="${bookSubtotal + item.subtotal}" />
+                            <c:set var="totalBookCount" value="${totalBookCount + item.quantity}" />
+                        </c:forEach>
+
                         <div class="space-y-2.5 text-xs">
+                            <div class="flex justify-between items-center text-[#424752]">
+                                <span>Tạm tính (${totalBookCount} sản phẩm)</span>
+                                <span class="font-semibold text-[#071e27]">
+                                    <fmt:formatNumber value="${bookSubtotal}" type="number" groupingUsed="true" />đ
+                                </span>
+                            </div>
+
+                            <c:if test="${bookSubtotal > order.totalPrice}">
+                                <div class="flex justify-between items-center text-green-700 font-semibold">
+                                    <span>Giảm giá voucher</span>
+                                    <span>
+                                        -<fmt:formatNumber value="${bookSubtotal - order.totalPrice}" type="number" groupingUsed="true" />đ
+                                    </span>
+                                </div>
+                            </c:if>
+
                             <div
                                 class="pt-3 border-t border-[#c2c6d4] flex justify-between items-baseline">
                                 <span class="text-sm font-bold text-[#071e27]">Tổng thanh
