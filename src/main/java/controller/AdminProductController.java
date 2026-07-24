@@ -281,12 +281,13 @@ public class AdminProductController extends HttpServlet {
         } catch (Exception e) {
         }
 
-        String status = req.getParameter("status") != null ? req.getParameter("status") : "available";
-        if (b.getStockQuantity() == 0) {
-            b.setStatus("discontinued");
-        } else {
-            b.setStatus(status);
-        }
+        // BR-63: Product status must be one of 'available', 'out_of_stock',
+        // or 'discontinued', and ONLY Staff can change it. Do not auto-override
+        // Staff's chosen status based on stock quantity (e.g. stock = 0 must NOT
+        // be silently forced to 'discontinued' — that value is reserved for an
+        // explicit soft-delete action, see UC2.7 Delete Product).
+        String status = req.getParameter("status");
+        b.setStatus(status != null && !status.trim().isEmpty() ? status.trim() : "available");
         Integer gid = parseIntParam(req.getParameter("genreID"));
         if (gid != null) {
             b.setGenreID(gid);
