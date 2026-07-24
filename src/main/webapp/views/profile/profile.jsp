@@ -3,8 +3,6 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <%@ include file="/views/layout/homepage/header.jsp" %>
-
-<%@ include file="/views/layout/profile/sidebar-styles.jsp" %>
 <style>
     .input-style{
         width:100%;
