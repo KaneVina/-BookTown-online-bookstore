@@ -327,11 +327,12 @@ public class VoucherDAO {
     }
 
     /**
-     * Lấy danh sách voucher khách hàng có thể dùng để hiển thị ở modal
-     * "Voucher của Shop" trên trang checkout: đang active, đã tới ngày bắt đầu,
-     * chưa hết hạn, và còn lượt sử dụng (nếu có giới hạn quantity).
+     * Lấy danh sách voucher khả dụng để hiển thị ở modal "Voucher của Shop" trên trang checkout.
+     * Điều kiện: đang active, trong thời hạn, còn lượt, và khách hàng này chưa dùng.
+     *
+     * @param customerID ID khách đang xem checkout (dùng để lọc voucher đã dùng rồi)
      */
-    public List<Voucher> getActiveVouchers() {
+    public List<Voucher> getActiveVouchers(int customerID) {
         List<Voucher> list = new ArrayList<>();
         String sql =
             "SELECT v.voucherID, v.code, v.discount_percent, v.quantity, "
@@ -343,19 +344,29 @@ public class VoucherDAO {
           + "       ON v.voucherID = cv.voucherID AND cv.is_used = 1 "
           + "WHERE v.is_deleted = 0 "
           + "  AND v.status = 'active' "
-          + "  AND v.start_date <= GETDATE() "
-          + "  AND v.end_date   >= GETDATE() "
+          + "  AND (v.start_date IS NULL OR v.start_date <= GETDATE()) "
+          + "  AND (v.end_date IS NULL OR v.end_date >= GETDATE()) "
+          // Loại bỏ voucher khách hàng này đã sử dụng rồi
+          + "  AND NOT EXISTS ( "
+          + "      SELECT 1 FROM CustomerVoucher used "
+          + "      WHERE used.voucherID = v.voucherID "
+          + "        AND used.customerID = ? "
+          + "        AND used.is_used = 1 "
+          + "  ) "
           + "GROUP BY v.voucherID, v.code, v.discount_percent, v.quantity, "
           + "         v.start_date, v.end_date, v.status, v.is_deleted, "
           + "         v.min_order_value, v.max_discount_value "
+          // Chỉ lấy voucher còn lượt (quantity NULL = không giới hạn)
           + "HAVING v.quantity IS NULL OR COUNT(cv.customerVoucherID) < v.quantity "
           + "ORDER BY v.end_date ASC";
 
         try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                list.add(mapRow(rs));
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerID);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapRow(rs));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
