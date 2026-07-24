@@ -180,7 +180,7 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ChangePasswordController</servlet-name>
-        <url-pattern>/change-password</url-pattern>
+        <url-pattern>/profile/change-password</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>AccountManagementController</servlet-name>
@@ -189,6 +189,10 @@
     <servlet-mapping>
         <servlet-name>ReviewController</servlet-name>
         <url-pattern>/dashboard/review-management</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ReviewController</servlet-name>
+        <url-pattern>/review</url-pattern>   
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>VoucherController</servlet-name>
