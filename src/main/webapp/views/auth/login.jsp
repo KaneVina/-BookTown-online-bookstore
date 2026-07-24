@@ -128,6 +128,7 @@
         </style>
     </head>
     <body class="min-h-screen flex flex-col">
+        <%@ include file="/views/layout/common/toast.jsp" %>
 
         <header class="w-full px-4 md:px-margin-desktop h-16 flex items-center justify-between bg-transparent">
             <div class="font-headline-md text-headline-md font-bold text-primary">
@@ -163,13 +164,6 @@
                         <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">Chào mừng trở lại</h1>
                         <p class="font-body-md text-body-md text-on-surface-variant">Vui lòng nhập thông tin để truy cập tài khoản của bạn.</p>
                     </div>
-
-                    <c:if test="${not empty errorMessage}">
-                        <div class="mb-4 p-4 bg-error-container text-on-error-container border-l-4 border-error font-body-sm text-body-sm rounded-lg flex items-center gap-2">
-                            <span class="material-symbols-outlined text-error">error</span>
-                            <span>${errorMessage}</span>
-                        </div>
-                    </c:if>
 
                     <%-- Thông báo thành công (đăng ký / đặt lại mật khẩu thành công) --%>
                     <c:if test="${not empty sessionScope.register_success}">

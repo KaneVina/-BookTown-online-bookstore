@@ -63,26 +63,28 @@ public class GoogleCallbackController extends HttpServlet {
 
         Account acc = null;
 
-// Kiểm tra xem email có trong bảng Account (staff/admin) không
-        if (accountDAO.isEmailExists(email)) {
+// Kiểm tra xem email có phải tài khoản staff/admin (chỉ bảng Account) không
+        if (accountDAO.isStaffEmailExists(email)) {
             // Staff/admin không được login bằng Google
             request.setAttribute("errorMessage", "Tài khoản này không hỗ trợ đăng nhập bằng Google.");
             request.getRequestDispatcher("/views/auth/login.jsp").forward(request, response);
             return;
         }
 
-// Tìm trong bảng Customer
+// Tìm trong bảng Customer — KHÔNG tự động đăng ký mới, phải có tài khoản sẵn mới cho login
         acc = customerDAO.getAccountByEmail(email);
 
         if (acc == null) {
-            // Chưa có → tự đăng ký mới
-            customerDAO.registerCustomer(fullname, email, "", "google_oauth_" + System.currentTimeMillis());
-            // Lấy lại account vừa tạo
-            acc = customerDAO.getAccountByEmail(email);
+            request.setAttribute("errorMessage",
+                    "Email này chưa có tài khoản trên hệ thống. Vui lòng đăng ký trước khi đăng nhập bằng Google.");
+            request.getRequestDispatcher("/views/auth/login.jsp").forward(request, response);
+            return;
         }
 
-        if (acc == null) {
-            request.setAttribute("errorMessage", "Đăng ký tài khoản Google thất bại.");
+        // Tài khoản đã bị khóa (giống điều kiện chặn ở login truyền thống)
+        if ("inactive".equalsIgnoreCase(acc.getStatus())) {
+            request.setAttribute("errorMessage",
+                    "Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.");
             request.getRequestDispatcher("/views/auth/login.jsp").forward(request, response);
             return;
         }

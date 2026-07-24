@@ -307,24 +307,43 @@ public class CheckoutController extends HttpServlet {
         // duy nhất ghi nhận thành công tại đây — request còn lại nhận USAGE_ALREADY_USED
         // hoặc USAGE_OUT_OF_QUANTITY.
         if (appliedVoucherID != null) {
+            VoucherDAO voucherDAO2 = new VoucherDAO();
             Integer voucherQuantity = null;
             // Lấy lại quantity của voucher để truyền vào hàm atomic (đảm bảo đúng ràng buộc hiện tại)
-            Voucher appliedVoucher = new VoucherDAO().getVoucherByCode(
+            Voucher appliedVoucher = voucherDAO2.getVoucherByCode(
                     (String) session.getAttribute(SESSION_VOUCHER_CODE));
             if (appliedVoucher != null) {
                 voucherQuantity = appliedVoucher.getQuantity();
             }
 
-            int usageResult = new VoucherDAO()
+            int usageResult = voucherDAO2
                     .insertVoucherUsage(account.getId(), appliedVoucherID, voucherQuantity);
 
             if (usageResult != dao.VoucherDAO.USAGE_OK) {
-                // Trường hợp hiếm: request khác đã dùng hết lượt/đã ghi nhận trước trong lúc
-                // request này đang xử lý. Đơn hàng vẫn đã tạo thành công (không rollback đơn
-                // để tránh trải nghiệm xấu hơn), nhưng log lại để đối soát/khuyến cáo khách.
-                System.err.println("[Voucher] Không ghi nhận được lượt dùng voucher (mã lỗi="
-                        + usageResult + ") cho customerID=" + account.getId()
-                        + ", voucherID=" + appliedVoucherID);
+                // Race condition: request khác đã tranh mất lượt voucher trong khoảng thời gian
+                // giữa validateVoucher() và insertVoucherUsage(). Đơn hàng đã được tạo và kho đã
+                // trừ nên KHÔNG cancel đơn — thay vào đó cập nhật lại total về giá gốc (bỏ giảm giá)
+                // để đảm bảo doanh thu đúng, và thông báo rõ cho khách hàng.
+                String voucherErrorMsg;
+                if (usageResult == dao.VoucherDAO.USAGE_OUT_OF_QUANTITY) {
+                    voucherErrorMsg = "Voucher vừa hết lượt do người khác sử dụng trước. "
+                            + "Đơn hàng vẫn được đặt thành công nhưng không áp dụng giảm giá.";
+                } else if (usageResult == dao.VoucherDAO.USAGE_ALREADY_USED) {
+                    voucherErrorMsg = "Voucher đã được bạn sử dụng trước đó. "
+                            + "Đơn hàng vẫn được đặt thành công nhưng không áp dụng giảm giá.";
+                } else {
+                    voucherErrorMsg = "Có lỗi xử lý voucher. "
+                            + "Đơn hàng vẫn được đặt thành công nhưng không áp dụng giảm giá.";
+                }
+                System.err.println("[Voucher] insertVoucherUsage thất bại (mã lỗi=" + usageResult
+                        + ") cho customerID=" + account.getId()
+                        + ", voucherID=" + appliedVoucherID
+                        + ". Đang cập nhật lại total đơn #" + orderID + " về giá gốc: " + total);
+
+                // Cập nhật lại total về giá gốc (không giảm) trên DB
+                orderDAO.updateOrderTotal(orderID, total);
+
+                request.getSession().setAttribute("warningMessage", voucherErrorMsg);
             }
 
             session.removeAttribute(SESSION_VOUCHER_ID);
@@ -534,7 +553,8 @@ public class CheckoutController extends HttpServlet {
         response.setContentType("application/json;charset=UTF-8");
 
         VoucherDAO voucherDAO = new VoucherDAO();
-        List<Voucher> vouchers = voucherDAO.getActiveVouchers();
+        Account account = getAccount(request);
+        List<Voucher> vouchers = voucherDAO.getActiveVouchers(account.getId());
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
         StringBuilder json = new StringBuilder("{\"success\":true,\"vouchers\":[");
@@ -549,7 +569,7 @@ public class CheckoutController extends HttpServlet {
                 .append("\"maxDiscountValue\":")
                     .append(v.getMaxDiscountValue() == null ? "null" : v.getMaxDiscountValue()).append(",")
                 .append("\"endDate\":\"")
-                    .append(v.getEndDate() == null ? "" : sdf.format(v.getEndDate())).append("\"")
+                    .append(v.getEndDate() == null ? "Vô hạn" : sdf.format(v.getEndDate())).append("\"")
                 .append("}");
         }
         json.append("]}");

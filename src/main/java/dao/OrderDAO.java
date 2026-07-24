@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -293,7 +294,6 @@ public class OrderDAO {
         return false;
     }
 
-
     public boolean confirmRefund(int orderID) {
         String sql = "UPDATE [Order] SET payment_status = 'refunded' "
                 + "WHERE orderID = ? AND payment_status = 'pending_refund'";
@@ -306,18 +306,14 @@ public class OrderDAO {
         return false;
     }
 
-
-
     public List<Order> getAllOrders(String status, int offset, int pageSize) {
         List<Order> list = new ArrayList<>();
 
         String sqlGetOverdue = "SELECT orderID FROM [Order] "
                 + "WHERE status = 'pending' "
                 + "AND created_at < DATEADD(DAY, -2, GETDATE())";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement psGet = conn.prepareStatement(sqlGetOverdue);
-             ResultSet rsGet = psGet.executeQuery()) {
-            
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement psGet = conn.prepareStatement(sqlGetOverdue); ResultSet rsGet = psGet.executeQuery()) {
+
             while (rsGet.next()) {
                 int overdueOrderID = rsGet.getInt("orderID");
                 Order overdueOrder = getOrderByID(overdueOrderID);
@@ -325,8 +321,7 @@ public class OrderDAO {
                     if ("vnpay".equalsIgnoreCase(overdueOrder.getPaymentMethod()) && "paid".equalsIgnoreCase(overdueOrder.getPaymentStatus())) {
                         String autoCancelReason = "Đơn hàng quá 2 ngày chưa được duyệt";
                         String sqlAutoCancel = "UPDATE [Order] SET status = 'cancelled', cancel_reason = ? WHERE orderID = ?";
-                        try (Connection connAC = new DBContext().getConnection();
-                             PreparedStatement psAC = connAC.prepareStatement(sqlAutoCancel)) {
+                        try (Connection connAC = new DBContext().getConnection(); PreparedStatement psAC = connAC.prepareStatement(sqlAutoCancel)) {
                             psAC.setString(1, autoCancelReason);
                             psAC.setInt(2, overdueOrderID);
                             psAC.executeUpdate();
@@ -350,8 +345,7 @@ public class OrderDAO {
                     } else {
                         String autoCancelReason = "Đơn hàng quá 2 ngày chưa được duyệt";
                         String sqlAutoCancel = "UPDATE [Order] SET status = 'cancelled', cancel_reason = ? WHERE orderID = ?";
-                        try (Connection connAC = new DBContext().getConnection();
-                             PreparedStatement psAC = connAC.prepareStatement(sqlAutoCancel)) {
+                        try (Connection connAC = new DBContext().getConnection(); PreparedStatement psAC = connAC.prepareStatement(sqlAutoCancel)) {
                             psAC.setString(1, autoCancelReason);
                             psAC.setInt(2, overdueOrderID);
                             psAC.executeUpdate();
@@ -552,7 +546,6 @@ public class OrderDAO {
         return 0;
     }
 
-
     public boolean deductStock(int orderID) {
         String sqlDeduct = "UPDATE Book "
                 + "SET Book.stock_quantity = Book.stock_quantity - OrderDetail.quantity "
@@ -605,6 +598,16 @@ public class OrderDAO {
         }
         return false;
     }
+
+    public boolean updateOrderTotal(int orderID, java.math.BigDecimal newTotal) {
+        String sql = "UPDATE [Order] SET total_price = ? WHERE orderID = ? AND status = 'pending'";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBigDecimal(1, newTotal);
+            ps.setInt(2, orderID);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
-
-
