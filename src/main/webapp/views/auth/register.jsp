@@ -262,7 +262,7 @@
                 const password        = document.getElementById('password');
                 const confirmPassword = document.getElementById('confirmPassword');
 
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const emailRegex = /^[\w.+-]+@[\w-]+(\.[\w-]+)*\.[a-zA-Z]{2,}$/;
                 const phoneRegex = /^(0[35789])\d{8}$/;
 
                 // Xóa lỗi cũ
@@ -270,6 +270,12 @@
 
                 if (!fullname.value.trim()) {
                     showError('err-fullname', "Họ và tên không được để trống.");
+                    isValid = false;
+                } else if (fullname.value.trim().split(/\s+/).length < 2) {
+                    showError('err-fullname', "Vui lòng nhập đầy đủ họ và tên (tối thiểu 2 từ).");
+                    isValid = false;
+                } else if (!/^[\p{L}\s]+$/u.test(fullname.value.trim())) {
+                    showError('err-fullname', "Họ và tên không được chứa số hoặc ký tự đặc biệt.");
                     isValid = false;
                 }
                 if (!email.value.trim()) {

@@ -54,10 +54,16 @@
         </style>
     </head>
     <body class="bg-background text-on-surface flex min-h-screen">
+        <%@ include file="/views/layout/common/toast.jsp" %>
         <%@ include file="/views/layout/dashboard/sidebar.jsp" %>
 
-        <main class="flex-1 md:ml-64 min-h-screen">
-            <div class="p-gutter max-w-container-max mx-auto space-y-stack-lg">
+        <main class="flex-1 md:ml-64 min-h-screen flex flex-col">
+            <header class="bg-white border-b h-14 sticky top-0 z-30 flex items-center px-6"
+                    style="border-color:#c2c6d4;">
+                <h1 class="font-semibold text-base text-on-background">Bảng điều khiển</h1>
+            </header>
+
+            <div class="p-gutter max-w-container-max w-full mx-auto space-y-stack-lg">
                 <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div>
                         <h2 class="text-3xl font-bold text-on-background">Bảng điều khiển</h2>

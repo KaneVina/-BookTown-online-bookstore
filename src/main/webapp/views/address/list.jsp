@@ -1,33 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-
 <%@ include file="/views/layout/homepage/header.jsp" %>
-
 <style>
-    body{background:#f3faff;}
-    .profile-card{
-        background:#fff;
-        border-radius:16px;
-        border:1px solid #dbeafe;
-        box-shadow:0 2px 10px rgba(0,0,0,.05);
-    }
-    .menu-item{
-        display:flex;
-        align-items:center;
-        gap:12px;
-        padding:12px 16px;
-        border-radius:12px;
-        transition:.2s;
-        text-decoration:none;
-        color:#111827;
-    }
-    .menu-item:hover{background:#eff6ff;}
-    .menu-active{
-        background:#dbeafe;
-        color:#2563eb;
-        font-weight:600;
-    }
     .address-list{
         display:flex;
         flex-direction:column;
@@ -153,53 +128,11 @@
     }
 </style>
 
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-
 <div class="max-w-7xl mx-auto py-10 px-4">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-        <div class="lg:col-span-1">
-            <div class="profile-card p-6">
-                <div class="flex flex-col items-center">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                         class="w-24 h-24 rounded-full border-4 border-blue-200 shadow" alt="Avatar">
-
-                    <h2 class="mt-4 text-xl font-bold text-center">${customer.fullname}</h2>
-                    <div class="mt-2 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-sm">
-                        ${customer.role}
-                    </div>
-                </div>
-
-                <hr class="my-6">
-
-                <nav class="space-y-2">
-                    <a href="${pageContext.request.contextPath}/profile?id=${sessionScope.account.id}" class="menu-item">
-                        <span class="material-symbols-outlined">person</span>
-                        Thông tin cá nhân
-                    </a>
-
-                    <a href="${pageContext.request.contextPath}/profile/order-history" class="menu-item">
-                        <span class="material-symbols-outlined">receipt_long</span>
-                        Lịch sử đơn hàng
-                    </a>
-
-                    <a href="${pageContext.request.contextPath}/address" class="menu-item menu-active">
-                        <span class="material-symbols-outlined">location_on</span>
-                        Địa chỉ của tôi
-                    </a>
-
-                    <a href="${pageContext.request.contextPath}/change-password" class="menu-item">
-                        <span class="material-symbols-outlined">lock</span>
-                        Đổi mật khẩu
-                    </a>
-
-                    <a href="${pageContext.request.contextPath}/logout" class="menu-item text-red-600">
-                        <span class="material-symbols-outlined">logout</span>
-                        Đăng xuất
-                    </a>
-                </nav>
-            </div>
-        </div>
+        <c:set var="activeMenu" value="address" scope="request"/>
+        <%@ include file="/views/layout/profile/sidebar.jsp" %>
 
         <div class="lg:col-span-3 space-y-6">
             <c:if test="${not empty sessionScope.message}">
@@ -234,8 +167,9 @@
                     </button>
                 </div>
 
-                <c:if test="${not empty addresses}">
-                    <div class="address-list">
+                <c:choose>
+                    <c:when test="${not empty addresses}">
+                        <div class="address-list">
                         <c:forEach var="address" items="${addresses}">
                             <div class="address-item" id="address-row-${address.addressID}">
                                 <input type="hidden"
@@ -261,7 +195,7 @@
 
                                 <div class="address-actions">
                                     <c:if test="${!address['default']}">
-                                        <form action="${pageContext.request.contextPath}/address"
+                                        <form action="${pageContext.request.contextPath}/profile/address"
                                               method="post"
                                               style="display:inline;">
                                             <input type="hidden" name="action" value="setDefaultAddress">
@@ -278,7 +212,7 @@
                                         Sửa
                                     </button>
 
-                                    <form action="${pageContext.request.contextPath}/address"
+                                    <form action="${pageContext.request.contextPath}/profile/address"
                                           method="post"
                                           style="display:inline;"
                                           onsubmit="openDeleteAddressModal(this); return false;">
@@ -289,8 +223,14 @@
                                 </div>
                             </div>
                         </c:forEach>
-                    </div>
-                </c:if>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-500">
+                            Bạn chưa có địa chỉ nào.
+                        </div>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
 
@@ -531,7 +471,7 @@
             body += '&addressID=' + encodeURIComponent(addressID);
         }
 
-        fetch('${pageContext.request.contextPath}/address', {
+        fetch('${pageContext.request.contextPath}/profile/address', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
@@ -551,7 +491,7 @@
 
             if (mode === 'add') {
                 window.location.href =
-                    '${pageContext.request.contextPath}/address';
+                    '${pageContext.request.contextPath}/profile/address';
                 return;
             }
 

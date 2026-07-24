@@ -32,13 +32,11 @@ public class ProfileController extends HttpServlet {
         Account loginUser = (Account) session.getAttribute("account");
         String idParam = request.getParameter("id");
 
-        // Nếu không có id -> redirect về profile của chính user
         if (idParam == null || idParam.trim().isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/profile?id=" + loginUser.getId());
             return;
         }
         idParam = idParam.trim();
-        // chỉ cho phép số nguyên dương
         if (!idParam.matches("^[1-9]\\d*$")) {
             request.getRequestDispatcher("/views/error/404.jsp")
                     .forward(request, response);
@@ -54,7 +52,6 @@ public class ProfileController extends HttpServlet {
             return;
         }
 
-        // Chỉ cho phép người dùng xem profile của chính họ
         if (id != loginUser.getId()) {
             request.getRequestDispatcher("/views/error/404.jsp")
                     .forward(request, response);
@@ -113,7 +110,6 @@ public class ProfileController extends HttpServlet {
         boolean isCustomer = "customer".equalsIgnoreCase(acc.getRole());
 
         if (isCustomer) {
-            // Validate dob & age for customer
             if (dob == null || dob.trim().isEmpty()) {
                 session.setAttribute("error", "Vui lòng chọn ngày sinh");
                 response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
@@ -139,7 +135,6 @@ public class ProfileController extends HttpServlet {
                 return;
             }
 
-            // Update customer
             CustomerDAO dao = new CustomerDAO();
             boolean success = dao.updateCustomer(
                     acc.getId(),
@@ -176,9 +171,9 @@ public class ProfileController extends HttpServlet {
         boolean success = accountDao.updateStaff(
                 acc.getId(),
                 fullname,
-                acc.getEmail(), // keep email unchanged
+                acc.getEmail(), 
                 phone,
-                acc.getRole()   // keep role unchanged
+                acc.getRole() 
         );
 
         if (success) {

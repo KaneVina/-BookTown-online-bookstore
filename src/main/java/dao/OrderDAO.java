@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -293,7 +294,6 @@ public class OrderDAO {
         return false;
     }
 
-
     public boolean confirmRefund(int orderID) {
         String sql = "UPDATE [Order] SET payment_status = 'refunded' "
                 + "WHERE orderID = ? AND payment_status = 'pending_refund'";
@@ -306,18 +306,14 @@ public class OrderDAO {
         return false;
     }
 
-
-
     public List<Order> getAllOrders(String status, int offset, int pageSize) {
         List<Order> list = new ArrayList<>();
 
         String sqlGetOverdue = "SELECT orderID FROM [Order] "
                 + "WHERE status = 'pending' "
                 + "AND created_at < DATEADD(DAY, -2, GETDATE())";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement psGet = conn.prepareStatement(sqlGetOverdue);
-             ResultSet rsGet = psGet.executeQuery()) {
-            
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement psGet = conn.prepareStatement(sqlGetOverdue); ResultSet rsGet = psGet.executeQuery()) {
+
             while (rsGet.next()) {
                 int overdueOrderID = rsGet.getInt("orderID");
                 Order overdueOrder = getOrderByID(overdueOrderID);
@@ -325,8 +321,7 @@ public class OrderDAO {
                     if ("vnpay".equalsIgnoreCase(overdueOrder.getPaymentMethod()) && "paid".equalsIgnoreCase(overdueOrder.getPaymentStatus())) {
                         String autoCancelReason = "Đơn hàng quá 2 ngày chưa được duyệt";
                         String sqlAutoCancel = "UPDATE [Order] SET status = 'cancelled', cancel_reason = ? WHERE orderID = ?";
-                        try (Connection connAC = new DBContext().getConnection();
-                             PreparedStatement psAC = connAC.prepareStatement(sqlAutoCancel)) {
+                        try (Connection connAC = new DBContext().getConnection(); PreparedStatement psAC = connAC.prepareStatement(sqlAutoCancel)) {
                             psAC.setString(1, autoCancelReason);
                             psAC.setInt(2, overdueOrderID);
                             psAC.executeUpdate();
@@ -350,8 +345,7 @@ public class OrderDAO {
                     } else {
                         String autoCancelReason = "Đơn hàng quá 2 ngày chưa được duyệt";
                         String sqlAutoCancel = "UPDATE [Order] SET status = 'cancelled', cancel_reason = ? WHERE orderID = ?";
-                        try (Connection connAC = new DBContext().getConnection();
-                             PreparedStatement psAC = connAC.prepareStatement(sqlAutoCancel)) {
+                        try (Connection connAC = new DBContext().getConnection(); PreparedStatement psAC = connAC.prepareStatement(sqlAutoCancel)) {
                             psAC.setString(1, autoCancelReason);
                             psAC.setInt(2, overdueOrderID);
                             psAC.executeUpdate();
@@ -552,30 +546,187 @@ public class OrderDAO {
         return 0;
     }
 
+ 
+    public int createOrderWithStockCheck(int customerID, int addressID, String paymentMethod,
+            BigDecimal totalPrice, List<CartItem> cartItems) {
 
-    public boolean deductStock(int orderID) {
-        String sqlDeduct = "UPDATE Book "
-                + "SET Book.stock_quantity = Book.stock_quantity - OrderDetail.quantity "
-                + "FROM Book "
-                + "INNER JOIN OrderDetail ON Book.bookID = OrderDetail.bookID "
-                + "WHERE OrderDetail.orderID = ? "
-                + "AND Book.stock_quantity >= OrderDetail.quantity";
+        String sqlCheckStock = "SELECT stock_quantity FROM Book WHERE bookID = ?";
+        String sqlOrder = "INSERT INTO [Order] (customerID, addressID, status, payment_method, "
+                + "payment_status, total_price, created_at) "
+                + "VALUES (?, ?, N'pending', ?, 'unpaid', ?, GETDATE())";
+        String sqlDetail = "INSERT INTO OrderDetail (orderID, bookID, quantity, unit_price) "
+                + "VALUES (?, ?, ?, ?)";
+        String sqlUpdateStock = "UPDATE Book SET stock_quantity = stock_quantity - ? "
+                + "WHERE bookID = ? AND stock_quantity >= ?";
+        String sqlUpdateStatus = "UPDATE Book SET status = 'out_of_stock' "
+                + "WHERE bookID = ? AND stock_quantity <= 0 AND (status IS NULL OR status <> 'discontinued')";
 
-        String sqlUpdateStatus = "UPDATE Book SET status = 'out_of_stock' WHERE stock_quantity <= 0 AND (status IS NULL OR status <> 'discontinued')";
+        Connection conn = null;
+        try {
+            conn = new DBContext().getConnection();
+            conn.setAutoCommit(false); 
 
-        try (Connection conn = new DBContext().getConnection()) {
-            try (PreparedStatement ps1 = conn.prepareStatement(sqlDeduct)) {
-                ps1.setInt(1, orderID);
-                int rows = ps1.executeUpdate();
-                if (rows > 0) {
-                    try (PreparedStatement ps2 = conn.prepareStatement(sqlUpdateStatus)) {
-                        ps2.executeUpdate();
+       
+            for (CartItem item : cartItems) {
+                try (PreparedStatement psCheck = conn.prepareStatement(sqlCheckStock)) {
+                    psCheck.setInt(1, item.getBookID());
+                    try (ResultSet rs = psCheck.executeQuery()) {
+                        if (rs.next()) {
+                            int currentStock = rs.getInt("stock_quantity");
+                            if (currentStock < item.getQuantity()) {
+                                conn.rollback();
+                                return -2; 
+                            }
+                        } else {
+                            conn.rollback();
+                            return -2;
+                        }
                     }
-                    return true;
                 }
             }
+
+           
+            int orderID = -1;
+            try (PreparedStatement psOrder = conn.prepareStatement(sqlOrder, PreparedStatement.RETURN_GENERATED_KEYS)) {
+                psOrder.setInt(1, customerID);
+                psOrder.setInt(2, addressID);
+                psOrder.setString(3, paymentMethod);
+                psOrder.setBigDecimal(4, totalPrice);
+                psOrder.executeUpdate();
+
+                try (ResultSet rs = psOrder.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        orderID = rs.getInt(1);
+                    }
+                }
+            }
+
+            if (orderID == -1) {
+                conn.rollback();
+                return -1;
+            }
+
+            
+            for (CartItem item : cartItems) {
+                try (PreparedStatement psDetail = conn.prepareStatement(sqlDetail)) {
+                    psDetail.setInt(1, orderID);
+                    psDetail.setInt(2, item.getBookID());
+                    psDetail.setInt(3, item.getQuantity());
+                    psDetail.setBigDecimal(4, item.getPrice());
+                    psDetail.executeUpdate();
+                }
+
+              
+                try (PreparedStatement psUpdate = conn.prepareStatement(sqlUpdateStock)) {
+                    psUpdate.setInt(1, item.getQuantity());
+                    psUpdate.setInt(2, item.getBookID());
+                    psUpdate.setInt(3, item.getQuantity());
+                    int rows = psUpdate.executeUpdate();
+                    if (rows == 0) { 
+                        conn.rollback();
+                        return -2;
+                    }
+                }
+
+               
+                try (PreparedStatement psStatus = conn.prepareStatement(sqlUpdateStatus)) {
+                    psStatus.setInt(1, item.getBookID());
+                    psStatus.executeUpdate();
+                }
+            }
+
+            conn.commit(); 
+            return orderID;
+
         } catch (Exception e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (Exception ignored) {
+                }
+            }
             e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        return -1;
+    }
+
+    public boolean deductStock(int orderID) {
+        String sqlGetDetails = "SELECT bookID, quantity FROM OrderDetail WHERE orderID = ?";
+        String sqlUpdateStock = "UPDATE Book SET stock_quantity = stock_quantity - ? "
+                + "WHERE bookID = ? AND stock_quantity >= ?";
+        String sqlUpdateStatus = "UPDATE Book SET status = 'out_of_stock' "
+                + "WHERE bookID = ? AND stock_quantity <= 0 AND (status IS NULL OR status <> 'discontinued')";
+
+        Connection conn = null;
+        try {
+            conn = new DBContext().getConnection();
+            conn.setAutoCommit(false); 
+
+          
+            List<OrderDetail> details = new ArrayList<>();
+            try (PreparedStatement psGet = conn.prepareStatement(sqlGetDetails)) {
+                psGet.setInt(1, orderID);
+                try (ResultSet rs = psGet.executeQuery()) {
+                    while (rs.next()) {
+                        OrderDetail d = new OrderDetail();
+                        d.setBookID(rs.getInt("bookID"));
+                        d.setQuantity(rs.getInt("quantity"));
+                        details.add(d);
+                    }
+                }
+            }
+
+            if (details.isEmpty()) {
+                conn.rollback();
+                return false;
+            }
+
+          
+            for (OrderDetail d : details) {
+                try (PreparedStatement psUpdate = conn.prepareStatement(sqlUpdateStock)) {
+                    psUpdate.setInt(1, d.getQuantity());
+                    psUpdate.setInt(2, d.getBookID());
+                    psUpdate.setInt(3, d.getQuantity());
+                    int rows = psUpdate.executeUpdate();
+                    if (rows == 0) { 
+                        conn.rollback();
+                        return false;
+                    }
+                }
+
+            
+                try (PreparedStatement psStatus = conn.prepareStatement(sqlUpdateStatus)) {
+                    psStatus.setInt(1, d.getBookID());
+                    psStatus.executeUpdate();
+                }
+            }
+
+            conn.commit(); 
+            return true;
+        } catch (Exception e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (Exception ignored) {
+                }
+            }
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (Exception ignored) {
+                }
+            }
         }
         return false;
     }
@@ -605,6 +756,16 @@ public class OrderDAO {
         }
         return false;
     }
+
+    public boolean updateOrderTotal(int orderID, java.math.BigDecimal newTotal) {
+        String sql = "UPDATE [Order] SET total_price = ? WHERE orderID = ? AND status = 'pending'";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBigDecimal(1, newTotal);
+            ps.setInt(2, orderID);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
-
-

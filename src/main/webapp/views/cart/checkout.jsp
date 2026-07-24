@@ -324,7 +324,14 @@
                     </h2>
 
                     <div class="mb-6">
-                        <label class="text-[13px] font-bold text-on-surface mb-2 block">Mã voucher</label>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-[13px] font-bold text-on-surface block">Mã voucher</label>
+                            <button type="button" id="btnShowVoucherList"
+                                    class="text-[12px] font-bold text-primary hover:underline flex items-center gap-1">
+                                <i data-lucide="ticket-percent" class="w-3.5 h-3.5"></i>
+                                Voucher của Shop
+                            </button>
+                        </div>
                         <div class="flex gap-2">
                             <input type="text" id="voucherCodeInput"
                                    placeholder="Nhập mã voucher"
@@ -410,6 +417,19 @@
                 <button type="button" id="btnConfirmOrder" class="px-4 py-2 bg-[#004d99] text-white rounded-lg hover:opacity-90">
                     Xác nhận
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <%-- Voucher list modal --%>
+    <div id="voucherListModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[9999] p-4">
+        <div class="bg-white w-full max-w-[480px] max-h-[80vh] rounded-xl relative flex flex-col">
+            <div class="flex items-center justify-between p-5 border-b border-outline-variant">
+                <h3 class="text-lg font-black text-primary">Voucher của Shop</h3>
+                <button type="button" id="btnCloseVoucherList" class="text-2xl leading-none hover:text-gray-500">&times;</button>
+            </div>
+            <div id="voucherListBody" class="p-5 overflow-y-auto space-y-3 flex-grow">
+                <p class="text-center text-on-surface-variant text-[13px]">Đang tải...</p>
             </div>
         </div>
     </div>
@@ -708,9 +728,9 @@
             });
         }
 
+        // Danh sách địa chỉ luôn lấy từ database do server render.
+        // Không khôi phục địa chỉ từ localStorage để tránh dữ liệu giả hoặc dữ liệu đã xóa xuất hiện lại.
         document.querySelectorAll('.address-option').forEach(bindAddressOption);
-        applyDeletedAddressesOnReload();
-        renderLocalAddresses();
 
         document.getElementById('btnCancelDeleteAddress').addEventListener('click', function () {
             deleteTargetOption = null;
@@ -718,9 +738,45 @@
         });
 
         document.getElementById('btnConfirmDeleteAddress').addEventListener('click', function () {
-            softDeleteAddress(deleteTargetOption);
-            deleteTargetOption = null;
-            document.getElementById('deleteAddressConfirm').classList.add('hidden');
+            if (!deleteTargetOption) {
+                document.getElementById('deleteAddressConfirm').classList.add('hidden');
+                return;
+            }
+
+            var addressID = deleteTargetOption.dataset.id;
+            var targetOption = deleteTargetOption;
+            var confirmButton = this;
+            confirmButton.disabled = true;
+
+            fetch('${pageContext.request.contextPath}/checkout', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+                body: 'action=deleteAddressAjax&addressID=' + encodeURIComponent(addressID)
+            })
+                    .then(function (response) {
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        confirmButton.disabled = false;
+
+                        if (!data.success) {
+                            showInputError(data.message || 'Không thể xóa địa chỉ.');
+                            return;
+                        }
+
+                        softDeleteAddress(targetOption);
+                        // Xóa dấu vết localStorage cũ; database mới là nguồn dữ liệu duy nhất.
+                        localStorage.removeItem(ADDRESS_STORAGE_KEY);
+                        localStorage.removeItem(DELETED_STORAGE_KEY);
+                    })
+                    .catch(function () {
+                        confirmButton.disabled = false;
+                        showInputError('Không kết nối được server!');
+                    })
+                    .finally(function () {
+                        deleteTargetOption = null;
+                        document.getElementById('deleteAddressConfirm').classList.add('hidden');
+                    });
         });
 
         document.getElementById('selectedAddressBox').addEventListener('click', function () {
@@ -865,7 +921,7 @@
                     })
                     .then(function (data) {
                         if (!data.success) {
-                            showInputError('Lỗi khi lưu địa chỉ vào database!');
+                            showInputError(data.message || 'Lỗi khi lưu địa chỉ vào database!');
                             return;
                         }
 
@@ -890,6 +946,8 @@
                         document.getElementById('newStreet').value = '';
                         document.getElementById('defaultAddress').checked = false;
 
+                        localStorage.removeItem(ADDRESS_STORAGE_KEY);
+                        localStorage.removeItem(DELETED_STORAGE_KEY);
                         showToast('Đã thêm địa chỉ mới!', false);
                     })
                     .catch(function () {
@@ -988,6 +1046,87 @@
                     .catch(function () {
                         showToast('Không kết nối được server!', true);
                     });
+        });
+
+        function formatCurrencyVND(n) {
+            return Number(n).toLocaleString('vi-VN') + 'đ';
+        }
+
+        function renderVoucherItem(v) {
+            var minOrderHtml = (v.minOrderValue !== null && v.minOrderValue !== undefined)
+                ? '<span class="inline-flex items-center gap-1"><i data-lucide="shopping-cart" class="w-3 h-3"></i>Đơn tối thiểu ' + formatCurrencyVND(v.minOrderValue) + '</span>'
+                : '';
+            var maxDiscountHtml = (v.maxDiscountValue !== null && v.maxDiscountValue !== undefined)
+                ? '<span class="inline-flex items-center gap-1"><i data-lucide="badge-percent" class="w-3 h-3"></i>Giảm tối đa ' + formatCurrencyVND(v.maxDiscountValue) + '</span>'
+                : '';
+
+            var conditionsHtml = '';
+            if (minOrderHtml || maxDiscountHtml) {
+                conditionsHtml = '<div class="flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-on-surface-variant mt-2">'
+                    + minOrderHtml + maxDiscountHtml + '</div>';
+            }
+
+            return ''
+                + '<div class="border border-dashed border-primary/40 rounded-lg p-4 bg-primary/[0.03]">'
+                + '  <div class="flex items-center justify-between gap-3">'
+                + '    <div>'
+                + '      <p class="text-[15px] font-black text-primary">Giảm ' + v.discountPercent + '%</p>'
+                + '      <div class="flex items-center gap-2 mt-1">'
+                + '        <span class="px-2 py-1 bg-white border border-outline-variant rounded text-[13px] font-bold tracking-wide">' + escapeHtml(v.code) + '</span>'
+                + '        <button type="button" class="btn-copy-voucher text-primary hover:opacity-70" data-code="' + escapeHtml(v.code) + '" title="Sao chép mã">'
+                + '          <i data-lucide="copy" class="w-4 h-4"></i>'
+                + '        </button>'
+                + '      </div>'
+                + '    </div>'
+                + '    <span class="text-[11px] text-on-surface-variant whitespace-nowrap">HSD: ' + v.endDate + '</span>'
+                + '  </div>'
+                + conditionsHtml
+                + '</div>';
+        }
+
+        document.getElementById('btnShowVoucherList').addEventListener('click', function () {
+            var modal = document.getElementById('voucherListModal');
+            var body = document.getElementById('voucherListBody');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            body.innerHTML = '<p class="text-center text-on-surface-variant text-[13px]">Đang tải...</p>';
+
+            fetch('${pageContext.request.contextPath}/checkout', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+                body: 'action=listVouchers'
+            })
+                    .then(function (response) { return response.json(); })
+                    .then(function (data) {
+                        if (!data.success || !data.vouchers || data.vouchers.length === 0) {
+                            body.innerHTML = '<p class="text-center text-on-surface-variant text-[13px]">Hiện không có voucher nào khả dụng.</p>';
+                            return;
+                        }
+                        body.innerHTML = data.vouchers.map(renderVoucherItem).join('');
+                        if (window.lucide) lucide.createIcons();
+
+                        body.querySelectorAll('.btn-copy-voucher').forEach(function (btn) {
+                            btn.addEventListener('click', function () {
+                                var code = btn.getAttribute('data-code');
+                                navigator.clipboard.writeText(code).then(function () {
+                                    showToast('Đã sao chép mã ' + code, false);
+                                });
+                            });
+                        });
+                    })
+                    .catch(function () {
+                        body.innerHTML = '<p class="text-center text-red-500 text-[13px]">Có lỗi khi tải voucher.</p>';
+                    });
+        });
+
+        function closeVoucherListModal() {
+            var modal = document.getElementById('voucherListModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+        document.getElementById('btnCloseVoucherList').addEventListener('click', closeVoucherListModal);
+        document.getElementById('voucherListModal').addEventListener('click', function (e) {
+            if (e.target === this) closeVoucherListModal();
         });
 
         document.getElementById('checkout-form').addEventListener('submit', function (e) {

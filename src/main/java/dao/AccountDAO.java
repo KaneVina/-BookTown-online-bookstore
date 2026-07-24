@@ -81,8 +81,17 @@ public class AccountDAO {
         return list;
     }
 
+    // Các giá trị status hợp lệ cho Account (staff/admin). Kiểm tra ở đây để
+    // phòng trường hợp Controller gọi hàm này chưa validate (defense in depth).
+    private static final java.util.Set<String> VALID_ACCOUNT_STATUSES
+            = java.util.Set.of("active", "inactive");
+
     // cập nhật trạng thái của staff 
     public boolean toggleStaffStatus(int accountID, String status) {
+        if (status == null || !VALID_ACCOUNT_STATUSES.contains(status.toLowerCase())) {
+            System.out.println("toggleStaffStatus: status không hợp lệ = " + status);
+            return false;
+        }
         String sql = "UPDATE Account SET status = ? WHERE accountID = ?";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
@@ -159,6 +168,40 @@ public class AccountDAO {
         }
 
         return null;
+    }
+
+    // Cập nhật email sau khi đã xác thực OTP thành công (dùng cho cả staff và admin)
+    public boolean updateEmail(int id, String newEmail) {
+        String sql = "UPDATE Account SET email = ? WHERE accountID = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newEmail);
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Kiểm tra email có phải tài khoản staff/admin (chỉ bảng Account) hay
+     * không. Khác với {@link #isEmailExists(String)} ở chỗ KHÔNG kiểm tra luôn
+     * bảng Customer — dùng để phân biệt "email này thuộc staff/admin" trước khi
+     * cho phép đăng nhập Google (chỉ dành cho customer). Nếu dùng
+     * isEmailExists() ở đây, một customer bình thường (email đã tồn tại trong
+     * bảng Customer) sẽ bị chặn nhầm là "không hỗ trợ Google".
+     */
+    public boolean isStaffEmailExists(String email) {
+        String sql = "SELECT 1 FROM Account WHERE email = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public boolean isEmailExists(String email) {
@@ -259,7 +302,6 @@ public class AccountDAO {
         }
         return false;
     }
-
 
     public boolean resetPasswordByEmail(String email, String newPassword) {
         String sql = "UPDATE Account SET password = ? WHERE email = ?";

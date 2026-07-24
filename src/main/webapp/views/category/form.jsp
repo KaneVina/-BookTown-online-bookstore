@@ -35,10 +35,11 @@
 
                         <div>
                             <label class="block text-sm font-bold mb-2">Tên thể loại</label>
-                            <input type="text" name="genre_name" required maxlength="100" value="${genre.genreName}"
+                            <input type="text" name="genre_name" id="genreName" required maxlength="100"
+                                   value="${genre.genreName}"
                                    placeholder="Ví dụ: Văn học, Kỹ năng sống..."
                                    class="w-full rounded-xl border-outline-variant bg-surface-container-low px-4 py-3 text-sm focus:border-primary focus:ring-primary">
-                            <p class="text-xs text-on-surface-variant mt-2">Tên thể loại không được để trống và không được trùng.</p>
+<p class="text-xs text-on-surface-variant mt-2">Chỉ nhập chữ và khoảng trắng, không nhập số hoặc ký tự đặc biệt.</p>
                         </div>
 
                         <div class="flex justify-end gap-3 pt-2">
@@ -55,5 +56,33 @@
                 </section>
             </div>
         </main>
+            <script>
+            const allowedGenres = null; /* removed suggestions */
+/*
+                'Văn học','Tiểu thuyết','Truyện ngắn','Thơ','Trinh thám','Kinh dị','Phiêu lưu',
+                'Khoa học viễn tưởng','Ngôn tình','Thiếu nhi','Truyện tranh','Giáo dục','Tham khảo',
+                'Ngoại ngữ','Kinh tế','Kinh doanh','Tài chính','Marketing','Quản trị','Công nghệ',
+                'Tin học','Khoa học','Lịch sử','Địa lý','Chính trị','Pháp luật','Tâm lý',
+                'Kỹ năng sống','Phát triển bản thân','Sức khỏe','Y học','Ẩm thực','Du lịch',
+                'Nghệ thuật','Âm nhạc','Tôn giáo','Triết học'
+*/
+
+            document.querySelector('form').addEventListener('submit', function (event) {
+                const input = document.getElementById('genreName');
+                const value = input.value.trim().replace(/\s+/g, ' ');
+                input.value = value;
+
+                if (!/^[\p{L}\s]+$/u.test(value)) {
+                    event.preventDefault();
+                    input.setCustomValidity('Tên thể loại chỉ được nhập chữ và khoảng trắng, không được nhập số hoặc ký tự đặc biệt.');
+                    input.reportValidity();
+                    return;
+                }        input.setCustomValidity('');
+            });
+
+            document.getElementById('genreName').addEventListener('input', function () {
+                this.setCustomValidity('');
+            });
+        </script>
     </body>
 </html>

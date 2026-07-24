@@ -327,6 +327,7 @@
             var confirmModal = null;
             var currentReviewID = null;
             var pendingAction = null;
+            var REVIEW_API_URL = '${pageContext.request.contextPath}/dashboard/review-management';
 
             function initReplyModal() {
                 if (!document.getElementById('replyModal')) {
@@ -471,7 +472,7 @@
 
                 const formData = new URLSearchParams(new FormData(replyForm));
 
-                fetch('${pageContext.request.contextPath}/review', {
+                fetch(REVIEW_API_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
@@ -507,7 +508,7 @@
                 formData.append('action', 'hide');
                 formData.append('reviewID', reviewID);
 
-                fetch('${pageContext.request.contextPath}/review', {
+                fetch(REVIEW_API_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
@@ -537,7 +538,7 @@
                 formData.append('reviewID', reviewID);
                 formData.append('customerID', customerID);
 
-                fetch('${pageContext.request.contextPath}/review', {
+                fetch(REVIEW_API_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
@@ -665,7 +666,7 @@
                         params.delete('status');
                     }
 
-                    return '${pageContext.request.contextPath}/review?' + params.toString();
+                    return REVIEW_API_URL + '?' + params.toString();
                 }
 
                 let debounceTimer = null;

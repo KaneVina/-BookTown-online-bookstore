@@ -73,6 +73,9 @@ public class LoginController extends HttpServlet {
             emailCookie.setPath("/");
             response.addCookie(emailCookie);
 
+            // Thông báo cho toast.jsp hiện popup "Đăng nhập thành công" ở trang tiếp theo
+            session.setAttribute("successMessage", "Đăng nhập thành công! Chào mừng " + acc.getFullname() + ".");
+
             if (acc.getRole().equals("admin") || acc.getRole().equals("staff")) {
                 response.sendRedirect(request.getContextPath() + "/dashboard/account-management");
             } else {
@@ -90,7 +93,7 @@ public class LoginController extends HttpServlet {
         if (email == null || email.trim().isEmpty()) {
             return "Vui lòng nhập email.";
         }
-        if (!email.trim().matches("^[\\w.+-]+@[\\w-]+\\.[a-zA-Z]{2,}$")) {
+        if (!email.trim().matches("^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)*\\.[a-zA-Z]{2,}$")) {
             return "Email không đúng định dạng.";
         }
         if (password == null || password.isEmpty()) {

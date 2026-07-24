@@ -1,5 +1,6 @@
 package controller;
 
+import dao.CustomerDAO;
 import dao.ReviewDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -9,6 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import model.Account;
 
 import java.io.IOException;
+import model.Customer;
 import model.Review;
 
 public class ReviewController extends HttpServlet {
@@ -68,31 +70,47 @@ public class ReviewController extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
         String action = request.getParameter("action");
 
         if (action == null) {
             action = "";
         }
 
-        switch (action) {
-            case "add":
-                handleAddReview(request, response);
-                break;
-            case "edit":
-                handleEditReview(request, response);
-                break;
-            case "reply":
-                handleReplyReview(request, response);
-                break;
-            case "hide":
-                handleHideReview(request, response);
-                break;
-            case "lock":
-                handleLockAccount(request, response);
-                break;
-            default:
-                sendJson(response,
-                        "{\"success\":false,\"message\":\"Action không hợp lệ\"}");
+        try {
+            switch (action) {
+                case "add":
+                    handleAddReview(request, response);
+                    break;
+                case "edit":
+                    handleEditReview(request, response);
+                    break;
+                case "reply":
+                    handleReplyReview(request, response);
+                    break;
+                case "hide":
+                    handleHideReview(request, response);
+                    break;
+                case "lock":
+                    handleLockAccount(request, response);
+                    break;
+                default:
+                    sendJson(response,
+                            "{\"success\":false,\"message\":\"Action không hợp lệ\"}");
+            }
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            response.setStatus(400);
+            response.getWriter().write("{\"success\":false,\"message\":\"Dữ liệu không hợp lệ\"}");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(500);
+            String safeMsg = e.getMessage() == null
+                    ? "Lỗi server"
+                    : e.getMessage().replace("\"", "'").replace("\n", " ");
+            response.getWriter().write("{\"success\":false,\"message\":\"Lỗi server: " + safeMsg + "\"}");
         }
     }
 
@@ -279,12 +297,15 @@ public class ReviewController extends HttpServlet {
         }
     }
 
+    // admin và staff đều được khóa tài khoản customer, không phân biệt role cụ thể
     private void handleLockAccount(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        if (!isAdmin(request)) {
+
+        if (!isAdminOrStaff(request)) {
             sendJson(response, "{\"success\":false,\"message\":\"Bạn không có quyền khóa tài khoản\"}");
             return;
         }
+
         int reviewID = toInt(request.getParameter("reviewID"), 0);
         if (reviewID <= 0) {
             sendJson(response, "{\"success\":false,\"message\":\"Review không hợp lệ\"}");
@@ -302,12 +323,35 @@ public class ReviewController extends HttpServlet {
             sendJson(response, "{\"success\":false,\"message\":\"Tài khoản khách hàng đã bị khóa rồi\"}");
             return;
         }
+
         boolean success = dao.lockAccountByReview(review.getCustomerID());
+
         if (success) {
+            CustomerDAO customerDAO = new CustomerDAO();
+            Customer customer = customerDAO.getCustomerById(review.getCustomerID());
+            if (customer != null && customer.getEmail() != null && !customer.getEmail().trim().isEmpty()) {
+                sendAccountViolationLockedEmailAsync(customer.getEmail(), customer.getFullname());
+            }
             sendJson(response, "{\"success\":true,\"message\":\"Khóa tài khoản thành công\"}");
         } else {
             sendJson(response, "{\"success\":false,\"message\":\"Không thể khóa tài khoản\"}");
         }
+    }
+
+    private void sendAccountViolationLockedEmailAsync(String email, String fullname) {
+        final String toEmail = email;
+        final String name = fullname;
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    utils.EmailUtil.sendAccountLockedForViolationEmail(toEmail, name);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     private boolean isCustomer(HttpServletRequest request) {
@@ -357,8 +401,6 @@ public class ReviewController extends HttpServlet {
 
     private void sendJson(HttpServletResponse response, String json)
             throws IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
         response.getWriter().print(json);
     }
 }

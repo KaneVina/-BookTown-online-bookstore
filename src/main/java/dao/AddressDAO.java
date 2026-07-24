@@ -72,6 +72,30 @@ public class AddressDAO {
         return null;
     }
 
+    public Address getAddressByIdAndCustomer(int addressID, int customerID) {
+        String sql = "SELECT addressID, customerID, street, district, city, country, "
+                + "is_default, recipient_name, recipient_phone "
+                + "FROM Address WHERE addressID=? AND customerID=? "
+                + "AND (country IS NULL OR country <> '__DELETED__')";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, addressID);
+            ps.setInt(2, customerID);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapAddress(rs);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     public void insertAddress(Address a) {
         insertAddressAndReturnId(a);
     }
@@ -162,19 +186,6 @@ public class AddressDAO {
         }
 
         return false;
-    }
-
-    public void deleteAddress(int id) {
-        String sql = "DELETE FROM Address WHERE addressID=?";
-
-        try (Connection conn = db.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, id);
-            ps.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public boolean deleteAddressByCustomer(int addressID, int customerID) {

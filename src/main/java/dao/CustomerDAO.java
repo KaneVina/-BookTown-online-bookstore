@@ -66,7 +66,6 @@ public class CustomerDAO {
         return false;
     }
 
-    // cập nhật dữ liệu của customer
     public boolean updateCustomer(
             int id,
             String fullname,
@@ -95,9 +94,20 @@ public class CustomerDAO {
         return false;
     }
 
-    // lấy id của customer ở trang profile
-    public Customer getCustomerById(int id) {
+    // Cập nhật email sau khi đã xác thực OTP thành công
+    public boolean updateEmail(int id, String newEmail) {
+        String sql = "UPDATE Customer SET email = ? WHERE customerID = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newEmail);
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
+    public Customer getCustomerById(int id) {
         String sql = "SELECT customerID, fullname, email, password, " + "phone, role, status, gender, dob " + "FROM Customer " + "WHERE customerID = ?";
 
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -124,35 +134,32 @@ public class CustomerDAO {
         return null;
     }
 
+    // Đồng nhất với AccountDAO.changePassword(): thực hiện trong một câu UPDATE
+    // duy nhất kèm điều kiện password cũ, tránh phải SELECT rồi so sánh riêng.
     public boolean changePassword(
             int customerId,
             String currentPassword,
             String newPassword) {
 
-        String checkSql = "SELECT password " + "FROM Customer " + "WHERE customerID = ?";
-        String updateSql = "UPDATE Customer " + "SET password = ? " + "WHERE customerID = ?";
+        String sql = "UPDATE Customer "
+                + "SET password = ? "
+                + "WHERE customerID = ? "
+                + "AND password = ?";
 
-        try (Connection conn = new DBContext().getConnection()) {
-            PreparedStatement ps = conn.prepareStatement(checkSql);
-            ps.setInt(1, customerId);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                String oldPassword = rs.getString("password");
-                if (!oldPassword.equals(HashMD5.hash(currentPassword))) {
-                    return false;
-                }
-                PreparedStatement update = conn.prepareStatement(updateSql);
-                update.setString(1, HashMD5.hash(newPassword));
-                update.setInt(2, customerId);
-                return update.executeUpdate() > 0;
-            }
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, HashMD5.hash(newPassword));
+            ps.setInt(2, customerId);
+            ps.setString(3, HashMD5.hash(currentPassword));
+
+            return ps.executeUpdate() > 0;
+
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
 
-    // admin và staff quản lý tài khoản người dùng 
     public List<Customer> getAllCustomers() {
         List<Customer> list = new ArrayList<>();
         String sql = "SELECT * FROM Customer";
@@ -173,8 +180,17 @@ public class CustomerDAO {
         return list;
     }
 
-    // cập nhật trạng thái của người dùng
+    // Các giá trị status hợp lệ cho Customer. Kiểm tra ở đây để phòng trường hợp
+    // Controller gọi hàm này chưa validate (defense in depth).
+    private static final java.util.Set<String> VALID_CUSTOMER_STATUSES
+            = java.util.Set.of("active", "inactive");
+
     public boolean toggleCustomerStatus(int customerID, String status) {
+
+        if (status == null || !VALID_CUSTOMER_STATUSES.contains(status.toLowerCase())) {
+            System.out.println("toggleCustomerStatus: status không hợp lệ = " + status);
+            return false;
+        }
 
         String sql = "UPDATE Customer SET status = ? WHERE customerID = ?";
 
@@ -197,7 +213,6 @@ public class CustomerDAO {
         return false;
     }
 
-    // thêm phân trang 
     public int countCustomers() {
 
         String sql = "SELECT COUNT(*) FROM Customer";
@@ -250,7 +265,6 @@ public class CustomerDAO {
         }
         return false;
     }
-
 
     public boolean resetPasswordByEmail(String email, String newPassword) {
         String sql = "UPDATE Customer SET password = ? WHERE email = ?";
@@ -384,6 +398,5 @@ public class CustomerDAO {
 
         return 0;
     }
-
 
 }

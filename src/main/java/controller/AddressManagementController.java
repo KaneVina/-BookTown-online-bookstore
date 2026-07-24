@@ -74,7 +74,7 @@ public class AddressManagementController extends HttpServlet {
                 return;
 
             default:
-                response.sendRedirect(request.getContextPath() + "/address");
+                response.sendRedirect(request.getContextPath() + "/profile/address");
         }
     }
 
@@ -145,7 +145,7 @@ public class AddressManagementController extends HttpServlet {
             session.setAttribute("error", "Xóa địa chỉ thất bại!");
         }
 
-        response.sendRedirect(request.getContextPath() + "/address");
+        response.sendRedirect(request.getContextPath() + "/profile/address");
     }
 
     private void setDefaultAddress(HttpServletRequest request,
@@ -162,7 +162,7 @@ public class AddressManagementController extends HttpServlet {
             session.setAttribute("message", "Đã đặt địa chỉ mặc định!");
         }
 
-        response.sendRedirect(request.getContextPath() + "/address");
+        response.sendRedirect(request.getContextPath() + "/profile/address");
     }
 
     private Account getLoggedInCustomer(HttpServletRequest request,

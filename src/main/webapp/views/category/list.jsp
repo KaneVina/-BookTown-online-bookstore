@@ -33,11 +33,16 @@
     <body class="bg-background text-on-surface flex min-h-screen">
         <%@ include file="/views/layout/dashboard/sidebar.jsp" %>
 
-        <main class="flex-1 md:ml-64 min-h-screen">
-            <div class="px-6 py-8 max-w-6xl mx-auto space-y-8">
+        <main class="flex-1 md:ml-64 min-h-screen flex flex-col">
+            <header class="bg-white border-b h-14 sticky top-0 z-30 flex items-center px-6"
+                    style="border-color:#c2c6d4;">
+                <h2 class="font-semibold text-base" style="color:#071e27;">Quản lý Thể loại</h2>
+            </header>
+
+            <div class="px-6 py-8 max-w-6xl mx-auto w-full space-y-8">
                 <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div>
-                        <h1 class="text-3xl font-bold text-on-surface">Quản lý thể loại</h1>
+                        <h1 class="text-3xl font-bold text-on-surface">Danh sách thể loại</h1>
                         <p class="text-sm text-on-surface-variant mt-2">Tạo, cập nhật, xem chi tiết và lọc thể loại sách của BookTown.</p>
                     </div>
                     <c:if test="${canManageCategory}">
@@ -96,7 +101,7 @@
                     <div class="px-6 py-5 border-b border-outline-variant flex items-center justify-between">
                         <div>
                             <h2 class="text-xl font-bold">Danh sách thể loại</h2>
-                            <p class="text-sm text-on-surface-variant mt-1">
+                            <p class="text-sm text-on-surface-variant mt-1">Hiển thị các thể loại đang có trong hệ thống.</p>
                         </div>
                     </div>
 

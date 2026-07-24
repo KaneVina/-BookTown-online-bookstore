@@ -1,6 +1,5 @@
 package controller;
 
-import dao.CartDAO;
 import dao.OrderDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -50,7 +49,6 @@ public class VNPayReturnController extends HttpServlet {
                 return;
             }
 
-            // Đọc addressID đã lưu từ session khi khách chọn VNPay
             Object addressIDObj = session.getAttribute("vnpay_addressID");
             BigDecimal total = (BigDecimal) session.getAttribute("vnpay_total");
 
@@ -62,10 +60,20 @@ public class VNPayReturnController extends HttpServlet {
 
             int addressID = (Integer) addressIDObj;
 
-            CartDAO cartDAO = new CartDAO();
-            List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
+            @SuppressWarnings("unchecked")
+            List<CartItem> cartItems = (List<CartItem>) session.getAttribute("vnpay_cartItems");
 
-            // Lọc bỏ sản phẩm hết hàng trước khi tạo đơn
+            if (cartItems == null || cartItems.isEmpty()) {
+                session.setAttribute("errorMessage", "Phiên thanh toán hết hạn, vui lòng thử lại!");
+                session.removeAttribute("vnpay_txnRef");
+                session.removeAttribute("vnpay_addressID");
+                session.removeAttribute("vnpay_total");
+                session.removeAttribute("vnpay_cartItems");
+                response.sendRedirect(request.getContextPath() + "/checkout");
+                return;
+            }
+
+          
             cartItems.removeIf(item -> item.getStockQuantity() == 0);
 
             if (cartItems.isEmpty()) {
@@ -73,6 +81,7 @@ public class VNPayReturnController extends HttpServlet {
                 session.removeAttribute("vnpay_txnRef");
                 session.removeAttribute("vnpay_addressID");
                 session.removeAttribute("vnpay_total");
+                session.removeAttribute("vnpay_cartItems");
                 response.sendRedirect(request.getContextPath() + "/cart");
                 return;
             }
@@ -84,13 +93,40 @@ public class VNPayReturnController extends HttpServlet {
                 return;
             }
             orderDAO.createOrderDetails(orderID, cartItems);
-            orderDAO.deductStock(orderID);
+            boolean stockDeducted = orderDAO.deductStock(orderID);
+            if (!stockDeducted) {
+                orderDAO.cancelOrder(orderID, account.getId(), "Sản phẩm vừa hết hàng do người khác mua trước trong lúc đang thanh toán VNPay");
+                orderDAO.updatePaymentStatus(orderID, "pending_refund");
+                session.setAttribute("errorMessage", "Sản phẩm trong giỏ đã bị người khác mua trước trong lúc thanh toán. Đơn hàng đã được ghi nhận hủy và sẽ hoàn tiền!");
+                session.removeAttribute("vnpay_txnRef");
+                session.removeAttribute("vnpay_addressID");
+                session.removeAttribute("vnpay_total");
+                session.removeAttribute("vnpay_cartItems");
+                response.sendRedirect(request.getContextPath() + "/cart");
+                return;
+            }
+
             orderDAO.updatePaymentStatus(orderID, "paid");
             orderDAO.clearCart(account.getId());
+
+            // Ghi nhận voucher đã sử dụng (nếu có) khi thanh toán VNPay thành công
+            Integer appliedVoucherID = (Integer) session.getAttribute("appliedVoucherID");
+            if (appliedVoucherID != null) {
+                String appliedCode = (String) session.getAttribute("appliedVoucherCode");
+                dao.VoucherDAO voucherDAO = new dao.VoucherDAO();
+                model.Voucher v = voucherDAO.getVoucherByCode(appliedCode);
+                Integer vQty = (v != null) ? v.getQuantity() : null;
+                voucherDAO.insertVoucherUsage(account.getId(), appliedVoucherID, vQty);
+
+                session.removeAttribute("appliedVoucherID");
+                session.removeAttribute("appliedVoucherCode");
+                session.removeAttribute("appliedVoucherDiscount");
+            }
 
             session.removeAttribute("vnpay_txnRef");
             session.removeAttribute("vnpay_addressID");
             session.removeAttribute("vnpay_total");
+            session.removeAttribute("vnpay_cartItems");
 
             Order order = orderDAO.getOrderByID(orderID);
             String orderCode = (order != null) ? order.getOrderCode() : "BT-" + orderID;
@@ -106,6 +142,7 @@ public class VNPayReturnController extends HttpServlet {
                 session.removeAttribute("vnpay_txnRef");
                 session.removeAttribute("vnpay_addressID");
                 session.removeAttribute("vnpay_total");
+                session.removeAttribute("vnpay_cartItems");
 
                 String msg;
 

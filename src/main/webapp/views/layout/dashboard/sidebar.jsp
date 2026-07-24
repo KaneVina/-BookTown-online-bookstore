@@ -2,7 +2,29 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <%
-    String currentPage = request.getRequestURI();
+    String currentPage = (String) request.getAttribute("jakarta.servlet.forward.request_uri");
+    if (currentPage == null || currentPage.isEmpty()) {
+        currentPage = request.getRequestURI();
+    }
+
+    String sidebarContextPath = request.getContextPath();
+    String sidebarCurrentPath = currentPage;
+    if (sidebarContextPath != null
+            && !sidebarContextPath.isEmpty()
+            && sidebarCurrentPath.startsWith(sidebarContextPath)) {
+        sidebarCurrentPath = sidebarCurrentPath.substring(sidebarContextPath.length());
+    }
+
+    int jsessionIndex = sidebarCurrentPath.indexOf(';');
+    if (jsessionIndex >= 0) {
+        sidebarCurrentPath = sidebarCurrentPath.substring(0, jsessionIndex);
+    }
+
+    while (sidebarCurrentPath.length() > 1 && sidebarCurrentPath.endsWith("/")) {
+        sidebarCurrentPath = sidebarCurrentPath.substring(0, sidebarCurrentPath.length() - 1);
+    }
+
+    boolean isDashboardPage = "/dashboard".equals(sidebarCurrentPath);
     model.Account sidebarUser = (model.Account) session.getAttribute("account");
     String sidebarRole = "";
     String sidebarName = "";
@@ -135,7 +157,7 @@
     <nav class="flex-1 py-4 space-y-0.5 overflow-y-auto">
 
         <a href="${pageContext.request.contextPath}/dashboard"
-           class="sidebar-link <%= currentPage.endsWith("/dashboard") ? "active" : ""%>">
+           class="sidebar-link <%= isDashboardPage ? "active" : ""%>">
             <span class="material-symbols-outlined">dashboard</span>
             Bảng điều khiển
         </a>
@@ -156,11 +178,14 @@
         </a>
         <% } %>
 
+
+        <% if (isStaffUser) { %>
         <a href="${pageContext.request.contextPath}/dashboard/category-management"
            class="sidebar-link <%= currentPage.contains("/dashboard/category-management") ? "active" : ""%>">
             <span class="material-symbols-outlined">category</span>
             Thể loại
         </a>
+        <% } %>
 
         <a href="${pageContext.request.contextPath}/dashboard/account-management"
            class="sidebar-link <%= currentPage.contains("account-management") ? "active" : ""%>">
@@ -168,17 +193,19 @@
             Tài khoản
         </a>
 
-        <a href="${pageContext.request.contextPath}/review"
+        <a href="${pageContext.request.contextPath}/dashboard/review-management"
            class="sidebar-link <%= currentPage.contains("review") ? "active" : ""%>">
             <span class="material-symbols-outlined">rate_review</span>
             Đánh giá
         </a>
 
+        <% if (isStaffUser) { %>
         <a href="${pageContext.request.contextPath}/dashboard/voucher-management"
            class="sidebar-link <%= currentPage.contains("voucher") ? "active" : ""%>">
             <span class="material-symbols-outlined">sell</span>
             Voucher
         </a>
+        <% } %>
 
     </nav>
 
@@ -191,7 +218,7 @@
                 </span>
                 Quản lý tài khoản
             </a>
-            <a href="${pageContext.request.contextPath}/change-password">
+            <a href="${pageContext.request.contextPath}/profile/change-password">
                 <span class="material-symbols-outlined" style="font-size:18px;">
                     lock_reset
                 </span>

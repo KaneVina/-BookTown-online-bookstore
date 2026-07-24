@@ -245,14 +245,33 @@
                                             </table>
                                         </div>
 
+                                        <c:set var="staffBookSubtotal" value="0" />
+                                        <c:set var="staffTotalBookCount" value="0" />
+                                        <c:forEach var="item" items="${orderDetails}">
+                                            <c:set var="staffBookSubtotal" value="${staffBookSubtotal + item.subtotal}" />
+                                            <c:set var="staffTotalBookCount" value="${staffTotalBookCount + item.quantity}" />
+                                        </c:forEach>
+
                                         <div class="p-6 bg-[#f3faff] border-t border-[#c2c6d4]">
-                                            <div class="flex flex-col items-end gap-2">
-                                                <div class="flex justify-between w-64">
-                                                    <span class="text-xl font-semibold text-[#071e27]">Tổng
-                                                        cộng:</span>
-                                                    <span class="text-xl font-semibold text-[#004d99]">
-                                                        <fmt:formatNumber value="${order.totalPrice}" pattern="#,###" />
-                                                        ₫
+                                            <div class="flex flex-col items-end gap-2 text-sm">
+                                                <div class="flex justify-between w-72 text-[#424752]">
+                                                    <span>Tạm tính (${staffTotalBookCount} sản phẩm):</span>
+                                                    <span class="font-semibold text-[#071e27]">
+                                                        <fmt:formatNumber value="${staffBookSubtotal}" pattern="#,###" /> ₫
+                                                    </span>
+                                                </div>
+                                                <c:if test="${staffBookSubtotal > order.totalPrice}">
+                                                    <div class="flex justify-between w-72 text-green-700 font-semibold">
+                                                        <span>Giảm giá voucher:</span>
+                                                        <span>
+                                                            -<fmt:formatNumber value="${staffBookSubtotal - order.totalPrice}" pattern="#,###" /> ₫
+                                                        </span>
+                                                    </div>
+                                                </c:if>
+                                                <div class="flex justify-between w-72 pt-2 border-t border-[#c2c6d4]">
+                                                    <span class="text-lg font-bold text-[#071e27]">Tổng thanh toán:</span>
+                                                    <span class="text-lg font-bold text-[#004d99]">
+                                                        <fmt:formatNumber value="${order.totalPrice}" pattern="#,###" /> ₫
                                                     </span>
                                                 </div>
                                             </div>

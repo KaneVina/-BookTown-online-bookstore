@@ -10,12 +10,24 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Set;
 import model.Account;
 import model.Genre;
 
 public class CategoryManagementController extends HttpServlet {
 // category
     private final GenreDAO genreDAO = new GenreDAO();
+
+    private static final Set<String> VALID_GENRES = Set.of(
+            "Văn học", "Tiểu thuyết", "Truyện ngắn", "Thơ", "Trinh thám",
+            "Kinh dị", "Phiêu lưu", "Khoa học viễn tưởng", "Ngôn tình",
+            "Thiếu nhi", "Truyện tranh", "Giáo dục", "Tham khảo",
+            "Ngoại ngữ", "Kinh tế", "Kinh doanh", "Tài chính", "Marketing",
+            "Quản trị", "Công nghệ", "Tin học", "Khoa học", "Lịch sử",
+            "Địa lý", "Chính trị", "Pháp luật", "Tâm lý", "Kỹ năng sống",
+            "Phát triển bản thân", "Sức khỏe", "Y học", "Ẩm thực", "Du lịch",
+            "Nghệ thuật", "Âm nhạc", "Tôn giáo", "Triết học"
+    );
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -103,8 +115,9 @@ public class CategoryManagementController extends HttpServlet {
                 return;
             }
 
-            if (name.length() > 100) {
-                response.sendRedirect(redirectUrl + "?error=" + encode("Tên thể loại không được vượt quá 100 ký tự."));
+            String validationError = validateGenreName(name);
+            if (validationError != null) {
+                response.sendRedirect(redirectUrl + "?action=create&error=" + encode(validationError));
                 return;
             }
 
@@ -134,8 +147,10 @@ public class CategoryManagementController extends HttpServlet {
                 return;
             }
 
-            if (name.length() > 100) {
-                response.sendRedirect(redirectUrl + "?error=" + encode("Tên thể loại không được vượt quá 100 ký tự."));
+            String validationError = validateGenreName(name);
+            if (validationError != null) {
+                response.sendRedirect(redirectUrl + "?action=detail&id=" + id
+                        + "&error=" + encode(validationError));
                 return;
             }
 
@@ -190,6 +205,23 @@ public class CategoryManagementController extends HttpServlet {
         }
         String role = account.getRole().trim().toLowerCase();
         return "staff".equals(role) || "admin".equals(role);
+    }
+
+    private String validateGenreName(String name) {
+        if (name.length() > 100) {
+            return "Tên thể loại không được vượt quá 100 ký tự.";
+        }
+
+        if (!name.matches("^[\\p{L}\\s]+$")) {
+            return "Tên thể loại chỉ được chứa chữ cái và khoảng trắng, không được chứa số hoặc ký tự đặc biệt.";
+        }
+
+        boolean valid = VALID_GENRES.stream().anyMatch(item -> item.equalsIgnoreCase(name));
+        if (!valid) {
+            return "Tên thể loại không hợp lệ. Vui lòng chọn một thể loại sách phổ biến trong danh sách gợi ý.";
+        }
+
+        return null;
     }
 
     private int parseInt(String value) {
