@@ -52,7 +52,6 @@ public class ChangeEmailController extends HttpServlet {
             return;
         }
 
-        // Email mới không được trùng với bất kỳ tài khoản nào khác (Customer lẫn Account)
         CustomerDAO customerDAO = new CustomerDAO();
         AccountDAO accountDAO = new AccountDAO();
         if (customerDAO.isEmailExists(newEmail) || accountDAO.isEmailExists(newEmail)) {
@@ -61,7 +60,6 @@ public class ChangeEmailController extends HttpServlet {
             return;
         }
 
-        // Chống spam: nếu vừa gửi OTP đổi email gần đây thì bắt chờ
         Long lastSentAt = (Long) session.getAttribute("otp_resend_at");
         String currentFlow = (String) session.getAttribute("otp_flow");
         long now = System.currentTimeMillis();
@@ -76,7 +74,7 @@ public class ChangeEmailController extends HttpServlet {
         String otp = String.format("%06d", new Random().nextInt(999999));
 
         session.setAttribute("otp_code", otp);
-        session.setAttribute("otp_email", newEmail);          // email MỚI, nơi OTP được gửi tới
+        session.setAttribute("otp_email", newEmail);         
         session.setAttribute("otp_created", now);
         session.setAttribute("otp_resend_at", now);
         session.setAttribute("otp_flow", "change_email");
