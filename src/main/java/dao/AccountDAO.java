@@ -170,12 +170,26 @@ public class AccountDAO {
         return null;
     }
 
+    // Cập nhật email sau khi đã xác thực OTP thành công (dùng cho cả staff và admin)
+    public boolean updateEmail(int id, String newEmail) {
+        String sql = "UPDATE Account SET email = ? WHERE accountID = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newEmail);
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     /**
-     * Kiểm tra email có phải tài khoản staff/admin (chỉ bảng Account) hay không.
-     * Khác với {@link #isEmailExists(String)} ở chỗ KHÔNG kiểm tra luôn bảng Customer —
-     * dùng để phân biệt "email này thuộc staff/admin" trước khi cho phép đăng nhập Google
-     * (chỉ dành cho customer). Nếu dùng isEmailExists() ở đây, một customer bình thường
-     * (email đã tồn tại trong bảng Customer) sẽ bị chặn nhầm là "không hỗ trợ Google".
+     * Kiểm tra email có phải tài khoản staff/admin (chỉ bảng Account) hay
+     * không. Khác với {@link #isEmailExists(String)} ở chỗ KHÔNG kiểm tra luôn
+     * bảng Customer — dùng để phân biệt "email này thuộc staff/admin" trước khi
+     * cho phép đăng nhập Google (chỉ dành cho customer). Nếu dùng
+     * isEmailExists() ở đây, một customer bình thường (email đã tồn tại trong
+     * bảng Customer) sẽ bị chặn nhầm là "không hỗ trợ Google".
      */
     public boolean isStaffEmailExists(String email) {
         String sql = "SELECT 1 FROM Account WHERE email = ?";
@@ -288,7 +302,6 @@ public class AccountDAO {
         }
         return false;
     }
-
 
     public boolean resetPasswordByEmail(String email, String newPassword) {
         String sql = "UPDATE Account SET password = ? WHERE email = ?";
