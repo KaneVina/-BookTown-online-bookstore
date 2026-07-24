@@ -25,6 +25,16 @@
         <servlet-name>OtpController</servlet-name>
         <servlet-class>controller.OtpController</servlet-class>
     </servlet>
+    <!-- BỔ SUNG: trước đây thiếu, gây lỗi 404 khi truy cập /forgot-password -->
+    <servlet>
+        <servlet-name>ForgotPasswordController</servlet-name>
+        <servlet-class>controller.ForgotPasswordController</servlet-class>
+    </servlet>
+    <!-- BỔ SUNG: trước đây thiếu, sẽ gây lỗi 404 khi truy cập /reset-password -->
+    <servlet>
+        <servlet-name>ResetPasswordController</servlet-name>
+        <servlet-class>controller.ResetPasswordController</servlet-class>
+    </servlet>
     <servlet>
         <servlet-name>ProfileController</servlet-name>
         <servlet-class>controller.ProfileController</servlet-class>
@@ -131,6 +141,7 @@
         <servlet-name>GoogleCallbackController</servlet-name>
         <servlet-class>controller.GoogleCallbackController</servlet-class>
     </servlet>
+
     <servlet-mapping>
         <servlet-name>LoginController</servlet-name>
         <url-pattern>/login</url-pattern>
@@ -139,9 +150,11 @@
         <servlet-name>HomeController</servlet-name>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
+
     <welcome-file-list>
         <welcome-file>home</welcome-file>
     </welcome-file-list>
+
     <servlet-mapping>
         <servlet-name>RegisterController</servlet-name>
         <url-pattern>/register</url-pattern>
@@ -149,6 +162,14 @@
     <servlet-mapping>
         <servlet-name>OtpController</servlet-name>
         <url-pattern>/otp</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ForgotPasswordController</servlet-name>
+        <url-pattern>/forgot-password</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ResetPasswordController</servlet-name>
+        <url-pattern>/reset-password</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ProfileController</servlet-name>

@@ -121,28 +121,26 @@ public class CustomerDAO {
         return null;
     }
 
+    // Đồng nhất với AccountDAO.changePassword(): thực hiện trong một câu UPDATE
+    // duy nhất kèm điều kiện password cũ, tránh phải SELECT rồi so sánh riêng.
     public boolean changePassword(
             int customerId,
             String currentPassword,
             String newPassword) {
 
-        String checkSql = "SELECT password " + "FROM Customer " + "WHERE customerID = ?";
-        String updateSql = "UPDATE Customer " + "SET password = ? " + "WHERE customerID = ?";
+        String sql = "UPDATE Customer "
+                + "SET password = ? "
+                + "WHERE customerID = ? "
+                + "AND password = ?";
 
-        try (Connection conn = new DBContext().getConnection()) {
-            PreparedStatement ps = conn.prepareStatement(checkSql);
-            ps.setInt(1, customerId);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                String oldPassword = rs.getString("password");
-                if (!oldPassword.equals(HashMD5.hash(currentPassword))) {
-                    return false;
-                }
-                PreparedStatement update = conn.prepareStatement(updateSql);
-                update.setString(1, HashMD5.hash(newPassword));
-                update.setInt(2, customerId);
-                return update.executeUpdate() > 0;
-            }
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, HashMD5.hash(newPassword));
+            ps.setInt(2, customerId);
+            ps.setString(3, HashMD5.hash(currentPassword));
+
+            return ps.executeUpdate() > 0;
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -169,7 +167,17 @@ public class CustomerDAO {
         return list;
     }
 
+    // Các giá trị status hợp lệ cho Customer. Kiểm tra ở đây để phòng trường hợp
+    // Controller gọi hàm này chưa validate (defense in depth).
+    private static final java.util.Set<String> VALID_CUSTOMER_STATUSES
+            = java.util.Set.of("active", "inactive");
+
     public boolean toggleCustomerStatus(int customerID, String status) {
+
+        if (status == null || !VALID_CUSTOMER_STATUSES.contains(status.toLowerCase())) {
+            System.out.println("toggleCustomerStatus: status không hợp lệ = " + status);
+            return false;
+        }
 
         String sql = "UPDATE Customer SET status = ? WHERE customerID = ?";
 

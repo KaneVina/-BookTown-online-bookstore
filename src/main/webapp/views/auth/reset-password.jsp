@@ -170,7 +170,7 @@
                             Mật khẩu 8–15 ký tự, gồm chữ hoa, chữ thường và số.
                         </p>
 
-                        <button type="submit" id="submitBtn"
+                        <button type="button" id="submitBtn"
                                 class="w-full h-14 bg-primary text-on-primary font-headline-sm text-headline-sm rounded-lg shadow-md hover:bg-primary-container active:scale-[0.98] transition-all flex items-center justify-center gap-2">
                             <span class="material-symbols-outlined">check_circle</span>
                             Xác nhận đặt lại
@@ -179,6 +179,31 @@
                 </div>
             </div>
         </main>
+
+        <%-- Modal xác nhận trước khi đổi mật khẩu (thao tác quan trọng) --%>
+        <div id="confirmModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4" style="background:rgba(7,30,39,0.5)">
+            <div class="bg-surface rounded-xl p-stack-lg max-w-sm w-full shadow-xl animate-fade-in">
+                <div class="flex justify-center mb-4">
+                    <div class="w-14 h-14 bg-primary-container rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-2xl text-on-primary">warning</span>
+                    </div>
+                </div>
+                <h2 class="font-headline-sm text-headline-sm text-on-surface text-center mb-2">Xác nhận đặt lại mật khẩu</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant text-center mb-stack-md">
+                    Sau khi xác nhận, mật khẩu hiện tại sẽ không còn dùng được. Bạn chắc chắn muốn tiếp tục?
+                </p>
+                <div class="flex gap-3">
+                    <button type="button" id="cancelConfirmBtn"
+                            class="flex-1 h-12 rounded-lg border border-outline-variant font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low transition-all">
+                        Hủy
+                    </button>
+                    <button type="button" id="proceedConfirmBtn"
+                            class="flex-1 h-12 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all">
+                        Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <footer class="flex flex-col md:flex-row justify-between items-center w-full px-4 md:px-margin-desktop py-stack-md gap-4 bg-surface-container-low mt-auto">
             <img src="${pageContext.request.contextPath}/assets/images/logo/logoBT_2.png" alt="BookTown Logo" class="w-[220px] mb-3"/>
@@ -252,21 +277,43 @@
             }
             confirmInput.addEventListener('input', checkMatch);
 
-            // Submit loading state
-            document.getElementById('resetForm').addEventListener('submit', function (e) {
+            // Bấm "Xác nhận đặt lại" → validate rồi hiện modal xác nhận (thao tác quan trọng)
+            const resetForm     = document.getElementById('resetForm');
+            const confirmModal  = document.getElementById('confirmModal');
+            const cancelBtn     = document.getElementById('cancelConfirmBtn');
+            const proceedBtn    = document.getElementById('proceedConfirmBtn');
+
+            document.getElementById('submitBtn').addEventListener('click', function () {
                 const pw = newPwInput.value;
-                const confirm = confirmInput.value;
-                if (pw !== confirm) {
-                    e.preventDefault();
+                const confirmVal = confirmInput.value;
+
+                if (!pw || !confirmVal) {
+                    matchMsg.textContent = '✗ Vui lòng nhập đầy đủ mật khẩu.';
+                    matchMsg.className = 'font-body-sm text-error';
+                    matchMsg.classList.remove('hidden');
+                    return;
+                }
+                if (pw !== confirmVal) {
                     matchMsg.textContent = '✗ Mật khẩu chưa khớp';
                     matchMsg.className = 'font-body-sm text-error';
+                    matchMsg.classList.remove('hidden');
                     confirmInput.focus();
                     return;
                 }
+                confirmModal.classList.remove('hidden');
+            });
+
+            cancelBtn.addEventListener('click', function () {
+                confirmModal.classList.add('hidden');
+            });
+
+            proceedBtn.addEventListener('click', function () {
+                confirmModal.classList.add('hidden');
                 const btn = document.getElementById('submitBtn');
                 btn.innerHTML = '<span class="material-symbols-outlined" style="animation:spin 1s linear infinite;display:inline-block">sync</span> Đang xử lý...';
                 btn.disabled = true;
                 btn.classList.add('opacity-80');
+                resetForm.submit();
             });
         </script>
     </body>

@@ -90,6 +90,7 @@ public class GoogleCallbackController extends HttpServlet {
 // 6. Tạo session với account thật từ DB
         session.setAttribute("account", acc);
         session.setMaxInactiveInterval(30 * 60);
+        session.setAttribute("successMessage", "Đăng nhập bằng Google thành công! Chào mừng " + acc.getFullname() + ".");
         response.sendRedirect(request.getContextPath() + "/home");
     }
 
