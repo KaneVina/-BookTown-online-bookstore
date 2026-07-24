@@ -12,13 +12,6 @@ import java.io.IOException;
 import java.util.Random;
 import model.Account;
 
-/**
- * Xử lý bước đầu tiên của luồng đổi email: nhận email mới từ form profile
- * (cả customer lẫn admin/staff dùng chung), kiểm tra hợp lệ, sinh OTP và gửi
- * OTP đến ĐỊA CHỈ EMAIL MỚI để xác minh quyền sở hữu hộp thư trước khi lưu
- * xuống DB. Việc xác thực OTP thực sự được xử lý ở OtpController (flow
- * "change_email") để tái sử dụng hạ tầng OTP đã có sẵn.
- */
 public class ChangeEmailController extends HttpServlet {
 
     private static final long RESEND_COOLDOWN_MS = 60 * 1000L;

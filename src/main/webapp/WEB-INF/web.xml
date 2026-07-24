@@ -271,7 +271,7 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ChangeEmailController</servlet-name>
-        <url-pattern>/ChangeEmailController</url-pattern>
+        <url-pattern>/profile/change-email</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout> 30 </session-timeout>

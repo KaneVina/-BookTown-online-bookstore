@@ -135,8 +135,6 @@
     </head>
 
     <body class="bg-background text-on-background min-h-screen flex flex-col">
-
-        <%-- Header --%>
         <header class="w-full px-4 md:px-margin-desktop h-16 flex items-center justify-between bg-transparent">
             <div class="font-bold text-primary">
                 <img src="${pageContext.request.contextPath}/assets/images/logo/logoBT_2.png" alt="BookTown Logo" class="w-[220px] mb-3"/>
@@ -240,8 +238,6 @@
                 </div>
             </div>
         </main>
-
-        <%-- Footer --%>
         <footer class="flex flex-col md:flex-row justify-between items-center w-full px-4 md:px-margin-desktop py-stack-md gap-4 bg-surface-container-low mt-auto">
             <img src="${pageContext.request.contextPath}/assets/images/logo/logoBT_2.png" alt="BookTown Logo" class="w-[220px] mb-3"/>
             <div class="flex gap-6 text-on-surface-variant">
@@ -261,8 +257,6 @@
             const resendWrap = document.getElementById('resend-wrapper');
             const resendLink = document.getElementById('resend-link');
             const resendForm = document.getElementById('resend-form');
-
-            // ===== OTP BOX =====
             inputs.forEach((input, i) => {
                 input.addEventListener('input', (e) => {
                     const val = e.target.value.replace(/\D/g, '');
@@ -300,8 +294,6 @@
                 otpHidden.value = val;
                 inputs.forEach(b => b.classList.toggle('filled', b.value !== ''));
             }
-
-            // ===== ĐẾM NGƯỢC =====
             let timerInterval;
             function startTimer(totalSec) {
                 clearInterval(timerInterval);
@@ -321,14 +313,11 @@
                 }, 1000);
             }
             startTimer(300);
-
-            // ===== RESEND =====
             resendLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 resendForm.submit();
             });
 
-            // ===== SUBMIT =====
             document.getElementById('otp-form').addEventListener('submit', (e) => {
                 const otpCode = [...inputs].map(i => i.value).join('');
                 if (otpCode.length < 6) {
