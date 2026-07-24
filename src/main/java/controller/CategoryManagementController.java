@@ -10,24 +10,12 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Set;
 import model.Account;
 import model.Genre;
 
 public class CategoryManagementController extends HttpServlet {
-// category
-    private final GenreDAO genreDAO = new GenreDAO();
 
-    private static final Set<String> VALID_GENRES = Set.of(
-            "Văn học", "Tiểu thuyết", "Truyện ngắn", "Thơ", "Trinh thám",
-            "Kinh dị", "Phiêu lưu", "Khoa học viễn tưởng", "Ngôn tình",
-            "Thiếu nhi", "Truyện tranh", "Giáo dục", "Tham khảo",
-            "Ngoại ngữ", "Kinh tế", "Kinh doanh", "Tài chính", "Marketing",
-            "Quản trị", "Công nghệ", "Tin học", "Khoa học", "Lịch sử",
-            "Địa lý", "Chính trị", "Pháp luật", "Tâm lý", "Kỹ năng sống",
-            "Phát triển bản thân", "Sức khỏe", "Y học", "Ẩm thực", "Du lịch",
-            "Nghệ thuật", "Âm nhạc", "Tôn giáo", "Triết học"
-    );
+    private final GenreDAO genreDAO = new GenreDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -42,42 +30,59 @@ public class CategoryManagementController extends HttpServlet {
 
         if ("create".equals(action)) {
             if (!canManageCategory) {
-                response.sendRedirect(request.getContextPath() + "/dashboard/category-management?error=" + encode("Bạn không có quyền thêm thể loại."));
+                response.sendRedirect(request.getContextPath()
+                        + "/dashboard/category-management?error="
+                        + encode("Bạn không có quyền thêm thể loại."));
                 return;
             }
+
             request.setAttribute("pageTitle", "Thêm thể loại");
             request.setAttribute("formAction", "create");
-            request.getRequestDispatcher("/views/category/form.jsp").forward(request, response);
+            request.getRequestDispatcher("/views/category/form.jsp")
+                    .forward(request, response);
             return;
         }
 
         if ("edit".equals(action)) {
             if (!canManageCategory) {
-                response.sendRedirect(request.getContextPath() + "/dashboard/category-management?error=" + encode("Bạn không có quyền cập nhật thể loại."));
+                response.sendRedirect(request.getContextPath()
+                        + "/dashboard/category-management?error="
+                        + encode("Bạn không có quyền cập nhật thể loại."));
                 return;
             }
+
             int id = parseInt(request.getParameter("id"));
             Genre genre = genreDAO.getGenreById(id);
+
             if (genre == null) {
-                response.sendRedirect(request.getContextPath() + "/dashboard/category-management?error=" + encode("Không tìm thấy thể loại."));
+                response.sendRedirect(request.getContextPath()
+                        + "/dashboard/category-management?error="
+                        + encode("Không tìm thấy thể loại."));
                 return;
             }
+
             request.setAttribute("genre", genre);
             request.setAttribute("pageTitle", "Cập nhật thể loại");
             request.setAttribute("formAction", "update");
-            request.getRequestDispatcher("/views/category/form.jsp").forward(request, response);
+            request.getRequestDispatcher("/views/category/form.jsp")
+                    .forward(request, response);
             return;
         }
 
         if ("detail".equals(action)) {
             int id = parseInt(request.getParameter("id"));
             Genre genre = genreDAO.getGenreById(id);
+
             if (genre == null) {
-                response.sendRedirect(request.getContextPath() + "/dashboard/category-management?error=" + encode("Không tìm thấy thể loại."));
+                response.sendRedirect(request.getContextPath()
+                        + "/dashboard/category-management?error="
+                        + encode("Không tìm thấy thể loại."));
                 return;
             }
+
             request.setAttribute("genre", genre);
-            request.getRequestDispatcher("/views/category/detail.jsp").forward(request, response);
+            request.getRequestDispatcher("/views/category/detail.jsp")
+                    .forward(request, response);
             return;
         }
 
@@ -89,7 +94,8 @@ public class CategoryManagementController extends HttpServlet {
         request.setAttribute("genres", genres);
         request.setAttribute("keyword", keyword);
         request.setAttribute("totalCategories", genres.size());
-        request.getRequestDispatcher("/views/category/list.jsp").forward(request, response);
+        request.getRequestDispatcher("/views/category/list.jsp")
+                .forward(request, response);
     }
 
     @Override
@@ -100,36 +106,39 @@ public class CategoryManagementController extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         String action = request.getParameter("action");
-        String redirectUrl = request.getContextPath() + "/dashboard/category-management";
+        String redirectUrl = request.getContextPath()
+                + "/dashboard/category-management";
 
         if (!canManageCategory(request)) {
-            response.sendRedirect(redirectUrl + "?error=" + encode("Bạn không có quyền thực hiện thao tác này."));
+            response.sendRedirect(redirectUrl
+                    + "?error="
+                    + encode("Bạn không có quyền thực hiện thao tác này."));
             return;
         }
 
         if ("create".equals(action)) {
             String name = clean(request.getParameter("genre_name"));
 
-            if (name.isEmpty()) {
-                response.sendRedirect(redirectUrl + "?error=" + encode("Tên thể loại không được để trống."));
-                return;
-            }
-
             String validationError = validateGenreName(name);
             if (validationError != null) {
-                response.sendRedirect(redirectUrl + "?action=create&error=" + encode(validationError));
+                response.sendRedirect(redirectUrl
+                        + "?action=create&error="
+                        + encode(validationError));
                 return;
             }
 
             if (genreDAO.isGenreNameExists(name)) {
-                response.sendRedirect(redirectUrl + "?error=" + encode("Tên thể loại đã tồn tại."));
+                response.sendRedirect(redirectUrl
+                        + "?action=create&error="
+                        + encode("Tên thể loại đã tồn tại."));
                 return;
             }
 
             boolean success = genreDAO.insertGenre(name);
             response.sendRedirect(redirectUrl + (success
                     ? "?success=" + encode("Thêm thể loại thành công.")
-                    : "?error=" + encode("Không thể thêm thể loại.")));
+                    : "?action=create&error="
+                    + encode("Không thể thêm thể loại.")));
             return;
         }
 
@@ -138,34 +147,39 @@ public class CategoryManagementController extends HttpServlet {
             String name = clean(request.getParameter("genre_name"));
 
             if (id <= 0) {
-                response.sendRedirect(redirectUrl + "?error=" + encode("Mã thể loại không hợp lệ."));
-                return;
-            }
-
-            if (name.isEmpty()) {
-                response.sendRedirect(redirectUrl + "?error=" + encode("Tên thể loại không được để trống."));
+                response.sendRedirect(redirectUrl
+                        + "?error="
+                        + encode("Mã thể loại không hợp lệ."));
                 return;
             }
 
             String validationError = validateGenreName(name);
             if (validationError != null) {
-                response.sendRedirect(redirectUrl + "?action=detail&id=" + id
+                response.sendRedirect(redirectUrl
+                        + "?action=detail&id=" + id
                         + "&error=" + encode(validationError));
                 return;
             }
 
             if (genreDAO.isGenreNameExists(name, id)) {
-                response.sendRedirect(redirectUrl + "?error=" + encode("Tên thể loại đã tồn tại."));
+                response.sendRedirect(redirectUrl
+                        + "?action=detail&id=" + id
+                        + "&error=" + encode("Tên thể loại đã tồn tại."));
                 return;
             }
 
             boolean success = genreDAO.updateGenre(id, name);
+
             if (success) {
-                response.sendRedirect(redirectUrl + "?action=detail&id=" + id
-                        + "&success=" + encode("Cập nhật thể loại thành công."));
+                response.sendRedirect(redirectUrl
+                        + "?action=detail&id=" + id
+                        + "&success="
+                        + encode("Cập nhật thể loại thành công."));
             } else {
-                response.sendRedirect(redirectUrl + "?action=detail&id=" + id
-                        + "&error=" + encode("Không thể cập nhật thể loại."));
+                response.sendRedirect(redirectUrl
+                        + "?action=detail&id=" + id
+                        + "&error="
+                        + encode("Không thể cập nhật thể loại."));
             }
             return;
         }
@@ -174,13 +188,17 @@ public class CategoryManagementController extends HttpServlet {
             int id = parseInt(request.getParameter("id"));
 
             if (id <= 0) {
-                response.sendRedirect(redirectUrl + "?error=" + encode("Mã thể loại không hợp lệ."));
+                response.sendRedirect(redirectUrl
+                        + "?error="
+                        + encode("Mã thể loại không hợp lệ."));
                 return;
             }
 
             int bookCount = genreDAO.countBooksByGenre(id);
             if (bookCount > 0) {
-                response.sendRedirect(redirectUrl + "?error=" + encode("Không thể xóa thể loại đang có sách."));
+                response.sendRedirect(redirectUrl
+                        + "?error="
+                        + encode("Không thể xóa thể loại đang có sách."));
                 return;
             }
 
@@ -196,29 +214,32 @@ public class CategoryManagementController extends HttpServlet {
 
     private boolean canManageCategory(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
+
         if (session == null) {
             return false;
         }
+
         Account account = (Account) session.getAttribute("account");
+
         if (account == null || account.getRole() == null) {
             return false;
         }
+
         String role = account.getRole().trim().toLowerCase();
         return "staff".equals(role) || "admin".equals(role);
     }
 
     private String validateGenreName(String name) {
+        if (name == null || name.isEmpty()) {
+            return "Tên thể loại không được để trống.";
+        }
+
         if (name.length() > 100) {
             return "Tên thể loại không được vượt quá 100 ký tự.";
         }
 
         if (!name.matches("^[\\p{L}\\s]+$")) {
             return "Tên thể loại chỉ được chứa chữ cái và khoảng trắng, không được chứa số hoặc ký tự đặc biệt.";
-        }
-
-        boolean valid = VALID_GENRES.stream().anyMatch(item -> item.equalsIgnoreCase(name));
-        if (!valid) {
-            return "Tên thể loại không hợp lệ. Vui lòng chọn một thể loại sách phổ biến trong danh sách gợi ý.";
         }
 
         return null;
