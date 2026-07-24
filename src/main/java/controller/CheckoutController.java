@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class CheckoutController extends HttpServlet {
@@ -156,6 +157,11 @@ public class CheckoutController extends HttpServlet {
 
         if ("removeVoucher".equals(action)) {
             handleRemoveVoucher(request, response);
+            return;
+        }
+
+        if ("listVouchers".equals(action)) {
+            handleListVouchers(request, response);
             return;
         }
 
@@ -520,6 +526,35 @@ public class CheckoutController extends HttpServlet {
         }
 
         response.getWriter().write("{\"success\":true}");
+    }
+
+    /** AJAX: trả về danh sách voucher đang khả dụng để hiển thị modal "Voucher của Shop". */
+    private void handleListVouchers(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        response.setContentType("application/json;charset=UTF-8");
+
+        VoucherDAO voucherDAO = new VoucherDAO();
+        List<Voucher> vouchers = voucherDAO.getActiveVouchers();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+
+        StringBuilder json = new StringBuilder("{\"success\":true,\"vouchers\":[");
+        for (int i = 0; i < vouchers.size(); i++) {
+            Voucher v = vouchers.get(i);
+            if (i > 0) json.append(",");
+            json.append("{")
+                .append("\"code\":\"").append(escapeJson(v.getCode())).append("\",")
+                .append("\"discountPercent\":").append(v.getDiscountPercent()).append(",")
+                .append("\"minOrderValue\":")
+                    .append(v.getMinOrderValue() == null ? "null" : v.getMinOrderValue()).append(",")
+                .append("\"maxDiscountValue\":")
+                    .append(v.getMaxDiscountValue() == null ? "null" : v.getMaxDiscountValue()).append(",")
+                .append("\"endDate\":\"")
+                    .append(v.getEndDate() == null ? "" : sdf.format(v.getEndDate())).append("\"")
+                .append("}");
+        }
+        json.append("]}");
+
+        response.getWriter().write(json.toString());
     }
 
     private String escapeJson(String s) {

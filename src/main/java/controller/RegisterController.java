@@ -78,6 +78,13 @@ public class RegisterController extends HttpServlet {
         // Kiểm tra không được bỏ trống
         if (fullname == null || fullname.isEmpty())
             return "Họ và tên không được để trống.";
+
+        // Họ và tên phải có ít nhất 2 từ (vd: "Nguyễn Văn A"), không chứa số/ký tự đặc biệt
+        String[] nameParts = fullname.trim().split("\\s+");
+        if (nameParts.length < 2)
+            return "Vui lòng nhập đầy đủ họ và tên (tối thiểu 2 từ).";
+        if (!fullname.matches("^[\\p{L}\\s]+$"))
+            return "Họ và tên không được chứa số hoặc ký tự đặc biệt.";
         if (email == null || email.isEmpty())
             return "Email không được để trống.";
         if (phone == null || phone.isEmpty())
@@ -87,8 +94,8 @@ public class RegisterController extends HttpServlet {
         if (confirmPassword == null || confirmPassword.isEmpty())
             return "Xác nhận mật khẩu không được để trống.";
 
-        // Kiểm tra định dạng email
-        if (!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))
+        // Kiểm tra định dạng email (hỗ trợ cả tên miền phụ, vd: mail.co.uk)
+        if (!email.matches("^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)*\\.[a-zA-Z]{2,}$"))
             return "Định dạng email không hợp lệ.";
 
         // Kiểm tra định dạng số điện thoại Việt Nam

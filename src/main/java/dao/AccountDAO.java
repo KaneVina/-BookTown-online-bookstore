@@ -81,8 +81,17 @@ public class AccountDAO {
         return list;
     }
 
+    // Các giá trị status hợp lệ cho Account (staff/admin). Kiểm tra ở đây để
+    // phòng trường hợp Controller gọi hàm này chưa validate (defense in depth).
+    private static final java.util.Set<String> VALID_ACCOUNT_STATUSES
+            = java.util.Set.of("active", "inactive");
+
     // cập nhật trạng thái của staff 
     public boolean toggleStaffStatus(int accountID, String status) {
+        if (status == null || !VALID_ACCOUNT_STATUSES.contains(status.toLowerCase())) {
+            System.out.println("toggleStaffStatus: status không hợp lệ = " + status);
+            return false;
+        }
         String sql = "UPDATE Account SET status = ? WHERE accountID = ?";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);

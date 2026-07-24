@@ -36,6 +36,14 @@ public class ForgotPasswordController extends HttpServlet {
 
         email = email.trim().toLowerCase();
 
+        // Kiểm tra định dạng email (hỗ trợ cả tên miền phụ, vd: mail.co.uk)
+        if (!email.matches("^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)*\\.[a-zA-Z]{2,}$")) {
+            request.setAttribute("errorMessage", "Định dạng email không hợp lệ.");
+            request.setAttribute("enteredEmail", email);
+            request.getRequestDispatcher("/views/auth/forgot-password.jsp").forward(request, response);
+            return;
+        }
+
         // Kiểm tra email có tồn tại trong hệ thống không (Customer hoặc Account/Staff)
         CustomerDAO customerDAO = new CustomerDAO();
         AccountDAO  accountDAO  = new AccountDAO();

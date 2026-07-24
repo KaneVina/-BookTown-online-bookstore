@@ -156,11 +156,13 @@
         </a>
         <% } %>
 
+        <% if (isStaffUser) { %>
         <a href="${pageContext.request.contextPath}/category"
            class="sidebar-link <%= currentPage.contains("/category") ? "active" : ""%>">
             <span class="material-symbols-outlined">category</span>
             Thể loại
         </a>
+        <% } %>
 
         <a href="${pageContext.request.contextPath}/dashboard/account-management"
            class="sidebar-link <%= currentPage.contains("account-management") ? "active" : ""%>">
@@ -174,11 +176,13 @@
             Đánh giá
         </a>
 
+        <% if (isStaffUser) { %>
         <a href="${pageContext.request.contextPath}/dashboard/voucher-management"
            class="sidebar-link <%= currentPage.contains("voucher") ? "active" : ""%>">
             <span class="material-symbols-outlined">sell</span>
             Voucher
         </a>
+        <% } %>
 
     </nav>
 

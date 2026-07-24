@@ -65,7 +65,9 @@
                             "success": "#2E7D32",
                             "outline-variant": "#c2c6d4",
                             "on-secondary-container": "#705e00",
-                            "error-container": "#ffdad6"
+                            "error-container": "#ffdad6",
+                            "success-container": "#E8F5E9",
+                            "on-success-container": "#1B5E20"
                         },
                         "borderRadius": {
                             "DEFAULT": "0.25rem",
@@ -167,6 +169,15 @@
                             <span class="material-symbols-outlined text-error">error</span>
                             <span>${errorMessage}</span>
                         </div>
+                    </c:if>
+
+                    <%-- Thông báo thành công (đăng ký / đặt lại mật khẩu thành công) --%>
+                    <c:if test="${not empty sessionScope.register_success}">
+                        <div class="mb-4 p-4 bg-success-container text-on-success-container border-l-4 border-success font-body-sm text-body-sm rounded-lg flex items-center gap-2">
+                            <span class="material-symbols-outlined text-success">check_circle</span>
+                            <span>${sessionScope.register_success}</span>
+                        </div>
+                        <% session.removeAttribute("register_success"); %>
                     </c:if>
 
                     <form class="space-y-stack-md" action="${pageContext.request.contextPath}/login" method="POST">
