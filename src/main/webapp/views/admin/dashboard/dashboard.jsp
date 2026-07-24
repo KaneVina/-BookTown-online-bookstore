@@ -54,6 +54,7 @@
         </style>
     </head>
     <body class="bg-background text-on-surface flex min-h-screen">
+        <%@ include file="/views/layout/common/toast.jsp" %>
         <%@ include file="/views/layout/dashboard/sidebar.jsp" %>
 
         <main class="flex-1 md:ml-64 min-h-screen">

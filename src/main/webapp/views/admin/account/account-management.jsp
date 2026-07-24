@@ -104,11 +104,13 @@
             </header>
             <div class="p-6 md:p-8 ">
                 <div class="flex flex-col md:flex-row justify-end items-end gap-4 mb-6">
-                    <a href="${pageContext.request.contextPath}/dashboard/add-staff"
-                       class="bg-primary text-white px-6 py-3 rounded-xl inline-flex items-center gap-2 hover:opacity-90 transition">
-                        <span class="material-symbols-outlined">person_add</span>
-                        Thêm tài khoản nhân viên
-                    </a>
+                    <c:if test="${sessionScope.account.role == 'admin'}">
+                        <a href="${pageContext.request.contextPath}/dashboard/add-staff"
+                           class="bg-primary text-white px-6 py-3 rounded-xl inline-flex items-center gap-2 hover:opacity-90 transition">
+                            <span class="material-symbols-outlined">person_add</span>
+                            Thêm tài khoản nhân viên
+                        </a>
+                    </c:if>
                 </div>
 
                 <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">

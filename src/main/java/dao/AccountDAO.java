@@ -1,32 +1,18 @@
 package dao;
 
 import utils.DBContext;
+import utils.HashMD5;
 import model.Account;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AccountDAO {
 
-    private String hashMD5(String input) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] bytes = md.digest(input.getBytes("UTF-8"));
-            StringBuilder sb = new StringBuilder();
-            for (byte b : bytes) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (Exception e) {
-            return input;
-        }
-    }
-
     public Account checkLogin(String email, String password) {
-        String hashedPassword = hashMD5(password);
+        String hashedPassword = HashMD5.hash(password);
         DBContext db = new DBContext();
 
         // Kiểm tra bảng Customer
@@ -95,8 +81,17 @@ public class AccountDAO {
         return list;
     }
 
+    // Các giá trị status hợp lệ cho Account (staff/admin). Kiểm tra ở đây để
+    // phòng trường hợp Controller gọi hàm này chưa validate (defense in depth).
+    private static final java.util.Set<String> VALID_ACCOUNT_STATUSES
+            = java.util.Set.of("active", "inactive");
+
     // cập nhật trạng thái của staff 
     public boolean toggleStaffStatus(int accountID, String status) {
+        if (status == null || !VALID_ACCOUNT_STATUSES.contains(status.toLowerCase())) {
+            System.out.println("toggleStaffStatus: status không hợp lệ = " + status);
+            return false;
+        }
         String sql = "UPDATE Account SET status = ? WHERE accountID = ?";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
@@ -175,6 +170,26 @@ public class AccountDAO {
         return null;
     }
 
+    /**
+     * Kiểm tra email có phải tài khoản staff/admin (chỉ bảng Account) hay không.
+     * Khác với {@link #isEmailExists(String)} ở chỗ KHÔNG kiểm tra luôn bảng Customer —
+     * dùng để phân biệt "email này thuộc staff/admin" trước khi cho phép đăng nhập Google
+     * (chỉ dành cho customer). Nếu dùng isEmailExists() ở đây, một customer bình thường
+     * (email đã tồn tại trong bảng Customer) sẽ bị chặn nhầm là "không hỗ trợ Google".
+     */
+    public boolean isStaffEmailExists(String email) {
+        String sql = "SELECT 1 FROM Account WHERE email = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public boolean isEmailExists(String email) {
         String sql1 = "SELECT 1 FROM Account WHERE email = ?";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql1)) {
@@ -210,7 +225,7 @@ public class AccountDAO {
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, fullname);
             ps.setString(2, email);
-            ps.setString(3, hashMD5(password));
+            ps.setString(3, HashMD5.hash(password));
             ps.setString(4, phone);
             ps.setString(5, role);
             ps.setString(6, status);
@@ -278,7 +293,7 @@ public class AccountDAO {
     public boolean resetPasswordByEmail(String email, String newPassword) {
         String sql = "UPDATE Account SET password = ? WHERE email = ?";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, hashMD5(newPassword));
+            ps.setString(1, HashMD5.hash(newPassword));
             ps.setString(2, email);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
@@ -301,9 +316,9 @@ public class AccountDAO {
         try (
                 Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, hashMD5(newPassword));
+            ps.setString(1, HashMD5.hash(newPassword));
             ps.setInt(2, accountId);
-            ps.setString(3, hashMD5(currentPassword));
+            ps.setString(3, HashMD5.hash(currentPassword));
 
             return ps.executeUpdate() > 0;
 

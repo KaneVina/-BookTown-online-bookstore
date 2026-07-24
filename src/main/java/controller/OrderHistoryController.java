@@ -138,22 +138,27 @@ public class OrderHistoryController extends HttpServlet {
         }
         cancelReason = cancelReason.trim();
 
+        String redirectTarget = request.getParameter("redirect");
+        String redirectUrl = "list".equalsIgnoreCase(redirectTarget)
+                ? request.getContextPath() + "/profile/order-history"
+                : request.getContextPath() + "/profile/order-history?action=detail&orderID=" + orderID;
+
         if (cancelReason.isEmpty()) {
             HttpSession session = request.getSession();
             session.setAttribute("errorMessage", "Vui lòng nhập lý do hủy đơn.");
-            response.sendRedirect(request.getContextPath() + "/profile/order-history?action=detail&orderID=" + orderID);
+            response.sendRedirect(redirectUrl);
             return;
         }
         if (cancelReason.length() < 10 || cancelReason.length() > 50) {
             HttpSession session = request.getSession();
             session.setAttribute("errorMessage", "Lý do hủy phải từ 10 đến 50 ký tự.");
-            response.sendRedirect(request.getContextPath() + "/profile/order-history?action=detail&orderID=" + orderID);
+            response.sendRedirect(redirectUrl);
             return;
         }
         if (!cancelReason.matches(".*\\p{L}.*")) {
             HttpSession session = request.getSession();
             session.setAttribute("errorMessage", "Lý do hủy phải chứa ít nhất 1 chữ cái.");
-            response.sendRedirect(request.getContextPath() + "/profile/order-history?action=detail&orderID=" + orderID);
+            response.sendRedirect(redirectUrl);
             return;
         }
 
@@ -200,7 +205,7 @@ public class OrderHistoryController extends HttpServlet {
             session.setAttribute("errorMessage", "Không thể hủy đơn hàng này (đơn đã được xử lý).");
         }
 
-        response.sendRedirect(request.getContextPath() + "/profile/order-history?action=detail&orderID=" + orderID);
+        response.sendRedirect(redirectUrl);
     }
 
     private boolean isCustomer(HttpServletRequest request, HttpServletResponse response)

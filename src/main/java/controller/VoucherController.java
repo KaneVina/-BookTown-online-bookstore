@@ -302,15 +302,17 @@ public class VoucherController extends HttpServlet {
     // ---------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------
+    /**
+     * Route /dashboard/voucher-management đã được AuthFilter bảo vệ bằng whitelist
+     * ("admin"/"staff" mới được vào). Ở đây chỉ kiểm tra session tồn tại như một lớp
+     * phòng thủ cuối (defense in depth), KHÔNG check lại role để tránh 2 nơi check
+     * theo 2 kiểu khác nhau (blacklist vs whitelist) dễ lệch pha khi thêm role mới.
+     */
     private boolean hasAccess(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         HttpSession session = request.getSession(false);
-        if (session == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return false;
-        }
-        Account user = (Account) session.getAttribute("account");
-        if (user == null || "customer".equals(user.getRole())) {
+        Account user = session != null ? (Account) session.getAttribute("account") : null;
+        if (user == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return false;
         }

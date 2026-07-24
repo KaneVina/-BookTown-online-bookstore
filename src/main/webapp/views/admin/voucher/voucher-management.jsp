@@ -293,7 +293,7 @@
                                                             <span class="font-medium" style="color:#071e27;">${v.quantity - v.usedCount}</span>
                                                             / ${v.quantity}
                                                         </c:when>
-                                                        <c:otherwise><span class="font-medium">∞</span></c:otherwise>
+                                                        <c:otherwise><span class="font-medium">Không giới hạn</span></c:otherwise>
                                                     </c:choose>
                                                 </td>
 

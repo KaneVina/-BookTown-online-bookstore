@@ -32,4 +32,4 @@ Thumbs.db
 *.bak
 *.class
 *.war
-*_BACKUP_*.xml
+*_BACKUP_*.xmltarget/

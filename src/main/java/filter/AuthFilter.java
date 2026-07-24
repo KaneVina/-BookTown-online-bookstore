@@ -1,9 +1,6 @@
 package filter;
 
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -17,10 +14,9 @@ import jakarta.servlet.http.HttpSession;
 import model.Account;
 
 /**
- *
  * @author PHUC KHANG
  */
-@WebFilter(filterName = "AuthFilter", urlPatterns = {"/admin/*"})
+@WebFilter(filterName = "AuthFilter", urlPatterns = {"/dashboard/*"})
 public class AuthFilter implements Filter {
 
     private static final boolean debug = true;
@@ -30,110 +26,68 @@ public class AuthFilter implements Filter {
     public AuthFilter() {
     }
 
-    private void doBeforeProcessing(ServletRequest request, ServletResponse response)
-            throws IOException, ServletException {
-        if (debug) {
-            log("AuthFilter:DoBeforeProcessing");
-        }
-    }
-
-    private void doAfterProcessing(ServletRequest request, ServletResponse response)
-            throws IOException, ServletException {
-        if (debug) {
-            log("AuthFilter:DoAfterProcessing");
-        }
-    }
-
+    @Override
     public void doFilter(ServletRequest request, ServletResponse response,
             FilterChain chain)
             throws IOException, ServletException {
+
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
 
-        HttpSession session = req.getSession();
-        Account account = (Account) session.getAttribute("account");
+        // false: không tự tạo session mới nếu chưa có -> tránh session rác
+        HttpSession session = req.getSession(false);
+        Account account = (session != null)
+                ? (Account) session.getAttribute("account")
+                : null;
 
-        if (account == null) {
+        boolean isLoggedIn = account != null;
+        boolean isAuthorized = isLoggedIn
+                && ("admin".equals(account.getRole()) || "staff".equals(account.getRole()));
+
+        if (!isLoggedIn) {
+            // Chưa đăng nhập -> quay về trang login
+            if (debug) {
+                log("AuthFilter: chua dang nhap, redirect ve /login. URI=" + req.getRequestURI());
+            }
             res.sendRedirect(req.getContextPath() + "/login");
-        } else {
-            chain.doFilter(request, response);
+            return;
         }
+
+        if (!isAuthorized) {
+            // Đã đăng nhập nhưng không đủ quyền (chặn cus vào dashboard)
+            if (debug) {
+                log("AuthFilter: khong du quyen (" + account.getRole() + "), redirect ve /home. URI=" + req.getRequestURI());
+            }
+            res.sendRedirect(req.getContextPath() + "/home");
+            return;
+        }
+
+        // chặn tài khoản bị vô hiệu hóa truy cập giữa chừng (session cũ)
+        if ("inactive".equalsIgnoreCase(account.getStatus())) {
+            session.invalidate();
+            res.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
+
+        chain.doFilter(request, response);
     }
 
-    public FilterConfig getFilterConfig() {
-        return (this.filterConfig);
-    }
-
-    public void setFilterConfig(FilterConfig filterConfig) {
-        this.filterConfig = filterConfig;
-    }
-
-    public void destroy() {
-    }
-
+    @Override
     public void init(FilterConfig filterConfig) {
         this.filterConfig = filterConfig;
-        if (filterConfig != null) {
-            if (debug) {
-                log("AuthFilter:Initializing filter");
-            }
+        if (filterConfig != null && debug) {
+            log("AuthFilter: Initializing filter");
         }
     }
 
     @Override
-    public String toString() {
-        if (filterConfig == null) {
-            return ("AuthFilter()");
-        }
-        StringBuffer sb = new StringBuffer("AuthFilter(");
-        sb.append(filterConfig);
-        sb.append(")");
-        return (sb.toString());
-    }
-
-    private void sendProcessingError(Throwable t, ServletResponse response) {
-        String stackTrace = getStackTrace(t);
-
-        if (stackTrace != null && !stackTrace.equals("")) {
-            try {
-                response.setContentType("text/html");
-                PrintStream ps = new PrintStream(response.getOutputStream());
-                PrintWriter pw = new PrintWriter(ps);
-                pw.print("<html>\n<head>\n<title>Error</title>\n</head>\n<body>\n");
-                pw.print("<h1>The resource did not process correctly</h1>\n<pre>\n");
-                pw.print(stackTrace);
-                pw.print("</pre></body>\n</html>");
-                pw.close();
-                ps.close();
-                response.getOutputStream().close();
-            } catch (Exception ex) {
-            }
-        } else {
-            try {
-                PrintStream ps = new PrintStream(response.getOutputStream());
-                t.printStackTrace(ps);
-                ps.close();
-                response.getOutputStream().close();
-            } catch (Exception ex) {
-            }
-        }
-    }
-
-    public static String getStackTrace(Throwable t) {
-        String stackTrace = null;
-        try {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            t.printStackTrace(pw);
-            pw.close();
-            sw.close();
-            stackTrace = sw.getBuffer().toString();
-        } catch (Exception ex) {
-        }
-        return stackTrace;
+    public void destroy() {
+        this.filterConfig = null;
     }
 
     public void log(String msg) {
-        filterConfig.getServletContext().log(msg);
+        if (filterConfig != null) {
+            filterConfig.getServletContext().log(msg);
+        }
     }
 }

@@ -4,6 +4,7 @@ import dao.CartDAO;
 import dao.OrderDAO;
 import dao.AddressDAO;
 import dao.BookDAO;
+import dao.VoucherDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,9 +13,13 @@ import jakarta.servlet.http.HttpSession;
 import model.Account;
 import model.CartItem;
 import model.Address;
+import model.Voucher;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class CheckoutController extends HttpServlet {
@@ -96,6 +101,29 @@ public class CheckoutController extends HttpServlet {
         request.setAttribute("totalQuantity", totalQuantity);
         request.setAttribute("addressList", addressList);
 
+        // Nếu đang có voucher áp dụng trong session, kiểm tra lại còn hợp lệ không
+        // (ví dụ giỏ hàng thay đổi khiến không còn đạt giá trị đơn tối thiểu)
+        HttpSession session = request.getSession();
+        Object voucherIdObj = session.getAttribute(SESSION_VOUCHER_ID);
+        if (voucherIdObj != null) {
+            String code = (String) session.getAttribute(SESSION_VOUCHER_CODE);
+            VoucherDAO voucherDAO = new VoucherDAO();
+            VoucherResult recheck = validateVoucher(code, account.getId(), total, voucherDAO);
+
+            if (recheck.success) {
+                session.setAttribute(SESSION_VOUCHER_DISCOUNT, recheck.discountAmount);
+                request.setAttribute("appliedVoucherCode", recheck.voucher.getCode());
+                request.setAttribute("appliedDiscount", recheck.discountAmount);
+            } else {
+                session.removeAttribute(SESSION_VOUCHER_ID);
+                session.removeAttribute(SESSION_VOUCHER_CODE);
+                session.removeAttribute(SESSION_VOUCHER_DISCOUNT);
+                // Báo cho khách biết lý do voucher bị gỡ, thay vì âm thầm biến mất
+                request.setAttribute("errorMessage",
+                        "Voucher \"" + code + "\" không còn áp dụng được: " + recheck.message);
+            }
+        }
+
         request.getRequestDispatcher("/views/cart/checkout.jsp").forward(request, response);
     }
 
@@ -119,6 +147,21 @@ public class CheckoutController extends HttpServlet {
 
         if ("saveAddress".equals(action)) {
             saveAddressAjax(request, response, account);
+            return;
+        }
+
+        if ("applyVoucher".equals(action)) {
+            handleApplyVoucher(request, response, account);
+            return;
+        }
+
+        if ("removeVoucher".equals(action)) {
+            handleRemoveVoucher(request, response);
+            return;
+        }
+
+        if ("listVouchers".equals(action)) {
+            handleListVouchers(request, response);
             return;
         }
 
@@ -178,6 +221,32 @@ public class CheckoutController extends HttpServlet {
             }
         }
 
+        // --- Áp lại voucher (nếu có) và xác thực lần cuối trước khi trừ tiền ---
+        HttpSession session = request.getSession();
+        Integer appliedVoucherID = (Integer) session.getAttribute(SESSION_VOUCHER_ID);
+        BigDecimal finalTotal = total;
+
+        if (appliedVoucherID != null) {
+            VoucherDAO voucherDAO = new VoucherDAO();
+            String appliedCode = (String) session.getAttribute(SESSION_VOUCHER_CODE);
+            VoucherResult recheck = validateVoucher(appliedCode, account.getId(), total, voucherDAO);
+
+            if (recheck.success) {
+                finalTotal = total.subtract(BigDecimal.valueOf(recheck.discountAmount));
+                if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
+                    finalTotal = BigDecimal.ZERO;
+                }
+            } else {
+                // Voucher không còn hợp lệ tại thời điểm đặt hàng (hết lượt, hết hạn...)
+                appliedVoucherID = null;
+                session.removeAttribute(SESSION_VOUCHER_ID);
+                session.removeAttribute(SESSION_VOUCHER_CODE);
+                session.removeAttribute(SESSION_VOUCHER_DISCOUNT);
+                request.getSession().setAttribute("errorMessage",
+                        "Voucher không còn hợp lệ và đã được gỡ khỏi đơn hàng. Vui lòng kiểm tra lại.");
+            }
+        }
+
         String addressIDRaw = request.getParameter("addressID");
 
         if (isEmpty(addressIDRaw)) {
@@ -212,14 +281,7 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-        if (!bookDAO.deductStockForOrder(cartItems)) {
-            request.getSession().setAttribute("errorMessage",
-                    "Một số sách trong giỏ đã hết hàng. Vui lòng kiểm tra lại!");
-            response.sendRedirect(request.getContextPath() + "/cart");
-            return;
-        }
-
-        int orderID = orderDAO.createOrder(account.getId(), addressID, paymentMethod, total);
+        int orderID = orderDAO.createOrder(account.getId(), addressID, paymentMethod, finalTotal);
 
         if (orderID == -1) {
             request.getSession().setAttribute("errorMessage", "Lỗi khi tạo đơn hàng, vui lòng thử lại!");
@@ -228,8 +290,66 @@ public class CheckoutController extends HttpServlet {
         }
 
         orderDAO.createOrderDetails(orderID, cartItems);
-        orderDAO.deductStock(orderID);
+
+        boolean stockDeducted = orderDAO.deductStock(orderID);
+        if (!stockDeducted) {
+            orderDAO.cancelOrder(orderID, account.getId(), "Sản phẩm hết hàng do tranh chấp tồn kho");
+            request.getSession().setAttribute("errorMessage", "Sản phẩm trong giỏ vừa hết hàng do có người khác mua trước. Đơn hàng đã bị hủy!");
+            response.sendRedirect(request.getContextPath() + "/cart");
+            return;
+        }
+
         orderDAO.clearCart(account.getId());
+
+        // Ghi nhận voucher đã được sử dụng, chỉ sau khi đơn hàng tạo thành công.
+        // insertVoucherUsage giờ atomic (check + insert cùng 1 transaction có khóa),
+        // nên dù 2 request race nhau ở bước validateVoucher phía trên, chỉ 1 request
+        // duy nhất ghi nhận thành công tại đây — request còn lại nhận USAGE_ALREADY_USED
+        // hoặc USAGE_OUT_OF_QUANTITY.
+        if (appliedVoucherID != null) {
+            VoucherDAO voucherDAO2 = new VoucherDAO();
+            Integer voucherQuantity = null;
+            // Lấy lại quantity của voucher để truyền vào hàm atomic (đảm bảo đúng ràng buộc hiện tại)
+            Voucher appliedVoucher = voucherDAO2.getVoucherByCode(
+                    (String) session.getAttribute(SESSION_VOUCHER_CODE));
+            if (appliedVoucher != null) {
+                voucherQuantity = appliedVoucher.getQuantity();
+            }
+
+            int usageResult = voucherDAO2
+                    .insertVoucherUsage(account.getId(), appliedVoucherID, voucherQuantity);
+
+            if (usageResult != dao.VoucherDAO.USAGE_OK) {
+                // Race condition: request khác đã tranh mất lượt voucher trong khoảng thời gian
+                // giữa validateVoucher() và insertVoucherUsage(). Đơn hàng đã được tạo và kho đã
+                // trừ nên KHÔNG cancel đơn — thay vào đó cập nhật lại total về giá gốc (bỏ giảm giá)
+                // để đảm bảo doanh thu đúng, và thông báo rõ cho khách hàng.
+                String voucherErrorMsg;
+                if (usageResult == dao.VoucherDAO.USAGE_OUT_OF_QUANTITY) {
+                    voucherErrorMsg = "Voucher vừa hết lượt do người khác sử dụng trước. "
+                            + "Đơn hàng vẫn được đặt thành công nhưng không áp dụng giảm giá.";
+                } else if (usageResult == dao.VoucherDAO.USAGE_ALREADY_USED) {
+                    voucherErrorMsg = "Voucher đã được bạn sử dụng trước đó. "
+                            + "Đơn hàng vẫn được đặt thành công nhưng không áp dụng giảm giá.";
+                } else {
+                    voucherErrorMsg = "Có lỗi xử lý voucher. "
+                            + "Đơn hàng vẫn được đặt thành công nhưng không áp dụng giảm giá.";
+                }
+                System.err.println("[Voucher] insertVoucherUsage thất bại (mã lỗi=" + usageResult
+                        + ") cho customerID=" + account.getId()
+                        + ", voucherID=" + appliedVoucherID
+                        + ". Đang cập nhật lại total đơn #" + orderID + " về giá gốc: " + total);
+
+                // Cập nhật lại total về giá gốc (không giảm) trên DB
+                orderDAO.updateOrderTotal(orderID, total);
+
+                request.getSession().setAttribute("warningMessage", voucherErrorMsg);
+            }
+
+            session.removeAttribute(SESSION_VOUCHER_ID);
+            session.removeAttribute(SESSION_VOUCHER_CODE);
+            session.removeAttribute(SESSION_VOUCHER_DISCOUNT);
+        }
 
         request.getSession().setAttribute("cartCount", 0);
 
@@ -278,6 +398,188 @@ public class CheckoutController extends HttpServlet {
                     "{\"success\":false,\"message\":\"Lỗi server khi xóa địa chỉ\"}"
             );
         }
+    }
+
+    // =================================================================
+    // VOUCHER — logic nghiệp vụ đặt tại Controller (đúng mô hình MVC2,
+    // DAO chỉ đảm nhiệm truy vấn dữ liệu thuần)
+    // =================================================================
+
+    private static final String SESSION_VOUCHER_ID       = "appliedVoucherID";
+    private static final String SESSION_VOUCHER_CODE     = "appliedVoucherCode";
+    private static final String SESSION_VOUCHER_DISCOUNT = "appliedVoucherDiscount";
+
+    private static class VoucherResult {
+        boolean success;
+        String message;
+        Voucher voucher;
+        double discountAmount;
+    }
+
+    /**
+     * Kiểm tra toàn bộ điều kiện áp dụng voucher: tồn tại, đang active,
+     * trong thời gian hiệu lực, đơn hàng đạt giá trị tối thiểu, còn lượt sử dụng,
+     * khách hàng chưa từng dùng voucher này. Tính luôn số tiền được giảm (có chặn trần).
+     */
+    private VoucherResult validateVoucher(String code, int customerID, BigDecimal orderTotal, VoucherDAO voucherDAO) {
+        VoucherResult r = new VoucherResult();
+
+        if (code == null || code.trim().isEmpty()) {
+            r.message = "Vui lòng nhập mã voucher.";
+            return r;
+        }
+
+        Voucher v = voucherDAO.getVoucherByCode(code);
+        if (v == null) {
+            r.message = "Mã voucher không tồn tại.";
+            return r;
+        }
+
+        if (!"active".equals(v.getStatus())) {
+            r.message = "Voucher này không còn khả dụng.";
+            return r;
+        }
+
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        if (v.getStartDate() != null && v.getStartDate().after(now)) {
+            r.message = "Voucher chưa tới thời gian sử dụng.";
+            return r;
+        }
+        if (v.getEndDate() != null && v.getEndDate().before(now)) {
+            r.message = "Voucher đã hết hạn.";
+            return r;
+        }
+
+        if (v.getMinOrderValue() != null && orderTotal.doubleValue() < v.getMinOrderValue()) {
+            r.message = "Đơn hàng chưa đạt giá trị tối thiểu "
+                    + String.format("%,.0f", v.getMinOrderValue()) + "đ để dùng voucher này.";
+            return r;
+        }
+
+        if (v.getQuantity() != null) {
+            int usedCount = voucherDAO.getUsedCount(v.getVoucherID());
+            if (usedCount >= v.getQuantity()) {
+                r.message = "Voucher đã hết lượt sử dụng.";
+                return r;
+            }
+        }
+
+        if (voucherDAO.hasCustomerUsedVoucher(customerID, v.getVoucherID())) {
+            r.message = "Bạn đã sử dụng voucher này rồi.";
+            return r;
+        }
+
+        BigDecimal discount = orderTotal
+                .multiply(BigDecimal.valueOf(v.getDiscountPercent()))
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+
+        if (v.getMaxDiscountValue() != null) {
+            BigDecimal maxDiscount = BigDecimal.valueOf(v.getMaxDiscountValue());
+            if (discount.compareTo(maxDiscount) > 0) {
+                discount = maxDiscount;
+            }
+        }
+        if (discount.compareTo(orderTotal) > 0) {
+            discount = orderTotal;
+        }
+
+        r.success = true;
+        r.voucher = v;
+        r.discountAmount = discount.doubleValue();
+        r.message = "Áp dụng voucher thành công!";
+        return r;
+    }
+
+    /** AJAX: khách hàng nhập mã voucher và bấm "Áp dụng" ở trang checkout. */
+    private void handleApplyVoucher(HttpServletRequest request, HttpServletResponse response, Account account)
+            throws IOException {
+
+        response.setContentType("application/json;charset=UTF-8");
+
+        String code = request.getParameter("code");
+
+        CartDAO cartDAO = new CartDAO();
+        List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
+        cartItems.removeIf(item -> item.getStockQuantity() == 0);
+
+        if (cartItems.isEmpty()) {
+            response.getWriter().write("{\"success\":false,\"message\":\"Giỏ hàng trống hoặc đã hết hàng.\"}");
+            return;
+        }
+
+        BigDecimal total = cartDAO.calcSubtotal(cartItems);
+
+        VoucherDAO voucherDAO = new VoucherDAO();
+        VoucherResult result = validateVoucher(code, account.getId(), total, voucherDAO);
+
+        if (!result.success) {
+            response.getWriter().write("{\"success\":false,\"message\":\"" + escapeJson(result.message) + "\"}");
+            return;
+        }
+
+        HttpSession session = request.getSession();
+        session.setAttribute(SESSION_VOUCHER_ID, result.voucher.getVoucherID());
+        session.setAttribute(SESSION_VOUCHER_CODE, result.voucher.getCode());
+        session.setAttribute(SESSION_VOUCHER_DISCOUNT, result.discountAmount);
+
+        BigDecimal newTotal = total.subtract(BigDecimal.valueOf(result.discountAmount));
+        if (newTotal.compareTo(BigDecimal.ZERO) < 0) {
+            newTotal = BigDecimal.ZERO;
+        }
+
+        String json = "{\"success\":true,\"message\":\"" + escapeJson(result.message) + "\","
+                + "\"discountAmount\":" + result.discountAmount + ","
+                + "\"newTotal\":" + newTotal.doubleValue() + "}";
+        response.getWriter().write(json);
+    }
+
+    /** AJAX: khách hàng bấm gỡ voucher đang áp dụng. */
+    private void handleRemoveVoucher(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json;charset=UTF-8");
+
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.removeAttribute(SESSION_VOUCHER_ID);
+            session.removeAttribute(SESSION_VOUCHER_CODE);
+            session.removeAttribute(SESSION_VOUCHER_DISCOUNT);
+        }
+
+        response.getWriter().write("{\"success\":true}");
+    }
+
+    /** AJAX: trả về danh sách voucher đang khả dụng để hiển thị modal "Voucher của Shop". */
+    private void handleListVouchers(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        response.setContentType("application/json;charset=UTF-8");
+
+        VoucherDAO voucherDAO = new VoucherDAO();
+        Account account = getAccount(request);
+        List<Voucher> vouchers = voucherDAO.getActiveVouchers(account.getId());
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+
+        StringBuilder json = new StringBuilder("{\"success\":true,\"vouchers\":[");
+        for (int i = 0; i < vouchers.size(); i++) {
+            Voucher v = vouchers.get(i);
+            if (i > 0) json.append(",");
+            json.append("{")
+                .append("\"code\":\"").append(escapeJson(v.getCode())).append("\",")
+                .append("\"discountPercent\":").append(v.getDiscountPercent()).append(",")
+                .append("\"minOrderValue\":")
+                    .append(v.getMinOrderValue() == null ? "null" : v.getMinOrderValue()).append(",")
+                .append("\"maxDiscountValue\":")
+                    .append(v.getMaxDiscountValue() == null ? "null" : v.getMaxDiscountValue()).append(",")
+                .append("\"endDate\":\"")
+                    .append(v.getEndDate() == null ? "Vô hạn" : sdf.format(v.getEndDate())).append("\"")
+                .append("}");
+        }
+        json.append("]}");
+
+        response.getWriter().write(json.toString());
+    }
+
+    private String escapeJson(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     private void saveAddressAjax(HttpServletRequest request, HttpServletResponse response, Account account)
