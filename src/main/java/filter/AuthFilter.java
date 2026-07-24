@@ -16,7 +16,7 @@ import model.Account;
 /**
  * @author PHUC KHANG
  */
-@WebFilter(filterName = "AuthFilter", urlPatterns = {"/dashboard/*"})
+@WebFilter(filterName = "AuthFilter", urlPatterns = {"/dashboard", "/dashboard/*"})
 public class AuthFilter implements Filter {
 
     private static final boolean debug = true;
