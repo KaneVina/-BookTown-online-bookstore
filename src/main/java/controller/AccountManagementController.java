@@ -12,7 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Account;
 
-
 public class AccountManagementController extends HttpServlet {
 
     private CustomerDAO customerDAO;
@@ -155,6 +154,10 @@ public class AccountManagementController extends HttpServlet {
     }
 
     private void handleToggleStaff(HttpServletRequest request, PrintWriter out, Account loginUser) {
+        if (!"admin".equals(loginUser.getRole())) {
+            out.write("{\"success\":false,\"message\":\"Không đủ quyền\"}");
+            return;
+        }
         int id = Integer.parseInt(request.getParameter("id"));
         String status = request.getParameter("status");
         boolean ok = accountDAO.toggleStaffStatus(id, status);
@@ -210,6 +213,10 @@ public class AccountManagementController extends HttpServlet {
     }
 
     private void handleUpdateStaff(HttpServletRequest request, PrintWriter out, Account loginUser) {
+        if (!"admin".equals(loginUser.getRole())) {
+            out.write("{\"success\":false,\"message\":\"Không đủ quyền\"}");
+            return;
+        }
         int id = Integer.parseInt(request.getParameter("id"));
         String fullname = request.getParameter("fullname");
         String phone = request.getParameter("phone");
