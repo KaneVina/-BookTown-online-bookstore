@@ -326,6 +326,43 @@ public class VoucherDAO {
         return false;
     }
 
+    /**
+     * Lấy danh sách voucher khách hàng có thể dùng để hiển thị ở modal
+     * "Voucher của Shop" trên trang checkout: đang active, đã tới ngày bắt đầu,
+     * chưa hết hạn, và còn lượt sử dụng (nếu có giới hạn quantity).
+     */
+    public List<Voucher> getActiveVouchers() {
+        List<Voucher> list = new ArrayList<>();
+        String sql =
+            "SELECT v.voucherID, v.code, v.discount_percent, v.quantity, "
+          + "       v.start_date, v.end_date, v.status, v.is_deleted, "
+          + "       v.min_order_value, v.max_discount_value, "
+          + "       COUNT(cv.customerVoucherID) AS usedCount "
+          + "FROM Voucher v "
+          + "LEFT JOIN CustomerVoucher cv "
+          + "       ON v.voucherID = cv.voucherID AND cv.is_used = 1 "
+          + "WHERE v.is_deleted = 0 "
+          + "  AND v.status = 'active' "
+          + "  AND v.start_date <= GETDATE() "
+          + "  AND v.end_date   >= GETDATE() "
+          + "GROUP BY v.voucherID, v.code, v.discount_percent, v.quantity, "
+          + "         v.start_date, v.end_date, v.status, v.is_deleted, "
+          + "         v.min_order_value, v.max_discount_value "
+          + "HAVING v.quantity IS NULL OR COUNT(cv.customerVoucherID) < v.quantity "
+          + "ORDER BY v.end_date ASC";
+
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
     /** Mã trả về của {@link #insertVoucherUsage}. */
     public static final int USAGE_OK              = 1;
     public static final int USAGE_ALREADY_USED    = 0;

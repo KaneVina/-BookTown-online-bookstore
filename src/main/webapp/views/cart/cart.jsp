@@ -126,10 +126,6 @@
                     </div>
                 </div>
 
-                <p class="text-[12px] text-[#424752] -mt-2">
-                    Mã giảm giá voucher sẽ được nhập ở bước thanh toán.
-                </p>
-
                 <div class="border-t border-[#c2c6d4] pt-6">
                     <div class="flex justify-between items-end mb-8">
                         <span class="text-xl font-bold text-[#071e27]">Tổng cộng</span>
