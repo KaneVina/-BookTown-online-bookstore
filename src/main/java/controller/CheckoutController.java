@@ -73,7 +73,7 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-        // Điều chỉnh số lượng giỏ về bằng tồn kho nếu vượt quá (Option A)
+       
         boolean hasAdjusted = false;
         for (CartItem item : cartItems) {
             if (item.getQuantity() > item.getStockQuantity()) {
@@ -199,7 +199,7 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-        // Lọc bỏ item hết hàng trước khi tạo đơn
+        
         cartItems.removeIf(item -> item.getStockQuantity() == 0);
 
         if (cartItems.isEmpty()) {
@@ -281,21 +281,15 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-        int orderID = orderDAO.createOrder(account.getId(), addressID, paymentMethod, finalTotal);
+        int orderID = orderDAO.createOrderWithStockCheck(account.getId(), addressID, paymentMethod, finalTotal, cartItems);
 
-        if (orderID == -1) {
+        if (orderID == -2) {
+            request.getSession().setAttribute("errorMessage", "Sản phẩm trong giỏ vừa hết hàng do có người khác mua trước. Vui lòng kiểm tra lại giỏ hàng!");
+            response.sendRedirect(request.getContextPath() + "/cart");
+            return;
+        } else if (orderID == -1) {
             request.getSession().setAttribute("errorMessage", "Lỗi khi tạo đơn hàng, vui lòng thử lại!");
             response.sendRedirect(request.getContextPath() + "/checkout");
-            return;
-        }
-
-        orderDAO.createOrderDetails(orderID, cartItems);
-
-        boolean stockDeducted = orderDAO.deductStock(orderID);
-        if (!stockDeducted) {
-            orderDAO.cancelOrder(orderID, account.getId(), "Sản phẩm hết hàng do tranh chấp tồn kho");
-            request.getSession().setAttribute("errorMessage", "Sản phẩm trong giỏ vừa hết hàng do có người khác mua trước. Đơn hàng đã bị hủy!");
-            response.sendRedirect(request.getContextPath() + "/cart");
             return;
         }
 
