@@ -95,11 +95,18 @@ public class ProfileController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
             return;
         }
-        if (!fullname.matches("^[\\p{L}\\s]{2,50}$")) {
-            session.setAttribute("error", "Họ tên chỉ được chứa chữ cái và khoảng trắng");
+        if (fullname.matches(".*\\s{2,}.*")) {
+            session.setAttribute("error", "Họ tên không được chứa nhiều khoảng trắng liên tiếp");
             response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
             return;
         }
+        // Chỉ chứa chữ cái, các từ cách nhau đúng 1 dấu cách, tối thiểu 2 từ (vd: "Trương Trân")
+        if (!fullname.matches("^[\\p{L}]+( [\\p{L}]+)+$") || fullname.length() > 50) {
+            session.setAttribute("error", "Họ tên phải có ít nhất 2 từ, chỉ chứa chữ cái và cách nhau đúng 1 dấu cách");
+            response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
+            return;
+        }
+
         if (phone == null) phone = "";
         if (!phone.matches("^0\\d{9}$")) {
             session.setAttribute("error", "Số điện thoại phải gồm 10 số và bắt đầu bằng 0");
@@ -110,29 +117,30 @@ public class ProfileController extends HttpServlet {
         boolean isCustomer = "customer".equalsIgnoreCase(acc.getRole());
 
         if (isCustomer) {
-            if (dob == null || dob.trim().isEmpty()) {
-                session.setAttribute("error", "Vui lòng chọn ngày sinh");
-                response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
-                return;
-            }
-            try {
-                LocalDate birthDate = LocalDate.parse(dob);
-                LocalDate today = LocalDate.now();
-                if (birthDate.isAfter(today)) {
-                    session.setAttribute("error", "Ngày sinh không hợp lệ");
+            // Ngày sinh là tùy chọn: chỉ validate khi người dùng có nhập
+            dob = safeTrim(dob);
+            if (!dob.isEmpty()) {
+                try {
+                    LocalDate birthDate = LocalDate.parse(dob);
+                    LocalDate today = LocalDate.now();
+                    if (birthDate.isAfter(today)) {
+                        session.setAttribute("error", "Ngày sinh không hợp lệ");
+                        response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
+                        return;
+                    }
+                    int age = Period.between(birthDate, today).getYears();
+                    if (age < 18 || age > 120) {
+                        session.setAttribute("error", "Bạn phải từ 18 tuổi đến dưới 120 tuổi");
+                        response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
+                        return;
+                    }
+                } catch (Exception ex) {
+                    session.setAttribute("error", "Định dạng ngày sinh không hợp lệ");
                     response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
                     return;
                 }
-                int age = Period.between(birthDate, today).getYears();
-                if (age < 18 || age > 120) {
-                    session.setAttribute("error", "Bạn phải từ 18 tuổi đến dưới 120 tuổi");
-                    response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
-                    return;
-                }
-            } catch (Exception ex) {
-                session.setAttribute("error", "Định dạng ngày sinh không hợp lệ");
-                response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
-                return;
+            } else {
+                dob = null;
             }
 
             CustomerDAO dao = new CustomerDAO();

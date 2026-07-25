@@ -127,14 +127,14 @@
                                        class="w-full pl-11 pr-4 py-3 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
                             </div>
 
-                            <select id="roleFilter" class="px-4 py-3 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                                <option value=""         ${role == ''         ? 'selected' : ''}>Tất cả vai trò</option>
-                                <option value="customer" ${role == 'customer' ? 'selected' : ''}>Khách hàng</option>
-                                <c:if test="${loginUser.role == 'admin'}">
+                            <c:if test="${loginUser.role == 'admin'}">
+                                <select id="roleFilter" class="px-4 py-3 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                                    <option value=""         ${role == ''         ? 'selected' : ''}>Tất cả vai trò</option>
+                                    <option value="customer" ${role == 'customer' ? 'selected' : ''}>Khách hàng</option>
                                     <option value="staff" ${role == 'staff' ? 'selected' : ''}>Staff</option>
                                     <option value="admin" ${role == 'admin' ? 'selected' : ''}>Admin</option>
-                                </c:if>
-                            </select>
+                                </select>
+                            </c:if>
 
                             <select id="statusFilter" class="px-4 py-3 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none">
                                 <option value=""         ${status == ''         ? 'selected' : ''}>Tất cả trạng thái</option>
@@ -378,7 +378,8 @@
 
             function applyFilters() {
                 const keyword = document.getElementById('searchInput').value.trim();
-                const role = document.getElementById('roleFilter').value;
+                const roleFilterEl = document.getElementById('roleFilter');
+                const role = roleFilterEl ? roleFilterEl.value : '';
                 const status = document.getElementById('statusFilter').value;
                 const params = new URLSearchParams({keyword, role, status, page: 1});
                 window.location.href = BASE_URL + '?' + params.toString();
@@ -389,7 +390,10 @@
                 searchTimeout = setTimeout(applyFilters, 400);
             });
 
-            document.getElementById('roleFilter').addEventListener('change', applyFilters);
+            const roleFilterInput = document.getElementById('roleFilter');
+            if (roleFilterInput) {
+                roleFilterInput.addEventListener('change', applyFilters);
+            }
             document.getElementById('statusFilter').addEventListener('change', applyFilters);
             const confirmModal = document.getElementById('confirmModal');
             const modalTitle = document.getElementById('modalTitle');

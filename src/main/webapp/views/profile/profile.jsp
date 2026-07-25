@@ -57,6 +57,7 @@
                                 value="${customer.fullname}"
                                 required
                                 class="input-style">
+                            <p id="fullnameError" class="text-red-500 text-sm mt-1 hidden"></p>
                         </div>
                         <div>
                             <label class="block mb-2 font-medium">
@@ -86,6 +87,7 @@
                                 id="phone"
                                 value="${customer.phone}"
                                 class="input-style">
+                            <p id="phoneError" class="text-red-500 text-sm mt-1 hidden"></p>
                         </div>
                         <div>
                             <label class="block mb-2 font-medium">
@@ -131,6 +133,7 @@
                                 value="${customer.dob}"
                                 max="<%= java.time.LocalDate.now()%>"
                                 class="input-style">
+                            <p id="dobError" class="text-red-500 text-sm mt-1 hidden"></p>
                         </div>
                     </div>
                     <div class="mt-8">
@@ -211,11 +214,87 @@
     const form = document.getElementById('profileForm');
     const saveBtn = document.getElementById('saveBtn');
     const fullnameInput = document.getElementById('fullname');
+    const fullnameError = document.getElementById('fullnameError');
     const phoneInput = document.getElementById('phone');
+    const phoneError = document.getElementById('phoneError');
     const genderSelect = document.getElementById('gender');
     const dobInput = document.getElementById('dob');
+    const dobError = document.getElementById('dobError');
+
+    function setFieldError(inputEl, errorEl, message) {
+        if (message) {
+            errorEl.textContent = message;
+            errorEl.classList.remove('hidden');
+            inputEl.classList.add('border-red-500');
+        } else {
+            errorEl.textContent = "";
+            errorEl.classList.add('hidden');
+            inputEl.classList.remove('border-red-500');
+        }
+        return message === "";
+    }
+
+    function validateFullname() {
+        const value = fullnameInput.value.trim();
+        let message = "";
+
+        if (!value) {
+            message = "Họ tên không được để trống";
+        } else if (/\s{2,}/.test(value)) {
+            message = "Họ tên không được chứa nhiều khoảng trắng liên tiếp";
+        } else if (!/^[\p{L}]+( [\p{L}]+)+$/u.test(value)) {
+            message = value.split(" ").filter(Boolean).length < 2
+                ? "Họ tên phải có ít nhất 2 từ, ví dụ: \"Trương Trân\""
+                : "Họ tên chỉ được chứa chữ cái và khoảng trắng";
+        } else if (value.length > 50) {
+            message = "Họ tên không được vượt quá 50 ký tự";
+        }
+
+        return setFieldError(fullnameInput, fullnameError, message);
+    }
+
+    function validatePhone() {
+        const value = phoneInput.value.trim();
+        let message = "";
+
+        if (!value) {
+            message = "Số điện thoại không được để trống";
+        } else if (!/^0\d{9}$/.test(value)) {
+            message = "Số điện thoại phải gồm 10 số và bắt đầu bằng 0";
+        }
+
+        return setFieldError(phoneInput, phoneError, message);
+    }
+
+    function validateDob() {
+        const value = dobInput.value;
+        let message = "";
+
+        if (value) {
+            const birthDate = new Date(value);
+            const today = new Date();
+            if (birthDate > today) {
+                message = "Ngày sinh không hợp lệ";
+            } else {
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                if (age < 18 || age > 120) {
+                    message = "Bạn phải từ 18 tuổi đến dưới 120 tuổi";
+                }
+            }
+        }
+
+        return setFieldError(dobInput, dobError, message);
+    }
 
     function checkFormChanges() {
+        const fullnameValid = validateFullname();
+        const phoneValid = validatePhone();
+        const dobValid = validateDob();
+
         const currentValues = {
             fullname: fullnameInput.value.trim(),
             phone: phoneInput.value.trim(),
@@ -223,7 +302,7 @@
             dob: dobInput.value
         };
 
-        if (!currentValues.fullname) {
+        if (!fullnameValid || !phoneValid || !dobValid) {
             saveBtn.disabled = true;
             return;
         }
@@ -234,6 +313,22 @@
                 currentValues.dob !== initialValues.dob;
         saveBtn.disabled = !hasChanges;
     }
+
+    form.addEventListener('submit', function (e) {
+        const fullnameValid = validateFullname();
+        const phoneValid = validatePhone();
+        const dobValid = validateDob();
+
+        if (!fullnameValid || !phoneValid || !dobValid) {
+            e.preventDefault();
+            const firstError = !fullnameValid ? fullnameError.textContent
+                    : !phoneValid ? phoneError.textContent
+                    : dobError.textContent;
+            const focusTarget = !fullnameValid ? fullnameInput : !phoneValid ? phoneInput : dobInput;
+            focusTarget.focus();
+            showToast(firstError, true);
+        }
+    });
 
     fullnameInput.addEventListener('input', checkFormChanges);
     fullnameInput.addEventListener('change', checkFormChanges);
