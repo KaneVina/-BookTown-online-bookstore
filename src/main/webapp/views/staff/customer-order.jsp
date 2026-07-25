@@ -124,16 +124,14 @@
 
             <body class="bg-background text-on-surface flex min-h-screen">
                 <%@ include file="/views/layout/dashboard/sidebar.jsp" %>
-                    <main class="flex-1 md:ml-64 min-h-screen">
+                    <main class="flex-1 md:ml-64 min-h-screen flex flex-col justify-between">
 
-                        <!--header-->
                         <header class="bg-white border-b h-14 sticky top-0 z-30 flex items-center px-6"
                             style="border-color:#c2c6d4;">
                             <h2 class="font-semibold text-base" style="color:#071e27;">Quản lý Đơn hàng</h2>
                         </header>
 
-                        <!--content-->
-                        <div class="p-gutter max-w-container-max mx-auto">
+                        <div class="p-gutter max-w-container-max mx-auto flex-1 w-full">
                             <div class="flex flex-col md:flex-row md:items-end justify-between gap-gutter mb-stack-lg">
                                 <div>
                                     <h1 class="text-2xl font-bold">Danh sách đơn hàng</h1>
@@ -218,7 +216,7 @@
                                                     </td>
                                                     <td class="px-gutter py-3.5">
                                                         <div class="flex items-center gap-3">
-                                                             <span
+                                                            <span
                                                                 class="text-sm font-medium">${order.recipientName}</span>
                                                         </div>
                                                     </td>
@@ -229,12 +227,16 @@
                                                     <td class="px-gutter py-3.5">
                                                         <c:choose>
                                                             <c:when test="${order.paymentMethod == 'vnpay'}">
-                                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold" style="background:#fce4ec; color:#880e4f;">
+                                                                <span
+                                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                                                                    style="background:#fce4ec; color:#880e4f;">
                                                                     VNPAY
                                                                 </span>
                                                             </c:when>
                                                             <c:otherwise>
-                                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold" style="background:#fff3e0; color:#e65100;">
+                                                                <span
+                                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                                                                    style="background:#fff3e0; color:#e65100;">
                                                                     COD
                                                                 </span>
                                                             </c:otherwise>
@@ -313,7 +315,8 @@
                                                                             value="updateStatus">
                                                                         <input type="hidden" name="orderID"
                                                                             value="${order.orderID}">
-                                                                        <input type="hidden" name="cancelReason" class="cancelReasonInput" value="">
+                                                                        <input type="hidden" name="cancelReason"
+                                                                            class="cancelReasonInput" value="">
                                                                         <select name="status"
                                                                             onchange="confirmStatusChange(this)"
                                                                             class="bg-surface border border-outline-variant/30 text-on-surface rounded-lg text-xs focus:ring-primary focus:border-primary px-2 py-1 cursor-pointer">
@@ -517,7 +520,7 @@
                                     );
                                 }
                             }
-                            
+
                             function showListCancelError(msg) {
                                 document.getElementById('listCancelErrorText').textContent = msg;
                                 document.getElementById('listCancelError').classList.remove('hidden');
@@ -563,14 +566,16 @@
                         </script>
 
                         <!-- Modal nhập lý do hủy  -->
-                        <div id="listCancelReasonModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[200]">
+                        <div id="listCancelReasonModal"
+                            class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[200]">
                             <div class="bg-white w-[460px] rounded-xl p-6 relative shadow-xl">
                                 <button type="button" onclick="closeListCancelModal()"
                                     class="absolute top-3 right-4 text-2xl text-gray-400 hover:text-gray-600">×</button>
                                 <h3 class="text-lg font-bold text-[#D32F2F] mb-2">Hủy đơn hàng</h3>
                                 <p class="text-sm text-gray-500 mb-3">Vui lòng nhập lý do hủy đơn hàng này.</p>
-                             
-                                <div id="listCancelError" class="hidden mb-3 px-3 py-2 bg-red-50 border border-red-300 rounded-lg text-sm text-[#D32F2F] flex items-center gap-2">
+
+                                <div id="listCancelError"
+                                    class="hidden mb-3 px-3 py-2 bg-red-50 border border-red-300 rounded-lg text-sm text-[#D32F2F] flex items-center gap-2">
                                     <span class="material-symbols-outlined text-[16px]">error</span>
                                     <span id="listCancelErrorText"></span>
                                 </div>

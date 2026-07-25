@@ -45,7 +45,7 @@ public class VNPayConfig {
         }
     }
 
-    // Copy y chang Config.java gốc của VNPAY - encode giá trị khi build hash
+    
     public static String hashAllFields(Map<String, String> fields) {
         List<String> fieldNames = new ArrayList<>(fields.keySet());
         Collections.sort(fieldNames);

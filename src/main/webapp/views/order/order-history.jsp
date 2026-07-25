@@ -188,7 +188,8 @@
         <button type="button" onclick="closeCustomerCancelModal()"
             class="absolute top-3 right-4 text-2xl text-gray-400 hover:text-gray-600">&times;</button>
         <h3 class="text-lg font-bold text-[#D32F2F] mb-2" id="cancelModalTitle">Hủy đơn hàng</h3>
-        <p class="text-sm text-gray-500 mb-4">Vui lòng nhập lý do bạn muốn hủy đơn hàng này.</p>
+        <p class="text-sm text-gray-500 mb-3">Vui lòng nhập lý do bạn muốn hủy đơn hàng này.</p>
+        <div id="cancelModalError" class="hidden mb-3 px-3 py-2 bg-red-50 border border-red-300 text-red-600 text-sm rounded-lg"></div>
         <textarea id="customerCancelReasonText" rows="4" maxlength="50"
             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
             placeholder="Nhập lý do hủy... (10-50 ký tự, phải có chữ cái)"></textarea>
@@ -267,10 +268,23 @@
             textElem.value = '';
             textElem.focus();
         }
+        var errorElem = document.getElementById('cancelModalError');
+        if (errorElem) {
+            errorElem.textContent = '';
+            errorElem.classList.add('hidden');
+        }
         var modal = document.getElementById('customerCancelModal');
         if (modal) {
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+        }
+    }
+
+    function showCancelModalError(message) {
+        var errorElem = document.getElementById('cancelModalError');
+        if (errorElem) {
+            errorElem.textContent = message;
+            errorElem.classList.remove('hidden');
         }
     }
 
@@ -287,20 +301,20 @@
         var reasonElem = document.getElementById('customerCancelReasonText');
         var reason = reasonElem ? reasonElem.value.trim() : '';
         if (reason.length === 0) {
-            showToast('Vui lòng nhập lý do hủy đơn!', true);
+            showCancelModalError('Vui lòng nhập lý do hủy đơn!');
             return;
         }
         if (reason.length < 10) {
-            showToast('Lý do hủy phải có ít nhất 10 ký tự!', true);
+            showCancelModalError('Lý do hủy phải có ít nhất 10 ký tự!');
             return;
         }
         if (reason.length > 50) {
-            showToast('Lý do hủy không được vượt quá 50 ký tự!', true);
+            showCancelModalError('Lý do hủy không được vượt quá 50 ký tự!');
             return;
         }
         var hasLetter = /[a-zA-ZÀ-ỹ]/.test(reason);
         if (!hasLetter) {
-            showToast('Lý do hủy phải chứa ít nhất 1 chữ cái!', true);
+            showCancelModalError('Lý do hủy phải chứa ít nhất 1 chữ cái!');
             return;
         }
 
