@@ -2,7 +2,29 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <%
-    String currentPage = request.getRequestURI();
+    String currentPage = (String) request.getAttribute("jakarta.servlet.forward.request_uri");
+    if (currentPage == null || currentPage.isEmpty()) {
+        currentPage = request.getRequestURI();
+    }
+
+    String sidebarContextPath = request.getContextPath();
+    String sidebarCurrentPath = currentPage;
+    if (sidebarContextPath != null
+            && !sidebarContextPath.isEmpty()
+            && sidebarCurrentPath.startsWith(sidebarContextPath)) {
+        sidebarCurrentPath = sidebarCurrentPath.substring(sidebarContextPath.length());
+    }
+
+    int jsessionIndex = sidebarCurrentPath.indexOf(';');
+    if (jsessionIndex >= 0) {
+        sidebarCurrentPath = sidebarCurrentPath.substring(0, jsessionIndex);
+    }
+
+    while (sidebarCurrentPath.length() > 1 && sidebarCurrentPath.endsWith("/")) {
+        sidebarCurrentPath = sidebarCurrentPath.substring(0, sidebarCurrentPath.length() - 1);
+    }
+
+    boolean isDashboardPage = "/dashboard".equals(sidebarCurrentPath);
     model.Account sidebarUser = (model.Account) session.getAttribute("account");
     String sidebarRole = "";
     String sidebarName = "";
@@ -17,6 +39,8 @@
         }
     }
     boolean isStaffUser = sidebarUser != null && "staff".equals(sidebarUser.getRole());
+    boolean isAdminUser = sidebarUser != null && "admin".equals(sidebarUser.getRole());
+    boolean isStaffOrAdmin = isStaffUser || isAdminUser;
 %>
 
 <style>
@@ -49,7 +73,7 @@
         font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
 
-    /* User popup menu */
+
     .user-popup {
         display: none;
         position: absolute;
@@ -135,7 +159,7 @@
     <nav class="flex-1 py-4 space-y-0.5 overflow-y-auto">
 
         <a href="${pageContext.request.contextPath}/dashboard"
-           class="sidebar-link <%= currentPage.endsWith("/dashboard") ? "active" : ""%>">
+           class="sidebar-link <%= isDashboardPage ? "active" : ""%>">
             <span class="material-symbols-outlined">dashboard</span>
             Bảng điều khiển
         </a>
@@ -148,33 +172,40 @@
         </a>
         </c:when></c:choose>
 
-        <% if (isStaffUser) { %>
+        <% if (isStaffUser) {
+                boolean khoHangActive = "product-management".equals(request.getAttribute("activeMenu"))
+                        || currentPage.contains("product-management");
+        %>
         <a href="${pageContext.request.contextPath}/dashboard/product-management"
-           class="sidebar-link <%= currentPage.contains("product-management") ? "active" : ""%>">
+           class="sidebar-link <%= khoHangActive ? "active" : ""%>">
             <span class="material-symbols-outlined">inventory_2</span>
             Kho hàng
         </a>
         <% } %>
 
+
+
         <% if (isStaffUser) { %>
-        <a href="${pageContext.request.contextPath}/category"
-           class="sidebar-link <%= currentPage.contains("/category") ? "active" : ""%>">
+        <a href="${pageContext.request.contextPath}/dashboard/category-management"
+           class="sidebar-link <%= sidebarCurrentPath.startsWith("/dashboard/category-management") ? "active" : ""%>">
             <span class="material-symbols-outlined">category</span>
             Thể loại
         </a>
         <% } %>
 
+        <% if (isStaffOrAdmin) { %>
         <a href="${pageContext.request.contextPath}/dashboard/account-management"
            class="sidebar-link <%= currentPage.contains("account-management") ? "active" : ""%>">
             <span class="material-symbols-outlined">group</span>
             Tài khoản
         </a>
 
-        <a href="${pageContext.request.contextPath}/dashboard/review-management"
+        <a href="${pageContext.request.contextPath}/review"
            class="sidebar-link <%= currentPage.contains("review") ? "active" : ""%>">
             <span class="material-symbols-outlined">rate_review</span>
             Đánh giá
         </a>
+        <% } %>
 
         <% if (isStaffUser) { %>
         <a href="${pageContext.request.contextPath}/dashboard/voucher-management"
@@ -186,7 +217,7 @@
 
     </nav>
 
-    <%-- User section với popup menu --%>
+
     <div class="border-t relative" style="border-color: #c2c6d4;">
         <div class="user-popup" id="userPopup">
             <a href="${pageContext.request.contextPath}/profile">

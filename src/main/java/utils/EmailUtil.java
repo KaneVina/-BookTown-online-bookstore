@@ -283,22 +283,52 @@ public class EmailUtil {
             String username,
             String password
     ) {
-        return "<div style='font-family: Arial, sans-serif;'>"
-                + "<h2>Chào " + fullName + ",</h2>"
-                + "<p>Tài khoản nhân viên BookTown của bạn đã được tạo thành công.</p>"
-                + "<table style='border-collapse: collapse;'>"
-                + "<tr>"
-                + "<td style='padding:8px'><b>Tên đăng nhập:</b></td>"
-                + "<td style='padding:8px'>" + username + "</td>"
-                + "</tr>"
-                + "<tr>"
-                + "<td style='padding:8px'><b>Mật khẩu:</b></td>"
-                + "<td style='padding:8px'>" + password + "</td>"
-                + "</tr>"
-                + "</table>"
-                + "<p>Vui lòng đổi mật khẩu sau lần đăng nhập đầu tiên.</p>"
-                + "<br>"
-                + "<p>BookTown Team</p>"
+        String safeName = (fullName == null || fullName.trim().isEmpty()) ? "bạn" : fullName;
+
+        return "<div style=\"font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 30px 0;\">"
+                + "  <div style=\"max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e0e0e0;\">"
+                // Header
+                + "    <div style=\"background-color: #134aa4; padding: 20px; text-align: center;\">"
+                + "      <img src=\"https://res.cloudinary.com/dylkbydhg/image/upload/v1780127819/logoBT_1_fyixrl.png\" alt=\"BookTown Logo\" style=\"max-width: 180px; height: auto; display: block; margin: 0 auto;\" />"
+                + "    </div>"
+                // Nội dung
+                + "    <div style=\"padding: 30px 40px;\">"
+                + "      <h2 style=\"color: #333333; font-size: 20px; margin-top: 0;\">Tài khoản nhân viên đã được tạo</h2>"
+                + "      <p style=\"color: #555555; font-size: 15px; line-height: 1.6;\">"
+                + "        Xin chào <strong>" + safeName + "</strong>,<br><br>"
+                + "        Tài khoản nhân viên của bạn tại hệ thống BookTown đã được tạo thành công. "
+                + "        Dưới đây là thông tin đăng nhập của bạn:"
+                + "      </p>"
+                // Thông tin tài khoản
+                + "      <div style=\"background-color: #f0f5fa; padding: 15px; border-radius: 6px; margin: 20px 0; border: 1px solid #cfe0f5;\">"
+                + "        <table style=\"width: 100%; border-collapse: collapse; font-size: 14px;\">"
+                + "          <tr>"
+                + "            <td style=\"padding: 5px 0; color: #777777;\">Tên đăng nhập:</td>"
+                + "            <td style=\"padding: 5px 0; font-weight: bold; text-align: right;\">" + username + "</td>"
+                + "          </tr>"
+                + "          <tr>"
+                + "            <td style=\"padding: 5px 0; color: #777777;\">Mật khẩu:</td>"
+                + "            <td style=\"padding: 5px 0; font-weight: bold; color: #134aa4; text-align: right;\">" + password + "</td>"
+                + "          </tr>"
+                + "        </table>"
+                + "      </div>"
+                + "      <p style=\"color: #555555; font-size: 15px; line-height: 1.6;\">"
+                + "        <strong>Lưu ý:</strong> Vì lý do bảo mật, vui lòng đổi mật khẩu ngay sau lần đăng nhập đầu tiên "
+                + "        và không chia sẻ thông tin này với bất kỳ ai."
+                + "      </p>"
+                + "      <div style=\"border-top: 1px solid #eeeeee; margin-top: 30px; padding-top: 20px;\">"
+                + "        <p style=\"color: #888888; font-size: 13px; line-height: 1.5; margin: 0;\">"
+                + "          Nếu bạn không yêu cầu tạo tài khoản này, vui lòng liên hệ BookTown ngay để được hỗ trợ."
+                + "        </p>"
+                + "      </div>"
+                + "    </div>"
+                // Footer
+                + "    <div style=\"background-color: #f9f9f9; padding: 20px; text-align: center; border-top: 1px solid #eeeeee;\">"
+                + "      <p style=\"color: #999999; font-size: 13px; margin: 0;\">"
+                + "        &copy; 2026 BookTown. Tất cả quyền được bảo lưu."
+                + "      </p>"
+                + "    </div>"
+                + "  </div>"
                 + "</div>";
     }
 

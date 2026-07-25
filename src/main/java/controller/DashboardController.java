@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -40,11 +41,22 @@ public class DashboardController extends HttpServlet {
         String toDate = trimToNull(request.getParameter("toDate"));
         Integer genreID = parseGenreID(request.getParameter("genreID"));
 
+        boolean showAll = "true".equalsIgnoreCase(request.getParameter("showAll"));
+        boolean filterRequested = "filter".equalsIgnoreCase(request.getParameter("action"));
+
+        // Nếu người dùng chỉ nhập một ngày thì hiểu là lọc đúng ngày đó.
+        if (filterRequested) {
+            if (fromDate != null && toDate == null) {
+                toDate = fromDate;
+            } else if (fromDate == null && toDate != null) {
+                fromDate = toDate;
+            }
+        }
+
         String dateError = validateDateRange(fromDate, toDate);
         if (dateError != null) {
             request.setAttribute("dateError", dateError);
-            fromDate = null;
-            toDate = null;
+            filterRequested = false;
         }
 
         // Code mới: số liệu bán hàng, lọc ngày và lọc thể loại.
@@ -60,8 +72,17 @@ public class DashboardController extends HttpServlet {
         addRevenuePercentages(revenueByCategory);
         List<Map<String, Object>> topSellingBooks = dashboardDAO.getTopSellingBooks(
                 fromDate, toDate, genreID);
-        List<Map<String, Object>> allOrders = dashboardDAO.getAllOrders(
-                fromDate, toDate, genreID);
+        List<Map<String, Object>> allOrders;
+        if (showAll) {
+            // Nút "Xem tất cả đơn hàng": không áp dụng bộ lọc ngày/thể loại.
+            allOrders = dashboardDAO.getAllOrders(null, null, null);
+        } else if (filterRequested && dateError == null) {
+            // Chỉ hiển thị danh sách đơn khi người dùng thật sự bấm nút Lọc.
+            allOrders = dashboardDAO.getAllOrders(fromDate, toDate, genreID);
+        } else {
+            // Lần đầu mở dashboard hoặc bấm Xóa: để trống khu vực đơn hàng.
+            allOrders = Collections.emptyList();
+        }
         List<Genre> genres = genreDAO.getAllGenres();
 
         // Giữ code cũ: thống kê kho sách và nhân viên.
@@ -85,6 +106,9 @@ public class DashboardController extends HttpServlet {
         request.setAttribute("fromDate", fromDate);
         request.setAttribute("toDate", toDate);
         request.setAttribute("selectedGenreID", genreID);
+        request.setAttribute("showAll", showAll);
+        request.setAttribute("filterRequested", filterRequested);
+        request.setAttribute("currentDate", LocalDate.now().toString());
 
         request.setAttribute("allBooks", allBooks);
         request.setAttribute("availableBooks", availableBooks);
@@ -107,6 +131,10 @@ public class DashboardController extends HttpServlet {
         try {
             LocalDate from = fromDate == null ? null : LocalDate.parse(fromDate);
             LocalDate to = toDate == null ? null : LocalDate.parse(toDate);
+            LocalDate today = LocalDate.now();
+            if ((from != null && from.isAfter(today)) || (to != null && to.isAfter(today))) {
+                return "Không được chọn ngày trong tương lai.";
+            }
             if (from != null && to != null && from.isAfter(to)) {
                 return "Ngày bắt đầu không được lớn hơn ngày kết thúc.";
             }

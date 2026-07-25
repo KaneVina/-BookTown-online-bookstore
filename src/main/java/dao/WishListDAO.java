@@ -12,9 +12,7 @@ import java.util.List;
 
 public class WishListDAO {
 
-    /**
-     * Lấy wishlistID của customer. Nếu chưa có thì tạo mới.
-     */
+
     public int getOrCreateWishlist(int customerID) {
         String sqlFind = "SELECT wishlistID FROM WishList WHERE customerID = ?";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sqlFind)) {
@@ -41,9 +39,7 @@ public class WishListDAO {
         return -1;
     }
 
-    /**
-     * Lấy danh sách wishlist items kèm thông tin sách.
-     */
+
     public List<WishlistItem> getWishlistItems(int customerID) {
         List<WishlistItem> items = new ArrayList<>();
         String sql
@@ -88,9 +84,7 @@ public class WishListDAO {
         return items;
     }
 
-    /**
-     * Kiểm tra sách đã có trong wishlist chưa.
-     */
+
     public boolean isInWishlist(int customerID, int bookID) {
         String sql
                 = "SELECT 1 FROM WishList wl "
@@ -106,12 +100,10 @@ public class WishListDAO {
         return false;
     }
 
-    /**
-     * Thêm sách vào wishlist. Bỏ qua nếu đã có.
-     */
+
     public boolean addToWishlist(int customerID, int bookID) {
         if (isInWishlist(customerID, bookID)) {
-            return true; // đã có rồi
+            return true; 
         }
         int wishlistID = getOrCreateWishlist(customerID);
         if (wishlistID == -1) {
@@ -129,9 +121,7 @@ public class WishListDAO {
         return false;
     }
 
-    /**
-     * Xóa sách khỏi wishlist.
-     */
+    
     public boolean removeFromWishlist(int customerID, int bookID) {
         if (!isInWishlist(customerID, bookID)) {
             return true;
@@ -150,9 +140,7 @@ public class WishListDAO {
         return false;
     }
 
-    /**
-     * Đếm số item trong wishlist.
-     */
+
     public int countWishlistItems(int customerID) {
         String sql
                 = "SELECT COUNT(*) FROM WishList wl "
@@ -170,9 +158,7 @@ public class WishListDAO {
         return 0;
     }
 
-    /**
-     * Chuyển sách từ wishlist sang giỏ hàng (xóa wishlist + thêm cart).
-     */
+
     public boolean moveToCart(int customerID, int bookID) {
         return moveToCart(customerID, bookID, 1);
     }

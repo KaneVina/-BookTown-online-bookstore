@@ -38,15 +38,30 @@ public class CheckoutController extends HttpServlet {
         if (action != null) {
             switch (action) {
                 case "deleteAddress":
+                    // Chỉ cho phép xóa địa chỉ thuộc đúng khách hàng đang đăng nhập.
+                    // Không dùng deleteAddress(addressID) vì có thể gây IDOR.
                     String addressIdRaw = request.getParameter("addressID");
 
                     if (addressIdRaw != null && !addressIdRaw.trim().isEmpty()) {
                         try {
-                            int addressID = Integer.parseInt(addressIdRaw);
+                            int addressID = Integer.parseInt(addressIdRaw.trim());
                             AddressDAO addressDAO = new AddressDAO();
-                            addressDAO.deleteAddress(addressID);
+                            boolean deleted = addressDAO.deleteAddressByCustomer(
+                                    addressID,
+                                    account.getId()
+                            );
+
+                            if (!deleted) {
+                                request.getSession().setAttribute(
+                                        "errorMessage",
+                                        "Không tìm thấy địa chỉ hoặc bạn không có quyền xóa."
+                                );
+                            }
                         } catch (NumberFormatException e) {
-                            e.printStackTrace();
+                            request.getSession().setAttribute(
+                                    "errorMessage",
+                                    "Mã địa chỉ không hợp lệ."
+                            );
                         }
                     }
 

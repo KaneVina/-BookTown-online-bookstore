@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
     <context-param>
         <param-name>GOOGLE_CLIENT_ID</param-name>
@@ -241,13 +242,13 @@
         <servlet-name>VNPayReturnController</servlet-name>
         <url-pattern>/vnpay-return</url-pattern>
     </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CategoryManagementController</servlet-name>
-        <url-pattern>/category</url-pattern>
-    </servlet-mapping>
+<servlet-mapping>
+    <servlet-name>CategoryManagementController</servlet-name>
+    <url-pattern>/dashboard/category-management</url-pattern>
+</servlet-mapping>
     <servlet-mapping>
         <servlet-name>AddressManagementController</servlet-name>
-        <url-pattern>/address</url-pattern>
+        <url-pattern>/profile/address</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>CreateStaffController</servlet-name>

@@ -164,6 +164,7 @@
                                         required
                                         class="input-premium"
                                         placeholder="Nhập tên đầy đủ">
+                                    <p id="fullnameError" class="text-red-500 text-sm mt-1 hidden"></p>
                                 </div>
                                 <div>
                                     <label class="form-label-modern" for="phone">
@@ -177,6 +178,7 @@
                                         required
                                         class="input-premium"
                                         placeholder="0912345678">
+                                    <p id="phoneError" class="text-red-500 text-sm mt-1 hidden"></p>
                                 </div>
                                          <div>
                                     <label class="form-label-modern text-slate-500">Mã ID</label>
@@ -265,15 +267,65 @@
                 phone: "${account.phone}"
             };
 
+            const form = document.getElementById('profileForm');
             const saveBtn = document.getElementById('saveBtn');
             const fullnameInput = document.getElementById('fullname');
+            const fullnameError = document.getElementById('fullnameError');
             const phoneInput = document.getElementById('phone');
+            const phoneError = document.getElementById('phoneError');
+
+            function setFieldError(inputEl, errorEl, message) {
+                if (message) {
+                    errorEl.textContent = message;
+                    errorEl.classList.remove('hidden');
+                    inputEl.classList.add('border-red-500');
+                } else {
+                    errorEl.textContent = "";
+                    errorEl.classList.add('hidden');
+                    inputEl.classList.remove('border-red-500');
+                }
+                return message === "";
+            }
+
+            function validateFullname() {
+                const value = fullnameInput.value.trim();
+                let message = "";
+
+                if (!value) {
+                    message = "Họ tên không được để trống";
+                } else if (/\s{2,}/.test(value)) {
+                    message = "Họ tên không được chứa nhiều khoảng trắng liên tiếp";
+                } else if (!/^[\p{L}]+( [\p{L}]+)+$/u.test(value)) {
+                    message = value.split(" ").filter(Boolean).length < 2
+                        ? "Họ tên phải có ít nhất 2 từ, ví dụ: \"Trương Trân\""
+                        : "Họ tên chỉ được chứa chữ cái và khoảng trắng";
+                } else if (value.length > 50) {
+                    message = "Họ tên không được vượt quá 50 ký tự";
+                }
+
+                return setFieldError(fullnameInput, fullnameError, message);
+            }
+
+            function validatePhone() {
+                const value = phoneInput.value.trim();
+                let message = "";
+
+                if (!value) {
+                    message = "Số điện thoại không được để trống";
+                } else if (!/^0\d{9}$/.test(value)) {
+                    message = "Số điện thoại phải gồm 10 số và bắt đầu bằng 0";
+                }
+
+                return setFieldError(phoneInput, phoneError, message);
+            }
 
             function checkFormChanges() {
+                const fullnameValid = validateFullname();
+                const phoneValid = validatePhone();
                 const currentFullname = fullnameInput.value.trim();
                 const currentPhone = phoneInput.value.trim();
 
-                if (!currentFullname || !currentPhone) {
+                if (!fullnameValid || !phoneValid) {
                     saveBtn.disabled = true;
                     return;
                 }
@@ -281,6 +333,19 @@
                 const hasChanges = currentFullname !== initialValues.fullname || currentPhone !== initialValues.phone;
                 saveBtn.disabled = !hasChanges;
             }
+
+            form.addEventListener('submit', function (e) {
+                const fullnameValid = validateFullname();
+                const phoneValid = validatePhone();
+
+                if (!fullnameValid || !phoneValid) {
+                    e.preventDefault();
+                    const firstError = !fullnameValid ? fullnameError.textContent : phoneError.textContent;
+                    const focusTarget = !fullnameValid ? fullnameInput : phoneInput;
+                    focusTarget.focus();
+                    showToast(firstError, true);
+                }
+            });
 
             ['input', 'change'].forEach(evt => {
                 fullnameInput.addEventListener(evt, checkFormChanges);

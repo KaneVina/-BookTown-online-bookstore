@@ -31,7 +31,7 @@ public class Book {
     private int originID;
     private String originName;
 
-    // Computed
+
     private double avgRating;
     private int reviewCount;
     private boolean featured;
@@ -41,7 +41,7 @@ public class Book {
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
-    // ── Getters & Setters ──────────────────────────────────────────────
+
     public int getBookID() {
         return bookID;
     }
@@ -242,9 +242,7 @@ public class Book {
         return idx >= 0 ? thumbnail.substring(0, idx).trim() : thumbnail.trim();
     }
 
-    /**
-     * Trả về danh sách TẤT CẢ ảnh (tách theo |)
-     */
+
     public java.util.List<String> getAllImages() {
         java.util.List<String> list = new java.util.ArrayList<>();
         if (thumbnail == null || thumbnail.isEmpty()) {

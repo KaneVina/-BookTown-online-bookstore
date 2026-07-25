@@ -18,7 +18,7 @@
         <%@ include file="/views/layout/dashboard/sidebar.jsp" %>
         <main class="flex-1 md:ml-64 min-h-screen">
             <div class="px-6 py-8 max-w-3xl mx-auto space-y-6">
-                <a href="${pageContext.request.contextPath}/category" class="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
+                <a href="${pageContext.request.contextPath}/dashboard/category-management" class="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
                     <span class="material-symbols-outlined text-[18px]">arrow_back</span>
                     Quay lại danh sách
                 </a>
@@ -29,20 +29,21 @@
                         <p class="text-sm text-on-surface-variant mt-1">Nhập tên thể loại để lưu vào hệ thống BookTown.</p>
                     </div>
 
-                    <form action="${pageContext.request.contextPath}/category" method="post" class="p-6 space-y-5">
+                    <form action="${pageContext.request.contextPath}/dashboard/category-management" method="post" class="p-6 space-y-5">
                         <input type="hidden" name="action" value="${formAction}">
                         <input type="hidden" name="id" value="${genre.genreID}">
 
                         <div>
                             <label class="block text-sm font-bold mb-2">Tên thể loại</label>
-                            <input type="text" name="genre_name" required maxlength="100" value="${genre.genreName}"
+                            <input type="text" name="genre_name" id="genreName" required maxlength="100"
+                                   value="${genre.genreName}"
                                    placeholder="Ví dụ: Văn học, Kỹ năng sống..."
                                    class="w-full rounded-xl border-outline-variant bg-surface-container-low px-4 py-3 text-sm focus:border-primary focus:ring-primary">
-                            <p class="text-xs text-on-surface-variant mt-2">Tên thể loại không được để trống và không được trùng.</p>
+<p class="text-xs text-on-surface-variant mt-2">Chỉ nhập chữ và khoảng trắng, không nhập số hoặc ký tự đặc biệt.</p>
                         </div>
 
                         <div class="flex justify-end gap-3 pt-2">
-                            <a href="${pageContext.request.contextPath}/category"
+                            <a href="${pageContext.request.contextPath}/dashboard/category-management"
                                class="inline-flex items-center justify-center rounded-xl border border-outline-variant bg-white px-5 py-3 text-sm font-semibold text-primary hover:bg-surface-container-low transition">
                                 Hủy
                             </a>
@@ -55,5 +56,25 @@
                 </section>
             </div>
         </main>
+            <script>
+            const allowedGenres = null;
+
+            document.querySelector('form').addEventListener('submit', function (event) {
+                const input = document.getElementById('genreName');
+                const value = input.value.trim().replace(/\s+/g, ' ');
+                input.value = value;
+
+                if (!/^[\p{L}\s]+$/u.test(value)) {
+                    event.preventDefault();
+                    input.setCustomValidity('Tên thể loại chỉ được nhập chữ và khoảng trắng, không được nhập số hoặc ký tự đặc biệt.');
+                    input.reportValidity();
+                    return;
+                }        input.setCustomValidity('');
+            });
+
+            document.getElementById('genreName').addEventListener('input', function () {
+                this.setCustomValidity('');
+            });
+        </script>
     </body>
 </html>
