@@ -39,6 +39,8 @@
         }
     }
     boolean isStaffUser = sidebarUser != null && "staff".equals(sidebarUser.getRole());
+    boolean isAdminUser = sidebarUser != null && "admin".equals(sidebarUser.getRole());
+    boolean isStaffOrAdmin = isStaffUser || isAdminUser;
 %>
 
 <style>
@@ -189,7 +191,9 @@
             <span class="material-symbols-outlined">category</span>
             Thể loại
         </a>
+        <% } %>
 
+        <% if (isStaffOrAdmin) { %>
         <a href="${pageContext.request.contextPath}/dashboard/account-management"
            class="sidebar-link <%= currentPage.contains("account-management") ? "active" : ""%>">
             <span class="material-symbols-outlined">group</span>
@@ -201,7 +205,9 @@
             <span class="material-symbols-outlined">rate_review</span>
             Đánh giá
         </a>
+        <% } %>
 
+        <% if (isStaffUser) { %>
         <a href="${pageContext.request.contextPath}/dashboard/voucher-management"
            class="sidebar-link <%= currentPage.contains("voucher") ? "active" : ""%>">
             <span class="material-symbols-outlined">sell</span>
