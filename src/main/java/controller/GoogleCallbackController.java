@@ -63,16 +63,13 @@ public class GoogleCallbackController extends HttpServlet {
 
         Account acc = null;
 
-// Kiểm tra xem email có phải tài khoản staff/admin (chỉ bảng Account) không
-        if (accountDAO.isStaffEmailExists(email)) {
-            // Staff/admin không được login bằng Google
-            request.setAttribute("errorMessage", "Tài khoản này không hỗ trợ đăng nhập bằng Google.");
-            request.getRequestDispatcher("/views/auth/login.jsp").forward(request, response);
-            return;
-        }
-
-// Tìm trong bảng Customer — KHÔNG tự động đăng ký mới, phải có tài khoản sẵn mới cho login
+// Tìm trong bảng Customer trước 
         acc = customerDAO.getAccountByEmail(email);
+
+// Nếu không phải Customer, thử tìm trong bảng Account(Staff/Admin
+        if (acc == null) {
+            acc = accountDAO.getAccountByEmail(email);
+        }
 
         if (acc == null) {
             request.setAttribute("errorMessage",

@@ -183,14 +183,6 @@ public class AccountDAO {
         return false;
     }
 
-    /**
-     * Kiểm tra email có phải tài khoản staff/admin (chỉ bảng Account) hay
-     * không. Khác với {@link #isEmailExists(String)} ở chỗ KHÔNG kiểm tra luôn
-     * bảng Customer — dùng để phân biệt "email này thuộc staff/admin" trước khi
-     * cho phép đăng nhập Google (chỉ dành cho customer). Nếu dùng
-     * isEmailExists() ở đây, một customer bình thường (email đã tồn tại trong
-     * bảng Customer) sẽ bị chặn nhầm là "không hỗ trợ Google".
-     */
     public boolean isStaffEmailExists(String email) {
         String sql = "SELECT 1 FROM Account WHERE email = ?";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -456,4 +448,26 @@ public class AccountDAO {
         return 0;
     }
 
+    public Account getAccountByEmail(String email) {
+        String sql = "SELECT accountID, fullname, email, phone, role, status "
+                + "FROM Account WHERE email = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Account(
+                            rs.getInt("accountID"),
+                            rs.getString("fullname"),
+                            rs.getString("email"),
+                            rs.getString("phone") != null ? rs.getString("phone") : "",
+                            rs.getString("role"),
+                            rs.getString("status")
+                    );
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
