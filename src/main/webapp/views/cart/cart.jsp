@@ -33,7 +33,6 @@
                                  data-stock="${item.stockQuantity}"
                                  style="box-shadow: 0 4px 20px rgba(21,101,192,0.08);">
 
-                                <%-- Ảnh bìa sách --%>
                                 <div class="w-24 h-36 flex-shrink-0 overflow-hidden rounded-lg bg-[#e6f6ff]">
                                     <c:choose>
                                         <c:when test="${not empty item.thumbnail}">
@@ -62,7 +61,6 @@
 
                                     <c:choose>
                                         <c:when test="${item.stockQuantity == 0}">
-                                            <%-- Hết hàng: hiện badge đỏ, disable 2 nút --%>
                                             <span class="text-xs font-bold text-white bg-red-500 px-3 py-1 rounded-full">Hết hàng</span>
                                             <div class="flex items-center border border-[#c2c6d4] rounded-lg overflow-hidden bg-[#f5f5f5] opacity-50">
                                                 <button class="px-3 py-1 font-bold cursor-not-allowed" disabled>−</button>
@@ -72,7 +70,6 @@
                                             </div>
                                         </c:when>
                                         <c:otherwise>
-                                            <%-- Còn hàng: bình thường --%>
                                             <div class="flex items-center border border-[#c2c6d4] rounded-lg overflow-hidden bg-[#e6f6ff]">
                                                 <button class="px-3 py-1 hover:bg-[#cfe6f2] transition-colors font-bold"
                                                         onclick="updateQty(${item.cartItemID}, ${item.quantity - 1})">−</button>
@@ -204,7 +201,6 @@
             return;
         }
 
-        // Chặn phía client nếu vượt stock
         var card = document.getElementById('cart-item-' + cartItemID);
         var stock = parseInt(card.getAttribute('data-stock'), 10);
         if (newQty > stock) {
@@ -235,7 +231,6 @@
                     buttons[0].setAttribute('onclick', 'updateQty(' + cartItemID + ',' + (newQty - 1) + ')');
                     buttons[1].setAttribute('onclick', 'updateQty(' + cartItemID + ',' + (newQty + 1) + ')');
 
-                    // Cập nhật trạng thái disable nút + và -
                     buttons[1].disabled = (newQty >= stock);
                     buttons[1].classList.toggle('opacity-40', newQty >= stock);
                     buttons[1].classList.toggle('cursor-not-allowed', newQty >= stock);
@@ -341,7 +336,6 @@
     </script>
 
     <script>
-        // Khởi tạo trạng thái nút + khi load trang
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('[data-stock]').forEach(function (card) {
                 var id = card.id.replace('cart-item-', '');

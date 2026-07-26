@@ -11,12 +11,12 @@
     <div class="absolute right-[200px] bottom-[-80px] w-[200px] h-[200px] rounded-full border-[40px] border-white/5 pointer-events-none"></div>
 
     <div class="relative z-10 max-w-2xl">
-        <div class="bg-secondary text-primary font-bold text-xs px-3 py-1 rounded-full inline-block mb-3 tracking-wide uppercase">Kho sách #1 Việt Nam</div>
+        <div class="bg-secondary text-primary font-bold text-xs px-3 py-1 rounded-full inline-block mb-3 tracking-wide uppercase">Kho sách Việt Nam</div>
         <h1 class="text-white text-[38px] font-black leading-[1.15] mb-3">
             Khám phá <em class="text-secondary not-italic">thế giới</em><br>qua từng trang sách
         </h1>
         <p class="text-white/80 text-sm mb-5 max-w-[420px]">
-            Hơn 50.000 đầu sách chính hãng – Văn học, kinh tế, kỹ năng, thiếu nhi. Giao hàng nhanh toàn quốc.
+            Hơn 20 đầu sách chính hãng – Văn học, kinh tế, kỹ năng, thiếu nhi. Giao hàng nhanh toàn quốc.
         </p>
         <div class="flex gap-3">
             <a href="${pageContext.request.contextPath}/products"
@@ -37,7 +37,7 @@
     <div class="flex items-center gap-3 px-6 py-4 border-r border-gray-100">
         <span class="text-3xl"></span>
         <div class="flex flex-col">
-            <strong class="text-[15px] font-bold text-primary leading-tight">50.000+</strong>
+            <strong class="text-[15px] font-bold text-primary leading-tight">20 Sách +</strong>
             <span class="text-xs text-gray-500">Đầu sách có sẵn</span>
         </div>
     </div>
@@ -45,21 +45,21 @@
         <span class="text-3xl"></span>
         <div class="flex flex-col">
             <strong class="text-[15px] font-bold text-primary leading-tight">Miễn phí ship</strong>
-            <span class="text-xs text-gray-500">Đơn từ 299.000đ</span>
+            <span class="text-xs text-gray-500">Ưu đãi đặc biệt</span>
         </div>
     </div>
     <div class="flex items-center gap-3 px-6 py-4 border-r border-gray-100">
         <span class="text-3xl"></span>
         <div class="flex flex-col">
-            <strong class="text-[15px] font-bold text-primary leading-tight">Chính hãng 100%</strong>
-            <span class="text-xs text-gray-500">Cam kết từ nhà xuất bản</span>
+            <strong class="text-[15px] font-bold text-primary leading-tight">Chính hãng</strong>
+            <span class="text-xs text-gray-500">Cam kết từ BookTown</span>
         </div>
     </div>
     <div class="flex items-center gap-3 px-6 py-4">
         <span class="text-3xl"></span>
         <div class="flex flex-col">
             <strong class="text-[15px] font-bold text-primary leading-tight">Đổi trả 7 ngày</strong>
-            <span class="text-xs text-gray-500">Không cần lý do</span>
+            <span class="text-xs text-gray-500">Hoàn tiền nhanh chóng</span>
         </div>
     </div>
 </section>

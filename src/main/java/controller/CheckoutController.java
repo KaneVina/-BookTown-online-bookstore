@@ -38,8 +38,6 @@ public class CheckoutController extends HttpServlet {
         if (action != null) {
             switch (action) {
                 case "deleteAddress":
-                    // Chỉ cho phép xóa địa chỉ thuộc đúng khách hàng đang đăng nhập.
-                    // Không dùng deleteAddress(addressID) vì có thể gây IDOR.
                     String addressIdRaw = request.getParameter("addressID");
 
                     if (addressIdRaw != null && !addressIdRaw.trim().isEmpty()) {
@@ -79,7 +77,6 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-        // Lọc bỏ sản phẩm hết hàng (stock = 0) trước khi tải trang thanh toán
         cartItems.removeIf(item -> item.getStockQuantity() == 0);
 
         if (cartItems.isEmpty()) {
