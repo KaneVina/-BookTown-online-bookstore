@@ -83,7 +83,7 @@ public class CartController extends HttpServlet {
         Account account = getAccount(request);
         CartDAO cartDAO = new CartDAO();
 
-        // Validate stock trước khi cộng dồn
+     
         int stock      = cartDAO.getStockByBookID(bookID);
         int currentQty = cartDAO.getCurrentCartQty(account.getId(), bookID);
         if (currentQty + quantity > stock) {
@@ -124,7 +124,6 @@ public class CartController extends HttpServlet {
         if (newQty < 1) {
             cartDAO.removeItem(cartItemID, account.getId());
         } else {
-            // Validate stock server-side
             int stock = cartDAO.getStockByCartItemID(cartItemID);
             if (newQty > stock) {
                 String msg = stock == 0

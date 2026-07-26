@@ -13,10 +13,9 @@ public class OrderDetail {
     private int bookID;
     private int quantity;
     private BigDecimal unitPrice;
-
     private String title;
     private String thumbnail;
-    private String authorsDisplay;
+   
 
     public OrderDetail() {
     }
@@ -77,13 +76,6 @@ public class OrderDetail {
         this.thumbnail = thumbnail;
     }
 
-    public String getAuthorsDisplay() {
-        return authorsDisplay;
-    }
-
-    public void setAuthorsDisplay(String authorsDisplay) {
-        this.authorsDisplay = authorsDisplay;
-    }
     public BigDecimal getSubtotal() {
         if (unitPrice == null) return BigDecimal.ZERO;
         return unitPrice.multiply(BigDecimal.valueOf(quantity));

@@ -182,7 +182,7 @@
     </div>
 </div>
 
-<!-- Modal nhập lý do hủy đơn hàng (Khách hàng ở danh sách) -->
+<!-- Modal nhập lý do hủy đơn hàng -->
 <div id="customerCancelModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[200]">
     <div class="bg-white w-[460px] rounded-xl p-6 relative shadow-xl">
         <button type="button" onclick="closeCustomerCancelModal()"

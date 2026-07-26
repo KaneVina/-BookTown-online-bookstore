@@ -728,8 +728,6 @@
             });
         }
 
-        // Danh sách địa chỉ luôn lấy từ database do server render.
-        // Không khôi phục địa chỉ từ localStorage để tránh dữ liệu giả hoặc dữ liệu đã xóa xuất hiện lại.
         document.querySelectorAll('.address-option').forEach(bindAddressOption);
 
         document.getElementById('btnCancelDeleteAddress').addEventListener('click', function () {
@@ -765,7 +763,6 @@
                         }
 
                         softDeleteAddress(targetOption);
-                        // Xóa dấu vết localStorage cũ; database mới là nguồn dữ liệu duy nhất.
                         localStorage.removeItem(ADDRESS_STORAGE_KEY);
                         localStorage.removeItem(DELETED_STORAGE_KEY);
                     })

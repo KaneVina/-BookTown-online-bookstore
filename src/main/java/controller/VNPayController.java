@@ -75,7 +75,6 @@ public class VNPayController extends HttpServlet {
             return;
         }
 
-        // Lọc bỏ sản phẩm hết hàng trước khi chuyển sang VNPay
         cartItems.removeIf(item -> item.getStockQuantity() == 0);
 
         if (cartItems.isEmpty()) {
@@ -86,7 +85,6 @@ public class VNPayController extends HttpServlet {
 
         BigDecimal total = cartDAO.calcSubtotal(cartItems);
 
-        // Áp dụng số tiền giảm giá từ voucher (nếu khách hàng đã áp dụng ở trang checkout)
         Double discountObj = (Double) session.getAttribute("appliedVoucherDiscount");
         if (discountObj != null && discountObj > 0) {
             BigDecimal discount = BigDecimal.valueOf(discountObj);

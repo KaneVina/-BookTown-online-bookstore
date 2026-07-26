@@ -93,7 +93,6 @@
                                             </c:choose>
                                         </span>
 
-                                        <%-- Tag hoàn tiền: chỉ hiện khi VNPAY đã hủy --%>
                                             <c:if
                                                 test="${order.status == 'cancelled' && order.paymentMethod == 'vnpay'}">
                                                 <c:choose>
@@ -407,7 +406,6 @@
                                             <c:choose>
                                                 <c:when test="${order.status == 'cancelled'}">
                                                     <c:choose>
-                                                        <%-- VNPAY đang chờ hoàn tiền --%>
                                                             <c:when
                                                                 test="${order.paymentMethod == 'vnpay' && order.paymentStatus == 'pending_refund'}">
                                                                 <div class="space-y-3">
@@ -432,7 +430,7 @@
                                                                             </p>
                                                                         </c:if>
                                                                     </div>
-                                                                    <%-- Nút xác nhận hoàn tiền --%>
+                                                                    
                                                                         <form
                                                                             action="${pageContext.request.contextPath}/dashboard/customer-order"
                                                                             method="POST" id="confirmRefundForm">
@@ -450,7 +448,7 @@
                                                                         </form>
                                                                 </div>
                                                             </c:when>
-                                                            <%-- VNPAY đã hoàn tiền xong --%>
+                                                       
                                                                 <c:when
                                                                     test="${order.paymentMethod == 'vnpay' && order.paymentStatus == 'refunded'}">
                                                                     <div
@@ -475,7 +473,7 @@
                                                                         </c:if>
                                                                     </div>
                                                                 </c:when>
-                                                                <%-- Mặc định (COD hoặc không có tiền hoàn) --%>
+                                                            
                                                                     <c:otherwise>
                                                                         <div
                                                                             class="flex flex-col gap-2 p-4 bg-red-50 rounded-lg border border-red-200">

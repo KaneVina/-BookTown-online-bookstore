@@ -109,7 +109,6 @@ public class VNPayReturnController extends HttpServlet {
             orderDAO.updatePaymentStatus(orderID, "paid");
             orderDAO.clearCart(account.getId());
 
-            // Ghi nhận voucher đã sử dụng (nếu có) khi thanh toán VNPay thành công
             Integer appliedVoucherID = (Integer) session.getAttribute("appliedVoucherID");
             if (appliedVoucherID != null) {
                 String appliedCode = (String) session.getAttribute("appliedVoucherCode");
