@@ -117,7 +117,6 @@ public class ProfileController extends HttpServlet {
         boolean isCustomer = "customer".equalsIgnoreCase(acc.getRole());
 
         if (isCustomer) {
-            // Ngày sinh là tùy chọn: chỉ validate khi người dùng có nhập
             dob = safeTrim(dob);
             if (!dob.isEmpty()) {
                 try {

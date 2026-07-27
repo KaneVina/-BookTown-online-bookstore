@@ -108,9 +108,6 @@ public class CartItem implements Serializable {
         return price.multiply(BigDecimal.valueOf(quantity));
     }
 
-    /**
-     * Trả về URL ảnh đầu tiên trong chuỗi thumbnail ngăn bởi '|'
-     */
     public String getThumbnailFirst() {
         if (thumbnail == null || thumbnail.isEmpty()) {
             return "";

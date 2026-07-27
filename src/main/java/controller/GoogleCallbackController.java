@@ -93,9 +93,7 @@ public class GoogleCallbackController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/home");
     }
 
-    // ---------------------------------------------------------------
     // Đổi authorization code → access_token
-    // ---------------------------------------------------------------
     private String exchangeCodeForToken(String code) {
         try {
             URL url = new URL("https://oauth2.googleapis.com/token");
@@ -133,9 +131,7 @@ public class GoogleCallbackController extends HttpServlet {
         }
     }
 
-    // ---------------------------------------------------------------
     // Dùng access_token lấy email + name từ Google
-    // ---------------------------------------------------------------
     private String[] getUserInfo(String accessToken) {
         try {
             URL url = new URL("https://www.googleapis.com/oauth2/v3/userinfo");
@@ -166,9 +162,7 @@ public class GoogleCallbackController extends HttpServlet {
         }
     }
 
-    // ---------------------------------------------------------------
     // Parse giá trị từ JSON string đơn giản (không dùng thư viện)
-    // ---------------------------------------------------------------
     private String extractJsonValue(String json, String key) {
         String search = "\"" + key + "\"";
         int idx = json.indexOf(search);

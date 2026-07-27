@@ -180,8 +180,6 @@ public class CustomerDAO {
         return list;
     }
 
-    // Các giá trị status hợp lệ cho Customer. Kiểm tra ở đây để phòng trường hợp
-    // Controller gọi hàm này chưa validate (defense in depth).
     private static final java.util.Set<String> VALID_CUSTOMER_STATUSES
             = java.util.Set.of("active", "inactive");
 
