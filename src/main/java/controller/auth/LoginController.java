@@ -77,7 +77,7 @@ public class LoginController extends HttpServlet {
             session.setAttribute("successMessage", "Đăng nhập thành công! Chào mừng " + acc.getFullname() + ".");
 
             if (acc.getRole().equals("admin") || acc.getRole().equals("staff")) {
-                response.sendRedirect(request.getContextPath() + "/dashboard/account-management");
+                response.sendRedirect(request.getContextPath() + "/dashboard");
             } else {
                 response.sendRedirect(request.getContextPath() + "/home");
             }
