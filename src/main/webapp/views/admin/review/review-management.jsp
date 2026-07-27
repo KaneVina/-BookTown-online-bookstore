@@ -209,9 +209,7 @@
                                                 </td>
                                                 <td class="px-6 py-5">
                                                     <div class="flex items-center gap-3">
-                                                        <c:if test="${not empty review.bookCover}">
-                                                            <img alt="Book Cover" class="w-10 h-14 object-cover rounded shadow-sm" src="${review.bookCover}"/>
-                                                        </c:if>
+                                                       
                                                         <span class="font-body-sm text-body-sm text-on-surface max-w-[120px] line-clamp-2">${review.bookTitle}</span>
                                                     </div>
                                                 </td>

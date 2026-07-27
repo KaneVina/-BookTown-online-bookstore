@@ -307,11 +307,6 @@ public class CheckoutController extends HttpServlet {
 
         orderDAO.clearCart(account.getId());
 
-        // Ghi nhận voucher đã được sử dụng, chỉ sau khi đơn hàng tạo thành công.
-        // insertVoucherUsage giờ atomic (check + insert cùng 1 transaction có khóa),
-        // nên dù 2 request race nhau ở bước validateVoucher phía trên, chỉ 1 request
-        // duy nhất ghi nhận thành công tại đây — request còn lại nhận USAGE_ALREADY_USED
-        // hoặc USAGE_OUT_OF_QUANTITY.
         if (appliedVoucherID != null) {
             VoucherDAO voucherDAO2 = new VoucherDAO();
             Integer voucherQuantity = null;
@@ -326,10 +321,6 @@ public class CheckoutController extends HttpServlet {
                     .insertVoucherUsage(account.getId(), appliedVoucherID, voucherQuantity);
 
             if (usageResult != dao.VoucherDAO.USAGE_OK) {
-                // Race condition: request khác đã tranh mất lượt voucher trong khoảng thời gian
-                // giữa validateVoucher() và insertVoucherUsage(). Đơn hàng đã được tạo và kho đã
-                // trừ nên KHÔNG cancel đơn — thay vào đó cập nhật lại total về giá gốc (bỏ giảm giá)
-                // để đảm bảo doanh thu đúng, và thông báo rõ cho khách hàng.
                 String voucherErrorMsg;
                 if (usageResult == dao.VoucherDAO.USAGE_OUT_OF_QUANTITY) {
                     voucherErrorMsg = "Voucher vừa hết lượt do người khác sử dụng trước. "
@@ -406,11 +397,6 @@ public class CheckoutController extends HttpServlet {
         }
     }
 
-    // =================================================================
-    // VOUCHER — logic nghiệp vụ đặt tại Controller (đúng mô hình MVC2,
-    // DAO chỉ đảm nhiệm truy vấn dữ liệu thuần)
-    // =================================================================
-
     private static final String SESSION_VOUCHER_ID       = "appliedVoucherID";
     private static final String SESSION_VOUCHER_CODE     = "appliedVoucherCode";
     private static final String SESSION_VOUCHER_DISCOUNT = "appliedVoucherDiscount";
@@ -422,11 +408,6 @@ public class CheckoutController extends HttpServlet {
         double discountAmount;
     }
 
-    /**
-     * Kiểm tra toàn bộ điều kiện áp dụng voucher: tồn tại, đang active,
-     * trong thời gian hiệu lực, đơn hàng đạt giá trị tối thiểu, còn lượt sử dụng,
-     * khách hàng chưa từng dùng voucher này. Tính luôn số tiền được giảm (có chặn trần).
-     */
     private VoucherResult validateVoucher(String code, int customerID, BigDecimal orderTotal, VoucherDAO voucherDAO) {
         VoucherResult r = new VoucherResult();
 
@@ -496,7 +477,6 @@ public class CheckoutController extends HttpServlet {
         return r;
     }
 
-    /** AJAX: khách hàng nhập mã voucher và bấm "Áp dụng" ở trang checkout. */
     private void handleApplyVoucher(HttpServletRequest request, HttpServletResponse response, Account account)
             throws IOException {
 
@@ -539,7 +519,6 @@ public class CheckoutController extends HttpServlet {
         response.getWriter().write(json);
     }
 
-    /** AJAX: khách hàng bấm gỡ voucher đang áp dụng. */
     private void handleRemoveVoucher(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
 
@@ -553,7 +532,6 @@ public class CheckoutController extends HttpServlet {
         response.getWriter().write("{\"success\":true}");
     }
 
-    /** AJAX: trả về danh sách voucher đang khả dụng để hiển thị modal "Voucher của Shop". */
     private void handleListVouchers(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         response.setContentType("application/json;charset=UTF-8");
