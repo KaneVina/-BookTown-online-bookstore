@@ -27,6 +27,11 @@ public class Order {
     private String street;
     private String district;
     private String cancelReason;
+    private String customerName;
+    private String customerEmail;
+    private String customerPhone;
+    private String recipientName;
+    private String recipientPhone;
 
     public String getStreet() {
         return street;
@@ -136,14 +141,6 @@ public class Order {
         String seqPart = String.format("%06d", orderID);
         return "BT-" + datePart + seqPart;
     }
-
-    private String customerName;
-    private String customerEmail;
-    private String customerPhone;
-
-    // Tên và SĐT người nhận lấy từ Address (recipient_name, recipient_phone)
-    private String recipientName;
-    private String recipientPhone;
 
     public String getCustomerName() {
         return customerName;

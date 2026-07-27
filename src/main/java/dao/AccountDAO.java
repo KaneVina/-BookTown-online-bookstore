@@ -448,4 +448,26 @@ public class AccountDAO {
         return 0;
     }
 
+    public Account getAccountByEmail(String email) {
+        String sql = "SELECT accountID, fullname, email, phone, role, status "
+                + "FROM Account WHERE email = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Account(
+                            rs.getInt("accountID"),
+                            rs.getString("fullname"),
+                            rs.getString("email"),
+                            rs.getString("phone") != null ? rs.getString("phone") : "",
+                            rs.getString("role"),
+                            rs.getString("status")
+                    );
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

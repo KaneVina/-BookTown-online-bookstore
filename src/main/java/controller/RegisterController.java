@@ -26,10 +26,10 @@ public class RegisterController extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
 
         // trim
-        String fullname        = trim(request.getParameter("fullname"));
-        String email           = trim(request.getParameter("email"));
-        String phone           = trim(request.getParameter("phone"));
-        String password        = trim(request.getParameter("password"));
+        String fullname = trim(request.getParameter("fullname"));
+        String email = trim(request.getParameter("email"));
+        String phone = trim(request.getParameter("phone"));
+        String password = trim(request.getParameter("password"));
         String confirmPassword = trim(request.getParameter("confirmPassword"));
 
         // Validate dữ liệu
@@ -53,11 +53,11 @@ public class RegisterController extends HttpServlet {
         // Lưu thông tin vào session để OtpController xử lý tiếp
         HttpSession session = request.getSession();
         session.setAttribute("otp_fullname", fullname);
-        session.setAttribute("otp_email",    email);
-        session.setAttribute("otp_phone",    phone);
+        session.setAttribute("otp_email", email);
+        session.setAttribute("otp_phone", phone);
         session.setAttribute("otp_password", password);
-        session.setAttribute("otp_code",     otp);
-        session.setAttribute("otp_created",  System.currentTimeMillis());
+        session.setAttribute("otp_code", otp);
+        session.setAttribute("otp_created", System.currentTimeMillis());
 
         // Gửi OTP qua email
         try {
@@ -74,51 +74,68 @@ public class RegisterController extends HttpServlet {
     }
 
     private String validate(String fullname, String email, String phone,
-                             String password, String confirmPassword) {
+            String password, String confirmPassword) {
         // Kiểm tra không được bỏ trống
-        if (fullname == null || fullname.isEmpty())
+        if (fullname == null || fullname.isEmpty()) {
             return "Họ và tên không được để trống.";
+        }
 
-        // Họ và tên phải có ít nhất 2 từ (vd: "Nguyễn Văn A"), không chứa số/ký tự đặc biệt
         String[] nameParts = fullname.trim().split("\\s+");
-        if (nameParts.length < 2)
+        if (nameParts.length < 2) {
             return "Vui lòng nhập đầy đủ họ và tên (tối thiểu 2 từ).";
-        if (!fullname.matches("^[\\p{L}\\s]+$"))
+        }
+        if (!fullname.matches("^[\\p{L}\\s]+$")) {
             return "Họ và tên không được chứa số hoặc ký tự đặc biệt.";
-        if (email == null || email.isEmpty())
+        }
+        if (email == null || email.isEmpty()) {
             return "Email không được để trống.";
-        if (phone == null || phone.isEmpty())
+        }
+        if (phone == null || phone.isEmpty()) {
             return "Số điện thoại không được để trống.";
-        if (password == null || password.isEmpty())
+        }
+        if (password == null || password.isEmpty()) {
             return "Mật khẩu không được để trống.";
-        if (confirmPassword == null || confirmPassword.isEmpty())
+        }
+        if (fullname.length() < 2 || fullname.length() > 50) {
+            return "Họ và tên phải từ 2 đến 50 ký tự.";
+        }
+        if (confirmPassword == null || confirmPassword.isEmpty()) {
             return "Xác nhận mật khẩu không được để trống.";
+        }
 
         // Kiểm tra định dạng email (hỗ trợ cả tên miền phụ, vd: mail.co.uk)
-        if (!email.matches("^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)*\\.[a-zA-Z]{2,}$"))
+        if (!email.matches("^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)*\\.[a-zA-Z]{2,}$")) {
             return "Định dạng email không hợp lệ.";
+        }
 
         // Kiểm tra định dạng số điện thoại Việt Nam
-        if (!phone.matches("^(0[35789])\\d{8}$"))
+        if (!phone.matches("^(0[35789])\\d{8}$")) {
             return "Số điện thoại không đúng định dạng.";
+        }
 
         // Kiểm tra độ dài mật khẩu 8 - 15 ký tự
-        if (password.length() < 8 || password.length() > 15)
+        if (password.length() < 8 || password.length() > 15) {
             return "Mật khẩu phải từ 8 đến 15 ký tự.";
+        }
 
         // Kiểm tra mật khẩu phải có đủ chữ hoa, chữ thường, số, ký tự đặc biệt
-        if (!password.matches(".*[A-Z].*"))
+        if (!password.matches(".*[A-Z].*")) {
             return "Mật khẩu phải có ít nhất 1 chữ hoa.";
-        if (!password.matches(".*[a-z].*"))
+        }
+        if (!password.matches(".*[a-z].*")) {
             return "Mật khẩu phải có ít nhất 1 chữ thường.";
-        if (!password.matches(".*[0-9].*"))
+        }
+        if (!password.matches(".*[0-9].*")) {
             return "Mật khẩu phải có ít nhất 1 chữ số.";
-        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*"))
+        }
+        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*")) {
             return "Mật khẩu phải có ít nhất 1 ký tự đặc biệt.";
+        }
 
         // Kiểm tra xác nhận mật khẩu
-        if (!password.equals(confirmPassword))
+        if (!password.equals(confirmPassword)) {
             return "Mật khẩu xác nhận không khớp.";
+        }
 
         return null;
     }

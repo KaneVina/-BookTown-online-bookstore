@@ -63,16 +63,13 @@ public class GoogleCallbackController extends HttpServlet {
 
         Account acc = null;
 
-// Kiểm tra xem email có phải tài khoản staff/admin (chỉ bảng Account) không
-        if (accountDAO.isStaffEmailExists(email)) {
-            // Staff/admin không được login bằng Google
-            request.setAttribute("errorMessage", "Tài khoản này không hỗ trợ đăng nhập bằng Google.");
-            request.getRequestDispatcher("/views/auth/login.jsp").forward(request, response);
-            return;
-        }
-
-// Tìm trong bảng Customer — KHÔNG tự động đăng ký mới, phải có tài khoản sẵn mới cho login
+// Tìm trong bảng Customer trước 
         acc = customerDAO.getAccountByEmail(email);
+
+// Nếu không phải Customer, thử tìm trong bảng Account(Staff/Admin
+        if (acc == null) {
+            acc = accountDAO.getAccountByEmail(email);
+        }
 
         if (acc == null) {
             request.setAttribute("errorMessage",
@@ -96,9 +93,7 @@ public class GoogleCallbackController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/home");
     }
 
-    // ---------------------------------------------------------------
     // Đổi authorization code → access_token
-    // ---------------------------------------------------------------
     private String exchangeCodeForToken(String code) {
         try {
             URL url = new URL("https://oauth2.googleapis.com/token");
@@ -136,9 +131,7 @@ public class GoogleCallbackController extends HttpServlet {
         }
     }
 
-    // ---------------------------------------------------------------
     // Dùng access_token lấy email + name từ Google
-    // ---------------------------------------------------------------
     private String[] getUserInfo(String accessToken) {
         try {
             URL url = new URL("https://www.googleapis.com/oauth2/v3/userinfo");
@@ -169,9 +162,7 @@ public class GoogleCallbackController extends HttpServlet {
         }
     }
 
-    // ---------------------------------------------------------------
     // Parse giá trị từ JSON string đơn giản (không dùng thư viện)
-    // ---------------------------------------------------------------
     private String extractJsonValue(String json, String key) {
         String search = "\"" + key + "\"";
         int idx = json.indexOf(search);
