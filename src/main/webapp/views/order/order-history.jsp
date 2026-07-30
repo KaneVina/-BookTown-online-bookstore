@@ -186,20 +186,20 @@
 <div id="customerCancelModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[200]">
     <div class="bg-white w-[460px] rounded-xl p-6 relative shadow-xl">
         <button type="button" onclick="closeCustomerCancelModal()"
-            class="absolute top-3 right-4 text-2xl text-gray-400 hover:text-gray-600">&times;</button>
+                class="absolute top-3 right-4 text-2xl text-gray-400 hover:text-gray-600">&times;</button>
         <h3 class="text-lg font-bold text-[#D32F2F] mb-2" id="cancelModalTitle">Hủy đơn hàng</h3>
         <p class="text-sm text-gray-500 mb-3">Vui lòng nhập lý do bạn muốn hủy đơn hàng này.</p>
         <div id="cancelModalError" class="hidden mb-3 px-3 py-2 bg-red-50 border border-red-300 text-red-600 text-sm rounded-lg"></div>
         <textarea id="customerCancelReasonText" rows="4" maxlength="50"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
-            placeholder="Nhập lý do hủy... (10-50 ký tự, phải có chữ cái)"></textarea>
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+                  placeholder="Nhập lý do hủy... (10-50 ký tự, phải có chữ cái)"></textarea>
         <div class="flex justify-end gap-3 mt-4">
             <button type="button" onclick="closeCustomerCancelModal()"
-                class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100">
+                    class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100">
                 Thoát
             </button>
             <button type="button" onclick="submitCustomerCancelFormList()"
-                class="px-4 py-2 bg-[#D32F2F] text-white rounded-lg text-sm font-semibold hover:opacity-90">
+                    class="px-4 py-2 bg-[#D32F2F] text-white rounded-lg text-sm font-semibold hover:opacity-90">
                 Xác nhận hủy đơn
             </button>
         </div>
@@ -262,7 +262,8 @@
     function openCustomerCancelModalList(orderId, orderCode) {
         currentCancelOrderId = orderId;
         var titleElem = document.getElementById('cancelModalTitle');
-        if (titleElem) titleElem.textContent = 'Hủy đơn hàng #' + orderCode;
+        if (titleElem)
+            titleElem.textContent = 'Hủy đơn hàng #' + orderCode;
         var textElem = document.getElementById('customerCancelReasonText');
         if (textElem) {
             textElem.value = '';

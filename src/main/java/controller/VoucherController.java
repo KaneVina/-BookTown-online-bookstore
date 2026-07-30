@@ -83,9 +83,6 @@ public class VoucherController extends HttpServlet {
         }
     }
 
-    // ---------------------------------------------------------------
-    // ADD — status luôn là "active", không nhận từ form
-    // ---------------------------------------------------------------
     private void handleAdd(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
@@ -108,9 +105,6 @@ public class VoucherController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/dashboard/voucher-management");
     }
 
-    // ---------------------------------------------------------------
-    // EDIT — status lấy từ form (toggle)
-    // ---------------------------------------------------------------
     private void handleEdit(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
@@ -177,9 +171,6 @@ public class VoucherController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/dashboard/voucher-management");
     }
 
-    // ---------------------------------------------------------------
-    // Input DTO
-    // ---------------------------------------------------------------
     private static class VoucherInput {
         String    code;
         double    discount;
@@ -192,14 +183,9 @@ public class VoucherController extends HttpServlet {
         String    errorMsg;
     }
 
-    /**
-     * @param isCreate true = form tạo mới (không đọc status, validate startDate >= hôm nay)
-     *                 false = form chỉnh sửa (đọc status từ toggle)
-     */
     private VoucherInput validateVoucherInput(HttpServletRequest request, boolean isCreate) {
         VoucherInput v = new VoucherInput();
 
-        // --- Code ---
         String code = request.getParameter("code");
         if (code == null || code.trim().isEmpty()) {
             v.errorMsg = "Mã voucher không được để trống.";
@@ -207,7 +193,6 @@ public class VoucherController extends HttpServlet {
         }
         v.code = code.trim().toUpperCase();
 
-        // --- Discount ---
         try {
             v.discount = Double.parseDouble(request.getParameter("discountPercent"));
         } catch (NumberFormatException e) {
@@ -219,7 +204,6 @@ public class VoucherController extends HttpServlet {
             return v;
         }
 
-        // --- Quantity ---
         String quantityStr = request.getParameter("quantity");
         if (quantityStr != null && !quantityStr.trim().isEmpty()) {
             try {
@@ -235,7 +219,6 @@ public class VoucherController extends HttpServlet {
             }
         }
 
-        // --- Min order value ---
         String minOrderStr = request.getParameter("minOrderValue");
         if (minOrderStr != null && !minOrderStr.trim().isEmpty()) {
             try {
@@ -251,7 +234,6 @@ public class VoucherController extends HttpServlet {
             }
         }
 
-        // --- Max discount value ---
         String maxDiscStr = request.getParameter("maxDiscountValue");
         if (maxDiscStr != null && !maxDiscStr.trim().isEmpty()) {
             try {
@@ -267,11 +249,9 @@ public class VoucherController extends HttpServlet {
             }
         }
 
-        // --- Dates ---
         v.startDate = parseDate(request.getParameter("startDate"));
         v.endDate   = parseDate(request.getParameter("endDate"));
 
-        // Validate startDate >= hôm nay (chỉ khi tạo mới)
         if (isCreate && v.startDate != null) {
             Timestamp today = Timestamp.valueOf(LocalDate.now().atStartOfDay());
             if (v.startDate.before(today)) {
@@ -280,13 +260,11 @@ public class VoucherController extends HttpServlet {
             }
         }
 
-        // startDate phải trước endDate
         if (v.startDate != null && v.endDate != null && !v.startDate.before(v.endDate)) {
             v.errorMsg = "Ngày bắt đầu phải trước ngày kết thúc.";
             return v;
         }
 
-        // --- Status (chỉ edit mới đọc, create luôn active) ---
         if (!isCreate) {
             String statusParam = request.getParameter("status");
             if ("active".equals(statusParam) || "inactive".equals(statusParam)) {
@@ -299,15 +277,6 @@ public class VoucherController extends HttpServlet {
         return v;
     }
 
-    // ---------------------------------------------------------------
-    // Helpers
-    // ---------------------------------------------------------------
-    /**
-     * Route /dashboard/voucher-management đã được AuthFilter bảo vệ bằng whitelist
-     * ("admin"/"staff" mới được vào). Ở đây chỉ kiểm tra session tồn tại như một lớp
-     * phòng thủ cuối (defense in depth), KHÔNG check lại role để tránh 2 nơi check
-     * theo 2 kiểu khác nhau (blacklist vs whitelist) dễ lệch pha khi thêm role mới.
-     */
     private boolean hasAccess(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         HttpSession session = request.getSession(false);

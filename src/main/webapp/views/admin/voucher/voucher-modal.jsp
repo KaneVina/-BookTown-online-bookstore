@@ -23,7 +23,6 @@
                 <input type="hidden" name="action" id="formAction" value="add"/>
                 <input type="hidden" name="voucherID" id="formVoucherID" value=""/>
 
-                <%-- Mã code --%>
                 <div>
                     <label class="block text-sm font-semibold mb-1.5" style="color:#071e27;">
                         Mã Code <span style="color:#D32F2F;">*</span>
@@ -43,7 +42,6 @@
                     </div>
                 </div>
 
-                <%-- Giảm giá + Số lượng --%>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold mb-1.5" style="color:#071e27;">
@@ -67,7 +65,6 @@
                     </div>
                 </div>
 
-                <%-- Đơn hàng tối thiểu + Giảm tối đa --%>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold mb-1.5" style="color:#071e27;">
@@ -93,7 +90,6 @@
                     </div>
                 </div>
 
-                <%-- Ngày bắt đầu + Ngày kết thúc --%>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold mb-1.5" style="color:#071e27;">Ngày bắt đầu</label>
@@ -112,7 +108,6 @@
                     </div>
                 </div>
 
-                <%-- Toggle trạng thái — chỉ hiện khi EDIT --%>
                 <div id="statusSection" class="hidden">
                     <label class="block text-sm font-semibold mb-1.5" style="color:#071e27;">Trạng thái</label>
                     <label class="inline-flex items-center cursor-pointer gap-3">
@@ -128,7 +123,6 @@
                 </div>
             </form>
 
-            <%-- Preview --%>
             <div class="w-full lg:w-72 flex-shrink-0">
                 <p class="text-xs font-semibold text-center mb-3" style="color:#727783;">XEM TRƯỚC</p>
                 <div class="border-2 border-dashed rounded-xl p-6 text-center relative overflow-hidden"
@@ -168,7 +162,6 @@
     </div>
 </div>
 
-<%-- ===== DELETE CONFIRM ===== --%>
 <div class="fixed inset-0 z-[60] hidden" id="deleteDialog" style="background:rgba(30,51,60,0.6);">
     <div class="absolute inset-0" onclick="closeDeleteDialog()"></div>
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-card-hover w-full max-w-sm p-6 text-center">
