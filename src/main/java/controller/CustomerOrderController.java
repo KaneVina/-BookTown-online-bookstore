@@ -238,8 +238,14 @@ public class CustomerOrderController extends HttpServlet {
 
         if (ok) {
             if ("cancelled".equalsIgnoreCase(status)) {
-                if (order != null && ("pending".equalsIgnoreCase(order.getStatus()) || "confirmed".equalsIgnoreCase(order.getStatus()))) {
-                    orderDAO.restoreStock(orderID);
+                if (order != null) {
+                    String currentStatus = order.getStatus();
+                    boolean isPending = "pending".equalsIgnoreCase(currentStatus);
+                    boolean isConfirmed = "confirmed".equalsIgnoreCase(currentStatus);
+                    boolean isShipping = "shipping".equalsIgnoreCase(currentStatus);
+                    if (isPending || isConfirmed || isShipping) {
+                        orderDAO.restoreStock(orderID);
+                    }
                 }
             }
             session.setAttribute("successMessage", "Cập nhật trạng thái đơn hàng thành công!");

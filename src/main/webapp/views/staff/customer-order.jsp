@@ -260,6 +260,8 @@
                                                                    value="updateStatus">
                                                             <input type="hidden" name="orderID"
                                                                    value="${order.orderID}">
+                                                            <input type="hidden" name="cancelReason"
+                                                                   class="cancelReasonInput" value="">
                                                             <select name="status"
                                                                     onchange="confirmStatusChange(this)"
                                                                     class="bg-white border border-gray-300 text-gray-700 rounded-lg text-xs focus:ring-[#004d99] focus:border-[#004d99] px-2 py-1 cursor-pointer">
@@ -282,6 +284,8 @@
                                                                    value="updateStatus">
                                                             <input type="hidden" name="orderID"
                                                                    value="${order.orderID}">
+                                                            <input type="hidden" name="cancelReason"
+                                                                   class="cancelReasonInput" value="">
                                                             <select name="status"
                                                                     onchange="confirmStatusChange(this)"
                                                                     class="bg-white border border-gray-300 text-gray-700 rounded-lg text-xs focus:ring-[#004d99] focus:border-[#004d99] px-2 py-1 cursor-pointer">
