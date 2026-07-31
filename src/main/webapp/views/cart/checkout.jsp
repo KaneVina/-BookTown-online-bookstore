@@ -1,317 +1,327 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-    <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-        <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-            <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-                <%@ include file="/views/layout/homepage/header.jsp" %>
-                    <%@ include file="/views/layout/common/toast.jsp" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ include file="/views/layout/homepage/header.jsp" %>
+<%@ include file="/views/layout/common/toast.jsp" %>
 
-                        <body class="bg-background-alt text-on-background font-body-md min-h-screen">
-                            <main class="max-w-[1280px] mx-auto px-4 md:px-16 py-12 min-h-[716px] text-[#071e27]">
+<body class="bg-background-alt text-on-background font-body-md min-h-screen">
+    <main class="max-w-[1280px] mx-auto px-4 md:px-16 py-12 min-h-[716px] text-[#071e27]">
 
-                                <h1
-                                    class="text-[20px] font-bold mb-stack-md text-primary pl-3 border-l-4 border-secondary">
-                                    THANH TOÁN AN TOÀN
-                                </h1>
+        <h1
+            class="text-[20px] font-bold mb-stack-md text-primary pl-3 border-l-4 border-secondary">
+            THANH TOÁN AN TOÀN
+        </h1>
 
-                                <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
-                                    <div class="lg:col-span-8 space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+            <div class="lg:col-span-8 space-y-6">
 
-                                        <section
-                                            class="bg-surface rounded-xl style-card border border-outline-variant overflow-hidden">
+                <!-- Thanh toán -->
+                <section
+                    class="bg-surface rounded-xl style-card border border-outline-variant overflow-hidden">
+                    <div
+                        class="p-6 border-b border-surface-container flex items-center justify-between">
+                        <h2 class="text-[16px] font-bold text-primary flex items-center gap-2">
+                            <i data-lucide="shopping-bag"></i>
+                            Kiểm tra đơn hàng
+                        </h2>
+                        <a href="${pageContext.request.contextPath}/cart"
+                           class="text-[13px] text-primary hover:underline font-medium">
+                            ← Quay lại giỏ hàng
+                        </a>
+                    </div>
+
+                    <div class="divide-y divide-surface-container">
+                        <c:forEach var="item" items="${cartItems}">
+                            <div
+                                class="p-6 flex flex-col sm:flex-row gap-6 hover:bg-surface-variant/20 transition-colors">
+                                <div
+                                    class="w-24 h-36 bg-surface-container-low flex-shrink-0 rounded-lg overflow-hidden border border-outline-variant">
+                                    <c:choose>
+                                        <c:when test="${not empty item.thumbnail}">
+                                            <img class="w-full h-full object-cover"
+                                                 src="${item.thumbnailFirst}"
+                                                 alt="${item.title}" />
+                                        </c:when>
+                                        <c:otherwise>
                                             <div
-                                                class="p-6 border-b border-surface-container flex items-center justify-between">
-                                                <h2 class="text-[16px] font-bold text-primary flex items-center gap-2">
-                                                    <i data-lucide="shopping-bag"></i>
-                                                    Kiểm tra đơn hàng
-                                                </h2>
-                                                <a href="${pageContext.request.contextPath}/cart"
-                                                    class="text-[13px] text-primary hover:underline font-medium">
-                                                    ← Quay lại giỏ hàng
-                                                </a>
+                                                class="w-full h-full flex items-center justify-center text-on-surface-variant">
+                                                <i data-lucide="book-open"></i>
                                             </div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
 
-                                            <div class="divide-y divide-surface-container">
-                                                <c:forEach var="item" items="${cartItems}">
-                                                    <div
-                                                        class="p-6 flex flex-col sm:flex-row gap-6 hover:bg-surface-variant/20 transition-colors">
-                                                        <div
-                                                            class="w-24 h-36 bg-surface-container-low flex-shrink-0 rounded-lg overflow-hidden border border-outline-variant">
-                                                            <c:choose>
-                                                                <c:when test="${not empty item.thumbnail}">
-                                                                    <img class="w-full h-full object-cover"
-                                                                        src="${item.thumbnailFirst}"
-                                                                        alt="${item.title}" />
-                                                                </c:when>
-                                                                <c:otherwise>
-                                                                    <div
-                                                                        class="w-full h-full flex items-center justify-center text-on-surface-variant">
-                                                                        <i data-lucide="book-open"></i>
-                                                                    </div>
-                                                                </c:otherwise>
-                                                            </c:choose>
-                                                        </div>
-
-                                                        <div class="flex-grow">
-                                                            <div class="flex justify-between items-start">
-                                                                <div>
-                                                                    <h3
-                                                                        class="text-[15px] font-bold text-on-surface mb-1">
-                                                                        ${item.title}</h3>
-                                                                    <p class="text-[13px] text-on-surface-variant">
-                                                                        ${item.authorsDisplay}</p>
-                                                                    <div class="mt-4">
-                                                                        <span
-                                                                            class="text-[13px] text-on-surface-variant">
-                                                                            Số lượng: <strong>${item.quantity}</strong>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-
-                                                                <span
-                                                                    class="text-[17px] font-bold text-primary whitespace-nowrap">
-                                                                    <fmt:formatNumber value="${item.subtotal}"
-                                                                        type="number" groupingUsed="true" /> đ
-                                                                </span>
-                                                            </div>
-
-                                                            <p class="text-[16px] text-on-surface-variant mt-1">
-                                                                Đơn giá:
-                                                                <strong>
-                                                                    <fmt:formatNumber value="${item.price}"
-                                                                        type="number" groupingUsed="true" /> đ
-                                                                </strong>
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </c:forEach>
+                                <div class="flex-grow">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h3
+                                                class="text-[15px] font-bold text-on-surface mb-1">
+                                                ${item.title}</h3>
+                                            <p class="text-[13px] text-on-surface-variant">
+                                                ${item.authorsDisplay}</p>
+                                            <div class="mt-4">
+                                                <span
+                                                    class="text-[13px] text-on-surface-variant">
+                                                    Số lượng: <strong>${item.quantity}</strong>
+                                                </span>
                                             </div>
-                                        </section>
+                                        </div>
 
-                                        <section
-                                            class="bg-surface rounded-xl style-card border border-outline-variant p-6">
-                                            <div class="flex items-center justify-between mb-5">
-                                                <h2 class="text-[16px] font-bold text-primary flex items-center gap-2">
-                                                    <i data-lucide="truck"></i>
-                                                    Địa chỉ giao hàng
-                                                </h2>
+                                        <span
+                                            class="text-[17px] font-bold text-primary whitespace-nowrap">
+                                            <fmt:formatNumber value="${item.subtotal}"
+                                                              type="number" groupingUsed="true" /> đ
+                                        </span>
+                                    </div>
 
-                                                <button type="button" id="btnShowAddressForm"
-                                                    class="text-[12px] font-bold text-primary border border-primary rounded-full px-4 py-1.5 hover:bg-primary hover:text-white transition">
-                                                    + Thêm mới
+                                    <p class="text-[16px] text-on-surface-variant mt-1">
+                                        Đơn giá:
+                                        <strong>
+                                            <fmt:formatNumber value="${item.price}"
+                                                              type="number" groupingUsed="true" /> đ
+                                        </strong>
+                                    </p>
+                                </div>
+                            </div>
+                        </c:forEach>
+                    </div>
+                </section>
+
+                <section
+                    class="bg-surface rounded-xl style-card border border-outline-variant p-6">
+                    <div class="flex items-center justify-between mb-5">
+                        <h2 class="text-[16px] font-bold text-primary flex items-center gap-2">
+                            <i data-lucide="truck"></i>
+                            Địa chỉ giao hàng
+                        </h2>
+
+                        <button type="button" id="btnShowAddressForm"
+                                class="text-[12px] font-bold text-primary border border-primary rounded-full px-4 py-1.5 hover:bg-primary hover:text-white transition">
+                            + Thêm mới
+                        </button>
+                    </div>
+
+                    <div class="relative">
+                        <div id="selectedAddressBox"
+                             class="border-2 border-primary bg-primary/5 rounded-xl p-4 cursor-pointer flex items-center justify-between">
+                            <div>
+                                <p class="text-[14px] font-bold">
+                                    <span id="selectedDefaultBadge"
+                                          class="hidden text-[11px] bg-primary text-white px-2 py-1 rounded-full mr-2">
+                                        Mặc định
+                                    </span>
+                                    <span id="selectedNamePhone">Chưa có địa chỉ</span>
+                                </p>
+                                <p id="selectedAddressText"
+                                   class="text-[13px] text-on-surface-variant mt-1">
+                                    Vui lòng thêm địa chỉ giao hàng trước khi thanh toán.
+                                </p>
+                            </div>
+
+                            <button type="button"
+                                    class="text-primary font-bold text-[13px] flex items-center gap-1">
+                                Thay đổi <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <div id="addressDropdown"
+                             class="hidden absolute left-0 right-0 mt-2 bg-white border border-outline-variant rounded-xl shadow-lg z-40 overflow-hidden">
+
+                            <c:choose>
+                                <c:when test="${not empty addressList}">
+                                    <c:forEach var="address" items="${addressList}">
+                                        <c:set var="displayRecipientName"
+                                               value="${not empty address.recipientName ? address.recipientName : sessionScope.account.fullname}" />
+                                        <c:set var="displayRecipientPhone"
+                                               value="${not empty address.recipientPhone ? address.recipientPhone : sessionScope.account.phone}" />
+
+                                        <div class="address-option p-4 cursor-pointer hover:bg-primary/5 border-b"
+                                             data-id="${address.addressID}" data-deleted="false"
+                                             data-fullname="${fn:escapeXml(displayRecipientName)}"
+                                             data-phone="${fn:escapeXml(displayRecipientPhone)}"
+                                             data-street="${fn:escapeXml(address.street)}"
+                                             data-ward="${fn:escapeXml(address.district)}"
+                                             data-city="${fn:escapeXml(address.city)}"
+                                             data-default="${address['default']}">
+                                            <div class="flex justify-between gap-3">
+                                                <div>
+                                                    <p class="text-[14px] font-bold">
+                                                        <span
+                                                            class="default-option-badge ${address['default'] ? '' : 'hidden'} text-[11px] bg-primary text-white px-2 py-1 rounded-full mr-2">
+                                                            Mặc định
+                                                        </span>
+                                                        ${displayRecipientName} -
+                                                        ${displayRecipientPhone}
+                                                    </p>
+                                                    <p
+                                                        class="text-[13px] text-on-surface-variant mt-1">
+                                                        ${address.street}, ${address.district},
+                                                        ${address.city}
+                                                    </p>
+                                                </div>
+
+                                                <button type="button"
+                                                        class="delete-address-btn text-red-600 text-[12px] font-bold hover:underline">
+                                                    Xóa
                                                 </button>
                                             </div>
+                                        </div>
+                                    </c:forEach>
+                                </c:when>
 
-                                            <div class="relative">
-                                                <div id="selectedAddressBox"
-                                                    class="border-2 border-primary bg-primary/5 rounded-xl p-4 cursor-pointer flex items-center justify-between">
-                                                    <div>
-                                                        <p class="text-[14px] font-bold">
-                                                            <span id="selectedDefaultBadge"
-                                                                class="hidden text-[11px] bg-primary text-white px-2 py-1 rounded-full mr-2">
-                                                                Mặc định
-                                                            </span>
-                                                            <span id="selectedNamePhone">Chưa có địa chỉ</span>
-                                                        </p>
-                                                        <p id="selectedAddressText"
-                                                            class="text-[13px] text-on-surface-variant mt-1">
-                                                            Vui lòng thêm địa chỉ giao hàng trước khi thanh toán.
-                                                        </p>
-                                                    </div>
+                                <c:otherwise>
+                                    <div class="p-4 text-red-600 text-[13px] font-bold">
+                                        Bạn chưa có địa chỉ. Vui lòng thêm địa chỉ giao hàng.
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </div>
 
-                                                    <button type="button"
-                                                        class="text-primary font-bold text-[13px] flex items-center gap-1">
-                                                        Thay đổi <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                                                    </button>
-                                                </div>
+                    <div id="deleteAddressConfirm"
+                         class="hidden fixed inset-0 bg-black/40 z-[60] flex items-center justify-center">
+                        <div class="bg-white rounded-xl w-[360px] shadow-xl p-6">
+                            <h3 class="text-[16px] font-bold text-on-surface mb-2">Xóa địa chỉ?
+                            </h3>
+                            <p class="text-[13px] text-on-surface-variant mb-5">
+                                Địa chỉ này sẽ được xóa khỏi danh sách hiển thị. Bạn có chắc
+                                chắn muốn xóa không?
+                            </p>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button type="button" id="btnCancelDeleteAddress"
+                                        class="bg-blue-100 text-[#071e27] py-3 rounded font-bold text-[13px]">
+                                    Hủy
+                                </button>
+                                <button type="button" id="btnConfirmDeleteAddress"
+                                        class="bg-red-600 text-white py-3 rounded font-bold text-[13px]">
+                                    Xóa
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
-                                                <div id="addressDropdown"
-                                                    class="hidden absolute left-0 right-0 mt-2 bg-white border border-outline-variant rounded-xl shadow-lg z-40 overflow-hidden">
+                    <div id="newAddressForm"
+                         class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+                        <div class="bg-white rounded-lg w-[430px] overflow-hidden shadow-xl">
+                            <div
+                                class="bg-primary text-white px-5 py-4 flex justify-between items-center">
+                                <h3 class="font-bold text-[16px]">Thêm địa chỉ mới</h3>
+                                <button type="button" id="btnCloseAddressForm"
+                                        class="text-white text-[24px] leading-none">×</button>
+                            </div>
 
-                                                    <c:choose>
-                                                        <c:when test="${not empty addressList}">
-                                                            <c:forEach var="address" items="${addressList}">
-                                                                <c:set var="displayRecipientName"
-                                                                    value="${not empty address.recipientName ? address.recipientName : sessionScope.account.fullname}" />
-                                                                <c:set var="displayRecipientPhone"
-                                                                    value="${not empty address.recipientPhone ? address.recipientPhone : sessionScope.account.phone}" />
+                            <div class="p-5 space-y-4">
+                                <div id="newRecipientFields" class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[12px] font-bold mb-1">Họ tên
+                                            người nhận</label>
+                                        <input id="newFullname" type="text"
+                                               placeholder="Nhập họ và tên"
+                                               value="${sessionScope.account.fullname}"
+                                               class="w-full border border-outline-variant rounded px-3 py-2 text-[13px]">
+                                    </div>
 
-                                                                <div class="address-option p-4 cursor-pointer hover:bg-primary/5 border-b"
-                                                                    data-id="${address.addressID}" data-deleted="false"
-                                                                    data-fullname="${fn:escapeXml(displayRecipientName)}"
-                                                                    data-phone="${fn:escapeXml(displayRecipientPhone)}"
-                                                                    data-street="${fn:escapeXml(address.street)}"
-                                                                    data-ward="${fn:escapeXml(address.district)}"
-                                                                    data-city="${fn:escapeXml(address.city)}"
-                                                                    data-default="${address['default']}">
-                                                                    <div class="flex justify-between gap-3">
-                                                                        <div>
-                                                                            <p class="text-[14px] font-bold">
-                                                                                <span
-                                                                                    class="default-option-badge ${address['default'] ? '' : 'hidden'} text-[11px] bg-primary text-white px-2 py-1 rounded-full mr-2">
-                                                                                    Mặc định
-                                                                                </span>
-                                                                                ${displayRecipientName} -
-                                                                                ${displayRecipientPhone}
-                                                                            </p>
-                                                                            <p
-                                                                                class="text-[13px] text-on-surface-variant mt-1">
-                                                                                ${address.street}, ${address.district},
-                                                                                ${address.city}
-                                                                            </p>
-                                                                        </div>
+                                    <div>
+                                        <label class="block text-[12px] font-bold mb-1">Số điện
+                                            thoại</label>
+                                        <input id="newPhone" type="text"
+                                               placeholder="Nhập số điện thoại"
+                                               value="${sessionScope.account.phone}"
+                                               class="w-full border border-outline-variant rounded px-3 py-2 text-[13px]">
+                                    </div>
+                                </div>
 
-                                                                        <button type="button"
-                                                                            class="delete-address-btn text-red-600 text-[12px] font-bold hover:underline">
-                                                                            Xóa
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            </c:forEach>
-                                                        </c:when>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[12px] font-bold mb-1">Tỉnh /
+                                            Thành phố</label>
+                                        <select id="newCity"
+                                                class="w-full border border-outline-variant rounded px-3 py-2 text-[13px]">
+                                            <option value="">Đang tải...</option>
+                                        </select>
+                                    </div>
 
-                                                        <c:otherwise>
-                                                            <div class="p-4 text-red-600 text-[13px] font-bold">
-                                                                Bạn chưa có địa chỉ. Vui lòng thêm địa chỉ giao hàng.
-                                                            </div>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </div>
-                                            </div>
+                                    <div>
+                                        <label class="block text-[12px] font-bold mb-1">Phường /
+                                            Xã</label>
+                                        <select id="newWard"
+                                                class="w-full border border-outline-variant rounded px-3 py-2 text-[13px]">
+                                            <option value="">Chọn Phường / Xã</option>
+                                        </select>
+                                    </div>
+                                </div>
 
-                                            <div id="deleteAddressConfirm"
-                                                class="hidden fixed inset-0 bg-black/40 z-[60] flex items-center justify-center">
-                                                <div class="bg-white rounded-xl w-[360px] shadow-xl p-6">
-                                                    <h3 class="text-[16px] font-bold text-on-surface mb-2">Xóa địa chỉ?
-                                                    </h3>
-                                                    <p class="text-[13px] text-on-surface-variant mb-5">
-                                                        Địa chỉ này sẽ được xóa khỏi danh sách hiển thị. Bạn có chắc
-                                                        chắn muốn xóa không?
-                                                    </p>
-                                                    <div class="grid grid-cols-2 gap-3">
-                                                        <button type="button" id="btnCancelDeleteAddress"
-                                                            class="bg-blue-100 text-[#071e27] py-3 rounded font-bold text-[13px]">
-                                                            Hủy
-                                                        </button>
-                                                        <button type="button" id="btnConfirmDeleteAddress"
-                                                            class="bg-red-600 text-white py-3 rounded font-bold text-[13px]">
-                                                            Xóa
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                <div>
+                                    <label class="block text-[12px] font-bold mb-1">Địa chỉ cụ
+                                        thể</label>
+                                    <textarea id="newStreet" rows="3"
+                                              placeholder="Số nhà, tên đường..."
+                                              class="w-full border border-outline-variant rounded px-3 py-2 text-[13px]"></textarea>
+                                </div>
 
-                                            <div id="newAddressForm"
-                                                class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-                                                <div class="bg-white rounded-lg w-[430px] overflow-hidden shadow-xl">
-                                                    <div
-                                                        class="bg-primary text-white px-5 py-4 flex justify-between items-center">
-                                                        <h3 class="font-bold text-[16px]">Thêm địa chỉ mới</h3>
-                                                        <button type="button" id="btnCloseAddressForm"
-                                                            class="text-white text-[24px] leading-none">×</button>
-                                                    </div>
+                                <label
+                                    class="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded text-[12px]">
+                                    <input type="checkbox" id="defaultAddress">
+                                    Đặt làm địa chỉ nhận hàng mặc định
+                                </label>
 
-                                                    <div class="p-5 space-y-4">
-                                                        <div id="newRecipientFields" class="grid grid-cols-2 gap-3">
-                                                            <div>
-                                                                <label class="block text-[12px] font-bold mb-1">Họ tên
-                                                                    người nhận</label>
-                                                                <input id="newFullname" type="text"
-                                                                    placeholder="Nhập họ và tên"
-                                                                    value="${sessionScope.account.fullname}"
-                                                                    class="w-full border border-outline-variant rounded px-3 py-2 text-[13px]">
-                                                            </div>
+                                <div class="grid grid-cols-2 gap-3 pt-2">
+                                    <button type="button" id="btnCancelAddress"
+                                            class="bg-blue-100 text-[#071e27] py-3 rounded font-bold text-[13px]">
+                                        Hủy bỏ
+                                    </button>
 
-                                                            <div>
-                                                                <label class="block text-[12px] font-bold mb-1">Số điện
-                                                                    thoại</label>
-                                                                <input id="newPhone" type="text"
-                                                                    placeholder="Nhập số điện thoại"
-                                                                    value="${sessionScope.account.phone}"
-                                                                    class="w-full border border-outline-variant rounded px-3 py-2 text-[13px]">
-                                                            </div>
-                                                        </div>
+                                    <button type="button" id="btnSaveAddress"
+                                            class="bg-primary text-white py-3 rounded font-bold text-[13px]">
+                                        Lưu địa chỉ
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
-                                                        <div class="grid grid-cols-2 gap-3">
-                                                            <div>
-                                                                <label class="block text-[12px] font-bold mb-1">Tỉnh /
-                                                                    Thành phố</label>
-                                                                <select id="newCity"
-                                                                    class="w-full border border-outline-variant rounded px-3 py-2 text-[13px]">
-                                                                    <option value="">Đang tải...</option>
-                                                                </select>
-                                                            </div>
-
-                                                            <div>
-                                                                <label class="block text-[12px] font-bold mb-1">Phường /
-                                                                    Xã</label>
-                                                                <select id="newWard"
-                                                                    class="w-full border border-outline-variant rounded px-3 py-2 text-[13px]">
-                                                                    <option value="">Chọn Phường / Xã</option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-
-                                                        <div>
-                                                            <label class="block text-[12px] font-bold mb-1">Địa chỉ cụ
-                                                                thể</label>
-                                                            <textarea id="newStreet" rows="3"
-                                                                placeholder="Số nhà, tên đường..."
-                                                                class="w-full border border-outline-variant rounded px-3 py-2 text-[13px]"></textarea>
-                                                        </div>
-
-                                                        <label
-                                                            class="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded text-[12px]">
-                                                            <input type="checkbox" id="defaultAddress">
-                                                            Đặt làm địa chỉ nhận hàng mặc định
-                                                        </label>
-
-                                                        <div class="grid grid-cols-2 gap-3 pt-2">
-                                                            <button type="button" id="btnCancelAddress"
-                                                                class="bg-blue-100 text-[#071e27] py-3 rounded font-bold text-[13px]">
-                                                                Hủy bỏ
-                                                            </button>
-
-                                                            <button type="button" id="btnSaveAddress"
-                                                                class="bg-primary text-white py-3 rounded font-bold text-[13px]">
-                                                                Lưu địa chỉ
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </section>
-                <section class="bg-surface rounded-xl style-card border border-outline-variant p-6">
+                <!--   Phương thức thanh toán  -->
+                <section
+                    class="bg-surface rounded-xl style-card border border-outline-variant p-6">
                     <h2 class="text-[16px] font-bold text-primary flex items-center gap-2 mb-6">
                         <i data-lucide="wallet-cards"></i> Phương thức thanh toán
                     </h2>
 
                     <div class="space-y-3" id="paymentGroup">
-                        <label class="payment-card flex items-center justify-between p-4 border border-outline-variant rounded-[10px] cursor-pointer hover:bg-surface-variant/20 transition-all">
+                        <label
+                            class="payment-card flex items-center justify-between p-4 border border-outline-variant rounded-[10px] cursor-pointer hover:bg-surface-variant/20 transition-all">
                             <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant">
                                     <i data-lucide="credit-card"></i>
                                 </div>
                                 <div>
-                                    <p class="text-[14px] font-bold text-on-surface-variant">VNPAY</p>
-                                    <p class="text-[12px] text-on-surface-variant">Thanh toán điện tử nhanh</p>
+                                    <p class="text-[14px] font-bold text-on-surface-variant">
+                                        Chuyển khoản ngân hàng (VNPAY)</p>
                                 </div>
                             </div>
                             <input class="text-primary focus:ring-primary h-5 w-5"
-                                   name="payment_method" form="checkout-form" type="radio" value="vnpay"/>
+                                   name="payment_method" form="checkout-form" type="radio"
+                                   value="vnpay" />
                         </label>
 
-                        <label class="payment-card flex items-center justify-between p-4 border-2 border-primary bg-primary/5 rounded-[10px] cursor-pointer transition-all">
+                        <label
+                            class="payment-card flex items-center justify-between p-4 border border-outline-variant rounded-[10px] cursor-pointer hover:bg-surface-variant/20 transition-all">
                             <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 rounded-full bg-white border border-primary/20 flex items-center justify-center text-primary">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant">
                                     <i data-lucide="banknote"></i>
                                 </div>
                                 <div>
-                                    <p class="text-[14px] font-bold">Cash on Delivery (COD)</p>
-                                    <p class="text-[12px] text-on-surface-variant">Thanh toán khi nhận hàng</p>
+                                    <p class="text-[14px] font-bold">Thanh toán khi nhận hàng
+                                        (COD)</p>
                                 </div>
                             </div>
                             <input checked class="text-primary focus:ring-primary h-5 w-5"
-                                   name="payment_method" form="checkout-form" type="radio" value="cod"/>
+                                   name="payment_method" form="checkout-form" type="radio"
+                                   value="cod" />
                         </label>
                     </div>
                 </section>
@@ -319,13 +329,15 @@
 
             <aside class="lg:col-span-4 sticky top-6">
                 <div class="bg-surface rounded-xl style-card border border-outline-variant p-6">
-                    <h2 class="text-[16px] font-black text-primary uppercase border-l-4 border-secondary pl-3 mb-6">
+                    <h2
+                        class="text-[16px] font-black text-primary uppercase border-l-4 border-secondary pl-3 mb-6">
                         Tóm tắt đơn hàng
                     </h2>
 
                     <div class="mb-6">
                         <div class="flex items-center justify-between mb-2">
-                            <label class="text-[13px] font-bold text-on-surface block">Mã voucher</label>
+                            <label class="text-[13px] font-bold text-on-surface block">Mã
+                                voucher</label>
                             <button type="button" id="btnShowVoucherList"
                                     class="text-[12px] font-bold text-primary hover:underline flex items-center gap-1">
                                 <i data-lucide="ticket-percent" class="w-3.5 h-3.5"></i>
@@ -334,11 +346,10 @@
                         </div>
                         <div class="flex gap-2">
                             <input type="text" id="voucherCodeInput"
-                                   placeholder="Nhập mã voucher"
-                                   value="${appliedVoucherCode}"
-                                   ${not empty appliedVoucherCode ? 'disabled' : ''}
+                                   placeholder="Nhập mã voucher" value="${appliedVoucherCode}"
+                                   ${not empty appliedVoucherCode ? 'disabled' : '' }
                                    class="flex-grow border border-outline-variant rounded-lg px-3 py-2 text-[14px] uppercase
-                                          focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:bg-surface-variant/40"/>
+                                   focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:bg-surface-variant/40" />
                             <button type="button" id="btnApplyVoucher"
                                     class="${not empty appliedVoucherCode ? 'hidden' : ''} px-4 py-2 rounded-lg bg-primary text-white text-[13px] font-bold hover:opacity-90 transition">
                                 Áp dụng
@@ -352,9 +363,11 @@
 
                     <div class="space-y-3 mb-6">
                         <div class="flex justify-between text-[14px]">
-                            <span class="text-on-surface-variant">Tạm tính (${totalQuantity} sản phẩm)</span>
+                            <span class="text-on-surface-variant">Tạm tính (${totalQuantity} sản
+                                phẩm)</span>
                             <span id="subtotalDisplay" class="font-bold" data-value="${total}">
-                                <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/> đ
+                                <fmt:formatNumber value="${total}" type="number"
+                                                  groupingUsed="true" /> đ
                             </span>
                         </div>
 
@@ -364,34 +377,43 @@
                                   data-value="${empty appliedDiscount ? 0 : appliedDiscount}">
                                 <c:choose>
                                     <c:when test="${not empty appliedDiscount}">
-                                        - <fmt:formatNumber value="${appliedDiscount}" type="number" groupingUsed="true"/> đ
+                                        -
+                                        <fmt:formatNumber value="${appliedDiscount}"
+                                                          type="number" groupingUsed="true" /> đ
                                     </c:when>
                                     <c:otherwise>- 0 đ</c:otherwise>
                                 </c:choose>
                             </span>
                         </div>
 
-                        <div class="pt-4 border-t border-surface-container flex justify-between items-end">
+                        <div
+                            class="pt-4 border-t border-surface-container flex justify-between items-end">
                             <span class="text-[15px] font-bold text-primary">Tổng cộng</span>
-                            <span id="grandTotalDisplay" class="text-[22px] font-black text-primary">
-                                <fmt:formatNumber value="${total - (empty appliedDiscount ? 0 : appliedDiscount)}" type="number" groupingUsed="true"/> đ
+                            <span id="grandTotalDisplay"
+                                  class="text-[22px] font-black text-primary">
+                                <fmt:formatNumber
+                                    value="${total - (empty appliedDiscount ? 0 : appliedDiscount)}"
+                                    type="number" groupingUsed="true" /> đ
                             </span>
                         </div>
                     </div>
 
-                    <form id="checkout-form" action="${pageContext.request.contextPath}/checkout" method="POST">
+                    <form id="checkout-form"
+                          action="${pageContext.request.contextPath}/checkout" method="POST">
                         <input type="hidden" name="addressID" id="checkoutAddressID" value="">
                         <input type="hidden" name="fullname" id="checkoutFullname" value="">
                         <input type="hidden" name="phone" id="checkoutPhone" value="">
                         <input type="hidden" name="street" id="checkoutStreet" value="">
                         <input type="hidden" name="ward" id="checkoutWard" value="">
                         <input type="hidden" name="city" id="checkoutCity" value="">
-                        <input type="hidden" name="district" id="checkoutDistrict" value="Không có">
-                        <input type="hidden" name="isDefault" id="checkoutIsDefault" value="false">
-                        <input type="hidden" name="deletedAddressIds" id="deletedAddressIds" value="">
+                        <input type="hidden" name="district" id="checkoutDistrict"
+                               value="Không có">
+                        <input type="hidden" name="isDefault" id="checkoutIsDefault"
+                               value="false">
+                        <input type="hidden" name="deletedAddressIds" id="deletedAddressIds"
+                               value="">
 
-                        <button type="submit"
-                                class="w-full bg-secondary text-primary py-3.5 rounded-full font-black text-[15px]
+                        <button type="submit" class="w-full bg-secondary text-primary py-3.5 rounded-full font-black text-[15px]
                                 shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all
                                 flex items-center justify-center gap-2 uppercase tracking-wide">
                             ĐẶT HÀNG NGAY
@@ -403,18 +425,23 @@
     </main>
 
     <%-- Confirm order modal --%>
-    <div id="confirmOrderModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[9999]">
+    <div id="confirmOrderModal"
+         class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[9999]">
         <div class="bg-white w-[450px] rounded-xl p-6 relative">
-            <button type="button" class="absolute top-3 right-4 text-2xl hover:text-gray-500" id="btnCloseOrderConfirm">×</button>
+            <button type="button"
+                    class="absolute top-3 right-4 text-2xl hover:text-gray-500"
+                    id="btnCloseOrderConfirm">×</button>
 
             <h3 class="text-xl font-bold mb-4">Xác nhận đặt hàng</h3>
             <p class="text-gray-600 mb-6">Bạn có chắc chắn muốn đặt đơn hàng này không?</p>
 
             <div class="flex justify-end gap-3">
-                <button type="button" id="btnCancelOrder" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">
+                <button type="button" id="btnCancelOrder"
+                        class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">
                     Hủy
                 </button>
-                <button type="button" id="btnConfirmOrder" class="px-4 py-2 bg-[#004d99] text-white rounded-lg hover:opacity-90">
+                <button type="button" id="btnConfirmOrder"
+                        class="px-4 py-2 bg-[#004d99] text-white rounded-lg hover:opacity-90">
                     Xác nhận
                 </button>
             </div>
@@ -422,14 +449,19 @@
     </div>
 
     <%-- Voucher list modal --%>
-    <div id="voucherListModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[9999] p-4">
-        <div class="bg-white w-full max-w-[480px] max-h-[80vh] rounded-xl relative flex flex-col">
-            <div class="flex items-center justify-between p-5 border-b border-outline-variant">
+    <div id="voucherListModal"
+         class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[9999] p-4">
+        <div
+            class="bg-white w-full max-w-[480px] max-h-[80vh] rounded-xl relative flex flex-col">
+            <div
+                class="flex items-center justify-between p-5 border-b border-outline-variant">
                 <h3 class="text-lg font-black text-primary">Voucher của Shop</h3>
-                <button type="button" id="btnCloseVoucherList" class="text-2xl leading-none hover:text-gray-500">&times;</button>
+                <button type="button" id="btnCloseVoucherList"
+                        class="text-2xl leading-none hover:text-gray-500">&times;</button>
             </div>
             <div id="voucherListBody" class="p-5 overflow-y-auto space-y-3 flex-grow">
-                <p class="text-center text-on-surface-variant text-[13px]">Đang tải...</p>
+                <p class="text-center text-on-surface-variant text-[13px]">Đang tải...
+                </p>
             </div>
         </div>
     </div>
@@ -728,6 +760,8 @@
             });
         }
 
+        // Danh sách địa chỉ luôn lấy từ database do server render.
+        // Không khôi phục địa chỉ từ localStorage để tránh dữ liệu giả hoặc dữ liệu đã xóa xuất hiện lại.
         document.querySelectorAll('.address-option').forEach(bindAddressOption);
 
         document.getElementById('btnCancelDeleteAddress').addEventListener('click', function () {
@@ -763,6 +797,7 @@
                         }
 
                         softDeleteAddress(targetOption);
+                        // Xóa dấu vết localStorage cũ; database mới là nguồn dữ liệu duy nhất.
                         localStorage.removeItem(ADDRESS_STORAGE_KEY);
                         localStorage.removeItem(DELETED_STORAGE_KEY);
                     })
@@ -952,25 +987,12 @@
                     });
         });
 
-        document.querySelectorAll('#paymentGroup input[type="radio"]').forEach(function (radio) {
-            radio.addEventListener('change', function () {
-                document.querySelectorAll('.payment-card').forEach(function (card) {
-                    card.classList.remove('border-2', 'border-primary', 'bg-primary/5');
-                    card.classList.add('border', 'border-outline-variant');
-                });
-
-                var selected = this.closest('.payment-card');
-                selected.classList.remove('border', 'border-outline-variant');
-                selected.classList.add('border-2', 'border-primary', 'bg-primary/5');
-            });
-        });
-
         function formatMoney(value) {
             return Math.round(value).toLocaleString('vi-VN') + ' đ';
         }
 
         function updateOrderSummary(discountAmount, newTotal) {
-            var subtotal = parseFloat(document.getElementById('subtotalDisplay').dataset.value);
+            const subtotal = parseFloat(document.getElementById('subtotalDisplay').dataset.value);
             document.getElementById('discountDisplay').dataset.value = discountAmount;
             document.getElementById('discountDisplay').textContent = '- ' + formatMoney(discountAmount);
             document.getElementById('grandTotalDisplay').textContent = formatMoney(newTotal);
@@ -993,7 +1015,9 @@
                 headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
                 body: 'action=applyVoucher&code=' + encodeURIComponent(code)
             })
-                    .then(function (response) { return response.json(); })
+                    .then(function (response) {
+                        return response.json();
+                    })
                     .then(function (data) {
                         btn.disabled = false;
 
@@ -1021,7 +1045,9 @@
                 headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
                 body: 'action=removeVoucher'
             })
-                    .then(function (response) { return response.json(); })
+                    .then(function (response) {
+                        return response.json();
+                    })
                     .then(function (data) {
                         if (!data.success) {
                             showToast('Không thể gỡ voucher.', true);
@@ -1051,34 +1077,34 @@
 
         function renderVoucherItem(v) {
             var minOrderHtml = (v.minOrderValue !== null && v.minOrderValue !== undefined)
-                ? '<span class="inline-flex items-center gap-1"><i data-lucide="shopping-cart" class="w-3 h-3"></i>Đơn tối thiểu ' + formatCurrencyVND(v.minOrderValue) + '</span>'
-                : '';
+                    ? '<span class="inline-flex items-center gap-1"><i data-lucide="shopping-cart" class="w-3 h-3"></i>Đơn tối thiểu ' + formatCurrencyVND(v.minOrderValue) + '</span>'
+                    : '';
             var maxDiscountHtml = (v.maxDiscountValue !== null && v.maxDiscountValue !== undefined)
-                ? '<span class="inline-flex items-center gap-1"><i data-lucide="badge-percent" class="w-3 h-3"></i>Giảm tối đa ' + formatCurrencyVND(v.maxDiscountValue) + '</span>'
-                : '';
+                    ? '<span class="inline-flex items-center gap-1"><i data-lucide="badge-percent" class="w-3 h-3"></i>Giảm tối đa ' + formatCurrencyVND(v.maxDiscountValue) + '</span>'
+                    : '';
 
             var conditionsHtml = '';
             if (minOrderHtml || maxDiscountHtml) {
                 conditionsHtml = '<div class="flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-on-surface-variant mt-2">'
-                    + minOrderHtml + maxDiscountHtml + '</div>';
+                        + minOrderHtml + maxDiscountHtml + '</div>';
             }
 
             return ''
-                + '<div class="border border-dashed border-primary/40 rounded-lg p-4 bg-primary/[0.03]">'
-                + '  <div class="flex items-center justify-between gap-3">'
-                + '    <div>'
-                + '      <p class="text-[15px] font-black text-primary">Giảm ' + v.discountPercent + '%</p>'
-                + '      <div class="flex items-center gap-2 mt-1">'
-                + '        <span class="px-2 py-1 bg-white border border-outline-variant rounded text-[13px] font-bold tracking-wide">' + escapeHtml(v.code) + '</span>'
-                + '        <button type="button" class="btn-copy-voucher text-primary hover:opacity-70" data-code="' + escapeHtml(v.code) + '" title="Sao chép mã">'
-                + '          <i data-lucide="copy" class="w-4 h-4"></i>'
-                + '        </button>'
-                + '      </div>'
-                + '    </div>'
-                + '    <span class="text-[11px] text-on-surface-variant whitespace-nowrap">HSD: ' + v.endDate + '</span>'
-                + '  </div>'
-                + conditionsHtml
-                + '</div>';
+                    + '<div class="border border-dashed border-primary/40 rounded-lg p-4 bg-primary/[0.03]">'
+                    + '  <div class="flex items-center justify-between gap-3">'
+                    + '    <div>'
+                    + '      <p class="text-[15px] font-black text-primary">Giảm ' + v.discountPercent + '%</p>'
+                    + '      <div class="flex items-center gap-2 mt-1">'
+                    + '        <span class="px-2 py-1 bg-white border border-outline-variant rounded text-[13px] font-bold tracking-wide">' + escapeHtml(v.code) + '</span>'
+                    + '        <button type="button" class="btn-copy-voucher text-primary hover:opacity-70" data-code="' + escapeHtml(v.code) + '" title="Sao chép mã">'
+                    + '          <i data-lucide="copy" class="w-4 h-4"></i>'
+                    + '        </button>'
+                    + '      </div>'
+                    + '    </div>'
+                    + '    <span class="text-[11px] text-on-surface-variant whitespace-nowrap">HSD: ' + v.endDate + '</span>'
+                    + '  </div>'
+                    + conditionsHtml
+                    + '</div>';
         }
 
         document.getElementById('btnShowVoucherList').addEventListener('click', function () {
@@ -1093,14 +1119,17 @@
                 headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
                 body: 'action=listVouchers'
             })
-                    .then(function (response) { return response.json(); })
+                    .then(function (response) {
+                        return response.json();
+                    })
                     .then(function (data) {
                         if (!data.success || !data.vouchers || data.vouchers.length === 0) {
                             body.innerHTML = '<p class="text-center text-on-surface-variant text-[13px]">Hiện không có voucher nào khả dụng.</p>';
                             return;
                         }
                         body.innerHTML = data.vouchers.map(renderVoucherItem).join('');
-                        if (window.lucide) lucide.createIcons();
+                        if (window.lucide)
+                            lucide.createIcons();
 
                         body.querySelectorAll('.btn-copy-voucher').forEach(function (btn) {
                             btn.addEventListener('click', function () {
@@ -1123,7 +1152,8 @@
         }
         document.getElementById('btnCloseVoucherList').addEventListener('click', closeVoucherListModal);
         document.getElementById('voucherListModal').addEventListener('click', function (e) {
-            if (e.target === this) closeVoucherListModal();
+            if (e.target === this)
+                closeVoucherListModal();
         });
 
         document.getElementById('checkout-form').addEventListener('submit', function (e) {
@@ -1149,7 +1179,7 @@
             e.preventDefault();
             syncLocalAddressesFromDom();
 
-            var modal = document.getElementById('confirmOrderModal');
+            const modal = document.getElementById('confirmOrderModal');
             if (modal) {
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
@@ -1157,24 +1187,24 @@
         });
 
         function closeOrderConfirmModal() {
-            var modal = document.getElementById('confirmOrderModal');
+            const modal = document.getElementById('confirmOrderModal');
             if (modal) {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
             }
         }
 
-        var btnCancelOrder = document.getElementById('btnCancelOrder');
+        const btnCancelOrder = document.getElementById('btnCancelOrder');
         if (btnCancelOrder) {
             btnCancelOrder.addEventListener('click', closeOrderConfirmModal);
         }
 
-        var btnCloseOrderConfirm = document.getElementById('btnCloseOrderConfirm');
+        const btnCloseOrderConfirm = document.getElementById('btnCloseOrderConfirm');
         if (btnCloseOrderConfirm) {
             btnCloseOrderConfirm.addEventListener('click', closeOrderConfirmModal);
         }
 
-        var confirmOrderModalOverlay = document.getElementById('confirmOrderModal');
+        const confirmOrderModalOverlay = document.getElementById('confirmOrderModal');
         if (confirmOrderModalOverlay) {
             confirmOrderModalOverlay.addEventListener('click', function (e) {
                 if (e.target === confirmOrderModalOverlay) {
@@ -1183,7 +1213,7 @@
             });
         }
 
-        var btnConfirmOrder = document.getElementById('btnConfirmOrder');
+        const btnConfirmOrder = document.getElementById('btnConfirmOrder');
         if (btnConfirmOrder) {
             btnConfirmOrder.addEventListener('click', function () {
                 saveDeletedAddressIds();

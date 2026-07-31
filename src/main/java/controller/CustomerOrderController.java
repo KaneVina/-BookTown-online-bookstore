@@ -76,15 +76,22 @@ public class CustomerOrderController extends HttpServlet {
         try {
             String p = request.getParameter("page");
             if (p != null) {
-                currentPage = Math.max(1, Integer.parseInt(p));
+                int parsedPage = Integer.parseInt(p);
+                if (parsedPage < 1) {
+                    currentPage = 1;
+                } else {
+                    currentPage = parsedPage;
+                }
             }
         } catch (Exception ignored) {
         }
 
         int totalRecords = orderDAO.countFilteredOrders(status);
-        int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
-        if (totalPages == 0) {
+        int totalPages;
+        if (totalRecords == 0) {
             totalPages = 1;
+        } else {
+            totalPages = (totalRecords + pageSize - 1) / pageSize;
         }
         if (currentPage > totalPages) {
             currentPage = totalPages;
@@ -97,9 +104,11 @@ public class CustomerOrderController extends HttpServlet {
         request.setAttribute("totalRecords", totalRecords);
         request.setAttribute("status", status);
 
-        String baseUrl = request.getContextPath()
-                + "/dashboard/customer-order?"
-                + "status=" + (status != null ? status : "");
+        String statusParam = "";
+        if (status != null) {
+            statusParam = status;
+        }
+        String baseUrl = request.getContextPath() + "/dashboard/customer-order?status=" + statusParam;
         request.setAttribute("baseUrl", baseUrl);
 
         request.setAttribute("countPending", orderDAO.countOrdersByStatus("pending"));
@@ -149,34 +158,36 @@ public class CustomerOrderController extends HttpServlet {
         }
         cancelReason = cancelReason.trim();
 
-        if ("cancelled".equalsIgnoreCase(status) && cancelReason.isEmpty()) {
-            session.setAttribute("errorMessage", "Vui lòng nhập lý do hủy đơn.");
-            if ("detail".equals(redirect)) {
-                response.sendRedirect(request.getContextPath() + "/dashboard/customer-order?action=detail&orderID=" + orderID);
-            } else {
-                response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
+        if ("cancelled".equalsIgnoreCase(status)) {
+            if (cancelReason.isEmpty()) {
+                session.setAttribute("errorMessage", "Vui lòng nhập lý do hủy đơn.");
+                if ("detail".equals(redirect)) {
+                    response.sendRedirect(request.getContextPath() + "/dashboard/customer-order?action=detail&orderID=" + orderID);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
+                }
+                return;
             }
-            return;
-        }
-    
-        if ("cancelled".equalsIgnoreCase(status) && (cancelReason.length() < 10 || cancelReason.length() > 50)) {
-            session.setAttribute("errorMessage", "Lý do hủy phải từ 10 đến 50 ký tự.");
-            if ("detail".equals(redirect)) {
-                response.sendRedirect(request.getContextPath() + "/dashboard/customer-order?action=detail&orderID=" + orderID);
-            } else {
-                response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
+
+            if (cancelReason.length() < 10 || cancelReason.length() > 50) {
+                session.setAttribute("errorMessage", "Lý do hủy phải từ 10 đến 50 ký tự.");
+                if ("detail".equals(redirect)) {
+                    response.sendRedirect(request.getContextPath() + "/dashboard/customer-order?action=detail&orderID=" + orderID);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
+                }
+                return;
             }
-            return;
-        }
-      
-        if ("cancelled".equalsIgnoreCase(status) && !cancelReason.matches(".*\\p{L}.*")) {
-            session.setAttribute("errorMessage", "Lý do hủy phải chứa ít nhất 1 chữ cái.");
-            if ("detail".equals(redirect)) {
-                response.sendRedirect(request.getContextPath() + "/dashboard/customer-order?action=detail&orderID=" + orderID);
-            } else {
-                response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
+
+            if (!cancelReason.matches(".*\\p{L}.*")) {
+                session.setAttribute("errorMessage", "Lý do hủy phải chứa ít nhất 1 chữ cái.");
+                if ("detail".equals(redirect)) {
+                    response.sendRedirect(request.getContextPath() + "/dashboard/customer-order?action=detail&orderID=" + orderID);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
+                }
+                return;
             }
-            return;
         }
 
         model.Order order = orderDAO.getOrderByID(orderID);
@@ -187,7 +198,7 @@ public class CustomerOrderController extends HttpServlet {
                 }
             } else if ("cancelled".equalsIgnoreCase(status)) {
                 if ("vnpay".equalsIgnoreCase(order.getPaymentMethod()) && "paid".equalsIgnoreCase(order.getPaymentStatus())) {
-                
+
                     orderDAO.updatePaymentStatus(orderID, "pending_refund");
 
                     final model.Order finalOrder = order;
@@ -256,7 +267,6 @@ public class CustomerOrderController extends HttpServlet {
             return;
         }
 
-      
         boolean ok = orderDAO.confirmRefund(orderID);
 
         if (ok) {

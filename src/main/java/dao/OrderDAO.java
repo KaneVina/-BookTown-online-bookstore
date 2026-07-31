@@ -139,9 +139,24 @@ public class OrderDAO {
     }
 
     public int countOrdersByCustomerFiltered(int customerID, String status) {
-        boolean isRefundStatus = "pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status);
-        boolean noFilter = status == null || status.trim().isEmpty() || "all".equalsIgnoreCase(status);
-        String normalizedStatus = noFilter ? null : status.trim();
+        boolean isPendingRefund = "pending_refund".equalsIgnoreCase(status);
+        boolean isRefunded = "refunded".equalsIgnoreCase(status);
+        boolean isRefundStatus = isPendingRefund || isRefunded;
+        boolean statusIsNull = (status == null);
+        boolean statusIsEmpty;
+        if (statusIsNull) {
+            statusIsEmpty = false;
+        } else {
+            statusIsEmpty = status.trim().isEmpty();
+        }
+        boolean statusIsAll = "all".equalsIgnoreCase(status);
+        boolean noFilter = statusIsNull || statusIsEmpty || statusIsAll;
+        String normalizedStatus;
+        if (noFilter) {
+            normalizedStatus = null;
+        } else {
+            normalizedStatus = status.trim();
+        }
 
         String sql;
         if (isRefundStatus) {
@@ -166,9 +181,24 @@ public class OrderDAO {
 
     public List<Order> getOrdersByCustomerFiltered(int customerID, String status, int offset, int pageSize) {
         List<Order> orders = new ArrayList<>();
-        boolean isRefundStatus = "pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status);
-        boolean noFilter = status == null || status.trim().isEmpty() || "all".equalsIgnoreCase(status);
-        String normalizedStatus = noFilter ? null : status.trim();
+        boolean isPendingRefund = "pending_refund".equalsIgnoreCase(status);
+        boolean isRefunded = "refunded".equalsIgnoreCase(status);
+        boolean isRefundStatus = isPendingRefund || isRefunded;
+        boolean statusIsNull = (status == null);
+        boolean statusIsEmpty;
+        if (statusIsNull) {
+            statusIsEmpty = false;
+        } else {
+            statusIsEmpty = status.trim().isEmpty();
+        }
+        boolean statusIsAll = "all".equalsIgnoreCase(status);
+        boolean noFilter = statusIsNull || statusIsEmpty || statusIsAll;
+        String normalizedStatus;
+        if (noFilter) {
+            normalizedStatus = null;
+        } else {
+            normalizedStatus = status.trim();
+        }
 
         String sql;
         if (isRefundStatus) {
@@ -318,7 +348,9 @@ public class OrderDAO {
                 int overdueOrderID = rsGet.getInt("orderID");
                 Order overdueOrder = getOrderByID(overdueOrderID);
                 if (overdueOrder != null) {
-                    if ("vnpay".equalsIgnoreCase(overdueOrder.getPaymentMethod()) && "paid".equalsIgnoreCase(overdueOrder.getPaymentStatus())) {
+                    boolean isVnpay = "vnpay".equalsIgnoreCase(overdueOrder.getPaymentMethod());
+                    boolean isPaid = "paid".equalsIgnoreCase(overdueOrder.getPaymentStatus());
+                    if (isVnpay && isPaid) {
                         String autoCancelReason = "Đơn hàng quá 2 ngày chưa được duyệt";
                         String sqlAutoCancel = "UPDATE [Order] SET status = 'cancelled', cancel_reason = ? WHERE orderID = ?";
                         try (Connection connAC = new DBContext().getConnection(); PreparedStatement psAC = connAC.prepareStatement(sqlAutoCancel)) {
@@ -372,9 +404,24 @@ public class OrderDAO {
             e.printStackTrace();
         }
 
-        boolean isRefundStatus = "pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status);
-        boolean noFilter = status == null || status.trim().isEmpty() || "all".equalsIgnoreCase(status);
-        String normalizedStatus = noFilter ? null : status.trim();
+        boolean isPendingRefund = "pending_refund".equalsIgnoreCase(status);
+        boolean isRefunded = "refunded".equalsIgnoreCase(status);
+        boolean isRefundStatus = isPendingRefund || isRefunded;
+        boolean statusIsNull = (status == null);
+        boolean statusIsEmpty;
+        if (statusIsNull) {
+            statusIsEmpty = false;
+        } else {
+            statusIsEmpty = status.trim().isEmpty();
+        }
+        boolean statusIsAll = "all".equalsIgnoreCase(status);
+        boolean noFilter = statusIsNull || statusIsEmpty || statusIsAll;
+        String normalizedStatus;
+        if (noFilter) {
+            normalizedStatus = null;
+        } else {
+            normalizedStatus = status.trim();
+        }
 
         String sql;
         if (isRefundStatus) {
@@ -425,9 +472,24 @@ public class OrderDAO {
     }
 
     public int countFilteredOrders(String status) {
-        boolean isRefundStatus = "pending_refund".equalsIgnoreCase(status) || "refunded".equalsIgnoreCase(status);
-        boolean noFilter = status == null || status.trim().isEmpty() || "all".equalsIgnoreCase(status);
-        String normalizedStatus = noFilter ? null : status.trim();
+        boolean isPendingRefund = "pending_refund".equalsIgnoreCase(status);
+        boolean isRefunded = "refunded".equalsIgnoreCase(status);
+        boolean isRefundStatus = isPendingRefund || isRefunded;
+        boolean statusIsNull = (status == null);
+        boolean statusIsEmpty;
+        if (statusIsNull) {
+            statusIsEmpty = false;
+        } else {
+            statusIsEmpty = status.trim().isEmpty();
+        }
+        boolean statusIsAll = "all".equalsIgnoreCase(status);
+        boolean noFilter = statusIsNull || statusIsEmpty || statusIsAll;
+        String normalizedStatus;
+        if (noFilter) {
+            normalizedStatus = null;
+        } else {
+            normalizedStatus = status.trim();
+        }
 
         String sql;
         if (isRefundStatus) {
@@ -738,7 +800,13 @@ public class OrderDAO {
                 + "INNER JOIN OrderDetail ON Book.bookID = OrderDetail.bookID "
                 + "WHERE OrderDetail.orderID = ?";
 
-        String sqlUpdateStatus = "UPDATE Book SET status = 'available' WHERE stock_quantity > 0 AND (status IS NULL OR status <> 'discontinued')";
+        String sqlUpdateStatus = "UPDATE Book "
+                + "SET Book.status = 'available' "
+                + "FROM Book "
+                + "INNER JOIN OrderDetail ON Book.bookID = OrderDetail.bookID "
+                + "WHERE OrderDetail.orderID = ? "
+                + "AND Book.stock_quantity > 0 "
+                + "AND (Book.status IS NULL OR Book.status <> 'discontinued')";
 
         try (Connection conn = new DBContext().getConnection()) {
             try (PreparedStatement ps1 = conn.prepareStatement(sqlRestore)) {
@@ -746,6 +814,7 @@ public class OrderDAO {
                 int rows = ps1.executeUpdate();
                 if (rows > 0) {
                     try (PreparedStatement ps2 = conn.prepareStatement(sqlUpdateStatus)) {
+                        ps2.setInt(1, orderID);
                         ps2.executeUpdate();
                     }
                     return true;

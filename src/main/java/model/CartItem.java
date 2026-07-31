@@ -113,6 +113,10 @@ public class CartItem implements Serializable {
             return "";
         }
         int idx = thumbnail.indexOf('|');
-        return idx >= 0 ? thumbnail.substring(0, idx).trim() : thumbnail.trim();
+        if (idx >= 0) {
+            return thumbnail.substring(0, idx).trim();
+        } else {
+            return thumbnail.trim();
+        }
     }
 }
