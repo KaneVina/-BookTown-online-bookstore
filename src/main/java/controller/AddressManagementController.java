@@ -91,6 +91,12 @@ public class AddressManagementController extends HttpServlet {
             return;
         }
 
+        Customer customer = new CustomerDAO().getCustomerById(customerID);
+        if (customer == null) {
+            writeJson(response, false, "Không tìm thấy thông tin khách hàng");
+            return;
+        }
+
         Address address = new Address();
         address.setCustomerID(customerID);
         address.setStreet(street);
@@ -98,6 +104,8 @@ public class AddressManagementController extends HttpServlet {
         address.setCity(city);
         address.setCountry("Việt Nam");
         address.setDefault(false);
+        address.setRecipientName(customer.getFullname());
+        address.setRecipientPhone(customer.getPhone());
 
         int newId = addressDAO.insertAddressAndReturnId(address);
         writeJson(response, newId > 0,
