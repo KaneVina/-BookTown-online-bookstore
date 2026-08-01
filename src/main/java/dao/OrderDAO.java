@@ -565,7 +565,10 @@ public class OrderDAO {
     }
 
     public int getTotalOrdersByCustomer(int customerId) {
-        String sql = "SELECT COUNT(*) FROM [Order] WHERE customerID = ?";
+        // Chỉ đếm đơn đã được xác nhận trở đi ko lấy status pending vì chưa chắc chắn, cancelled vì đã hủy
+        String sql = "SELECT COUNT(*) FROM [Order] "
+                + "WHERE customerID = ? "
+                + "AND status IN ('confirmed', 'shipping', 'completed')";
 
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -585,11 +588,13 @@ public class OrderDAO {
     }
 
     public double getTotalSpentByCustomer(int customerId) {
-
+        // Chỉ tính tiền của đơn đã hoàn tất và đã thanh toán thành công
         String sql
                 = "SELECT ISNULL(SUM(total_price),0) "
                 + "FROM [Order] "
-                + "WHERE customerID = ?";
+                + "WHERE customerID = ? "
+                + "AND status = 'completed' "
+                + "AND payment_status = 'paid'";
 
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -608,7 +613,6 @@ public class OrderDAO {
         return 0;
     }
 
- 
     public int createOrderWithStockCheck(int customerID, int addressID, String paymentMethod,
             BigDecimal totalPrice, List<CartItem> cartItems) {
 
@@ -626,9 +630,8 @@ public class OrderDAO {
         Connection conn = null;
         try {
             conn = new DBContext().getConnection();
-            conn.setAutoCommit(false); 
+            conn.setAutoCommit(false);
 
-       
             for (CartItem item : cartItems) {
                 try (PreparedStatement psCheck = conn.prepareStatement(sqlCheckStock)) {
                     psCheck.setInt(1, item.getBookID());
@@ -637,7 +640,7 @@ public class OrderDAO {
                             int currentStock = rs.getInt("stock_quantity");
                             if (currentStock < item.getQuantity()) {
                                 conn.rollback();
-                                return -2; 
+                                return -2;
                             }
                         } else {
                             conn.rollback();
@@ -647,7 +650,6 @@ public class OrderDAO {
                 }
             }
 
-           
             int orderID = -1;
             try (PreparedStatement psOrder = conn.prepareStatement(sqlOrder, PreparedStatement.RETURN_GENERATED_KEYS)) {
                 psOrder.setInt(1, customerID);
@@ -668,7 +670,6 @@ public class OrderDAO {
                 return -1;
             }
 
-            
             for (CartItem item : cartItems) {
                 try (PreparedStatement psDetail = conn.prepareStatement(sqlDetail)) {
                     psDetail.setInt(1, orderID);
@@ -678,26 +679,24 @@ public class OrderDAO {
                     psDetail.executeUpdate();
                 }
 
-              
                 try (PreparedStatement psUpdate = conn.prepareStatement(sqlUpdateStock)) {
                     psUpdate.setInt(1, item.getQuantity());
                     psUpdate.setInt(2, item.getBookID());
                     psUpdate.setInt(3, item.getQuantity());
                     int rows = psUpdate.executeUpdate();
-                    if (rows == 0) { 
+                    if (rows == 0) {
                         conn.rollback();
                         return -2;
                     }
                 }
 
-               
                 try (PreparedStatement psStatus = conn.prepareStatement(sqlUpdateStatus)) {
                     psStatus.setInt(1, item.getBookID());
                     psStatus.executeUpdate();
                 }
             }
 
-            conn.commit(); 
+            conn.commit();
             return orderID;
 
         } catch (Exception e) {
@@ -730,9 +729,8 @@ public class OrderDAO {
         Connection conn = null;
         try {
             conn = new DBContext().getConnection();
-            conn.setAutoCommit(false); 
+            conn.setAutoCommit(false);
 
-          
             List<OrderDetail> details = new ArrayList<>();
             try (PreparedStatement psGet = conn.prepareStatement(sqlGetDetails)) {
                 psGet.setInt(1, orderID);
@@ -751,27 +749,25 @@ public class OrderDAO {
                 return false;
             }
 
-          
             for (OrderDetail d : details) {
                 try (PreparedStatement psUpdate = conn.prepareStatement(sqlUpdateStock)) {
                     psUpdate.setInt(1, d.getQuantity());
                     psUpdate.setInt(2, d.getBookID());
                     psUpdate.setInt(3, d.getQuantity());
                     int rows = psUpdate.executeUpdate();
-                    if (rows == 0) { 
+                    if (rows == 0) {
                         conn.rollback();
                         return false;
                     }
                 }
 
-            
                 try (PreparedStatement psStatus = conn.prepareStatement(sqlUpdateStatus)) {
                     psStatus.setInt(1, d.getBookID());
                     psStatus.executeUpdate();
                 }
             }
 
-            conn.commit(); 
+            conn.commit();
             return true;
         } catch (Exception e) {
             if (conn != null) {
