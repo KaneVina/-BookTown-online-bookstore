@@ -188,7 +188,6 @@ public class OrderHistoryController extends HttpServlet {
 
         HttpSession session = request.getSession();
         if (ok) {
-            orderDAO.restoreStock(orderID);
             if (order != null) {
                 boolean isVnpayAndPaid = "vnpay".equalsIgnoreCase(order.getPaymentMethod())
                         && "paid".equalsIgnoreCase(order.getPaymentStatus());

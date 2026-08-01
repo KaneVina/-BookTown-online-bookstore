@@ -106,18 +106,16 @@ public class VNPayReturnController extends HttpServlet {
                 return;
             }
 
-            int orderID = orderDAO.createOrder(account.getId(), addressID, "vnpay", total);
-            if (orderID == -1) {
-                session.setAttribute("errorMessage", "Lỗi khi tạo đơn hàng!");
-                response.sendRedirect(request.getContextPath() + "/checkout");
-                return;
-            }
-            orderDAO.createOrderDetails(orderID, cartItems);
-            boolean stockDeducted = orderDAO.deductStock(orderID);
-            if (!stockDeducted) {
-                orderDAO.cancelOrder(orderID, account.getId(), "Sản phẩm vừa hết hàng do người khác mua trước trong lúc đang thanh toán VNPay");
-                orderDAO.updatePaymentStatus(orderID, "pending_refund");
-                session.setAttribute("errorMessage", "Sản phẩm trong giỏ đã bị người khác mua trước trong lúc thanh toán. Đơn hàng đã được ghi nhận hủy và sẽ hoàn tiền!");
+            // Kiểm tồn + tạo đơn pending — KHÔNG trừ kho ngay.
+            // Kho thật sẽ trừ khi Staff duyệt.
+            int orderID = orderDAO.createOrderWithStockCheck(
+                    account.getId(), addressID, "vnpay", total, cartItems);
+
+            if (orderID == -2) {
+                // Hết hàng tại thời điểm VNPay return — tiền đã thu, cần hoàn
+                session.setAttribute("errorMessage",
+                        "Sản phẩm trong giỏ vừa hết hàng trong lúc thanh toán. "
+                        + "Vui lòng liên hệ hỗ trợ để được hoàn tiền!");
                 session.removeAttribute("vnpay_txnRef");
                 session.removeAttribute("vnpay_addressID");
                 session.removeAttribute("vnpay_total");
@@ -125,8 +123,15 @@ public class VNPayReturnController extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/cart");
                 return;
             }
+            if (orderID == -1) {
+                session.setAttribute("errorMessage", "Lỗi khi tạo đơn hàng!");
+                response.sendRedirect(request.getContextPath() + "/checkout");
+                return;
+            }
 
+            // Đánh dấu đã thanh toán (tiền đã thu qua VNPay)
             orderDAO.updatePaymentStatus(orderID, "paid");
+
             orderDAO.clearCart(account.getId());
 
             Integer appliedVoucherID = (Integer) session.getAttribute("appliedVoucherID");
