@@ -141,7 +141,7 @@ public class CartController extends HttpServlet {
                 sendJson(response, "{\"ok\":false,\"message\":\"" + msg + "\"}");
                 return;
             }
-            cartDAO.updateQuantity(cartItemID, newQty);
+            cartDAO.updateQuantity(cartItemID, account.getId(), newQty);
         }
 
         List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
