@@ -4,42 +4,50 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <%@ include file="/views/layout/homepage/header.jsp" %>
-
+<%@ include file="/views/layout/common/toast.jsp" %>
+<%@ include file="/views/layout/common/wishlist-heart.js.jsp" %>
 <style>
-
     .no-spinner::-webkit-outer-spin-button,
     .no-spinner::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
     }
+
     .no-spinner {
         -moz-appearance: textfield;
         appearance: textfield;
     }
+
     .section-title-left {
         border-left: 4px solid #FDD835;
         padding-left: 12px;
     }
-    .prod-thumb-active  {
+
+    .prod-thumb-active {
         border: 2px solid #1565C0;
     }
-    .prod-thumb-idle    {
+
+    .prod-thumb-idle {
         border: 1px solid #E0E0E0;
     }
-    .prod-card-hover    {
+
+    .prod-card-hover {
         border: 1px solid #E0E0E0;
-        box-shadow: 0 1px 2px rgba(0,0,0,.05);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
         transition: box-shadow .2s, transform .2s;
     }
+
     .prod-card-hover:hover {
-        box-shadow: 0 6px 20px rgba(0,0,0,.1);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, .1);
         transform: translateY(-2px);
     }
+
     .review-card {
         border: 1px solid #E0E0E0;
         border-radius: 12px;
         background: #fff;
     }
+
     .slider-track {
         display: flex;
         gap: 16px;
@@ -47,19 +55,23 @@
         scroll-snap-type: x mandatory;
         scrollbar-width: none;
     }
+
     .slider-track::-webkit-scrollbar {
         display: none;
     }
+
     .slider-item {
         flex: 0 0 calc(25% - 12px);
         scroll-snap-align: start;
     }
+
     @media (max-width: 1024px) {
         .slider-item {
             flex: 0 0 calc(33% - 12px);
         }
     }
-    @media (max-width: 768px)  {
+
+    @media (max-width: 768px) {
         .slider-item {
             flex: 0 0 calc(50% - 8px);
         }
@@ -71,6 +83,7 @@
         display: flex;
         gap: 0;
     }
+
     .tab-btn {
         padding: 14px 24px;
         font-size: 15px;
@@ -83,17 +96,21 @@
         margin-bottom: -1px;
         transition: color .2s, border-color .2s;
     }
+
     .tab-btn:hover {
         color: #17479D;
     }
+
     .tab-btn.active {
         color: #17479D;
         border-bottom-color: #17479D;
     }
+
     .tab-panel {
         display: none;
         padding-top: 24px;
     }
+
     .tab-panel.active {
         display: block;
     }
@@ -110,6 +127,7 @@
         padding: 2px 8px;
         border-radius: 20px;
     }
+
     .badge-admin {
         display: inline-block;
         background: #1565C0;
@@ -121,6 +139,7 @@
         margin-left: 6px;
         vertical-align: middle;
     }
+
     .admin-reply {
         background: #e3f0fb;
         border-radius: 10px;
@@ -145,9 +164,11 @@
         letter-spacing: .5px;
         transition: background .2s;
     }
+
     .btn-write-review:hover {
         background: #0D47A1;
     }
+
     .write-review-form {
         background: #fff;
         border: 1px solid #E0E0E0;
@@ -156,12 +177,13 @@
         margin-top: 24px;
         display: none;
     }
+
     .write-review-form.open {
         display: block;
     }
 
     .review-summary {
-        background: linear-gradient(135deg,#f8fafc,#ffffff);
+        background: linear-gradient(135deg, #f8fafc, #ffffff);
         border: 1px solid #e5e7eb;
         border-radius: 16px;
     }
@@ -174,13 +196,14 @@
     }
 
     .review-item:hover {
-        box-shadow: 0 8px 24px rgba(0,0,0,.08);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
     }
 
     .star-filled {
         color: #facc15;
     }
-    .star-empty  {
+
+    .star-empty {
         color: #d1d5db;
     }
 
@@ -211,12 +234,13 @@
 
         <div class="flex-shrink-0 w-full lg:w-[499px] flex flex-col gap-4">
 
-            <%
-                String rawThumb = (request.getAttribute("book") != null)
-                        ? ((model.Book) request.getAttribute("book")).getThumbnail() : "";
-                if (rawThumb == null) rawThumb = "";
+            <% String rawThumb = (request.getAttribute("book") != null) ? ((model.Book) request.getAttribute("book")).getThumbnail() : "";
+                if (rawThumb == null) {
+                    rawThumb = "";
+                }
                 String[] imgArr = rawThumb.split("\\|", -1);
-                String img1 = imgArr.length > 0 ? imgArr[0].trim() : "";
+                String img1 = imgArr.length > 0
+                        ? imgArr[0].trim() : "";
                 String img2 = imgArr.length > 1 ? imgArr[1].trim() : "";
                 String img3 = imgArr.length > 2 ? imgArr[2].trim() : "";
                 String img4 = imgArr.length > 3 ? imgArr[3].trim() : "";
@@ -226,10 +250,12 @@
                 pageContext.setAttribute("img4", img4);
             %>
 
-            <div class="bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden aspect-[3/4] flex items-center justify-center relative">
+            <div
+                class="bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden aspect-[3/4] flex items-center justify-center relative">
                 <c:choose>
                     <c:when test="${not empty img1}">
-                        <img id="mainImage" src="${img1}" alt="${book.title}" class="w-full h-full object-cover">
+                        <img id="mainImage" src="${img1}" alt="${book.title}"
+                             class="w-full h-full object-cover">
                     </c:when>
                     <c:otherwise>
                         <i data-lucide="book-open" class="w-24 h-24 text-gray-300"></i>
@@ -237,12 +263,17 @@
                 </c:choose>
 
                 <c:if test="${book.featured}">
-                    <div class="absolute top-3 left-3 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">🔥 Nổi bật</div>
-                </c:if>
+                    <div
+                        class="absolute top-3 left-3 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                        🔥 Nổi bật</div>
+                    </c:if>
 
                 <c:if test="${book.status != 'available' or book.stockQuantity == 0}">
-                    <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <span class="bg-white text-red-600 font-bold text-sm px-4 py-2 rounded-full">Hết hàng</span>
+                    <div
+                        class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <span
+                            class="bg-white text-red-600 font-bold text-sm px-4 py-2 rounded-full">Hết
+                            hàng</span>
                     </div>
                 </c:if>
             </div>
@@ -253,19 +284,23 @@
                     <%-- Ảnh 1: bìa chính --%>
                     <button onclick="switchImg(this, '${img1}')"
                             class="prod-thumb-active rounded-lg overflow-hidden aspect-square bg-gray-50">
-                        <img src="${img1}" class="w-full h-full object-cover" alt="">
+                        <img src="${img1}" class="w-full h-full object-cover"
+                             alt="">
                     </button>
                     <%-- Ảnh 2 --%>
                     <c:choose>
                         <c:when test="${not empty img2}">
                             <button onclick="switchImg(this, '${img2}')"
                                     class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50">
-                                <img src="${img2}" class="w-full h-full object-cover" alt="">
+                                <img src="${img2}"
+                                     class="w-full h-full object-cover" alt="">
                             </button>
                         </c:when>
                         <c:otherwise>
-                            <button class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50 flex items-center justify-center opacity-40 cursor-not-allowed">
-                                <i data-lucide="image" class="w-6 h-6 text-gray-300"></i>
+                            <button
+                                class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50 flex items-center justify-center opacity-40 cursor-not-allowed">
+                                <i data-lucide="image"
+                                   class="w-6 h-6 text-gray-300"></i>
                             </button>
                         </c:otherwise>
                     </c:choose>
@@ -274,12 +309,16 @@
                         <c:when test="${not empty img3}">
                             <button onclick="switchImg(this, '${img3}')"
                                     class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50">
-                                <img src="${img3}" class="w-full h-full object-cover" alt="">
+                                <img src="${img3}"
+                                     class="w-full h-full object-cover"
+                                     alt="">
                             </button>
                         </c:when>
                         <c:otherwise>
-                            <button class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50 flex items-center justify-center opacity-40 cursor-not-allowed">
-                                <i data-lucide="image" class="w-6 h-6 text-gray-300"></i>
+                            <button
+                                class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50 flex items-center justify-center opacity-40 cursor-not-allowed">
+                                <i data-lucide="image"
+                                   class="w-6 h-6 text-gray-300"></i>
                             </button>
                         </c:otherwise>
                     </c:choose>
@@ -288,12 +327,16 @@
                         <c:when test="${not empty img4}">
                             <button onclick="switchImg(this, '${img4}')"
                                     class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50">
-                                <img src="${img4}" class="w-full h-full object-cover" alt="">
+                                <img src="${img4}"
+                                     class="w-full h-full object-cover"
+                                     alt="">
                             </button>
                         </c:when>
                         <c:otherwise>
-                            <button class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50 flex items-center justify-center opacity-40 cursor-not-allowed">
-                                <i data-lucide="image" class="w-6 h-6 text-gray-300"></i>
+                            <button
+                                class="prod-thumb-idle rounded-lg overflow-hidden aspect-square bg-gray-50 flex items-center justify-center opacity-40 cursor-not-allowed">
+                                <i data-lucide="image"
+                                   class="w-6 h-6 text-gray-300"></i>
                             </button>
                         </c:otherwise>
                     </c:choose>
@@ -307,25 +350,33 @@
             <!-- Tags -->
             <div class="flex flex-wrap gap-2">
                 <c:if test="${not empty book.genreName}">
-                    <span class="bg-primary/10 text-primary text-[12px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">${book.genreName}</span>
+                    <span
+                        class="bg-primary/10 text-primary text-[12px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">${book.genreName}</span>
                 </c:if>
                 <c:if test="${book.featured}">
-                    <span class="bg-secondary/20 text-primary text-[12px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">🔥 Bán chạy</span>
-                </c:if>
-                <c:if test="${not empty book.originName}">
-                    <span class="bg-gray-100 text-gray-600 text-[12px] font-medium px-3 py-1 rounded-full">🌏 ${book.originName}</span>
-                </c:if>
+                    <span
+                        class="bg-secondary/20 text-primary text-[12px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">🔥
+                        Bán chạy</span>
+                    </c:if>
+                    <c:if test="${not empty book.originName}">
+                    <span
+                        class="bg-gray-100 text-gray-600 text-[12px] font-medium px-3 py-1 rounded-full">🌏
+                        ${book.originName}</span>
+                    </c:if>
             </div>
 
             <!-- Title -->
-            <h1 class="text-[30px] font-black text-[#222222] leading-tight">${book.title}</h1>
+            <h1 class="text-[30px] font-black text-[#222222] leading-tight">${book.title}
+            </h1>
 
             <!-- Author -->
             <c:if test="${not empty book.authors}">
                 <p class="text-[18px] italic text-gray-500">
                     Tác giả:
                     <c:forEach var="author" items="${book.authors}" varStatus="s">
-                        <span class="text-primary font-semibold not-italic hover:underline cursor-pointer">${author}</span><c:if test="${!s.last}">, </c:if>
+                        <span
+                            class="text-primary font-semibold not-italic hover:underline cursor-pointer">${author}</span>
+                        <c:if test="${!s.last}">, </c:if>
                     </c:forEach>
                 </p>
             </c:if>
@@ -342,17 +393,21 @@
                     </c:forEach>
                 </div>
                 <span class="text-[14px] font-medium text-gray-500">
-                    <fmt:formatNumber value="${book.avgRating}" maxFractionDigits="1" /> (${book.reviewCount} đánh giá)
+                    <fmt:formatNumber value="${book.avgRating}" maxFractionDigits="1" />
+                    (${book.reviewCount} đánh giá)
                 </span>
             </div>
 
             <!-- Price card -->
-            <div class="bg-white border border-gray-200 shadow-sm rounded-xl px-6 pt-10 pb-6 flex flex-col gap-6">
+            <div
+                class="bg-white border border-gray-200 shadow-sm rounded-xl px-6 pt-10 pb-6 flex flex-col gap-6">
 
                 <!-- Price -->
                 <div class="flex items-end gap-3">
                     <span class="text-[30px] font-bold text-primary leading-none">
-                        <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true" />đ
+                        <fmt:formatNumber value="${book.price}" type="number"
+                                          groupingUsed="true" />
+                        đ
                     </span>
                 </div>
 
@@ -360,14 +415,18 @@
 
                 <div class="flex items-center gap-2 text-[14px] font-medium">
                     <c:choose>
-                        <c:when test="${book.status == 'available' and book.stockQuantity > 0}">
-                            <div class="w-5 h-5 bg-green-700 rounded-full flex items-center justify-center">
+                        <c:when
+                            test="${book.status == 'available' and book.stockQuantity > 0}">
+                            <div
+                                class="w-5 h-5 bg-green-700 rounded-full flex items-center justify-center">
                                 <i data-lucide="check" class="w-3 h-3 text-white"></i>
                             </div>
-                            <span class="text-[#222222]">Còn hàng (${book.stockQuantity} cuốn)</span>
-                        </c:when>
-                        <c:otherwise>
-                            <div class="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                            <span class="text-[#222222]">Còn hàng (${book.stockQuantity}
+                                cuốn)</span>
+                            </c:when>
+                            <c:otherwise>
+                            <div
+                                class="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
                                 <i data-lucide="x" class="w-3 h-3 text-white"></i>
                             </div>
                             <span class="text-red-500">Hết hàng</span>
@@ -375,108 +434,149 @@
                     </c:choose>
                 </div>
 
+                <!-- Thêm vào giỏ -->
                 <div class="flex items-center gap-4 flex-wrap">
-                    <form id="add-to-cart-form" action="${pageContext.request.contextPath}/cart" method="POST" class="flex items-center gap-4 flex-wrap flex-1">
-                        <input type="hidden" name="action"   value="add" />
-                        <input type="hidden" name="bookID"   value="${book.bookID}" />
-                        <input type="hidden" name="redirect" value="${pageContext.request.contextPath}/products?id=${book.bookID}" />
+                    <form id="add-to-cart-form"
+                          action="${pageContext.request.contextPath}/cart" method="POST"
+                          class="flex items-center gap-4 flex-wrap flex-1">
+                        <input type="hidden" name="action" value="add" />
+                        <input type="hidden" name="bookID" value="${book.bookID}" />
 
                         <c:if test="${book.status == 'available' and book.stockQuantity > 0}">
                             <div class="flex items-center border-2 border-gray-200 rounded-full overflow-hidden">
-                                <button type="button" id="qty-minus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">−</button>
-                                <input id="form-qty" name="quantity" type="number" value="1" min="1" max="${book.stockQuantity}"
-                                       class="w-14 text-center text-[15px] font-bold border-none outline-none py-2 bg-transparent no-spinner" readonly>
-                                <button type="button" id="qty-plus" class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">+</button>
+                                <button type="button" id="qty-minus"
+                                        class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">−</button>
+                                <input id="form-qty" name="quantity" type="number" value="1"
+                                       min="1" max="${book.stockQuantity}"
+                                       class="w-14 text-center text-[15px] font-bold border-none outline-none py-2 bg-transparent no-spinner"
+                                       readonly>
+                                <button type="button" id="qty-plus"
+                                        class="px-4 py-2 text-lg font-bold text-gray-500 hover:bg-gray-100 transition-colors">+</button>
                             </div>
                         </c:if>
 
                         <c:choose>
-                            <c:when test="${book.status == 'available' and book.stockQuantity > 0}">
-                                <c:choose>
-                                    <c:when test="${not empty sessionScope.account and sessionScope.account.role == 'customer'}">
-                                        <button type="button" id="btn-add-to-cart"
-                                                class="flex-1 bg-secondary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-opacity min-w-[160px]">
-                                            <i data-lucide="shopping-cart" class="w-5 h-5"></i> Thêm vào giỏ
-                                        </button>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <a href="${pageContext.request.contextPath}/login"
-                                           class="flex-1 bg-secondary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-opacity min-w-[160px]">
-                                            <i data-lucide="shopping-cart" class="w-5 h-5"></i> Thêm vào giỏ
-                                        </a>
-                                    </c:otherwise>
-                                </c:choose>
-                            </c:when>
-                            <c:otherwise>
-                                <button type="button" disabled class="flex-1 bg-gray-200 text-gray-400 font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 cursor-not-allowed min-w-[160px]">
+                            <c:when test="${book.status != 'available' or book.stockQuantity == 0}">
+                                <button type="button" disabled
+                                        class="flex-1 bg-gray-200 text-gray-400 font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 cursor-not-allowed min-w-[160px]">
                                     <i data-lucide="x-circle" class="w-5 h-5"></i> Hết hàng
                                 </button>
+                            </c:when>
+
+                            <c:when test="${not empty sessionScope.account and sessionScope.account.role == 'customer'}">
+                                <button type="button" id="btn-add-to-cart"
+                                        class="flex-1 bg-secondary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-opacity min-w-[160px]">
+                                    <i data-lucide="shopping-cart" class="w-5 h-5"></i> Thêm vào giỏ
+                                </button>
+                            </c:when>
+
+                            <c:otherwise>
+                                <a href="${pageContext.request.contextPath}/login"
+                                   class="flex-1 bg-secondary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-opacity min-w-[160px]">
+                                    <i data-lucide="shopping-cart" class="w-5 h-5"></i> Thêm vào giỏ
+                                </a>
                             </c:otherwise>
                         </c:choose>
                     </form>
 
                     <!-- Wishlist -->
-                    <c:if test="${empty sessionScope.account or sessionScope.account.role == 'customer'}">
-                    <c:choose>
-                        <c:when test="${inWishlist}">
-                            <form action="${pageContext.request.contextPath}/wishlist" method="POST" class="flex-1 min-w-[160px]" id="wishlist-detail-form" data-book-id="${book.bookID}">
-                                <input type="hidden" name="wishAction" value="remove" />
-                                <input type="hidden" name="wishBookId" value="${book.bookID}" />
-                                <button type="submit" class="w-full bg-red-50 border-2 border-red-500 text-red-500 font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-red-500 hover:text-white transition-all">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2" class="w-5 h-5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                                    <span class="wishlist-text">Đã thích</span>
-                                </button>
-                            </form>
-                        </c:when>
-                        <c:otherwise>
-                            <form action="${pageContext.request.contextPath}/wishlist" method="POST" class="flex-1 min-w-[160px]" id="wishlist-detail-form" data-book-id="${book.bookID}">
-                                <input type="hidden" name="wishAction" value="add" />
-                                <input type="hidden" name="wishBookId" value="${book.bookID}" />
-                                <button type="submit" class="w-full border-2 border-primary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                                    <span class="wishlist-text">Yêu thích</span>
-                                </button>
-                            </form>
-                        </c:otherwise>
-                    </c:choose>
+                    <c:if
+                        test="${empty sessionScope.account or sessionScope.account.role == 'customer'}">
+                        <c:choose>
+                            <c:when test="${inWishlist}">
+                                <form action="${pageContext.request.contextPath}/wishlist"
+                                      method="POST" class="flex-1 min-w-[160px]"
+                                      id="wishlist-detail-form" data-book-id="${book.bookID}">
+                                    <input type="hidden" name="wishAction" value="remove" />
+                                    <input type="hidden" name="wishBookId"
+                                           value="${book.bookID}" />
+                                    <button type="submit"
+                                            class="w-full bg-red-50 border-2 border-red-500 text-red-500 font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-red-500 hover:text-white transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20"
+                                             height="20" viewBox="0 0 24 24" fill="#ef4444"
+                                             stroke="#ef4444" stroke-width="2"
+                                             class="w-5 h-5">
+                                        <path
+                                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                        </path>
+                                        </svg>
+                                        <span class="wishlist-text">Đã thích</span>
+                                    </button>
+                                </form>
+                            </c:when>
+                            <c:otherwise>
+                                <form action="${pageContext.request.contextPath}/wishlist"
+                                      method="POST" class="flex-1 min-w-[160px]"
+                                      id="wishlist-detail-form" data-book-id="${book.bookID}">
+                                    <input type="hidden" name="wishAction" value="add" />
+                                    <input type="hidden" name="wishBookId"
+                                           value="${book.bookID}" />
+                                    <button type="submit"
+                                            class="w-full border-2 border-primary text-primary font-bold text-[16px] py-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20"
+                                             height="20" viewBox="0 0 24 24" fill="none"
+                                             stroke="currentColor" stroke-width="2"
+                                             class="w-5 h-5">
+                                        <path
+                                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                        </path>
+                                        </svg>
+                                        <span class="wishlist-text">Yêu thích</span>
+                                    </button>
+                                </form>
+                            </c:otherwise>
+                        </c:choose>
                     </c:if>
                 </div>
             </div>
 
             <!-- Specs grid -->
-            <div class="border-y border-gray-200 grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-200 py-6">
+            <div
+                class="border-y border-gray-200 grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-200 py-6">
                 <div class="flex flex-col gap-1 px-4 first:pl-0">
-                    <span class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Hình thức</span>
+                    <span
+                        class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Hình
+                        thức</span>
                     <span class="text-[16px] font-medium text-[#222222]">
                         <c:choose>
-                            <c:when test="${not empty book.contentName}">${book.contentName}</c:when>
+                            <c:when test="${not empty book.contentName}">${book.contentName}
+                            </c:when>
                             <c:otherwise>—</c:otherwise>
                         </c:choose>
                     </span>
                 </div>
                 <div class="flex flex-col gap-1 px-4">
-                    <span class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Xuất xứ</span>
+                    <span
+                        class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Xuất
+                        xứ</span>
                     <span class="text-[16px] font-medium text-[#222222]">
                         <c:choose>
-                            <c:when test="${not empty book.originName}">${book.originName}</c:when>
+                            <c:when test="${not empty book.originName}">${book.originName}
+                            </c:when>
                             <c:otherwise>—</c:otherwise>
                         </c:choose>
                     </span>
                 </div>
                 <div class="flex flex-col gap-1 px-4">
-                    <span class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Bộ sách</span>
+                    <span
+                        class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Bộ
+                        sách</span>
                     <span class="text-[16px] font-medium text-[#222222]">
                         <c:choose>
-                            <c:when test="${not empty book.seriesName}">${book.seriesName}</c:when>
+                            <c:when test="${not empty book.seriesName}">${book.seriesName}
+                            </c:when>
                             <c:otherwise>—</c:otherwise>
                         </c:choose>
                     </span>
                 </div>
                 <div class="flex flex-col gap-1 px-4">
-                    <span class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Số trang</span>
+                    <span
+                        class="text-[12px] font-bold text-gray-500 uppercase tracking-wide">Số
+                        trang</span>
                     <span class="text-[16px] font-medium text-[#222222]">
                         <c:choose>
-                            <c:when test="${book.totalPages > 0}">${book.totalPages} trang</c:when>
+                            <c:when test="${book.totalPages > 0}">${book.totalPages} trang
+                            </c:when>
                             <c:otherwise>—</c:otherwise>
                         </c:choose>
                     </span>
@@ -491,7 +591,8 @@
         <!-- Tab Navigation -->
         <div class="tab-nav">
             <button class="tab-btn" onclick="switchTab('tab-desc', this)">Mô tả</button>
-            <button class="tab-btn" onclick="switchTab('tab-info', this)">Thông tin bổ sung</button>
+            <button class="tab-btn" onclick="switchTab('tab-info', this)">Thông tin bổ
+                sung</button>
             <button class="tab-btn active" onclick="switchTab('tab-reviews', this)">
                 Đánh giá (${book.reviewCount})
             </button>
@@ -501,7 +602,8 @@
         <div id="tab-desc" class="tab-panel">
             <c:choose>
                 <c:when test="${not empty book.description}">
-                    <p class="text-[16px] text-gray-600 leading-relaxed">${book.description}</p>
+                    <p class="text-[16px] text-gray-600 leading-relaxed">${book.description}
+                    </p>
                 </c:when>
                 <c:otherwise>
                     <p class="text-gray-400 italic">Chưa có mô tả.</p>
@@ -517,7 +619,9 @@
                         <td class="py-3 font-semibold text-gray-500 w-[200px]">Số trang</td>
                         <td class="py-3 text-gray-800">
                             <c:choose>
-                                <c:when test="${book.totalPages > 0}">${book.totalPages} trang</c:when>
+                                <c:when test="${book.totalPages > 0}">${book.totalPages}
+                                    trang
+                                </c:when>
                                 <c:otherwise>—</c:otherwise>
                             </c:choose>
                         </td>
@@ -526,7 +630,9 @@
                         <td class="py-3 font-semibold text-gray-500">Hình thức</td>
                         <td class="py-3 text-gray-800">
                             <c:choose>
-                                <c:when test="${not empty book.contentName}">${book.contentName}</c:when>
+                                <c:when test="${not empty book.contentName}">
+                                    ${book.contentName}
+                                </c:when>
                                 <c:otherwise>—</c:otherwise>
                             </c:choose>
                         </td>
@@ -535,7 +641,9 @@
                         <td class="py-3 font-semibold text-gray-500">Xuất xứ</td>
                         <td class="py-3 text-gray-800">
                             <c:choose>
-                                <c:when test="${not empty book.originName}">${book.originName}</c:when>
+                                <c:when test="${not empty book.originName}">
+                                    ${book.originName}
+                                </c:when>
                                 <c:otherwise>—</c:otherwise>
                             </c:choose>
                         </td>
@@ -544,7 +652,9 @@
                         <td class="py-3 font-semibold text-gray-500">Bộ sách</td>
                         <td class="py-3 text-gray-800">
                             <c:choose>
-                                <c:when test="${not empty book.seriesName}">${book.seriesName}</c:when>
+                                <c:when test="${not empty book.seriesName}">
+                                    ${book.seriesName}
+                                </c:when>
                                 <c:otherwise>—</c:otherwise>
                             </c:choose>
                         </td>
@@ -553,7 +663,8 @@
                         <td class="py-3 font-semibold text-gray-500">Mã SKU</td>
                         <td class="py-3 text-gray-800">BT-${book.bookID}</td>
                     </tr>
-                    <%-- [NEW] Bổ sung Kích thước / Trọng lượng từ code 2 (chỉ hiện khi có dữ liệu) --%>
+                    <%-- [NEW] Bổ sung Kích thước / Trọng lượng từ code 2 (chỉ hiện khi có
+                        dữ liệu) --%>
                     <c:if test="${not empty book.dimensions}">
                         <tr class="border-b border-gray-100">
                             <td class="py-3 font-semibold text-gray-500">Kích thước</td>
@@ -562,7 +673,8 @@
                     </c:if>
                     <c:if test="${not empty book.weight}">
                         <tr>
-                            <td class="py-3 font-semibold text-gray-500">Trọng lượng</td>
+                            <td class="py-3 font-semibold text-gray-500">Trọng lượng
+                            </td>
                             <td class="py-3 text-gray-800">${book.weight} kg</td>
                         </tr>
                     </c:if>
@@ -578,12 +690,9 @@
                 <h2 class="section-title-left text-[22px] font-bold text-primary">
                     Đánh giá sản phẩm (${reviews.size()})
                 </h2>
-                <button
-                    id="openReviewModal"
-                    data-can-review="${canReview}"
-                    type="button"
-                    class="flex items-center gap-2 bg-primary hover:opacity-90 text-white font-bold px-5 py-2.5 rounded-lg transition"
-                    title="${canReview ? 'Viết đánh giá' : 'Bạn cần mua và nhận sách trước khi đánh giá'}">
+                <button id="openReviewModal" data-can-review="${canReview}" type="button"
+                        class="flex items-center gap-2 bg-primary hover:opacity-90 text-white font-bold px-5 py-2.5 rounded-lg transition"
+                        title="${canReview ? 'Viết đánh giá' : 'Bạn cần mua và nhận sách trước khi đánh giá'}">
                     <span class="material-symbols-outlined">edit</span>
                     Viết đánh giá
                 </button>
@@ -594,29 +703,37 @@
                 <c:when test="${not empty reviews}">
                     <div class="flex flex-col gap-6">
                         <c:forEach items="${reviews}" var="review">
-                            <div class="bg-white p-6 rounded-xl shadow-sm border border-outline-variant hover:shadow-md transition-shadow">
+                            <div
+                                class="bg-white p-6 rounded-xl shadow-sm border border-outline-variant hover:shadow-md transition-shadow">
                                 <div class="flex justify-between items-start mb-4">
                                     <div>
                                         <div class="flex items-center gap-2">
                                             <strong>${review.customerName}</strong>
-                                            <span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded font-bold uppercase">
+                                            <span
+                                                class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded font-bold uppercase">
                                                 Đã mua hàng
                                             </span>
                                         </div>
                                         <div class="flex gap-1 mt-1 text-yellow-400">
                                             <c:forEach begin="1" end="5" var="i">
                                                 <c:choose>
-                                                    <c:when test="${i <= review.rating}"><span>★</span></c:when>
-                                                    <c:otherwise><span class="text-gray-300">★</span></c:otherwise>
+                                                    <c:when test="${i <= review.rating}">
+                                                        <span>★</span>
+                                                    </c:when>
+                                                    <c:otherwise><span
+                                                            class="text-gray-300">★</span>
+                                                    </c:otherwise>
                                                 </c:choose>
                                             </c:forEach>
                                         </div>
                                     </div>
                                     <div class="flex flex-col items-end gap-2">
                                         <span class="text-xs text-gray-400 italic">
-                                            <fmt:formatDate value="${review.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
+                                            <fmt:formatDate value="${review.createdAt}"
+                                                            pattern="dd/MM/yyyy HH:mm" />
                                         </span>
-                                        <c:if test="${sessionScope.account != null && sessionScope.account.id == review.customerID}">
+                                        <c:if
+                                            test="${sessionScope.account != null && sessionScope.account.id == review.customerID}">
                                             <c:choose>
                                                 <c:when test="${empty review.adminReply}">
                                                     <button type="button"
@@ -624,7 +741,8 @@
                                                             data-review-id="${review.reviewID}"
                                                             data-rating="${review.rating}"
                                                             data-comment="${fn:escapeXml(review.comment)}">
-                                                        <span class="material-symbols-outlined text-base">edit</span>
+                                                        <span
+                                                            class="material-symbols-outlined text-base">edit</span>
                                                         Sửa
                                                     </button>
                                                 </c:when>
@@ -632,7 +750,8 @@
                                                     <button type="button" disabled
                                                             title="Không thể sửa vì BookTown đã phản hồi đánh giá này"
                                                             class="flex items-center gap-1 text-xs font-semibold text-gray-400 cursor-not-allowed">
-                                                        <span class="material-symbols-outlined text-base">edit_off</span>
+                                                        <span
+                                                            class="material-symbols-outlined text-base">edit_off</span>
                                                         Sửa
                                                     </button>
                                                 </c:otherwise>
@@ -640,16 +759,23 @@
                                         </c:if>
                                     </div>
                                 </div>
-                                <p class="text-gray-700 leading-relaxed text-sm">${review.comment}</p>
+                                <p class="text-gray-700 leading-relaxed text-sm">
+                                    ${review.comment}
+                                </p>
                                 <c:if test="${not empty review.adminReply}">
-                                    <div class="mt-5 ml-6 p-4 bg-blue-50 rounded-lg border-l-4 border-primary">
+                                    <div
+                                        class="mt-5 ml-6 p-4 bg-blue-50 rounded-lg border-l-4 border-primary">
                                         <div class="flex items-center gap-2 mb-2">
-                                            <span class="font-bold text-primary">BookTown</span>
+                                            <span
+                                                class="font-bold text-primary">BookTown</span>
                                         </div>
-                                        <p class="text-gray-700 text-sm leading-relaxed">${review.adminReply}</p>
-                                        <c:if test="${review.adminReplyDate != null}">
+                                        <p class="text-gray-700 text-sm leading-relaxed">
+                                            ${review.adminReply}</p>
+                                            <c:if test="${review.adminReplyDate != null}">
                                             <div class="text-xs text-gray-400 mt-2">
-                                                <fmt:formatDate value="${review.adminReplyDate}" pattern="dd/MM/yyyy HH:mm"/>
+                                                <fmt:formatDate
+                                                    value="${review.adminReplyDate}"
+                                                    pattern="dd/MM/yyyy HH:mm" />
                                             </div>
                                         </c:if>
                                     </div>
@@ -659,10 +785,13 @@
                     </div>
                 </c:when>
                 <c:otherwise>
-                    <div class="bg-white border border-dashed border-gray-300 rounded-xl p-10 text-center">
+                    <div
+                        class="bg-white border border-dashed border-gray-300 rounded-xl p-10 text-center">
                         <div class="text-5xl mb-3">⭐</div>
                         <div class="font-semibold text-gray-600">Chưa có đánh giá nào</div>
-                        <div class="text-gray-400 mt-2">Hãy là người đầu tiên trải nghiệm và đánh giá cuốn sách này</div>
+                        <div class="text-gray-400 mt-2">Hãy là người đầu tiên trải nghiệm và
+                            đánh
+                            giá cuốn sách này</div>
                     </div>
                 </c:otherwise>
             </c:choose>
@@ -670,15 +799,17 @@
     </section>
 
 
-    <div id="reviewModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div id="reviewModal"
+         class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
         <div class="bg-white w-[600px] rounded-xl p-6 relative">
             <button id="closeReviewModal" class="absolute top-3 right-4 text-2xl">×</button>
             <h3 id="reviewModalTitle" class="text-xl font-bold mb-6">Viết đánh giá</h3>
-            <form id="reviewForm" action="${pageContext.request.contextPath}/review" method="post">
-                <input type="hidden" id="formAction"    name="action"   value="add">
+            <form id="reviewForm" action="${pageContext.request.contextPath}/review"
+                  method="post">
+                <input type="hidden" id="formAction" name="action" value="add">
                 <input type="hidden" id="reviewIDInput" name="reviewID" value="">
                 <input type="hidden" name="bookID" value="${book.bookID}">
-                <input type="hidden" id="ratingValue"   name="rating"   value="5">
+                <input type="hidden" id="ratingValue" name="rating" value="5">
                 <div class="mb-4">
                     <label class="font-semibold block mb-2">Đánh giá của bạn</label>
                     <div id="ratingStars" class="flex gap-2 text-3xl cursor-pointer">
@@ -688,7 +819,8 @@
                         <span class="star text-yellow-400" data-value="4">★</span>
                         <span class="star text-yellow-400" data-value="5">★</span>
                     </div>
-                    <p class="text-sm text-gray-500 mt-2">Bạn đang chọn: <span id="ratingText">5</span> sao</p>
+                    <p class="text-sm text-gray-500 mt-2">Bạn đang chọn: <span
+                            id="ratingText">5</span> sao</p>
                 </div>
                 <textarea id="commentInput" name="comment" rows="5" required
                           placeholder="Chia sẻ cảm nhận của bạn..."
@@ -705,12 +837,16 @@
     <c:if test="${not empty relatedBooks}">
         <section class="pt-2">
             <div class="flex items-center justify-between mb-5">
-                <h2 class="section-title-left text-[20px] font-bold text-primary">📚 Bạn cũng có thể thích</h2>
+                <h2 class="section-title-left text-[20px] font-bold text-primary">📚 Bạn
+                    cũng có thể
+                    thích</h2>
                 <div class="flex gap-2">
-                    <button id="sliderPrev" class="w-[34px] h-[34px] border border-gray-200 rounded-full flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
+                    <button id="sliderPrev"
+                            class="w-[34px] h-[34px] border border-gray-200 rounded-full flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
                         <i data-lucide="chevron-left" class="w-4 h-4"></i>
                     </button>
-                    <button id="sliderNext" class="w-[34px] h-[34px] border border-gray-200 rounded-full flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
+                    <button id="sliderNext"
+                            class="w-[34px] h-[34px] border border-gray-200 rounded-full flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
                         <i data-lucide="chevron-right" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -718,28 +854,38 @@
 
             <div id="relatedSlider" class="slider-track">
                 <c:forEach var="rb" items="${relatedBooks}">
-                    <div class="slider-item prod-card-hover bg-white rounded-xl overflow-hidden flex flex-col">
-                        <div class="relative block bg-[#f0f4ff] aspect-[3/4] overflow-hidden">
-                            <a href="${pageContext.request.contextPath}/products?id=${rb.bookID}">
-                                <%-- [FIX] check đúng field đang được hiển thị (rb.thumbnailFirst)
-                                     thay vì check rb.thumbnail (chuỗi thô, có thể khác trạng thái rỗng) --%>
+                    <div
+                        class="slider-item prod-card-hover bg-white rounded-xl overflow-hidden flex flex-col">
+                        <div
+                            class="relative block bg-[#f0f4ff] aspect-[3/4] overflow-hidden">
+                            <a
+                                href="${pageContext.request.contextPath}/products?id=${rb.bookID}">
+                                <%-- [FIX] check đúng field đang được hiển thị
+                                    (rb.thumbnailFirst) thay vì check rb.thumbnail (chuỗi
+                                    thô, có thể khác trạng thái rỗng) --%>
                                 <c:choose>
                                     <c:when test="${not empty rb.thumbnailFirst}">
-                                        <img src="${rb.thumbnailFirst}" alt="${rb.title}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                                        <img src="${rb.thumbnailFirst}"
+                                             alt="${rb.title}"
+                                             class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                                     </c:when>
                                     <c:otherwise>
-                                        <div class="w-full h-full flex items-center justify-center">
-                                            <i data-lucide="book-open" class="w-12 h-12 text-gray-300"></i>
+                                        <div
+                                            class="w-full h-full flex items-center justify-center">
+                                            <i data-lucide="book-open"
+                                               class="w-12 h-12 text-gray-300"></i>
                                         </div>
                                     </c:otherwise>
                                 </c:choose>
                             </a>
                             <c:if test="${rb.featured}">
-                                <span class="absolute top-2.5 right-2.5 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">🔥 Hot</span>
-                            </c:if>
-                            <jsp:include page="/views/layout/common/wishlist-heart.jsp">
-                                <jsp:param name="wishBookId" value="${rb.bookID}" />
-                            </jsp:include>
+                                <span
+                                    class="absolute top-2.5 right-2.5 bg-[#8E24AA] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">🔥
+                                    Hot</span>
+                                </c:if>
+                                <jsp:include page="/views/layout/common/wishlist-heart.jsp">
+                                    <jsp:param name="wishBookId" value="${rb.bookID}" />
+                                </jsp:include>
                         </div>
                         <div class="p-3 flex flex-col flex-1 gap-1.5">
                             <a href="${pageContext.request.contextPath}/products?id=${rb.bookID}"
@@ -757,13 +903,16 @@
                                 <c:forEach begin="1" end="5" var="i">
                                     <c:choose>
                                         <c:when test="${i <= rb.avgRating}">★</c:when>
-                                        <c:otherwise><span class="text-gray-300">★</span></c:otherwise>
+                                        <c:otherwise><span class="text-gray-300">★</span>
+                                        </c:otherwise>
                                     </c:choose>
                                 </c:forEach>
-                                <span class="text-gray-400 text-[11px]">(${rb.reviewCount})</span>
+                                <span
+                                    class="text-gray-400 text-[11px]">(${rb.reviewCount})</span>
                             </div>
                             <p class="text-primary text-[17px] font-bold">
-                                <fmt:formatNumber value="${rb.price}" type="number" groupingUsed="true" />đ
+                                <fmt:formatNumber value="${rb.price}" type="number"
+                                                  groupingUsed="true" />đ
                             </p>
                             <a href="${pageContext.request.contextPath}/products?id=${rb.bookID}"
                                class="mt-auto w-full bg-primary text-white rounded-lg py-2.5 text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition-colors">
@@ -776,6 +925,30 @@
         </section>
     </c:if>
 </main>
+
+<!-- Modal giới hạn stock -->
+<div id="stock-limit-modal"
+     class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[9999]">
+    <div class="bg-white w-[420px] rounded-xl p-6 relative">
+        <button type="button" onclick="document.getElementById('stock-limit-modal').classList.add('hidden');
+                document.getElementById('stock-limit-modal').classList.remove('flex');"
+                class="absolute top-3 right-4 text-2xl hover:text-gray-500">&times;</button>
+        <h3 class="text-lg font-bold text-[#D32F2F] mb-3 flex items-center gap-2"> 
+            <i data-lucide="triangle-alert" class="w-5 h-5"></i>  Giới hạn tồn kho</h3>
+        <p id="stock-limit-msg" class="text-gray-700 mb-5"></p>
+        <div class="flex justify-end gap-3">
+            <a href="${pageContext.request.contextPath}/cart"
+               class="px-4 py-2 bg-[#004d99] text-white rounded-lg hover:opacity-90 text-sm font-semibold">
+                Xem giỏ hàng
+            </a>
+            <button type="button"
+                    onclick="document.getElementById('stock-limit-modal').classList.add('hidden');document.getElementById('stock-limit-modal').classList.remove('flex');"
+                    class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 text-sm">
+                Đóng
+            </button>
+        </div>
+    </div>
+</div>
 
 <script>
 
@@ -796,13 +969,16 @@
         if (!input)
             return;
 
-        var max = ${book.stockQuantity > 0 ? book.stockQuantity : 1};
+        var max = ${ book.stockQuantity > 0 ? book.stockQuantity : 1
+    };
         var minus = document.getElementById('qty-minus');
-        var plus  = document.getElementById('qty-plus');
+        var plus = document.getElementById('qty-plus');
 
         function clamp(v) {
-            if (isNaN(v) || v < 1) v = 1;
-            if (v > max) v = max;
+            if (isNaN(v) || v < 1)
+                v = 1;
+            if (v > max)
+                v = max;
             return v;
         }
 
@@ -810,7 +986,7 @@
             var v = clamp(parseInt(input.value, 10));
             input.value = v;
             minus.disabled = (v <= 1);
-            plus.disabled  = (v >= max);
+            plus.disabled = (v >= max);
             minus.classList.toggle('opacity-40', v <= 1);
             plus.classList.toggle('opacity-40', v >= max);
         }
@@ -845,37 +1021,32 @@
         }
     };
 
-
-    var btnAdd = document.getElementById('btn-add-to-cart');
+    // Thêm vào giỏ 
+    const btnAdd = document.getElementById('btn-add-to-cart');
     if (btnAdd) {
         btnAdd.addEventListener('click', function () {
-            var bookID = document.querySelector('#add-to-cart-form input[name="bookID"]').value;
-            var quantity = document.getElementById('form-qty').value;
-            var params = new URLSearchParams();
-            params.append('action', 'add');
-            params.append('bookID', bookID);
-            params.append('quantity', quantity);
+            const bookID = document.querySelector('#add-to-cart-form input[name="bookID"]').value;
+            const quantity = document.getElementById('form-qty').value;
+
             fetch('${pageContext.request.contextPath}/cart', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: params.toString()
+                body: 'action=add&bookID=' + bookID + '&quantity=' + quantity
             })
                     .then(function (res) {
                         return res.json();
                     })
                     .then(function (data) {
                         if (data.ok) {
-                            var badge = document.getElementById('cart-count');
-                            if (badge)
-                                badge.textContent = data.cartCount;
-                            showToast('Thêm vào giỏ hàng thành công!');
+                            location.reload();
                         } else if (data.overStock) {
-                            // Hiện modal giới hạn stock
                             document.getElementById('stock-limit-msg').textContent =
-                                'Bạn đã có ' + data.currentQty + ' cuốn trong giỏ hàng. ' +
-                                'Tối đa chỉ đặt được ' + data.stock + ' cuốn.';
-                            document.getElementById('stock-limit-modal').classList.remove('hidden');
-                            document.getElementById('stock-limit-modal').classList.add('flex');
+                                    'Bạn đã có ' + data.currentQty + ' cuốn trong giỏ hàng. Tối đa chỉ đặt được ' + data.stock + ' cuốn.';
+                            const modal = document.getElementById('stock-limit-modal');
+                            if (modal) {
+                                modal.classList.remove('hidden');
+                                modal.classList.add('flex');
+                            }
                         } else {
                             showToast(data.message || 'Thêm vào giỏ hàng thất bại!', true);
                         }
@@ -1040,27 +1211,5 @@
     }
 
 </script>
-
-<%@ include file="/views/layout/common/toast.jsp" %>
-<%@ include file="/views/layout/common/wishlist-heart.js.jsp" %>
-
-<!-- Modal giới hạn stock -->
-<div id="stock-limit-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[9999]">
-    <div class="bg-white w-[420px] rounded-xl p-6 relative">
-        <button type="button" onclick="document.getElementById('stock-limit-modal').classList.add('hidden');document.getElementById('stock-limit-modal').classList.remove('flex');" class="absolute top-3 right-4 text-2xl hover:text-gray-500">&times;</button>
-        <h3 class="text-lg font-bold text-[#D32F2F] mb-3">⚠️ Giới hạn tồn kho</h3>
-        <p id="stock-limit-msg" class="text-gray-700 mb-5"></p>
-        <div class="flex justify-end gap-3">
-            <a href="${pageContext.request.contextPath}/cart"
-               class="px-4 py-2 bg-[#004d99] text-white rounded-lg hover:opacity-90 text-sm font-semibold">
-                Xem giỏ hàng
-            </a>
-            <button type="button" onclick="document.getElementById('stock-limit-modal').classList.add('hidden');document.getElementById('stock-limit-modal').classList.remove('flex');"
-                    class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 text-sm">
-                Đóng
-            </button>
-        </div>
-    </div>
-</div>
 
 <%@ include file="/views/layout/homepage/footer.jsp" %>

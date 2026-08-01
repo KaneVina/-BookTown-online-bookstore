@@ -37,7 +37,8 @@ public class VNPayReturnController extends HttpServlet {
         String vnp_ResponseCode = request.getParameter("vnp_ResponseCode");
         HttpSession session = request.getSession(false);
 
-        if (isValidSignature && "00".equals(vnp_ResponseCode)) {
+        boolean isResponseOk = "00".equals(vnp_ResponseCode);
+        if (isValidSignature && isResponseOk) {
             if (session == null) {
                 response.sendRedirect(request.getContextPath() + "/home");
                 return;
@@ -52,7 +53,12 @@ public class VNPayReturnController extends HttpServlet {
             Object addressIDObj = session.getAttribute("vnpay_addressID");
             BigDecimal total = (BigDecimal) session.getAttribute("vnpay_total");
 
-            if (addressIDObj == null || total == null) {
+            if (addressIDObj == null) {
+                session.setAttribute("errorMessage", "Phiên thanh toán hết hạn, vui lòng thử lại!");
+                response.sendRedirect(request.getContextPath() + "/checkout");
+                return;
+            }
+            if (total == null) {
                 session.setAttribute("errorMessage", "Phiên thanh toán hết hạn, vui lòng thử lại!");
                 response.sendRedirect(request.getContextPath() + "/checkout");
                 return;
@@ -63,7 +69,16 @@ public class VNPayReturnController extends HttpServlet {
             @SuppressWarnings("unchecked")
             List<CartItem> cartItems = (List<CartItem>) session.getAttribute("vnpay_cartItems");
 
-            if (cartItems == null || cartItems.isEmpty()) {
+            if (cartItems == null) {
+                session.setAttribute("errorMessage", "Phiên thanh toán hết hạn, vui lòng thử lại!");
+                session.removeAttribute("vnpay_txnRef");
+                session.removeAttribute("vnpay_addressID");
+                session.removeAttribute("vnpay_total");
+                session.removeAttribute("vnpay_cartItems");
+                response.sendRedirect(request.getContextPath() + "/checkout");
+                return;
+            }
+            if (cartItems.isEmpty()) {
                 session.setAttribute("errorMessage", "Phiên thanh toán hết hạn, vui lòng thử lại!");
                 session.removeAttribute("vnpay_txnRef");
                 session.removeAttribute("vnpay_addressID");
@@ -73,8 +88,13 @@ public class VNPayReturnController extends HttpServlet {
                 return;
             }
 
-          
-            cartItems.removeIf(item -> item.getStockQuantity() == 0);
+            List<CartItem> availableItems = new java.util.ArrayList<>();
+            for (CartItem item : cartItems) {
+                if (item.getStockQuantity() > 0) {
+                    availableItems.add(item);
+                }
+            }
+            cartItems = availableItems;
 
             if (cartItems.isEmpty()) {
                 session.setAttribute("errorMessage", "Tất cả sản phẩm trong giỏ đã hết hàng! Vui lòng liên hệ hỗ trợ để được hoàn tiền.");
@@ -114,7 +134,12 @@ public class VNPayReturnController extends HttpServlet {
                 String appliedCode = (String) session.getAttribute("appliedVoucherCode");
                 dao.VoucherDAO voucherDAO = new dao.VoucherDAO();
                 model.Voucher v = voucherDAO.getVoucherByCode(appliedCode);
-                Integer vQty = (v != null) ? v.getQuantity() : null;
+                Integer vQty;
+                if (v != null) {
+                    vQty = v.getQuantity();
+                } else {
+                    vQty = null;
+                }
                 voucherDAO.insertVoucherUsage(account.getId(), appliedVoucherID, vQty);
 
                 session.removeAttribute("appliedVoucherID");
@@ -128,7 +153,12 @@ public class VNPayReturnController extends HttpServlet {
             session.removeAttribute("vnpay_cartItems");
 
             Order order = orderDAO.getOrderByID(orderID);
-            String orderCode = (order != null) ? order.getOrderCode() : "BT-" + orderID;
+            String orderCode;
+            if (order != null) {
+                orderCode = order.getOrderCode();
+            } else {
+                orderCode = "BT-" + orderID;
+            }
             session.setAttribute("cartCount", 0);
             session.setAttribute("successMessage",
                     "Thanh toán VNPAY thành công! Mã đơn hàng: " + orderCode);

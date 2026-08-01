@@ -85,7 +85,6 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-       
         boolean hasAdjusted = false;
         for (CartItem item : cartItems) {
             if (item.getQuantity() > item.getStockQuantity()) {
@@ -185,20 +184,15 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-        switch (paymentMethod) {
-            case "vnpay":
-                request.getRequestDispatcher("/vnpay-payment")
-                        .forward(request, response);
-                return;
+        if ("vnpay".equals(paymentMethod)) {
+            request.getRequestDispatcher("/vnpay-payment").forward(request, response);
+            return;
+        }
 
-            case "cod":
-                break;
-
-            default:
-                request.getSession().setAttribute("errorMessage",
-                        "Phương thức thanh toán chưa được hỗ trợ!");
-                response.sendRedirect(request.getContextPath() + "/checkout");
-                return;
+        if (!"cod".equals(paymentMethod)) {
+            request.getSession().setAttribute("errorMessage", "Phương thức thanh toán chưa được hỗ trợ!");
+            response.sendRedirect(request.getContextPath() + "/checkout");
+            return;
         }
 
         CartDAO cartDAO = new CartDAO();
@@ -211,7 +205,6 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-        
         cartItems.removeIf(item -> item.getStockQuantity() == 0);
 
         if (cartItems.isEmpty()) {
@@ -397,11 +390,12 @@ public class CheckoutController extends HttpServlet {
         }
     }
 
-    private static final String SESSION_VOUCHER_ID       = "appliedVoucherID";
-    private static final String SESSION_VOUCHER_CODE     = "appliedVoucherCode";
+    private static final String SESSION_VOUCHER_ID = "appliedVoucherID";
+    private static final String SESSION_VOUCHER_CODE = "appliedVoucherCode";
     private static final String SESSION_VOUCHER_DISCOUNT = "appliedVoucherDiscount";
 
     private static class VoucherResult {
+
         boolean success;
         String message;
         Voucher voucher;
@@ -544,17 +538,19 @@ public class CheckoutController extends HttpServlet {
         StringBuilder json = new StringBuilder("{\"success\":true,\"vouchers\":[");
         for (int i = 0; i < vouchers.size(); i++) {
             Voucher v = vouchers.get(i);
-            if (i > 0) json.append(",");
+            if (i > 0) {
+                json.append(",");
+            }
             json.append("{")
-                .append("\"code\":\"").append(escapeJson(v.getCode())).append("\",")
-                .append("\"discountPercent\":").append(v.getDiscountPercent()).append(",")
-                .append("\"minOrderValue\":")
+                    .append("\"code\":\"").append(escapeJson(v.getCode())).append("\",")
+                    .append("\"discountPercent\":").append(v.getDiscountPercent()).append(",")
+                    .append("\"minOrderValue\":")
                     .append(v.getMinOrderValue() == null ? "null" : v.getMinOrderValue()).append(",")
-                .append("\"maxDiscountValue\":")
+                    .append("\"maxDiscountValue\":")
                     .append(v.getMaxDiscountValue() == null ? "null" : v.getMaxDiscountValue()).append(",")
-                .append("\"endDate\":\"")
+                    .append("\"endDate\":\"")
                     .append(v.getEndDate() == null ? "Vô hạn" : sdf.format(v.getEndDate())).append("\"")
-                .append("}");
+                    .append("}");
         }
         json.append("]}");
 
@@ -562,7 +558,9 @@ public class CheckoutController extends HttpServlet {
     }
 
     private String escapeJson(String s) {
-        if (s == null) return "";
+        if (s == null) {
+            return "";
+        }
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 

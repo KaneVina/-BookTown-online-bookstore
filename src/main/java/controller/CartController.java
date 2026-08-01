@@ -29,14 +29,14 @@ public class CartController extends HttpServlet {
 
         List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
 
-        BigDecimal subtotal    = cartDAO.calcSubtotal(cartItems);
-        int totalQty    = calcTotalQuantity(cartItems);
+        BigDecimal subtotal = cartDAO.calcSubtotal(cartItems);
+        int totalQty = calcTotalQuantity(cartItems);
 
         request.getSession().setAttribute("cartCount", totalQty);
 
-        request.setAttribute("cartItems",     cartItems);
-        request.setAttribute("subtotal",      subtotal);
-        request.setAttribute("total",         subtotal);
+        request.setAttribute("cartItems", cartItems);
+        request.setAttribute("subtotal", subtotal);
+        request.setAttribute("total", subtotal);
         request.setAttribute("totalQuantity", totalQty);
 
         request.getRequestDispatcher("/views/cart/cart.jsp").forward(request, response);
@@ -51,7 +51,9 @@ public class CartController extends HttpServlet {
         }
 
         String action = request.getParameter("action");
-        if (action == null) action = "";
+        if (action == null) {
+            action = "";
+        }
 
         switch (action) {
             case "add":
@@ -65,31 +67,34 @@ public class CartController extends HttpServlet {
                 break;
             default:
                 sendJson(response, "{\"ok\":false,\"message\":\"Action không hợp lệ\"}");
+                break;
         }
     }
 
     private void handleAdd(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
-        int bookID   = toInt(request.getParameter("bookID"),   0);
+        int bookID = toInt(request.getParameter("bookID"), 0);
         int quantity = toInt(request.getParameter("quantity"), 1);
 
         if (bookID <= 0) {
             sendJson(response, "{\"ok\":false,\"message\":\"Sách không hợp lệ\"}");
             return;
         }
-        if (quantity < 1) quantity = 1;
+        if (quantity < 1) {
+            quantity = 1;
+        }
 
         Account account = getAccount(request);
         CartDAO cartDAO = new CartDAO();
 
-        // Validate stock trước khi cộng dồn
-        int stock      = cartDAO.getStockByBookID(bookID);
+        int stock = cartDAO.getStockByBookID(bookID);
         int currentQty = cartDAO.getCurrentCartQty(account.getId(), bookID);
+
         if (currentQty + quantity > stock) {
             sendJson(response, "{\"ok\":false"
                     + ",\"overStock\":true"
-                    + ",\"stock\":"      + stock
+                    + ",\"stock\":" + stock
                     + ",\"currentQty\":" + currentQty
                     + ",\"message\":\"Giỏ hàng đã đạt giới hạn " + stock + " cuốn\"}");
             return;
@@ -102,6 +107,7 @@ public class CartController extends HttpServlet {
             List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
             cartCount = calcTotalQuantity(cartItems);
             request.getSession().setAttribute("cartCount", cartCount);
+            request.getSession().setAttribute("successMessage", "Thêm vào giỏ hàng thành công!");
         }
 
         sendJson(response, "{\"ok\":" + success + ",\"cartCount\":" + cartCount + "}");
@@ -111,7 +117,7 @@ public class CartController extends HttpServlet {
             throws IOException {
 
         int cartItemID = toInt(request.getParameter("cartItemID"), 0);
-        int newQty     = toInt(request.getParameter("quantity"),   1);
+        int newQty = toInt(request.getParameter("quantity"), 1);
 
         if (cartItemID <= 0) {
             sendJson(response, "{\"ok\":false,\"message\":\"Item không hợp lệ\"}");
@@ -124,12 +130,14 @@ public class CartController extends HttpServlet {
         if (newQty < 1) {
             cartDAO.removeItem(cartItemID, account.getId());
         } else {
-            // Validate stock server-side
             int stock = cartDAO.getStockByCartItemID(cartItemID);
             if (newQty > stock) {
-                String msg = stock == 0
-                        ? "Sản phẩm đã hết hàng"
-                        : "Số lượng vượt quá tồn kho (còn " + stock + " cuốn)";
+                String msg = "";
+                if (stock == 0) {
+                    msg = "Sản phẩm đã hết hàng";
+                } else {
+                    msg = "Số lượng vượt quá tồn kho (còn " + stock + " cuốn)";
+                }
                 sendJson(response, "{\"ok\":false,\"message\":\"" + msg + "\"}");
                 return;
             }
@@ -137,8 +145,8 @@ public class CartController extends HttpServlet {
         }
 
         List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
-        BigDecimal subtotal      = cartDAO.calcSubtotal(cartItems);
-        int        cartCount     = calcTotalQuantity(cartItems);
+        BigDecimal subtotal = cartDAO.calcSubtotal(cartItems);
+        int cartCount = calcTotalQuantity(cartItems);
         request.getSession().setAttribute("cartCount", cartCount);
 
         BigDecimal itemSubtotal = BigDecimal.ZERO;
@@ -150,10 +158,10 @@ public class CartController extends HttpServlet {
         }
 
         sendJson(response, "{\"ok\":true"
-                + ",\"cartCount\":"    + cartCount
+                + ",\"cartCount\":" + cartCount
                 + ",\"itemSubtotal\":" + itemSubtotal.longValue()
-                + ",\"subtotal\":"     + subtotal.longValue()
-                + ",\"total\":"        + subtotal.longValue()
+                + ",\"subtotal\":" + subtotal.longValue()
+                + ",\"total\":" + subtotal.longValue()
                 + "}");
     }
 
@@ -171,19 +179,19 @@ public class CartController extends HttpServlet {
         CartDAO cartDAO = new CartDAO();
 
         cartDAO.removeItem(cartItemID, account.getId());
+        request.getSession().setAttribute("successMessage", "Đã xóa sản phẩm khỏi giỏ hàng");
 
         List<CartItem> cartItems = cartDAO.getCartItems(account.getId());
-        BigDecimal subtotal      = cartDAO.calcSubtotal(cartItems);
-        int        cartCount     = calcTotalQuantity(cartItems);
+        BigDecimal subtotal = cartDAO.calcSubtotal(cartItems);
+        int cartCount = calcTotalQuantity(cartItems);
         request.getSession().setAttribute("cartCount", cartCount);
 
         sendJson(response, "{\"ok\":true"
                 + ",\"cartCount\":" + cartCount
-                + ",\"subtotal\":"  + subtotal.longValue()
-                + ",\"total\":"     + subtotal.longValue()
+                + ",\"subtotal\":" + subtotal.longValue()
+                + ",\"total\":" + subtotal.longValue()
                 + "}");
     }
-
 
     private boolean isCustomer(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
@@ -217,7 +225,9 @@ public class CartController extends HttpServlet {
     }
 
     private int toInt(String value, int defaultVal) {
-        if (value == null || value.trim().isEmpty()) return defaultVal;
+        if (value == null || value.trim().isEmpty()) {
+            return defaultVal;
+        }
         try {
             return Integer.parseInt(value.trim());
         } catch (NumberFormatException e) {

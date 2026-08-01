@@ -77,15 +77,24 @@ public class OrderDetail {
     }
 
     public BigDecimal getSubtotal() {
-        if (unitPrice == null) return BigDecimal.ZERO;
+        if (unitPrice == null) {
+            return BigDecimal.ZERO;
+        }
         return unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
 
     public String getThumbnailFirst() {
-        if (thumbnail == null || thumbnail.isEmpty()) {
+        if (thumbnail == null) {
+            return "";
+        }
+        if (thumbnail.isEmpty()) {
             return "";
         }
         int idx = thumbnail.indexOf('|');
-        return idx >= 0 ? thumbnail.substring(0, idx).trim() : thumbnail.trim();
+        if (idx >= 0) {
+            return thumbnail.substring(0, idx).trim();
+        } else {
+            return thumbnail.trim();
+        }
     }
 }
