@@ -564,7 +564,10 @@ public class OrderDAO {
     }
 
     public int getTotalOrdersByCustomer(int customerId) {
-        String sql = "SELECT COUNT(*) FROM [Order] WHERE customerID = ?";
+        // Chỉ đếm đơn đã được xác nhận trở đi ko lấy status pending vì chưa chắc chắn, cancelled vì đã hủy
+        String sql = "SELECT COUNT(*) FROM [Order] "
+                + "WHERE customerID = ? "
+                + "AND status IN ('confirmed', 'shipping', 'completed')";
 
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -584,11 +587,13 @@ public class OrderDAO {
     }
 
     public double getTotalSpentByCustomer(int customerId) {
-
+        // Chỉ tính tiền của đơn đã hoàn tất và đã thanh toán thành công
         String sql
                 = "SELECT ISNULL(SUM(total_price),0) "
                 + "FROM [Order] "
-                + "WHERE customerID = ?";
+                + "WHERE customerID = ? "
+                + "AND status = 'completed' "
+                + "AND payment_status = 'paid'";
 
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
