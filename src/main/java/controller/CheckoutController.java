@@ -88,7 +88,7 @@ public class CheckoutController extends HttpServlet {
         boolean hasAdjusted = false;
         for (CartItem item : cartItems) {
             if (item.getQuantity() > item.getStockQuantity()) {
-                cartDAO.updateQuantity(item.getCartItemID(), item.getStockQuantity());
+                cartDAO.updateQuantity(item.getCartItemID(), account.getId(), item.getStockQuantity());
                 item.setQuantity(item.getStockQuantity());
                 hasAdjusted = true;
             }
