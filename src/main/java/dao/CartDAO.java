@@ -107,9 +107,14 @@ public class CartDAO {
         }
 
         String sqlReactivate
-                = "UPDATE Cart SET status = 'active' "
+                = "UPDATE Cart "
+                + "SET status = 'active' "
                 + "OUTPUT INSERTED.cartID "
-                + "WHERE customerID = ?";
+                + "WHERE cartID = ("
+                + "  SELECT TOP 1 cartID FROM Cart "
+                + "  WHERE customerID = ? AND status = 'checked_out' "
+                + "  ORDER BY cartID DESC"
+                + ")";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sqlReactivate)) {
             ps.setInt(1, customerID);
             ResultSet rs = ps.executeQuery();
@@ -204,13 +209,21 @@ public class CartDAO {
         return subtotal;
     }
 
-    public boolean updateQuantity(int cartItemID, int newQty) {
-        String sql = "UPDATE CartItem SET CartItem.quantity = ? WHERE CartItem.cartItemID = ?";
+    public boolean updateQuantity(int cartItemID, int customerID, int newQty) {
+
+        String sql = "UPDATE CartItem "
+                + "SET CartItem.quantity = ? "
+                + "FROM CartItem "
+                + "JOIN Cart ON Cart.cartID = CartItem.cartID "
+                + "WHERE CartItem.cartItemID = ? "
+                + "AND Cart.customerID = ? "
+                + "AND Cart.status = 'active'";
 
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, newQty);
             ps.setInt(2, cartItemID);
+            ps.setInt(3, customerID);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();

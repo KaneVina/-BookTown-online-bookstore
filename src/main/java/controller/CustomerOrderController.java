@@ -191,6 +191,35 @@ public class CustomerOrderController extends HttpServlet {
         }
 
         model.Order order = orderDAO.getOrderByID(orderID);
+
+        if ("confirmed".equalsIgnoreCase(status)) {
+            boolean stockOk = orderDAO.deductStock(orderID);
+            if (!stockOk) {
+                String outOfStockReason = "Sản phẩm đã hết hàng tại thời điểm duyệt";
+                orderDAO.updateOrderStatusAndStaff(orderID, "cancelled", staff.getId(), outOfStockReason);
+                if (order != null && order.getCustomerEmail() != null) {
+                    final model.Order finalOrder = order;
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                utils.EmailUtil.sendOrderCancelledEmail(finalOrder.getCustomerEmail(), finalOrder, outOfStockReason);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
+                }
+                session.setAttribute("errorMessage", "Không đủ hàng để duyệt. Đơn hàng đã bị hủy tự động và đã gửi thông báo cho khách hàng.");
+                if ("detail".equals(redirect)) {
+                    response.sendRedirect(request.getContextPath() + "/dashboard/customer-order?action=detail&orderID=" + orderID);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
+                }
+                return;
+            }
+        }
+
         if (order != null) {
             if ("completed".equalsIgnoreCase(status)) {
                 if ("cod".equalsIgnoreCase(order.getPaymentMethod()) && "unpaid".equalsIgnoreCase(order.getPaymentStatus())) {
@@ -240,10 +269,9 @@ public class CustomerOrderController extends HttpServlet {
             if ("cancelled".equalsIgnoreCase(status)) {
                 if (order != null) {
                     String currentStatus = order.getStatus();
-                    boolean isPending = "pending".equalsIgnoreCase(currentStatus);
                     boolean isConfirmed = "confirmed".equalsIgnoreCase(currentStatus);
                     boolean isShipping = "shipping".equalsIgnoreCase(currentStatus);
-                    if (isPending || isConfirmed || isShipping) {
+                    if (isConfirmed || isShipping) {
                         orderDAO.restoreStock(orderID);
                     }
                 }

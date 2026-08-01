@@ -1,5 +1,6 @@
 package controller;
 
+import dao.BookDAO;
 import dao.CartDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -87,6 +88,19 @@ public class VNPayController extends HttpServlet {
             session.setAttribute("errorMessage", "Tất cả sản phẩm trong giỏ đã hết hàng!");
             response.sendRedirect(request.getContextPath() + "/cart");
             return;
+        }
+
+        // Kiểm tra số lượng tồn kho chính xác trước khi mở cổng VNPAY
+        // (tránh trường hợp khách đã trả tiền nhưng số lượng vượt kho)
+        BookDAO bookDAO = new BookDAO();
+        for (CartItem item : cartItems) {
+            String stockError = bookDAO.validatePurchaseQuantity(item.getBookID(), item.getQuantity());
+            if (stockError != null) {
+                session.setAttribute("errorMessage",
+                        item.getTitle() + ": " + stockError);
+                response.sendRedirect(request.getContextPath() + "/cart");
+                return;
+            }
         }
 
         BigDecimal total = cartDAO.calcSubtotal(cartItems);
