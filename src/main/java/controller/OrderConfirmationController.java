@@ -28,7 +28,12 @@ public class OrderConfirmationController extends HttpServlet {
 
         Order order = orderDAO.getOrderByID(orderID);
 
-        if (order == null || order.getCustomerID() != account.getId()) {
+        if (order == null) {
+            response.sendRedirect(request.getContextPath() + "/home");
+            return;
+        }
+
+        if (order.getCustomerID() != account.getId()) {
             response.sendRedirect(request.getContextPath() + "/home");
             return;
         }
@@ -36,7 +41,6 @@ public class OrderConfirmationController extends HttpServlet {
         request.setAttribute("order", order);
         request.getRequestDispatcher("/views/order/order-confirmation.jsp").forward(request, response);
     }
-
 
     private boolean isCustomer(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
@@ -62,7 +66,9 @@ public class OrderConfirmationController extends HttpServlet {
     }
 
     private int toInt(String value, int defaultVal) {
-        if (value == null || value.trim().isEmpty()) return defaultVal;
+        if (value == null || value.trim().isEmpty()) {
+            return defaultVal;
+        }
         try {
             return Integer.parseInt(value.trim());
         } catch (NumberFormatException e) {

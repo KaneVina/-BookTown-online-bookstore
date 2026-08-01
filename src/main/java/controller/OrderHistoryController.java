@@ -38,6 +38,7 @@ public class OrderHistoryController extends HttpServlet {
                 break;
             default:
                 showList(request, response);
+                break;
         }
     }
 
@@ -60,6 +61,7 @@ public class OrderHistoryController extends HttpServlet {
                 break;
             default:
                 response.sendRedirect(request.getContextPath() + "/profile/order-history");
+                break;
         }
     }
 
@@ -75,15 +77,22 @@ public class OrderHistoryController extends HttpServlet {
         try {
             String p = request.getParameter("page");
             if (p != null) {
-                currentPage = Math.max(1, Integer.parseInt(p));
+                int parsedPage = Integer.parseInt(p);
+                if (parsedPage < 1) {
+                    currentPage = 1;
+                } else {
+                    currentPage = parsedPage;
+                }
             }
         } catch (Exception ignored) {
         }
 
         int totalRecords = orderDAO.countOrdersByCustomerFiltered(account.getId(), status);
-        int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
-        if (totalPages == 0) {
+        int totalPages;
+        if (totalRecords == 0) {
             totalPages = 1;
+        } else {
+            totalPages = (totalRecords + pageSize - 1) / pageSize;
         }
         if (currentPage > totalPages) {
             currentPage = totalPages;
@@ -98,7 +107,11 @@ public class OrderHistoryController extends HttpServlet {
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("status", status);
 
-        String baseUrl = request.getContextPath() + "/profile/order-history?status=" + (status != null ? status : "");
+        String statusParam = "";
+        if (status != null) {
+            statusParam = status;
+        }
+        String baseUrl = request.getContextPath() + "/profile/order-history?status=" + statusParam;
         request.setAttribute("baseUrl", baseUrl);
 
         request.getRequestDispatcher("/views/order/order-history.jsp").forward(request, response);
@@ -113,7 +126,12 @@ public class OrderHistoryController extends HttpServlet {
 
         Order order = orderDAO.getOrderByID(orderID);
 
-        if (order == null || order.getCustomerID() != account.getId()) {
+        if (order == null) {
+            response.sendRedirect(request.getContextPath() + "/profile/order-history");
+            return;
+        }
+
+        if (order.getCustomerID() != account.getId()) {
             response.sendRedirect(request.getContextPath() + "/profile/order-history");
             return;
         }
@@ -139,9 +157,12 @@ public class OrderHistoryController extends HttpServlet {
         cancelReason = cancelReason.trim();
 
         String redirectTarget = request.getParameter("redirect");
-        String redirectUrl = "list".equalsIgnoreCase(redirectTarget)
-                ? request.getContextPath() + "/profile/order-history"
-                : request.getContextPath() + "/profile/order-history?action=detail&orderID=" + orderID;
+        String redirectUrl;
+        if ("list".equalsIgnoreCase(redirectTarget)) {
+            redirectUrl = request.getContextPath() + "/profile/order-history";
+        } else {
+            redirectUrl = request.getContextPath() + "/profile/order-history?action=detail&orderID=" + orderID;
+        }
 
         if (cancelReason.isEmpty()) {
             HttpSession session = request.getSession();
@@ -169,7 +190,10 @@ public class OrderHistoryController extends HttpServlet {
         if (ok) {
             orderDAO.restoreStock(orderID);
             if (order != null) {
-                if ("vnpay".equalsIgnoreCase(order.getPaymentMethod()) && "paid".equalsIgnoreCase(order.getPaymentStatus())) {
+                boolean isVnpayAndPaid = "vnpay".equalsIgnoreCase(order.getPaymentMethod())
+                        && "paid".equalsIgnoreCase(order.getPaymentStatus());
+
+                if (isVnpayAndPaid) {
                     orderDAO.updatePaymentStatus(orderID, "pending_refund");
 
                     final Order finalOrder = order;
@@ -199,7 +223,12 @@ public class OrderHistoryController extends HttpServlet {
                 }
             }
 
-            String orderCode = (order != null) ? order.getOrderCode() : String.valueOf(orderID);
+            String orderCode;
+            if (order != null) {
+                orderCode = order.getOrderCode();
+            } else {
+                orderCode = String.valueOf(orderID);
+            }
             session.setAttribute("successMessage", "Đã hủy đơn hàng #" + orderCode + " thành công!");
         } else {
             session.setAttribute("errorMessage", "Không thể hủy đơn hàng này (đơn đã được xử lý).");
