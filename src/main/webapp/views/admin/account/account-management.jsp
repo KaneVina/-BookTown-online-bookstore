@@ -585,11 +585,47 @@
                     showUpdateModal();
                 });
             });
+            
+            const FULLNAME_REGEX = /^\p{L}+( \p{L}+)+$/u;
+            const PHONE_REGEX = /^(0[35789])\d{8}$/;
+
+            function validateFullnameClient(fullname) {
+                if (!fullname) {
+                    return 'Họ tên không được để trống';
+                }
+                if (/\s{2,}/.test(fullname)) {
+                    return 'Họ tên không được chứa nhiều khoảng trắng liên tiếp';
+                }
+                if (!FULLNAME_REGEX.test(fullname) || fullname.length > 50) {
+                    return 'Họ tên phải có ít nhất 2 từ, chỉ chứa chữ cái và cách nhau đúng 1 dấu cách';
+                }
+                return null;
+            }
+
+            function validatePhoneClient(phone) {
+                if (!phone) {
+                    return 'Số điện thoại không được để trống';
+                }
+                if (!PHONE_REGEX.test(phone)) {
+                    return 'Số điện thoại phải gồm 10 số và bắt đầu bằng đầu số di động hợp lệ (03, 05, 07, 08, 09)';
+                }
+                return null;
+            }
 
             updateSubmit.addEventListener('click', async function () {
                 const fullname = updateFullname.value.trim();
-                if (!fullname) {
-                    updateError.textContent = 'Họ tên không được để trống';
+                const phone = updatePhone.value.trim();
+
+                const fullnameError = validateFullnameClient(fullname);
+                if (fullnameError) {
+                    updateError.textContent = fullnameError;
+                    updateError.classList.remove('hidden');
+                    return;
+                }
+
+                const phoneError = validatePhoneClient(phone);
+                if (phoneError) {
+                    updateError.textContent = phoneError;
                     updateError.classList.remove('hidden');
                     return;
                 }
