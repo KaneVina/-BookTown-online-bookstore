@@ -165,6 +165,7 @@ public class VNPayReturnController extends HttpServlet {
                 orderCode = "BT-" + orderID;
             }
             session.setAttribute("cartCount", 0);
+            session.setAttribute("just_placed_order_id", orderID);
             session.setAttribute("successMessage",
                     "Thanh toán VNPAY thành công! Mã đơn hàng: " + orderCode);
 
