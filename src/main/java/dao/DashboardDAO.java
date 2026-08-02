@@ -26,14 +26,14 @@ public class DashboardDAO {
         if (genreID == null) {
             sql = "SELECT ISNULL(SUM(o.total_price), 0) AS totalRevenue "
                     + "FROM [Order] o "
-                    + "WHERE LOWER(o.status) IN ('completed', 'complete', 'delivered', 'success') "
+                    + "WHERE LOWER(LTRIM(RTRIM(o.status))) = 'completed' "
                     + buildDateFilter();
         } else {
             sql = "SELECT ISNULL(SUM(od.quantity * od.unit_price), 0) AS totalRevenue "
                     + "FROM [Order] o "
                     + "JOIN OrderDetail od ON od.orderID = o.orderID "
                     + "JOIN Book b ON b.bookID = od.bookID "
-                    + "WHERE LOWER(o.status) IN ('completed', 'complete', 'delivered', 'success') "
+                    + "WHERE LOWER(LTRIM(RTRIM(o.status))) = 'completed' "
                     + buildDateFilter()
                     + buildGenreFilter(genreID);
         }
@@ -74,7 +74,7 @@ public class DashboardDAO {
         String sql = "SELECT COUNT(DISTINCT o.customerID) AS totalCustomers "
                 + "FROM [Order] o "
                 + buildOrderDetailJoin(genreID)
-                + "WHERE 1 = 1 "
+                + "WHERE LOWER(LTRIM(RTRIM(o.status))) = 'completed' "
                 + buildDateFilter()
                 + buildGenreFilter(genreID);
 
@@ -113,7 +113,7 @@ public class DashboardDAO {
                 + "FROM [Order] o "
                 + "JOIN OrderDetail od ON od.orderID = o.orderID "
                 + "JOIN Book b ON b.bookID = od.bookID "
-                + "WHERE 1 = 1 "
+                + "WHERE LOWER(LTRIM(RTRIM(o.status))) = 'completed' "
                 + buildDateFilter()
                 + buildGenreFilter(genreID);
 
@@ -179,7 +179,7 @@ public class DashboardDAO {
                 + "JOIN OrderDetail od ON od.orderID = o.orderID "
                 + "JOIN Book b ON b.bookID = od.bookID "
                 + "LEFT JOIN Genre g ON g.genreID = b.genreID "
-                + "WHERE 1 = 1 "
+                + "WHERE LOWER(LTRIM(RTRIM(o.status))) = 'completed' "
                 + buildDateFilter()
                 + buildGenreFilter(genreID)
                 + "GROUP BY g.genre_name "
@@ -208,7 +208,7 @@ public class DashboardDAO {
                 + "JOIN OrderDetail od ON od.orderID = o.orderID "
                 + "JOIN Book b ON b.bookID = od.bookID "
                 + "LEFT JOIN Genre g ON g.genreID = b.genreID "
-                + "WHERE 1 = 1 "
+                + "WHERE LOWER(LTRIM(RTRIM(o.status))) = 'completed' "
                 + buildDateFilter()
                 + buildGenreFilter(genreID)
                 + "GROUP BY b.bookID, b.title, g.genre_name "

@@ -146,27 +146,6 @@ public class AddressDAO {
         return -1;
     }
 
-    public void updateAddress(Address a) {
-        String sql = "UPDATE Address SET customerID=?, street=?, district=?, city=?, country=?, is_default=?, recipient_name=?, recipient_phone=? WHERE addressID=?";
-
-        try (Connection conn = db.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, a.getCustomerID());
-            ps.setString(2, a.getStreet());
-            ps.setString(3, a.getDistrict());
-            ps.setString(4, a.getCity());
-            ps.setString(5, a.getCountry());
-            ps.setBoolean(6, a.isDefault());
-            ps.setString(7, emptyToNull(a.getRecipientName()));
-            ps.setString(8, emptyToNull(a.getRecipientPhone()));
-            ps.setInt(9, a.getAddressID());
-            ps.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public boolean updateAddressByCustomer(int addressID, int customerID, String street, String district, String city) {
         String sql = "UPDATE Address SET street=?, district=?, city=?, country=? WHERE addressID=? AND customerID=?";
 
