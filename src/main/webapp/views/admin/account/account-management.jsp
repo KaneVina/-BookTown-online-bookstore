@@ -585,10 +585,9 @@
                     showUpdateModal();
                 });
             });
-
-            // Đồng bộ rule với ProfileController (server-side)
+            
             const FULLNAME_REGEX = /^\p{L}+( \p{L}+)+$/u;
-            const PHONE_REGEX = /^0(8|2|9)\d{8}$/;
+            const PHONE_REGEX = /^(0[35789])\d{8}$/;
 
             function validateFullnameClient(fullname) {
                 if (!fullname) {
@@ -608,7 +607,7 @@
                     return 'Số điện thoại không được để trống';
                 }
                 if (!PHONE_REGEX.test(phone)) {
-                    return 'Số điện thoại phải gồm 10 số và bắt đầu bằng 08, 02 hoặc 09';
+                    return 'Số điện thoại phải gồm 10 số và bắt đầu bằng đầu số di động hợp lệ (03, 05, 07, 08, 09)';
                 }
                 return null;
             }
