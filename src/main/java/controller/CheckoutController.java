@@ -342,6 +342,7 @@ public class CheckoutController extends HttpServlet {
         }
 
         request.getSession().setAttribute("cartCount", 0);
+        request.getSession().setAttribute("just_placed_order_id", orderID);
 
         response.sendRedirect(request.getContextPath() + "/order-confirmation?orderID=" + orderID);
     }
