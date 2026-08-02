@@ -170,7 +170,7 @@ public class VNPayReturnController extends HttpServlet {
                     "Thanh toán VNPAY thành công! Mã đơn hàng: " + orderCode);
 
             response.sendRedirect(request.getContextPath()
-                    + "/order-confirmation?orderID=" + orderID);
+                    + "/order-confirmation?status=success");
 
         } else {
             if (session != null) {

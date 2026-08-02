@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="/views/layout/homepage/header.jsp" %>
 <!DOCTYPE html>
 <html lang="vi" class="light">
@@ -211,15 +212,26 @@
                                                 </div>
                                             </div>
 
-                                        <c:if test="${not empty order.cancelReason}">
-                                            <div
-                                                class="mt-6 p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-[#D32F2F] flex items-start gap-2">
-                                                <span
-                                                    class="material-symbols-outlined text-[16px] mt-0.5">info</span>
-                                                <span><strong>Lý do hủy đơn:</strong>
-                                                    ${order.cancelReason}</span>
-                                            </div>
-                                        </c:if>
+                                        <div class="mt-6 p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-[#D32F2F] flex items-start gap-2">
+                                            <span class="material-symbols-outlined text-[16px] mt-0.5">info</span>
+                                            <span>
+                                                <strong>Hủy bởi:</strong>
+                                                <c:choose>
+                                                    <c:when test="${not empty order.processedBy}">
+                                                        BookTown
+                                                    </c:when>
+                                                    <c:when test="${fn:contains(order.cancelReason, 'quá 2 ngày')}">
+                                                        BookTown
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        Khách hàng
+                                                    </c:otherwise>
+                                                </c:choose>
+                                                <c:if test="${not empty order.cancelReason}">
+                                                    &mdash; <strong>Lý do:</strong> ${order.cancelReason}
+                                                </c:if>
+                                            </span>
+                                        </div>
 
                                         <div class="mt-6 pt-4 border-t border-[#c2c6d4]">
                                             <c:choose>
@@ -271,12 +283,23 @@
                                             <p class="text-sm font-semibold text-red-700">
                                                 Đơn hàng này đã bị hủy.</p>
                                         </div>
-                                        <c:if test="${not empty order.cancelReason}">
-                                            <p class="text-xs text-red-600 pl-8">
-                                                <strong>Lý do hủy:</strong>
-                                                ${order.cancelReason}
-                                            </p>
-                                        </c:if>
+                                        <p class="text-xs text-red-600 pl-8">
+                                            <strong>Hủy bởi:</strong>
+                                            <c:choose>
+                                                <c:when test="${not empty order.processedBy}">
+                                                    BookTown
+                                                </c:when>
+                                                <c:when test="${fn:contains(order.cancelReason, 'quá 2 ngày')}">
+                                                    BookTown
+                                                </c:when>
+                                                <c:otherwise>
+                                                    Khách hàng
+                                                </c:otherwise>
+                                            </c:choose>
+                                            <c:if test="${not empty order.cancelReason}">
+                                                &mdash; <strong>Lý do:</strong> ${order.cancelReason}
+                                            </c:if>
+                                        </p>
                                     </section>
                                 </c:otherwise>
                             </c:choose>
