@@ -7,8 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import model.Account;
 import model.Genre;
@@ -30,9 +28,9 @@ public class CategoryManagementController extends HttpServlet {
 
         if ("create".equals(action)) {
             if (!canManageCategory) {
+                setFlash(request, "error", "Bạn không có quyền thêm thể loại.");
                 response.sendRedirect(request.getContextPath()
-                        + "/dashboard/category-management?error="
-                        + encode("Bạn không có quyền thêm thể loại."));
+                        + "/dashboard/category-management");
                 return;
             }
 
@@ -45,9 +43,9 @@ public class CategoryManagementController extends HttpServlet {
 
         if ("edit".equals(action)) {
             if (!canManageCategory) {
+                setFlash(request, "error", "Bạn không có quyền cập nhật thể loại.");
                 response.sendRedirect(request.getContextPath()
-                        + "/dashboard/category-management?error="
-                        + encode("Bạn không có quyền cập nhật thể loại."));
+                        + "/dashboard/category-management");
                 return;
             }
 
@@ -55,9 +53,9 @@ public class CategoryManagementController extends HttpServlet {
             Genre genre = genreDAO.getGenreById(id);
 
             if (genre == null) {
+                setFlash(request, "error", "Không tìm thấy thể loại.");
                 response.sendRedirect(request.getContextPath()
-                        + "/dashboard/category-management?error="
-                        + encode("Không tìm thấy thể loại."));
+                        + "/dashboard/category-management");
                 return;
             }
 
@@ -74,9 +72,9 @@ public class CategoryManagementController extends HttpServlet {
             Genre genre = genreDAO.getGenreById(id);
 
             if (genre == null) {
+                setFlash(request, "error", "Không tìm thấy thể loại.");
                 response.sendRedirect(request.getContextPath()
-                        + "/dashboard/category-management?error="
-                        + encode("Không tìm thấy thể loại."));
+                        + "/dashboard/category-management");
                 return;
             }
 
@@ -110,9 +108,8 @@ public class CategoryManagementController extends HttpServlet {
                 + "/dashboard/category-management";
 
         if (!canManageCategory(request)) {
-            response.sendRedirect(redirectUrl
-                    + "?error="
-                    + encode("Bạn không có quyền thực hiện thao tác này."));
+            setFlash(request, "error", "Bạn không có quyền thực hiện thao tác này.");
+            response.sendRedirect(redirectUrl);
             return;
         }
 
@@ -121,24 +118,21 @@ public class CategoryManagementController extends HttpServlet {
 
             String validationError = validateGenreName(name);
             if (validationError != null) {
-                response.sendRedirect(redirectUrl
-                        + "?action=create&error="
-                        + encode(validationError));
+                setFlash(request, "error", validationError);
+                response.sendRedirect(redirectUrl + "?action=create");
                 return;
             }
 
             if (genreDAO.isGenreNameExists(name)) {
-                response.sendRedirect(redirectUrl
-                        + "?action=create&error="
-                        + encode("Tên thể loại đã tồn tại."));
+                setFlash(request, "error", "Tên thể loại đã tồn tại.");
+                response.sendRedirect(redirectUrl + "?action=create");
                 return;
             }
 
             boolean success = genreDAO.insertGenre(name);
-            response.sendRedirect(redirectUrl + (success
-                    ? "?success=" + encode("Thêm thể loại thành công.")
-                    : "?action=create&error="
-                    + encode("Không thể thêm thể loại.")));
+            setFlash(request, success ? "success" : "error",
+                    success ? "Thêm thể loại thành công." : "Không thể thêm thể loại.");
+            response.sendRedirect(redirectUrl + (success ? "" : "?action=create"));
             return;
         }
 
@@ -147,39 +141,32 @@ public class CategoryManagementController extends HttpServlet {
             String name = clean(request.getParameter("genre_name"));
 
             if (id <= 0) {
-                response.sendRedirect(redirectUrl
-                        + "?error="
-                        + encode("Mã thể loại không hợp lệ."));
+                setFlash(request, "error", "Mã thể loại không hợp lệ.");
+                response.sendRedirect(redirectUrl);
                 return;
             }
 
             String validationError = validateGenreName(name);
             if (validationError != null) {
-                response.sendRedirect(redirectUrl
-                        + "?action=detail&id=" + id
-                        + "&error=" + encode(validationError));
+                setFlash(request, "error", validationError);
+                response.sendRedirect(redirectUrl + "?action=detail&id=" + id);
                 return;
             }
 
             if (genreDAO.isGenreNameExists(name, id)) {
-                response.sendRedirect(redirectUrl
-                        + "?action=detail&id=" + id
-                        + "&error=" + encode("Tên thể loại đã tồn tại."));
+                setFlash(request, "error", "Tên thể loại đã tồn tại.");
+                response.sendRedirect(redirectUrl + "?action=detail&id=" + id);
                 return;
             }
 
             boolean success = genreDAO.updateGenre(id, name);
 
             if (success) {
-                response.sendRedirect(redirectUrl
-                        + "?action=detail&id=" + id
-                        + "&success="
-                        + encode("Cập nhật thể loại thành công."));
+                setFlash(request, "success", "Cập nhật thể loại thành công.");
+                response.sendRedirect(redirectUrl + "?action=detail&id=" + id);
             } else {
-                response.sendRedirect(redirectUrl
-                        + "?action=detail&id=" + id
-                        + "&error="
-                        + encode("Không thể cập nhật thể loại."));
+                setFlash(request, "error", "Không thể cập nhật thể loại.");
+                response.sendRedirect(redirectUrl + "?action=detail&id=" + id);
             }
             return;
         }
@@ -188,24 +175,22 @@ public class CategoryManagementController extends HttpServlet {
             int id = parseInt(request.getParameter("id"));
 
             if (id <= 0) {
-                response.sendRedirect(redirectUrl
-                        + "?error="
-                        + encode("Mã thể loại không hợp lệ."));
+                setFlash(request, "error", "Mã thể loại không hợp lệ.");
+                response.sendRedirect(redirectUrl);
                 return;
             }
 
             int bookCount = genreDAO.countBooksByGenre(id);
             if (bookCount > 0) {
-                response.sendRedirect(redirectUrl
-                        + "?error="
-                        + encode("Không thể xóa thể loại đang có sách."));
+                setFlash(request, "error", "Không thể xóa thể loại đang có sách.");
+                response.sendRedirect(redirectUrl);
                 return;
             }
 
             boolean success = genreDAO.deleteGenre(id);
-            response.sendRedirect(redirectUrl + (success
-                    ? "?success=" + encode("Xóa thể loại thành công.")
-                    : "?error=" + encode("Không thể xóa thể loại.")));
+            setFlash(request, success ? "success" : "error",
+                    success ? "Xóa thể loại thành công." : "Không thể xóa thể loại.");
+            response.sendRedirect(redirectUrl);
             return;
         }
 
@@ -257,7 +242,7 @@ public class CategoryManagementController extends HttpServlet {
         return value == null ? "" : value.trim().replaceAll("\\s+", " ");
     }
 
-    private String encode(String value) {
-        return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    private void setFlash(HttpServletRequest request, String type, String message) {
+        request.getSession().setAttribute(type, message);
     }
 }

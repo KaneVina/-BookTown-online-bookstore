@@ -86,8 +86,9 @@ public class AddressManagementController extends HttpServlet {
         String district = safeTrim(request.getParameter("district"));
         String city = safeTrim(request.getParameter("city"));
 
-        if (!isValidAddress(street, district, city)) {
-            writeJson(response, false, "Dữ liệu địa chỉ không hợp lệ");
+        String addressError = validateAddress(street, district, city);
+        if (addressError != null) {
+            writeJson(response, false, addressError);
             return;
         }
 
@@ -138,8 +139,14 @@ public class AddressManagementController extends HttpServlet {
         String district = safeTrim(request.getParameter("district"));
         String city = safeTrim(request.getParameter("city"));
 
-        if (addressID == null || !isValidAddress(street, district, city)) {
-            writeJson(response, false, "Dữ liệu địa chỉ không hợp lệ");
+        if (addressID == null) {
+            writeJson(response, false, "Địa chỉ không hợp lệ");
+            return;
+        }
+
+        String addressError = validateAddress(street, district, city);
+        if (addressError != null) {
+            writeJson(response, false, addressError);
             return;
         }
 
@@ -210,10 +217,26 @@ public class AddressManagementController extends HttpServlet {
         return account;
     }
 
-    private boolean isValidAddress(String street, String district, String city) {
-        return street.length() >= 3
-                && district.length() >= 2
-                && city.length() >= 2;
+    private String validateAddress(String street, String district, String city) {
+        if (city == null || city.trim().isEmpty()) {
+            return "Vui lòng chọn Tỉnh / Thành phố.";
+        }
+
+        if (district == null || district.trim().isEmpty()) {
+            return "Vui lòng chọn Phường / Xã.";
+        }
+
+        if (street == null || street.trim().isEmpty()) {
+            return "Vui lòng nhập địa chỉ cụ thể.";
+        }
+
+        String trimmedStreet = street.trim();
+        if (trimmedStreet.length() < 5
+                || !trimmedStreet.matches(".*[a-zA-ZÀ-ỹ].*")) {
+            return "Địa chỉ không hợp lệ. Vui lòng nhập số nhà, tên đường rõ ràng hơn.";
+        }
+
+        return null;
     }
 
     private boolean isValidFullName(String fullname) {
