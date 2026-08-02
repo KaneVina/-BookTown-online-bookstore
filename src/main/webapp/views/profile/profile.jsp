@@ -260,7 +260,7 @@
         if (!value) {
             message = "Số điện thoại không được để trống";
         } else if (!/^0\d{9}$/.test(value)) {
-            message = "Số điện thoại phải gồm 10 số và bắt đầu bằng 0";
+            message = "Số điện thoại phải gồm 10 số và bắt đầu bằng 02, 08, 09";
         }
 
         return setFieldError(phoneInput, phoneError, message);
