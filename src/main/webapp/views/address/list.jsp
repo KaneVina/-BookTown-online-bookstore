@@ -321,9 +321,21 @@
         }
     }
 
-    function isValidAddressPart(value) {
-        var trimmed = (value || '').trim();
-        return trimmed.length >= 3 && /[a-zA-ZÀ-ỹ]/.test(trimmed);
+    function validateStreet(street) {
+        var trimmed = (street || '').trim();
+        if (!trimmed) {
+            return 'Vui lòng nhập địa chỉ cụ thể.';
+        }
+        if (trimmed.length < 5 || !/[A-Za-zÀ-ỹ]/.test(trimmed)) {
+            return 'Địa chỉ không hợp lệ. Vui lòng nhập số nhà, tên đường rõ ràng hơn.';
+        }
+        return '';
+    }
+
+    function isSelectedOption(selectElement, value) {
+        return Array.from(selectElement.options).some(function (option) {
+            return option.value === value && value !== '';
+        });
     }
 
     async function loadVietnamProvinces() {
@@ -444,18 +456,22 @@
         var city = document.getElementById('modalCity').value;
         var ward = document.getElementById('modalWard').value;
 
-        if (!isValidAddressPart(street)) {
-            showToast('Địa chỉ cụ thể không hợp lệ!', true);
+        var citySelect = document.getElementById('modalCity');
+        var wardSelect = document.getElementById('modalWard');
+
+        if (!city || !isSelectedOption(citySelect, city)) {
+            showToast('Vui lòng chọn Tỉnh / Thành phố hợp lệ.', true);
             return;
         }
 
-        if (!city) {
-            showToast('Vui lòng chọn Tỉnh / Thành phố!', true);
+        if (!ward || !isSelectedOption(wardSelect, ward)) {
+            showToast('Vui lòng chọn Phường / Xã hợp lệ.', true);
             return;
         }
 
-        if (!ward) {
-            showToast('Vui lòng chọn Phường / Xã!', true);
+        var streetError = validateStreet(street);
+        if (streetError) {
+            showToast(streetError, true);
             return;
         }
 
@@ -483,9 +499,9 @@
         })
         .then(function (data) {
             if (!data.success) {
-                showToast(mode === 'add'
+                showToast(data.message || (mode === 'add'
                     ? 'Thêm địa chỉ thất bại!'
-                    : 'Cập nhật địa chỉ thất bại!', true);
+                    : 'Cập nhật địa chỉ thất bại!'), true);
                 return;
             }
 
