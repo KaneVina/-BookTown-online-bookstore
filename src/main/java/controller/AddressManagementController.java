@@ -97,6 +97,23 @@ public class AddressManagementController extends HttpServlet {
             return;
         }
 
+        String recipientName = safeTrim(customer.getFullname());
+        String recipientPhone = safeTrim(customer.getPhone());
+
+        // Dùng cùng Business Rule với RegisterController để kiểm tra họ tên và SĐT.
+        // Trường hợp đăng nhập Google chưa cập nhật đủ hồ sơ thì không cho lưu địa chỉ.
+        if (!isValidFullName(recipientName)) {
+            writeJson(response, false,
+                    "Vui lòng cập nhật họ tên hợp lệ trong hồ sơ trước khi thêm địa chỉ");
+            return;
+        }
+
+        if (!isValidPhone(recipientPhone)) {
+            writeJson(response, false,
+                    "Vui lòng cập nhật số điện thoại hợp lệ trong hồ sơ trước khi thêm địa chỉ");
+            return;
+        }
+
         Address address = new Address();
         address.setCustomerID(customerID);
         address.setStreet(street);
@@ -104,8 +121,8 @@ public class AddressManagementController extends HttpServlet {
         address.setCity(city);
         address.setCountry("Việt Nam");
         address.setDefault(false);
-        address.setRecipientName(customer.getFullname());
-        address.setRecipientPhone(customer.getPhone());
+        address.setRecipientName(recipientName);
+        address.setRecipientPhone(recipientPhone);
 
         int newId = addressDAO.insertAddressAndReturnId(address);
         writeJson(response, newId > 0,
@@ -197,6 +214,27 @@ public class AddressManagementController extends HttpServlet {
         return street.length() >= 3
                 && district.length() >= 2
                 && city.length() >= 2;
+    }
+
+    private boolean isValidFullName(String fullname) {
+        if (fullname == null || fullname.isEmpty()) {
+            return false;
+        }
+
+        String[] nameParts = fullname.trim().split("\\s+");
+        if (nameParts.length < 2) {
+            return false;
+        }
+
+        if (!fullname.matches("^[\\p{L}\\s]+$")) {
+            return false;
+        }
+
+        return fullname.length() >= 2 && fullname.length() <= 50;
+    }
+
+    private boolean isValidPhone(String phone) {
+        return phone != null && phone.matches("^(0[35789])\\d{8}$");
     }
 
     private Integer parsePositiveInt(String value) {

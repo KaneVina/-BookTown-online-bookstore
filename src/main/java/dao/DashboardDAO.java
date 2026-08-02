@@ -74,7 +74,7 @@ public class DashboardDAO {
         String sql = "SELECT COUNT(DISTINCT o.customerID) AS totalCustomers "
                 + "FROM [Order] o "
                 + buildOrderDetailJoin(genreID)
-                + "WHERE 1 = 1 "
+                + "WHERE LOWER(LTRIM(RTRIM(o.status))) = 'completed' "
                 + buildDateFilter()
                 + buildGenreFilter(genreID);
 
