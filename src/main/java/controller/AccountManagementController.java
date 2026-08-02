@@ -254,8 +254,6 @@ public class AccountManagementController extends HttpServlet {
         return (value != null) ? value : defaultValue;
     }
 
-    // Đồng bộ rule với RegisterController/AddressManagementController/ProfileController:
-    // 10 số, đầu số di động hợp lệ 03/05/07/08/09 (bỏ 02 vì là đầu số cố định/bàn)
     private String validatePhone(String phone) {
         if (phone == null || phone.trim().isEmpty()) {
             return "Số điện thoại không được để trống";
@@ -269,7 +267,6 @@ public class AccountManagementController extends HttpServlet {
         return null;
     }
 
-    // Đồng bộ rule với ProfileController: tối thiểu 2 từ, chỉ chữ cái, cách nhau đúng 1 dấu cách, tối đa 50 ký tự
     private String validateFullname(String fullname) {
         if (fullname == null || fullname.trim().isEmpty()) {
             return "Họ tên không được để trống";

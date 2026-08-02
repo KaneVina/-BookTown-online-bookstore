@@ -100,7 +100,7 @@ public class ProfileController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
             return;
         }
-        // Chỉ chứa chữ cái, các từ cách nhau đúng 1 dấu cách, tối thiểu 2 từ (vd: "Trương Trân")
+
         if (!fullname.matches("^[\\p{L}]+( [\\p{L}]+)+$") || fullname.length() > 50) {
             session.setAttribute("error", "Họ tên phải có ít nhất 2 từ, chỉ chứa chữ cái và cách nhau đúng 1 dấu cách");
             response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
