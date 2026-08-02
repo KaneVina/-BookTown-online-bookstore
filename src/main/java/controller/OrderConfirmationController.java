@@ -24,15 +24,24 @@ public class OrderConfirmationController extends HttpServlet {
         }
 
         Account account = getAccount(request);
-        int orderID = toInt(request.getParameter("orderID"), 0);
+
+        String status = request.getParameter("status");
+        if (!"success".equals(status)) {
+            request.getRequestDispatcher("/views/error/404.jsp").forward(request, response);
+            return;
+        }
 
         HttpSession session = request.getSession();
         Integer justPlacedOrderID = (Integer) session.getAttribute("just_placed_order_id");
-        session.removeAttribute("just_placed_order_id");
 
-        Order order = orderDAO.getOrderByID(orderID);
+        if (justPlacedOrderID == null) {
+            request.getRequestDispatcher("/views/error/404.jsp").forward(request, response);
+            return;
+        }
 
-        if (justPlacedOrderID == null || justPlacedOrderID != orderID || order == null || order.getCustomerID() != account.getId()) {
+        Order order = orderDAO.getOrderByIDAndCustomer(justPlacedOrderID, account.getId());
+
+        if (order == null) {
             request.getRequestDispatcher("/views/error/404.jsp").forward(request, response);
             return;
         }
@@ -62,16 +71,5 @@ public class OrderConfirmationController extends HttpServlet {
 
     private Account getAccount(HttpServletRequest request) {
         return (Account) request.getSession().getAttribute("account");
-    }
-
-    private int toInt(String value, int defaultVal) {
-        if (value == null || value.trim().isEmpty()) {
-            return defaultVal;
-        }
-        try {
-            return Integer.parseInt(value.trim());
-        } catch (NumberFormatException e) {
-            return defaultVal;
-        }
     }
 }

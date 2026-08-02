@@ -138,6 +138,37 @@ public class OrderDAO {
         return null;
     }
 
+    public Order getOrderByIDAndCustomer(int orderID, int customerID) {
+        String sql = "SELECT o.orderID, o.customerID, o.addressID, o.processed_by, o.status, "
+                + "       o.payment_method, o.payment_status, o.total_price, o.created_at, o.cancel_reason, "
+                + "       a.street, a.district, a.city, a.recipient_name, a.recipient_phone, "
+                + "       c.fullname AS customerName, "
+                + "       c.email AS customerEmail, c.phone AS customerPhone "
+                + "FROM [Order] o "
+                + "LEFT JOIN Address a ON a.addressID = o.addressID "
+                + "LEFT JOIN Customer c ON c.customerID = o.customerID "
+                + "WHERE o.orderID = ? AND o.customerID = ?";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderID);
+            ps.setInt(2, customerID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Order order = mapOrder(rs);
+                    order.setCustomerName(rs.getString("customerName"));
+                    order.setCustomerEmail(rs.getString("customerEmail"));
+                    order.setCustomerPhone(rs.getString("customerPhone"));
+                    order.setRecipientName(rs.getString("recipient_name"));
+                    order.setRecipientPhone(rs.getString("recipient_phone"));
+                    return order;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public int countOrdersByCustomerFiltered(int customerID, String status) {
         boolean isPendingRefund = "pending_refund".equalsIgnoreCase(status);
         boolean isRefunded = "refunded".equalsIgnoreCase(status);
@@ -348,20 +379,20 @@ public class OrderDAO {
                 int overdueOrderID = rsGet.getInt("orderID");
                 Order overdueOrder = getOrderByID(overdueOrderID);
                 if (overdueOrder != null) {
+                    String autoCancelReason = "Đơn hàng quá 2 ngày chưa được duyệt";
+                    String sqlAutoCancel = "UPDATE [Order] SET status = 'cancelled', cancel_reason = ? WHERE orderID = ?";
+                    try (Connection connAC = new DBContext().getConnection(); PreparedStatement psAC = connAC.prepareStatement(sqlAutoCancel)) {
+                        psAC.setString(1, autoCancelReason);
+                        psAC.setInt(2, overdueOrderID);
+                        psAC.executeUpdate();
+                    } catch (Exception eAC) {
+                        eAC.printStackTrace();
+                    }
+
                     boolean isVnpay = "vnpay".equalsIgnoreCase(overdueOrder.getPaymentMethod());
                     boolean isPaid = "paid".equalsIgnoreCase(overdueOrder.getPaymentStatus());
                     if (isVnpay && isPaid) {
-                        String autoCancelReason = "Đơn hàng quá 2 ngày chưa được duyệt";
-                        String sqlAutoCancel = "UPDATE [Order] SET status = 'cancelled', cancel_reason = ? WHERE orderID = ?";
-                        try (Connection connAC = new DBContext().getConnection(); PreparedStatement psAC = connAC.prepareStatement(sqlAutoCancel)) {
-                            psAC.setString(1, autoCancelReason);
-                            psAC.setInt(2, overdueOrderID);
-                            psAC.executeUpdate();
-                        } catch (Exception eAC) {
-                            eAC.printStackTrace();
-                        }
                         updatePaymentStatus(overdueOrderID, "pending_refund");
-
                         final Order finalOrder = overdueOrder;
                         new Thread(new Runnable() {
                             @Override
@@ -374,16 +405,6 @@ public class OrderDAO {
                             }
                         }).start();
                     } else {
-                        String autoCancelReason = "Đơn hàng quá 2 ngày chưa được duyệt";
-                        String sqlAutoCancel = "UPDATE [Order] SET status = 'cancelled', cancel_reason = ? WHERE orderID = ?";
-                        try (Connection connAC = new DBContext().getConnection(); PreparedStatement psAC = connAC.prepareStatement(sqlAutoCancel)) {
-                            psAC.setString(1, autoCancelReason);
-                            psAC.setInt(2, overdueOrderID);
-                            psAC.executeUpdate();
-                        } catch (Exception eAC) {
-                            eAC.printStackTrace();
-                        }
-
                         final Order finalOverdueOrder = overdueOrder;
                         final String finalReason = autoCancelReason;
                         new Thread(new Runnable() {

@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -345,9 +346,17 @@
                                                                 <p class="text-xs text-amber-600 mt-0.5">VNPAY — Chưa xác nhận chuyển tiền</p>
                                                             </div>
                                                         </div>
-                                                        <c:if test="${not empty order.cancelReason}">
+                                                        <c:if test="${not empty order.status}">
                                                             <p class="text-xs text-amber-600 pl-8">
-                                                                <strong>Lý do hủy đơn:</strong> ${order.cancelReason}
+                                                                <strong>Hủy bởi:</strong>
+                                                                <c:choose>
+                                                                    <c:when test="${not empty order.processedBy}">BookTown</c:when>
+                                                                    <c:when test="${fn:contains(order.cancelReason, 'quá 2 ngày')}">BookTown</c:when>
+                                                                    <c:otherwise>Khách hàng</c:otherwise>
+                                                                </c:choose>
+                                                                <c:if test="${not empty order.cancelReason}">
+                                                                    &mdash; <strong>Lý do:</strong> ${order.cancelReason}
+                                                                </c:if>
                                                             </p>
                                                         </c:if>
                                                     </div>
@@ -373,9 +382,17 @@
                                                             <p class="text-xs text-green-600 mt-0.5">VNPAY — Đã xác nhận chuyển tiền thành công</p>
                                                         </div>
                                                     </div>
-                                                    <c:if test="${not empty order.cancelReason}">
+                                                    <c:if test="${not empty order.status}">
                                                         <p class="text-xs text-green-600 pl-8">
-                                                            <strong>Lý do hủy:</strong> ${order.cancelReason}
+                                                            <strong>Hủy bởi:</strong>
+                                                            <c:choose>
+                                                                <c:when test="${not empty order.processedBy}">BookTown</c:when>
+                                                                <c:when test="${fn:contains(order.cancelReason, 'quá 2 ngày')}">BookTown</c:when>
+                                                                <c:otherwise>Khách hàng</c:otherwise>
+                                                            </c:choose>
+                                                            <c:if test="${not empty order.cancelReason}">
+                                                                &mdash; <strong>Lý do:</strong> ${order.cancelReason}
+                                                            </c:if>
                                                         </p>
                                                     </c:if>
                                                 </div>
@@ -387,9 +404,17 @@
                                                         <span class="material-symbols-outlined text-[#D32F2F] text-[22px]">cancel</span>
                                                         <p class="text-sm font-semibold text-[#D32F2F]">Đơn hàng đã bị hủy</p>
                                                     </div>
-                                                    <c:if test="${not empty order.cancelReason}">
+                                                    <c:if test="${not empty order.status}">
                                                         <p class="text-xs text-[#D32F2F] pl-8">
-                                                            <strong>Lý do hủy:</strong> ${order.cancelReason}
+                                                            <strong>Hủy bởi:</strong>
+                                                            <c:choose>
+                                                                <c:when test="${not empty order.processedBy}">BookTown</c:when>
+                                                                <c:when test="${fn:contains(order.cancelReason, 'quá 2 ngày')}">BookTown</c:when>
+                                                                <c:otherwise>Khách hàng</c:otherwise>
+                                                            </c:choose>
+                                                            <c:if test="${not empty order.cancelReason}">
+                                                                &mdash; <strong>Lý do:</strong> ${order.cancelReason}
+                                                            </c:if>
                                                         </p>
                                                     </c:if>
                                                 </div>

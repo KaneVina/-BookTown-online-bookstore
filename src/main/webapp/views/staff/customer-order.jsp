@@ -300,7 +300,7 @@
                                                 </c:choose>
 
 
-                                                <a href="${pageContext.request.contextPath}/dashboard/customer-order?action=view&orderID=${order.orderID}"
+                                                <a href="${pageContext.request.contextPath}/dashboard/customer-order?action=detail&orderID=${order.orderID}"
                                                    class="p-1.5 bg-white border border-gray-300 text-[#004d99] rounded-lg hover:bg-blue-50 transition-all inline-flex items-center active:scale-95"
                                                    title="Xem chi tiết">
                                                     <span

@@ -30,11 +30,6 @@ public class CustomerOrderController extends HttpServlet {
         }
 
         switch (action) {
-            case "view":
-                int viewOrderID = parseInt(request.getParameter("orderID"), 0);
-                request.getSession().setAttribute("allowed_staff_order_id", viewOrderID);
-                response.sendRedirect(request.getContextPath() + "/dashboard/customer-order?action=detail&orderID=" + viewOrderID);
-                break;
             case "detail":
                 showDetail(request, response);
                 break;
@@ -132,11 +127,8 @@ public class CustomerOrderController extends HttpServlet {
         int orderID = parseInt(request.getParameter("orderID"), 0);
         Order order = orderDAO.getOrderByID(orderID);
 
-        HttpSession session = request.getSession();
-        Integer allowedStaffID = (Integer) session.getAttribute("allowed_staff_order_id");
-        session.removeAttribute("allowed_staff_order_id");
-
-        if (allowedStaffID == null || allowedStaffID != orderID || order == null) {
+        if (order == null) {
+            HttpSession session = request.getSession();
             session.setAttribute("errorMessage", "Không tìm thấy đơn hàng.");
             response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
             return;
@@ -170,7 +162,6 @@ public class CustomerOrderController extends HttpServlet {
             if (cancelReason.isEmpty()) {
                 session.setAttribute("errorMessage", "Vui lòng nhập lý do hủy đơn.");
                 if ("detail".equals(redirect)) {
-                    session.setAttribute("allowed_staff_order_id", orderID);
                     response.sendRedirect(request.getContextPath() + "/dashboard/customer-order?action=detail&orderID=" + orderID);
                 } else {
                     response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
@@ -181,7 +172,6 @@ public class CustomerOrderController extends HttpServlet {
             if (cancelReason.length() < 10 || cancelReason.length() > 50) {
                 session.setAttribute("errorMessage", "Lý do hủy phải từ 10 đến 50 ký tự.");
                 if ("detail".equals(redirect)) {
-                    session.setAttribute("allowed_staff_order_id", orderID);
                     response.sendRedirect(request.getContextPath() + "/dashboard/customer-order?action=detail&orderID=" + orderID);
                 } else {
                     response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
@@ -192,7 +182,6 @@ public class CustomerOrderController extends HttpServlet {
             if (!cancelReason.matches(".*\\p{L}.*")) {
                 session.setAttribute("errorMessage", "Lý do hủy phải chứa ít nhất 1 chữ cái.");
                 if ("detail".equals(redirect)) {
-                    session.setAttribute("allowed_staff_order_id", orderID);
                     response.sendRedirect(request.getContextPath() + "/dashboard/customer-order?action=detail&orderID=" + orderID);
                 } else {
                     response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
@@ -223,7 +212,6 @@ public class CustomerOrderController extends HttpServlet {
                 }
                 session.setAttribute("errorMessage", "Không đủ hàng để duyệt. Đơn hàng đã bị hủy tự động và đã gửi thông báo cho khách hàng.");
                 if ("detail".equals(redirect)) {
-                    session.setAttribute("allowed_staff_order_id", orderID);
                     response.sendRedirect(request.getContextPath() + "/dashboard/customer-order?action=detail&orderID=" + orderID);
                 } else {
                     response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
@@ -294,7 +282,6 @@ public class CustomerOrderController extends HttpServlet {
         }
 
         if ("detail".equals(redirect)) {
-            session.setAttribute("allowed_staff_order_id", orderID);
             response.sendRedirect(request.getContextPath() + "/dashboard/customer-order?action=detail&orderID=" + orderID);
         } else {
             response.sendRedirect(request.getContextPath() + "/dashboard/customer-order");
@@ -335,7 +322,6 @@ public class CustomerOrderController extends HttpServlet {
             session.setAttribute("errorMessage", "Không thể xác nhận hoàn tiền. Đơn hàng không ở trạng thái chờ hoàn tiền.");
         }
 
-        session.setAttribute("allowed_staff_order_id", orderID);
         response.sendRedirect(request.getContextPath() + "/dashboard/customer-order?action=detail&orderID=" + orderID);
     }
 
