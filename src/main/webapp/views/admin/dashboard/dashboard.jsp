@@ -167,7 +167,7 @@
                         <div class="flex items-center justify-between mb-6">
                             <div>
                                 <h3 class="text-xl font-bold">Doanh thu theo thể loại</h3>
-                                <p class="text-sm text-on-surface-variant">Phục vụ Task 12.3 Filter Dashboard by Category</p>
+                                <p class="text-sm text-on-surface-variant">
                             </div>
                             <span class="material-symbols-outlined text-primary">bar_chart</span>
                         </div>
