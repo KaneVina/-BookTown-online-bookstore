@@ -23,6 +23,20 @@
                     Quay lại danh sách
                 </a>
 
+                <c:if test="${not empty sessionScope.error}">
+                    <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                        ${sessionScope.error}
+                    </div>
+                    <c:remove var="error" scope="session"/>
+                </c:if>
+
+                <c:if test="${not empty sessionScope.success}">
+                    <div class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
+                        ${sessionScope.success}
+                    </div>
+                    <c:remove var="success" scope="session"/>
+                </c:if>
+
                 <section class="bg-surface rounded-2xl border border-outline-variant shadow-card overflow-hidden">
                     <div class="px-6 py-5 border-b border-outline-variant">
                         <h1 class="text-2xl font-bold">${pageTitle}</h1>
