@@ -312,8 +312,8 @@
 
                 if (!value) {
                     message = "Số điện thoại không được để trống";
-                } else if (!/^0\d{9}$/.test(value)) {
-                    message = "Số điện thoại phải gồm 10 số và bắt đầu bằng 0";
+                } else if (!/^0(8|2|9)\d{8}$/.test(value)) {
+                    message = "Số điện thoại phải gồm 10 số và bắt đầu bằng 08, 02 hoặc 09";
                 }
 
                 return setFieldError(phoneInput, phoneError, message);

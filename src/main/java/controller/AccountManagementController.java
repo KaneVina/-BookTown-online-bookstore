@@ -199,8 +199,9 @@ public class AccountManagementController extends HttpServlet {
         String phone = request.getParameter("phone");
         String status = request.getParameter("status");
 
-        if (fullname == null || fullname.trim().isEmpty()) {
-            out.write("{\"success\":false,\"message\":\"Họ tên không được để trống\"}");
+        String fullnameError = validateFullname(fullname);
+        if (fullnameError != null) {
+            out.write("{\"success\":false,\"message\":\"" + fullnameError + "\"}");
             return;
         }
         String phoneError = validatePhone(phone);
@@ -223,8 +224,9 @@ public class AccountManagementController extends HttpServlet {
         String status = request.getParameter("status");
         String role = request.getParameter("role");
 
-        if (fullname == null || fullname.trim().isEmpty()) {
-            out.write("{\"success\":false,\"message\":\"Họ tên không được để trống\"}");
+        String fullnameError = validateFullname(fullname);
+        if (fullnameError != null) {
+            out.write("{\"success\":false,\"message\":\"" + fullnameError + "\"}");
             return;
         }
         if (!"staff".equals(role) && !"admin".equals(role)) {
@@ -258,18 +260,25 @@ public class AccountManagementController extends HttpServlet {
         }
 
         String trimmed = phone.trim();
-        if (!trimmed.matches("^[0-9+\\-\\s\\(\\)]*$")) {
-            return "Số điện thoại chứa ký tự không hợp lệ";
+        if (!trimmed.matches("^0(8|2|9)\\d{8}$")) {
+            return "Số điện thoại phải gồm 10 số và bắt đầu bằng 08, 02 hoặc 09";
         }
 
-        String normalized = trimmed.replaceAll("[\\s\\-\\(\\)]", "");
-        if (!normalized.matches("^(0|\\+84)[0-9]{9,10}$")) {
-            return "Số điện thoại không hợp lệ (bắt đầu bằng 0 hoặc +84)";
+        return null;
+    }
+
+    private String validateFullname(String fullname) {
+        if (fullname == null || fullname.trim().isEmpty()) {
+            return "Họ tên không được để trống";
         }
 
-        String digitsOnly = normalized.replaceAll("[^0-9]", "");
-        if (digitsOnly.length() < 10 || digitsOnly.length() > 11) {
-            return "Số điện thoại phải có 10-11 chữ số";
+        String trimmed = fullname.trim();
+        if (trimmed.matches(".*\\s{2,}.*")) {
+            return "Họ tên không được chứa nhiều khoảng trắng liên tiếp";
+        }
+
+        if (!trimmed.matches("^[\\p{L}]+( [\\p{L}]+)+$") || trimmed.length() > 50) {
+            return "Họ tên phải có ít nhất 2 từ, chỉ chứa chữ cái và cách nhau đúng 1 dấu cách";
         }
 
         return null;
