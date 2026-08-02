@@ -245,7 +245,10 @@ public class BookDAO {
                 + "         s.seriesID, s.series_name, o.originID, o.origin_name, "
                 + "         b.created_at, b.updated_at "
                 + "ORDER BY ("
-                + "  SELECT ISNULL(SUM(od.quantity), 0) FROM OrderDetail od WHERE od.bookID = b.bookID"
+                + "  SELECT ISNULL(SUM(od.quantity), 0) FROM OrderDetail od "
+                + "  INNER JOIN [Order] ord ON ord.orderID = od.orderID "
+                + "  WHERE od.bookID = b.bookID "
+                + "  AND ord.status = 'completed'"
                 + ") DESC, avg_rating DESC";
         Connection conn = null;
         PreparedStatement ps = null;
