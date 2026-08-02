@@ -18,7 +18,6 @@
 </style>
 <div class="max-w-7xl mx-auto py-10 px-4">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <!-- SIDEBAR -->
         <c:set var="activeMenu" value="profile" scope="request"/>
         <%@ include file="/views/layout/profile/sidebar.jsp" %>
 
@@ -152,8 +151,6 @@
 </div>
 
 <%@ include file="/views/layout/common/toast.jsp" %>
-
-<!-- Modal đổi email -->
 <div id="changeEmailModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
     <div class="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
         <h3 class="text-xl font-bold mb-2">Đổi địa chỉ email</h3>
@@ -259,8 +256,8 @@
 
         if (!value) {
             message = "Số điện thoại không được để trống";
-        } else if (!/^0\d{9}$/.test(value)) {
-            message = "Số điện thoại phải gồm 10 số và bắt đầu bằng 0";
+        } else if (!/^(0[35789])\d{8}$/.test(value)) {
+            message = "Số điện thoại phải gồm 10 số và bắt đầu bằng đầu số di động hợp lệ (03, 05, 07, 08, 09)";
         }
 
         return setFieldError(phoneInput, phoneError, message);

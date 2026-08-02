@@ -100,7 +100,7 @@ public class ProfileController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
             return;
         }
-        // Chỉ chứa chữ cái, các từ cách nhau đúng 1 dấu cách, tối thiểu 2 từ (vd: "Trương Trân")
+
         if (!fullname.matches("^[\\p{L}]+( [\\p{L}]+)+$") || fullname.length() > 50) {
             session.setAttribute("error", "Họ tên phải có ít nhất 2 từ, chỉ chứa chữ cái và cách nhau đúng 1 dấu cách");
             response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
@@ -108,8 +108,8 @@ public class ProfileController extends HttpServlet {
         }
 
         if (phone == null) phone = "";
-        if (!phone.matches("^0\\d{9}$")) {
-            session.setAttribute("error", "Số điện thoại phải gồm 10 số và bắt đầu bằng 0");
+        if (!phone.matches("^(0[35789])\\d{8}$")) {
+            session.setAttribute("error", "Số điện thoại phải gồm 10 số và bắt đầu bằng đầu số di động hợp lệ (03, 05, 07, 08, 09)");
             response.sendRedirect(request.getContextPath() + "/profile?id=" + acc.getId());
             return;
         }
