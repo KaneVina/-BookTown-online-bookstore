@@ -26,15 +26,14 @@ public class OrderConfirmationController extends HttpServlet {
         Account account = getAccount(request);
         int orderID = toInt(request.getParameter("orderID"), 0);
 
+        HttpSession session = request.getSession();
+        Integer justPlacedOrderID = (Integer) session.getAttribute("just_placed_order_id");
+        session.removeAttribute("just_placed_order_id");
+
         Order order = orderDAO.getOrderByID(orderID);
 
-        if (order == null) {
-            response.sendRedirect(request.getContextPath() + "/home");
-            return;
-        }
-
-        if (order.getCustomerID() != account.getId()) {
-            response.sendRedirect(request.getContextPath() + "/home");
+        if (justPlacedOrderID == null || justPlacedOrderID != orderID || order == null || order.getCustomerID() != account.getId()) {
+            request.getRequestDispatcher("/views/error/404.jsp").forward(request, response);
             return;
         }
 
